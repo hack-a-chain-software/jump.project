@@ -38,6 +38,7 @@
     - Sender ID (string)
     - Amount (string)
     - Msg (string)
+  - Initialize user storage
   - Take the user tokens and add to his balance
   - Call Update Contract RPS
   - Call Update User RPS
@@ -45,7 +46,7 @@
   - Call Update Contract RPS
   - Call Update User RPS
   - Take user unclaimed rewards and send to the address
-  - Update his Unclaimed Rewards to 0
+  - Update his Unclaimed Rewards to 03
 - (Public) Unstake:
   - Paramenters:
     - Amount

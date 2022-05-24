@@ -1,5 +1,9 @@
-import { KeyPair, connect } from "near-api-js";
-import { NearConfig } from "near-api-js/lib/near";
+// import path from "path";
+import fs from "fs";
+import { KeyPair, connect, Account } from "near-api-js";
+import { UrlAccountCreator } from "near-api-js/lib/account_creator";
+import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
+import { Near, NearConfig } from "near-api-js/lib/near";
 import { v4 } from "uuid";
 
 export async function createFullAccessKey(config: NearConfig) {
@@ -14,4 +18,35 @@ export async function createFullAccessKey(config: NearConfig) {
     near,
     account,
   };
+}
+
+export const createTestAccount = async ({
+  config,
+  keyStore,
+  near,
+}: {
+  near: Near;
+  config: NearConfig;
+  keyStore: InMemoryKeyStore;
+}): Promise<Account> => {
+  const UrlCreator = new UrlAccountCreator(near.connection, config.helperUrl!);
+
+  const accountId = `${v4()}.testnet`;
+  const randomKey = KeyPair.fromRandom("ed25519");
+
+  await UrlCreator.createAccount(accountId, randomKey.getPublicKey());
+
+  keyStore.setKey(config.networkId, accountId, randomKey);
+
+  const account = await near.account(accountId);
+  return account;
+};
+
+export async function deployContract(
+  contractAccount: Account,
+  staticPath: string
+) {
+  await contractAccount.deployContract(
+    fs.readFileSync(__dirname + "/../" + staticPath)
+  );
 }
