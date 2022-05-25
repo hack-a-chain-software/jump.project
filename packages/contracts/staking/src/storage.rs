@@ -12,7 +12,7 @@ impl StakingFT {
       ERR_001
     );
 
-    if let Some(i) = self.user_map.get(&account_id) {
+    if let Some(_i) = self.user_map.get(&account_id) {
       panic!("User Already Registered")
     }
 
