@@ -1,6 +1,6 @@
+use crate::*;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
-use crate::*;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 pub struct UserData {
@@ -11,7 +11,6 @@ pub struct UserData {
 
 #[near_bindgen]
 impl StakingFT {
-
   pub fn get_user_data(&self, account_id: AccountId) -> UserData {
     let mut user = self
       .user_map
@@ -26,5 +25,4 @@ impl StakingFT {
 
     user
   }
-
 }
