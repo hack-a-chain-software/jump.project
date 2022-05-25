@@ -108,4 +108,3 @@ mod tests {
     contract.register_storage(test_account.clone());
   }
 }
-

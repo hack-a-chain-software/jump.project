@@ -96,18 +96,15 @@ impl StakingFT {
   }
 }
 
-
-
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::tests::{get_context, TOKEN_ACCOUNT, sample_contract};
+  use crate::tests::{get_context, sample_contract, TOKEN_ACCOUNT};
   use near_sdk::testing_env;
   use near_sdk::MockedBlockchain;
 
-
   #[test]
-  // should deposit data into the the staking pool and update the user balance and rps as expected 
+  // should deposit data into the the staking pool and update the user balance and rps as expected
   fn test_stake() {
     let test_account = "test.near".to_string();
     let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
@@ -128,7 +125,10 @@ mod tests {
     contract.user_map.insert(&test_account, &user_data);
     contract.ft_on_transfer(test_account.clone(), U128(STAKE_AMOUNT), MSG.to_string());
 
-    let updated_user_data = contract.user_map.get(&test_account).expect("User has not been found");
+    let updated_user_data = contract
+      .user_map
+      .get(&test_account)
+      .expect("User has not been found");
 
     assert_eq!(updated_user_data.balance, 100);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
@@ -156,14 +156,17 @@ mod tests {
 
     contract.unstake(U128(50));
 
-    let updated_user_data = contract.user_map.get(&test_account).expect("User has not been found");
+    let updated_user_data = contract
+      .user_map
+      .get(&test_account)
+      .expect("User has not been found");
 
     assert_eq!(updated_user_data.balance, 50);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
   }
 
   #[test]
-  // should withdraw all the money that the user on the balance value! 
+  // should withdraw all the money that the user on the balance value!
   fn test_unstake_all() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
@@ -181,10 +184,12 @@ mod tests {
     contract.user_map.insert(&test_account, &user_data);
     contract.unstake_all();
 
-    let updated_user_data = contract.user_map.get(&test_account).expect("User has not been found");
+    let updated_user_data = contract
+      .user_map
+      .get(&test_account)
+      .expect("User has not been found");
 
     assert_eq!(updated_user_data.balance, 0);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
   }
 }
-
