@@ -2,7 +2,6 @@ use crate::*;
 
 #[near_bindgen]
 impl StakingFT {
-  // @public - This gets the resolved transaction and stores on the user data
   pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, _msg: String) {
     assert_eq!(env::predecessor_account_id(), self.token_address);
 
@@ -108,8 +107,7 @@ mod tests {
   // should deposit data into the the staking pool and update the user balance and rps as expected 
   fn test_stake() {
     let test_account = "test.near".to_string();
-    let base_deposit = NEAR_AMOUNT_STORAGE;
-    let context = get_context(vec![], false, base_deposit, 0, TOKEN_ACCOUNT.to_string());
+    let context = get_context(vec![], false, NEAR_AMOUNT_STORAGE, 100, TOKEN_ACCOUNT.to_string());
 
     const STAKE_AMOUNT: u128 = 100;
     const MSG: &str = "";
