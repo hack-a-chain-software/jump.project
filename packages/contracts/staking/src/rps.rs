@@ -1,5 +1,4 @@
 use crate::*;
-use near_sdk::json_types::U128;
 
 impl StakingFT {
   // @private - Calculates the blockchain RPS
