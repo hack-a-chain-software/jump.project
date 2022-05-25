@@ -72,9 +72,9 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "The contract needs exactly 0.01 NEAR to initialize your data")]
-  fn test_register_storage_unhappy_user_already_exists() {
+  fn test_register_storage_unhappy_different_near_amount() {
     let test_account = "test.near".to_string();
-    let base_deposit = NEAR_AMOUNT_STORAGE;
+    let base_deposit = NEAR_AMOUNT_STORAGE + 1;
     let context = get_context(vec![], false, base_deposit, 0, OWNER_ACCOUNT.to_string());
     testing_env!(context);
 
@@ -90,7 +90,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "User Already Registered")]
-  fn test_register_storage_unhappy_different_near_amount() {
+  fn test_register_storage_unhappy_user_already_registered() {
     let test_account = "test.near".to_string();
     let base_deposit = NEAR_AMOUNT_STORAGE;
     let context = get_context(vec![], false, base_deposit, 0, OWNER_ACCOUNT.to_string());

@@ -65,9 +65,9 @@ impl StakingFT {
       .get(&account_id)
       .expect("Error user not found");
 
-    assert!(user.balance > amount.0, "Insuficient Balance");
+    assert!(user.balance >= amount.0, "Insuficient Balance");
 
-    user.balance = 0;
+    user.balance -= amount.0;
 
     self.user_map.insert(&account_id, &user);
 
@@ -84,11 +84,14 @@ impl StakingFT {
   #[payable]
   pub fn unstake_all(&mut self) -> Promise {
     assert_one_yocto();
+
     let account_id = env::predecessor_account_id();
+
     let user = self
       .user_map
       .get(&account_id)
       .expect("Error user not found");
+
     self.unstake(U128(user.balance))
   }
 }
@@ -107,7 +110,7 @@ mod tests {
   // should deposit data into the the staking pool and update the user balance and rps as expected 
   fn test_stake() {
     let test_account = "test.near".to_string();
-    let context = get_context(vec![], false, NEAR_AMOUNT_STORAGE, 100, TOKEN_ACCOUNT.to_string());
+    let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
 
     const STAKE_AMOUNT: u128 = 100;
     const MSG: &str = "";
@@ -136,7 +139,7 @@ mod tests {
   fn test_unstake() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
-    let context = get_context(vec![], false, NEAR_AMOUNT_STORAGE, contract_balance, test_account.to_string());
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
 
     testing_env!(context);
 
@@ -148,6 +151,9 @@ mod tests {
       unclaimed_rewards: 0,
     };
     contract.user_map.insert(&test_account, &user_data);
+
+    assert_eq!(contract.user_map.get(&test_account).unwrap().balance, 100);
+
     contract.unstake(U128(50));
 
     let updated_user_data = contract.user_map.get(&test_account).expect("User has not been found");
@@ -161,7 +167,7 @@ mod tests {
   fn test_unstake_all() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
-    let context = get_context(vec![], false, NEAR_AMOUNT_STORAGE, contract_balance, test_account.to_string());
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
 
     testing_env!(context);
 

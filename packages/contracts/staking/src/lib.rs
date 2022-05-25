@@ -115,7 +115,7 @@ mod tests {
       token_address: TOKEN_ACCOUNT.to_string(),
       period_duration: 100,
       user_map: LookupMap::new(b"a".to_vec()),
-      last_updated: 0,
+      last_updated: 1000,
       last_updated_rps: 0,
       yield_per_period: 1,
     }
