@@ -1,0 +1,1 @@
+cd packages/contracts && cargo fmt --all && cd ../..

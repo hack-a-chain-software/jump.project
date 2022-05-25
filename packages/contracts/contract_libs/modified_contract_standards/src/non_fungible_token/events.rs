@@ -21,24 +21,24 @@ use serde::Serialize;
 #[must_use]
 #[derive(Serialize, Debug, Clone)]
 pub struct NftMint<'a> {
-    pub owner_id: &'a AccountId,
-    pub token_ids: &'a [&'a str],
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub memo: Option<&'a str>,
+  pub owner_id: &'a AccountId,
+  pub token_ids: &'a [&'a str],
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub memo: Option<&'a str>,
 }
 
 impl NftMint<'_> {
-    /// Logs the event to the host. This is required to ensure that the event is triggered
-    /// and to consume the event.
-    pub fn emit(self) {
-        Self::emit_many(&[self])
-    }
+  /// Logs the event to the host. This is required to ensure that the event is triggered
+  /// and to consume the event.
+  pub fn emit(self) {
+    Self::emit_many(&[self])
+  }
 
-    /// Emits an nft mint event, through [`env::log_str`](near_sdk::env::log_str),
-    /// where each [`NftMint`] represents the data of each mint.
-    pub fn emit_many(data: &[NftMint<'_>]) {
-        new_171_v1(Nep171EventKind::NftMint(data)).emit()
-    }
+  /// Emits an nft mint event, through [`env::log_str`](near_sdk::env::log_str),
+  /// where each [`NftMint`] represents the data of each mint.
+  pub fn emit_many(data: &[NftMint<'_>]) {
+    new_171_v1(Nep171EventKind::NftMint(data)).emit()
+  }
 }
 
 /// Data to log for an NFT transfer event. To log this event,
@@ -46,60 +46,60 @@ impl NftMint<'_> {
 #[must_use]
 #[derive(Serialize, Debug, Clone)]
 pub struct NftTransfer<'a> {
-    pub old_owner_id: &'a AccountId,
-    pub new_owner_id: &'a AccountId,
-    pub token_ids: &'a [&'a str],
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub authorized_id: Option<&'a AccountId>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub memo: Option<&'a str>,
+  pub old_owner_id: &'a AccountId,
+  pub new_owner_id: &'a AccountId,
+  pub token_ids: &'a [&'a str],
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub authorized_id: Option<&'a AccountId>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub memo: Option<&'a str>,
 }
 
 impl NftTransfer<'_> {
-    /// Logs the event to the host. This is required to ensure that the event is triggered
-    /// and to consume the event.
-    pub fn emit(self) {
-        Self::emit_many(&[self])
-    }
+  /// Logs the event to the host. This is required to ensure that the event is triggered
+  /// and to consume the event.
+  pub fn emit(self) {
+    Self::emit_many(&[self])
+  }
 
-    /// Emits an nft transfer event, through [`env::log_str`](near_sdk::env::log_str),
-    /// where each [`NftTransfer`] represents the data of each transfer.
-    pub fn emit_many(data: &[NftTransfer<'_>]) {
-        new_171_v1(Nep171EventKind::NftTransfer(data)).emit()
-    }
+  /// Emits an nft transfer event, through [`env::log_str`](near_sdk::env::log_str),
+  /// where each [`NftTransfer`] represents the data of each transfer.
+  pub fn emit_many(data: &[NftTransfer<'_>]) {
+    new_171_v1(Nep171EventKind::NftTransfer(data)).emit()
+  }
 }
 
 /// Data to log for an NFT burn event. To log this event, call [`.emit()`](NftBurn::emit).
 #[must_use]
 #[derive(Serialize, Debug, Clone)]
 pub struct NftBurn<'a> {
-    pub owner_id: &'a AccountId,
-    pub token_ids: &'a [&'a str],
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub authorized_id: Option<&'a AccountId>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub memo: Option<&'a str>,
+  pub owner_id: &'a AccountId,
+  pub token_ids: &'a [&'a str],
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub authorized_id: Option<&'a AccountId>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub memo: Option<&'a str>,
 }
 
 impl NftBurn<'_> {
-    /// Logs the event to the host. This is required to ensure that the event is triggered
-    /// and to consume the event.
-    pub fn emit(self) {
-        Self::emit_many(&[self])
-    }
+  /// Logs the event to the host. This is required to ensure that the event is triggered
+  /// and to consume the event.
+  pub fn emit(self) {
+    Self::emit_many(&[self])
+  }
 
-    /// Emits an nft burn event, through [`env::log_str`](near_sdk::env::log_str),
-    /// where each [`NftBurn`] represents the data of each burn.
-    pub fn emit_many<'a>(data: &'a [NftBurn<'a>]) {
-        new_171_v1(Nep171EventKind::NftBurn(data)).emit()
-    }
+  /// Emits an nft burn event, through [`env::log_str`](near_sdk::env::log_str),
+  /// where each [`NftBurn`] represents the data of each burn.
+  pub fn emit_many<'a>(data: &'a [NftBurn<'a>]) {
+    new_171_v1(Nep171EventKind::NftBurn(data)).emit()
+  }
 }
 
 #[derive(Serialize, Debug)]
 pub(crate) struct Nep171Event<'a> {
-    version: &'static str,
-    #[serde(flatten)]
-    event_kind: Nep171EventKind<'a>,
+  version: &'static str,
+  #[serde(flatten)]
+  event_kind: Nep171EventKind<'a>,
 }
 
 #[derive(Serialize, Debug)]
@@ -107,16 +107,18 @@ pub(crate) struct Nep171Event<'a> {
 #[serde(rename_all = "snake_case")]
 #[allow(clippy::enum_variant_names)]
 enum Nep171EventKind<'a> {
-    NftMint(&'a [NftMint<'a>]),
-    NftTransfer(&'a [NftTransfer<'a>]),
-    NftBurn(&'a [NftBurn<'a>]),
+  NftMint(&'a [NftMint<'a>]),
+  NftTransfer(&'a [NftTransfer<'a>]),
+  NftBurn(&'a [NftBurn<'a>]),
 }
 
 fn new_171<'a>(version: &'static str, event_kind: Nep171EventKind<'a>) -> NearEvent<'a> {
-    NearEvent::Nep171(Nep171Event { version, event_kind })
+  NearEvent::Nep171(Nep171Event {
+    version,
+    event_kind,
+  })
 }
 
 fn new_171_v1(event_kind: Nep171EventKind) -> NearEvent {
-    new_171("1.0.0", event_kind)
+  new_171("1.0.0", event_kind)
 }
-

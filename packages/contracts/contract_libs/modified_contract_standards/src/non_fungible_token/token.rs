@@ -10,9 +10,9 @@ pub type TokenId = String;
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Token {
-    pub token_id: TokenId,
-    pub owner_id: AccountId,
-    pub metadata: Option<TokenMetadata>,
-    pub approved_account_ids: Option<HashMap<AccountId, u64>>,
-    pub royalty: Option<HashMap<AccountId, u128>>
+  pub token_id: TokenId,
+  pub owner_id: AccountId,
+  pub metadata: Option<TokenMetadata>,
+  pub approved_account_ids: Option<HashMap<AccountId, u64>>,
+  pub royalty: Option<HashMap<AccountId, u128>>,
 }

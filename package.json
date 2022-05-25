@@ -11,7 +11,13 @@
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
     "contract:lib:tests": "echo 'Not implmented yet coming soon'",
-    "postinstall": "yarn husky install"
+    "postinstall": "husky install",
+    "precommit": "lint-staged"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -20,6 +26,10 @@
     ],
     "*.{js,jsx}": [
       "yarn prettier --config ./.prettierrc.js --write",
+      "git add ."
+    ],
+    "*.rs": [
+      "sh ./format_rust.sh",
       "git add ."
     ]
   },
