@@ -79,7 +79,6 @@ mod tests {
 
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
   pub const TOKEN_ACCOUNT: &str = "token.testnet";
-  pub const SIGNER_ACCOUNT: &str = "signer.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
 
   // mock the context for testing, notice "signer_account_id" that was accessed above from env::
