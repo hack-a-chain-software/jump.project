@@ -12,7 +12,7 @@ impl StakingFT {
     let user = self
       .user_map
       .get(&account_id)
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     user.unclaimed_rewards + ((user.balance * (contract_rps - user.user_rps)) / FRACTION_BASE)
   }
@@ -29,7 +29,7 @@ impl StakingFT {
     let user = self
       .user_map
       .get(&account_id.clone())
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     self.user_map.insert(
       &account_id,

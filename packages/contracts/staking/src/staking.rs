@@ -11,7 +11,7 @@ impl StakingFT {
     let user = self
       .user_map
       .get(&sender_id.clone())
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     self.user_map.insert(
       &sender_id,
@@ -35,7 +35,7 @@ impl StakingFT {
     let mut user = self
       .user_map
       .get(&account_id.clone())
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     user.unclaimed_rewards = 0;
 
@@ -63,7 +63,7 @@ impl StakingFT {
     let mut user = self
       .user_map
       .get(&account_id)
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     assert!(user.balance >= amount.0, "Insuficient Balance");
 
@@ -90,7 +90,7 @@ impl StakingFT {
     let user = self
       .user_map
       .get(&account_id)
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     self.unstake(U128(user.balance))
   }
@@ -166,6 +166,77 @@ mod tests {
   }
 
   #[test]
+  #[should_panic(expected = "Insuficient Balance")]
+  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  fn test_unstake_insuficient_balance() {
+    let test_account = "test.near".to_string();
+    let contract_balance = 100;
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
+
+    testing_env!(context);
+
+    let mut contract = sample_contract();
+
+    let user_data = UserData {
+      balance: 0,
+      user_rps: contract.last_updated_rps,
+      unclaimed_rewards: 0,
+    };
+    contract.user_map.insert(&test_account, &user_data);
+    contract.unstake(U128(50));
+  }
+
+  #[test]
+  #[should_panic(expected = "User has not been found")]
+  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  fn test_unstake_user_not_found() {
+    let test_account = "test.near".to_string();
+    let contract_balance = 100;
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
+
+    testing_env!(context);
+
+    let mut contract = sample_contract();
+    contract.unstake(U128(50));
+  }
+
+  #[test]
+  #[should_panic(expected = "User has not been found")]
+  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  fn test_unstake_all_user_not_found() {
+    let test_account = "test.near".to_string();
+    let contract_balance = 100;
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
+
+    testing_env!(context);
+
+    let mut contract = sample_contract();
+    contract.unstake_all();
+  }
+
+  #[test]
+  #[should_panic(expected = "User has not been found")]
+  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  fn test_claim_user_not_found() {
+    let test_account = "test.near".to_string();
+    let contract_balance = 100;
+    let context = get_context(vec![], false, 1, contract_balance, test_account.to_string());
+
+    testing_env!(context);
+
+    let mut contract = sample_contract();
+    contract.claim();
+
+    let updated_user_data = contract
+      .user_map
+      .get(&test_account)
+      .expect("User has not been found");
+
+    assert_eq!(updated_user_data.balance, 50);
+    assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
+  }
+
+  #[test]
   // should withdraw all the money that the user on the balance value!
   fn test_unstake_all() {
     let test_account = "test.near".to_string();
@@ -190,6 +261,33 @@ mod tests {
       .expect("User has not been found");
 
     assert_eq!(updated_user_data.balance, 0);
+    assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
+  }
+
+  #[test]
+  // should claim all the user rewards that he has stored on his accout for the JUMP Tokens
+  fn test_claim() {
+    let test_account = "test.near".to_string();
+    let context = get_context(vec![], false, 1, 0, test_account.to_string());
+    testing_env!(context);
+
+    let mut contract = sample_contract();
+
+    let user_data = UserData {
+      balance: 100,
+      user_rps: contract.last_updated_rps,
+      unclaimed_rewards: 100,
+    };
+    contract.user_map.insert(&test_account, &user_data);
+    contract.claim();
+
+    let updated_user_data = contract
+      .user_map
+      .get(&test_account)
+      .expect("User has not been found");
+
+    assert_eq!(updated_user_data.unclaimed_rewards, 0);
+    assert_eq!(updated_user_data.balance, 100);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
   }
 }

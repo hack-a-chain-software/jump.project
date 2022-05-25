@@ -15,7 +15,7 @@ impl StakingFT {
     let mut user = self
       .user_map
       .get(&account_id)
-      .expect("Error user not found");
+      .expect("User has not been found");
 
     let contract_rps = self.internal_calculate_rps();
 
