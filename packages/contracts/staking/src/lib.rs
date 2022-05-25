@@ -1,4 +1,3 @@
-mod structs;
 use core::assert;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LookupMap;
@@ -6,7 +5,13 @@ pub use near_sdk::json_types::U128;
 pub use near_sdk::serde_json::{self, json, Value};
 pub use near_sdk::utils::assert_one_yocto;
 use near_sdk::{env, ext_contract, near_bindgen, setup_alloc, AccountId, Gas, Promise};
-use structs::UserData;
+use crate::user_data::UserData;
+
+pub mod user_data;
+pub mod rps;
+pub mod storage;
+pub mod staking; 
+pub(crate) mod errors;
 
 #[ext_contract(token_contract)]
 pub trait FungibleToken {
@@ -48,7 +53,8 @@ impl StakingFT {
     yield_per_period: U128,
     period_duration: U128,
   ) -> Self {
-    assert_eq!(!env::state_exists(), false);
+    assert!(!env::state_exists());
+    assert!(env::is_valid_account_id(owner.as_bytes()), "Invalid owner account");
 
     Self {
       owner,
@@ -61,184 +67,6 @@ impl StakingFT {
     }
   }
 
-  pub fn get_user_data(&self, account_id: AccountId) -> UserData {
-    let mut user = self
-      .user_map
-      .get(&account_id)
-      .expect("Error user not found");
-
-    let contract_rps = self.internal_calculate_rps();
-
-    user.unclaimed_rewards = self.internal_calculate_user_rewards(account_id, contract_rps);
-
-    user.user_rps = contract_rps;
-
-    user
-  }
-
-  // @private - Calculates the blockchain RPS
-  fn internal_calculate_rps(&self) -> u128 {
-    let timestamp = env::block_timestamp() as u128;
-    ((timestamp - self.last_updated) / self.period_duration) * self.yield_per_period 
-  }
-
-  // @private - Calculates the user unclaimed rewards
-  fn internal_calculate_user_rewards(&self, account_id: AccountId, contract_rps: u128) -> u128 {
-    let user = self
-      .user_map
-      .get(&account_id)
-      .expect("Error user not found");
-
-    user.unclaimed_rewards + ((user.balance * (contract_rps - user.user_rps)) / FRACTION_BASE)
-  }
-
-  // @private - This updates the contract RPS and can only be called by the contract
-  fn update_contract_rps(&mut self) {
-    let timestamp = env::block_timestamp() as u128;
-    self.last_updated_rps = self.internal_calculate_rps();
-    self.last_updated = timestamp;
-  }
-
-  // @private - This updates the user RPS and can only be called by the contract
-  fn update_user_rps(&mut self, account_id: AccountId) {
-    let user = self
-      .user_map
-      .get(&account_id.clone())
-      .expect("Error user not found");
-
-    self.user_map.insert(
-      &account_id,
-      &UserData {
-        balance: user.balance,
-        unclaimed_rewards: self
-          .internal_calculate_user_rewards(account_id.clone(), self.last_updated_rps),
-        user_rps: self.last_updated_rps,
-      },
-    );
-  }
-
-  pub fn unregister_storage(&mut self) -> Promise {
-    let account_id = env::predecessor_account_id();
-
-    self.claim();
-    self.unstake_all();
-    self.user_map.remove(&account_id);
-
-    Promise::new(account_id).transfer(NEAR_AMOUNT_STORAGE)
-  }
-
-  // @public - This initializes the storage for the user
-  #[payable]
-  pub fn register_storage(&mut self, account_id: AccountId) {
-    assert!(
-      env::attached_deposit() == NEAR_AMOUNT_STORAGE,
-      "The contract needs 0.01 NEAR to initialize your data"
-    );
-
-    if let Some(i) = self.user_map.get(&account_id) {
-      panic!("User Already Registered")
-    }
-
-    self.user_map.insert(
-      &account_id,
-      &UserData {
-        balance: 0,
-        unclaimed_rewards: 0,
-        user_rps: self.last_updated_rps,
-      },
-    );
-  }
-
-  // @public - This gets the resolved transaction and stores on the user data
-  pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) {
-    assert_eq!(env::predecessor_account_id(), self.token_address);
-
-    self.update_contract_rps();
-    self.update_user_rps(sender_id.clone());
-
-    let user = self
-      .user_map
-      .get(&sender_id.clone())
-      .expect("Error user not found");
-
-    self.user_map.insert(
-      &sender_id,
-      &UserData {
-        balance: user.balance + amount.0,
-        unclaimed_rewards: user.unclaimed_rewards,
-        user_rps: user.user_rps,
-      },
-    );
-  }
-
-  #[payable]
-  pub fn claim(&mut self) -> Promise {
-    assert_one_yocto();
-
-    let account_id = env::predecessor_account_id();
-
-    self.update_contract_rps();
-    self.update_user_rps(account_id.clone());
-
-    let mut user = self
-      .user_map
-      .get(&account_id.clone())
-      .expect("Error user not found");
-
-    user.unclaimed_rewards = 0;
-
-    self.user_map.insert(&account_id, &user);
-
-    token_contract::ft_transfer(
-      account_id.to_string(),
-      U128(user.unclaimed_rewards),
-      "Claimed #{amount}".to_string(),
-      &self.token_address,
-      1,
-      BASE_GAS,
-    )
-  }
-
-  #[payable]
-  pub fn unstake(&mut self, amount: U128) -> Promise {
-    assert_one_yocto();
-
-    self.update_contract_rps();
-    self.update_user_rps(env::predecessor_account_id());
-
-    let account_id = env::predecessor_account_id();
-
-    let mut user = self
-      .user_map
-      .get(&account_id)
-      .expect("Error user not found");
-
-    assert!(user.balance > amount.0, "Insuficient Balance");
-
-    user.balance = 0;
-
-    self.user_map.insert(&account_id, &user);
-
-    token_contract::ft_transfer(
-      account_id.to_string(),
-      amount,
-      "Unstaked #{amount} from the contract".to_string(),
-      &self.token_address,
-      1,
-      BASE_GAS,
-    )
-  }
-
-  #[payable]
-  pub fn unstake_all(&mut self) -> Promise {
-    assert_one_yocto();
-    let account_id = env::predecessor_account_id();
-    let user = self
-      .user_map
-      .get(&account_id)
-      .expect("Error user not found");
-    self.unstake(U128(user.balance))
-  }
 }
 
 #[cfg(test)]
@@ -247,25 +75,63 @@ mod tests {
   use near_sdk::MockedBlockchain;
   use near_sdk::{testing_env, VMContext};
 
+  pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
+  pub const TOKEN_ACCOUNT: &str = "token.testnet";
+  pub const SIGNER_ACCOUNT: &str = "signer.testnet";
+  pub const OWNER_ACCOUNT: &str = "owner.testnet";
+
   // mock the context for testing, notice "signer_account_id" that was accessed above from env::
-  fn get_context(input: Vec<u8>, is_view: bool) -> VMContext {
+  pub fn get_context(input: Vec<u8>, is_view: bool, attached_deposit: u128, account_balance: u128, signer_id: AccountId) -> VMContext {
     VMContext {
-      current_account_id: "alice_near".to_string(),
-      signer_account_id: "bob_near".to_string(),
-      signer_account_pk: vec![0, 1, 2],
-      predecessor_account_id: "carol_near".to_string(),
-      input,
-      block_index: 0,
-      block_timestamp: 0,
-      account_balance: 0,
-      account_locked_balance: 0,
-      storage_usage: 0,
-      attached_deposit: 0,
-      prepaid_gas: 10u64.pow(18),
-      random_seed: vec![0, 1, 2],
-      is_view,
-      output_data_receivers: vec![],
-      epoch_height: 19,
+        current_account_id: CONTRACT_ACCOUNT.to_string(),
+        signer_account_id: signer_id.clone(),
+        signer_account_pk: vec![0, 1, 2],
+        predecessor_account_id: signer_id.clone(),
+        input,
+        block_index: 0,
+        block_timestamp: 0,
+        account_balance,
+        account_locked_balance: 0,
+        storage_usage: 0,
+        attached_deposit,
+        prepaid_gas: 10u64.pow(18),
+        random_seed: vec![0, 1, 2],
+        is_view,
+        output_data_receivers: vec![],
+        epoch_height: 19,
     }
   }
+
+  pub fn sample_contract() -> StakingFT {
+    StakingFT {
+      owner: OWNER_ACCOUNT.to_string(),
+      token_address: TOKEN_ACCOUNT.to_string(),
+      period_duration: 100,
+      user_map: LookupMap::new(b"a".to_vec()),
+      last_updated: 0,
+      last_updated_rps: 0,
+      yield_per_period: 1,
+    }
+  }
+
+  #[test]
+  fn test_constructor() {
+    let base_deposit = 0;
+    let context = get_context(vec![], false, base_deposit, 0, OWNER_ACCOUNT.to_string());
+    testing_env!(context);
+
+    let call_instanciation = StakingFT::initialize_staking(OWNER_ACCOUNT.to_string(), TOKEN_ACCOUNT.to_string(), U128(1), U128(100));
+
+    let manual_instanciation = sample_contract();
+
+    
+    assert_eq!(manual_instanciation.owner, call_instanciation.owner);
+    assert_eq!(manual_instanciation.token_address, call_instanciation.token_address);
+    assert_eq!(manual_instanciation.period_duration, call_instanciation.period_duration);
+    assert_eq!(manual_instanciation.last_updated, call_instanciation.last_updated);
+    assert_eq!(manual_instanciation.last_updated_rps, call_instanciation.last_updated_rps);
+    assert_eq!(manual_instanciation.yield_per_period, call_instanciation.yield_per_period);
+
+  }
+
 }
