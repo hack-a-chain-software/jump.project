@@ -19,11 +19,8 @@ impl StakingFT {
       .expect("User has not been found");
 
     let contract_rps = self.internal_calculate_rps();
-
     user.unclaimed_rewards = self.internal_calculate_user_rewards(account_id, contract_rps);
-
     user.user_rps = contract_rps;
-
     user
   }
 }
