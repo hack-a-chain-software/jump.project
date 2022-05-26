@@ -12,7 +12,7 @@
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
     "contract:lib:tests": "echo 'Not implmented yet coming soon'",
     "postinstall": "husky install",
-    "format:rust": "./format_rust.sh",
+    "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged"
   },
   "husky": {
