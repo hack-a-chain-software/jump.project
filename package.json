@@ -6,7 +6,7 @@
   "scripts": {
     "start": "yarn workspace @near/web dev",
     "prestart": "yarn workspace @near/contracts prestart",
-    "dev:web": "yarn workspace @near/web dev",
+    "web:dev": "yarn workspace @near/web dev",
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
@@ -21,11 +21,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "yarn prettier --config ./.prettierrc.js --write",
+      "yarn prettier --config .prettierrc --write **/*.{ts,tsx}",
       "git add ."
     ],
     "*.{js,jsx}": [
-      "yarn prettier --config ./.prettierrc.js --write",
+      "yarn prettier --config .prettierrc --write **/*.{js,jsx}",
       "git add ."
     ],
     "*.rs": [
