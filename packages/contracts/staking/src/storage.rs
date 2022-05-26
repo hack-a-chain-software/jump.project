@@ -3,8 +3,8 @@ use crate::*;
 
 #[near_bindgen]
 impl StakingFT {
-  // @public - This initializes the storage for the user
   #[payable]
+  // @public - This initializes the storage for the user
   pub fn register_storage(&mut self, account_id: AccountId) {
     assert!(
       env::attached_deposit() == NEAR_AMOUNT_STORAGE,
@@ -26,6 +26,7 @@ impl StakingFT {
     );
   }
 
+  // @public - This unregisters the user from the storage and transfer funds if they have any
   pub fn unregister_storage(&mut self) -> Promise {
     let account_id = env::predecessor_account_id();
 
@@ -45,6 +46,7 @@ mod tests {
   use near_sdk::MockedBlockchain;
 
   #[test]
+  // should register the user storage and create the user metadata on chain
   fn test_register_storage_happy() {
     let test_account = "test.near".to_string();
     let base_deposit = NEAR_AMOUNT_STORAGE;
@@ -72,6 +74,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "The contract needs exactly 0.01 NEAR to initialize your data")]
+  // should not register the user if the near ammount deposited for the transaction
   fn test_register_storage_unhappy_different_near_amount() {
     let test_account = "test.near".to_string();
     let base_deposit = NEAR_AMOUNT_STORAGE + 1;
@@ -90,6 +93,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "User Already Registered")]
+  // should not re-initialize the storage for an already reagistered user
   fn test_register_storage_unhappy_user_already_registered() {
     let test_account = "test.near".to_string();
     let base_deposit = NEAR_AMOUNT_STORAGE;

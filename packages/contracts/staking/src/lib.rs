@@ -45,8 +45,8 @@ impl Default for StakingFT {
 
 #[near_bindgen]
 impl StakingFT {
-  // @public - This initializes the state of the contract
   #[init]
+  // @public - This initializes the state of the contract
   pub fn initialize_staking(
     owner: AccountId,
     token_address: AccountId,
@@ -81,7 +81,7 @@ mod tests {
   pub const TOKEN_ACCOUNT: &str = "token.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
 
-  // mock the context for testing, notice "signer_account_id" that was accessed above from env::
+  // This is the funciton that will mock the vm context for us to initialize a new testing_env
   pub fn get_context(
     input: Vec<u8>,
     is_view: bool,
@@ -109,6 +109,7 @@ mod tests {
     }
   }
 
+  // This will initialize for us a sample contract with the standard data
   pub fn sample_contract() -> StakingFT {
     StakingFT {
       owner: OWNER_ACCOUNT.to_string(),
@@ -122,6 +123,7 @@ mod tests {
   }
 
   #[test]
+  // should use the initialize_staking to make a new contract state
   fn test_constructor() {
     let base_deposit = 0;
     let context = get_context(vec![], false, base_deposit, 0, OWNER_ACCOUNT.to_string());

@@ -2,6 +2,8 @@ use crate::*;
 
 #[near_bindgen]
 impl StakingFT {
+  // @public - This is the staking function of the contract that the user will interact to stake
+  // JUMP tokens into the the staking pool
   pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, _msg: String) {
     assert_eq!(env::predecessor_account_id(), self.token_address);
 
@@ -24,6 +26,8 @@ impl StakingFT {
   }
 
   #[payable]
+  // @public - This is the claim function of the contract that the user will interact to retrieve
+  // his rewards from the staking pool
   pub fn claim(&mut self) -> Promise {
     assert_one_yocto();
 
@@ -52,6 +56,8 @@ impl StakingFT {
   }
 
   #[payable]
+  // @public - This is the unstake function of the contract that the user will interact in order to
+  // withdraw the funds that he staked inside the staking pool
   pub fn unstake(&mut self, amount: U128) -> Promise {
     assert_one_yocto();
 
@@ -82,6 +88,8 @@ impl StakingFT {
   }
 
   #[payable]
+  // @public - This is the unstake all function of the contract that the user will hit in order to
+  // retrieve all his funds that he has deposited so far
   pub fn unstake_all(&mut self) -> Promise {
     assert_one_yocto();
 
@@ -167,7 +175,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "Insuficient Balance")]
-  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  // should not unstake more money than you got
   fn test_unstake_insuficient_balance() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
@@ -188,7 +196,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "User has not been found")]
-  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  // should not unstake tokens when the contract didn't find a user on the map
   fn test_unstake_user_not_found() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
@@ -202,7 +210,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "User has not been found")]
-  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  // should not unstake_all tokens when the contract didn't find a user on the map
   fn test_unstake_all_user_not_found() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
@@ -216,7 +224,7 @@ mod tests {
 
   #[test]
   #[should_panic(expected = "User has not been found")]
-  // should withdraw an ammount of tokens from the staking pool and update its balance and its rps
+  // should not claim rewards for a unregistered user
   fn test_claim_user_not_found() {
     let test_account = "test.near".to_string();
     let contract_balance = 100;
