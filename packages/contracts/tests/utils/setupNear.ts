@@ -19,7 +19,7 @@ function getNearConfig(env: "testnet" | "sandbox") {
       return {
         networkId: "sandbox",
         nodeUrl: "http://localhost:3030",
-        keyPath: `${process.env.HOME}/near/tmp/near-sandbox/validator_key.json`,
+        keyPath: `/tmp/near-sandbox/validator_key.json`,
       };
   }
 }
@@ -48,12 +48,7 @@ export async function setupNearWithEnvironment() {
 
   if (env === "sandbox") {
     // Create near account
-    const keyFile = {
-      account_id: "test.near",
-      public_key: "ed25519:7qmZrs3o6UMF7gmb878VFR5SU3cev5hTiXeD7NA32WLu",
-      secret_key:
-        "ed25519:JYDzayQGRvt2jrpbsokubs4BLdCz3hNh6XtNQTBSp5qzHJ4tnBo4dHQx5iHCXUjEWAAx9f7K8Xs8UXwyhCWpUJH",
-    };
+    const keyFile = require(getNearConfig(env).keyPath);
     const masterKey = KeyPair.fromString(keyFile.secret_key);
     keyStore.setKey(configPayload.networkId, "test.near", masterKey);
   }

@@ -5,6 +5,9 @@ import { deployContract } from "./utils";
 import { TokenContract } from "@near/ts";
 import { setupNearWithContractAccounts } from "./utils/accounts";
 
+import fs from "fs";
+import path from "path";
+
 const yield_per_period = "10";
 const period_duration = "604800000";
 
@@ -19,19 +22,26 @@ describe("Staking Contract", () => {
   let tokenContract: TokenContract;
 
   beforeAll(async () => {
-    const { testAccount, tokenAccount, stakingAccount, ...rest } =
+    const { testAccount, tokenAccount, stakingAccount, near, ...rest } =
       await setupNearWithContractAccounts();
-    masterAccount = new Account(near.connection, "jump-dex.testnet");
+    masterAccount = rest.masterAccount;
 
     tokenContractAccount = tokenAccount;
     stakingContractAccount = stakingAccount;
 
     account = testAccount;
     config = rest.config;
-    near = rest.near;
 
-    await deployContract(tokenAccount, "../out/token_contract.wasm");
-    await deployContract(stakingAccount, "../out/staking.wasm");
+    console.log("pre-deploy");
+    await stakingContractAccount.deployContract(
+      fs.readFileSync(path.resolve(__dirname, "../out/staking.wasm"))
+    );
+    console.log("first-deploy");
+    await tokenContractAccount.deployContract(
+      fs.readFileSync(path.resolve(__dirname, "../out/token_contract.wasm"))
+    );
+
+    console.log("after-deploy");
 
     console.log(
       tokenContractAccount.accountId,
@@ -60,11 +70,9 @@ describe("Staking Contract", () => {
 
   it("should initialize the staking program", async () => {
     await tokenContract.new_default_meta({
-      params: {
-        owner_id: account.accountId,
-        total_supply: "100000000",
-      },
-    });
+      owner_id: account.accountId,
+      total_supply: "100000000",
+    } as any);
 
     await stakingContract.initialize_staking({
       owner: account.accountId,

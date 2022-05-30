@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-loss-of-precision */
 import BN from "bn.js";
-import { KeyPair, Account } from "near-api-js";
+import { KeyPair, Account, utils } from "near-api-js";
 import { setupNearWithEnvironment } from "./setupNear";
-
-const PerYoctoNEAR = 10000000000000000000000;
+import { v4 } from "uuid";
 
 export async function setupNearWithContractAccounts() {
   const { near, config } = await setupNearWithEnvironment();
@@ -22,42 +21,41 @@ export async function setupNearWithContractAccounts() {
 
   console.log("Master Account Balance", masterBalance.available);
 
+  const stakingAccountName = `${v4().slice(0, 15)}.test.near`;
+  const tokenAccountName = `${v4().slice(0, 15)}.test.near`;
+  const testAccountName = `${v4().slice(0, 15)}.test.near`;
+
   await masterAccount.createAccount(
-    "staking.test.near",
+    stakingAccountName,
     stakingContractKey.getPublicKey(),
-    new BN(10)
+    new BN(utils.format.parseNearAmount("100")!)
   );
 
   await masterAccount.createAccount(
-    "token.test.near",
+    tokenAccountName,
     tokenContractKey.getPublicKey(),
-    new BN(10)
-  );
-  await masterAccount.createAccount(
-    "testacc.test.near",
-    testAccountkey.getPublicKey(),
-    new BN(10)
+    new BN(utils.format.parseNearAmount("100")!)
   );
 
-  const stakingAccount = new Account(near.connection, "staking.test.near");
-  const tokenAccount = new Account(near.connection, "token.test.near");
-  const testAccount = new Account(near.connection, "testacc.test.near");
+  await masterAccount.createAccount(
+    testAccountName,
+    testAccountkey.getPublicKey(),
+    new BN(utils.format.parseNearAmount("100")!)
+  );
+
+  config.keyStore.setKey(
+    config.networkId,
+    stakingAccountName,
+    stakingContractKey
+  );
+  config.keyStore.setKey(config.networkId, tokenAccountName, tokenContractKey);
+  config.keyStore.setKey(config.networkId, testAccountName, testAccountkey);
+
+  const stakingAccount = new Account(near.connection, stakingAccountName);
+  const tokenAccount = new Account(near.connection, tokenAccountName);
+  const testAccount = new Account(near.connection, testAccountName);
 
   console.log("Accounts Created");
-
-  // This will fund the acounts with some yoctoNEAR to be sure that the
-  await masterAccount.sendMoney(
-    stakingAccount.accountId,
-    new BN(1819999999999999999500)
-  );
-  await masterAccount.sendMoney(
-    tokenAccount.accountId,
-    new BN(1819999999999999999500)
-  );
-  await masterAccount.sendMoney(
-    testAccount.accountId,
-    new BN(1819999999999999999500)
-  );
 
   const stakingAccountBalance = await stakingAccount.getAccountBalance();
   const tokenAccountBalance = await tokenAccount.getAccountBalance();
