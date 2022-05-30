@@ -4,14 +4,15 @@
   "license": "UNLICENSED",
   "main": "lib/index.ts",
   "scripts": {
+    "clean:contract": "cargo clean",
     "build:contract": "node compile.js",
     "build:contract:debug": "node compile.js --debug",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
     "deploy": "npm run build:contract && npm run deploy:contract",
-    "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
-    "test:rust": "npm run build:contract:debug && cd staking && cargo test -- --nocapture && cd ..",
-    "test:lib": "npm run build:contract:debug && clear && NEAR_ENV=sandbox jest",
+    "prestart": "npm run build:contract && npm run dev:deploy:contract",
+    "test:rust": "npm run build:contract && cd staking && cargo test -- --nocapture && cd ..",
+    "test:lib": "npm run build:contract && clear && NEAR_ENV=sandbox jest",
     "format": "cargo fmt --all"
   },
   "devDependencies": {

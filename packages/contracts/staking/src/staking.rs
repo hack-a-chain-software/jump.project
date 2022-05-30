@@ -4,7 +4,8 @@ use crate::*;
 impl StakingFT {
   // @public - This is the staking function of the contract that the user will interact to stake
   // JUMP tokens into the the staking pool
-  pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, _msg: String) {
+  #[allow(unused_variables)]
+  pub fn ft_on_transfer(&mut self, sender_id: AccountId, amount: U128, msg: String) {
     assert_eq!(env::predecessor_account_id(), self.token_address);
 
     self.update_contract_rps();
@@ -125,7 +126,7 @@ mod tests {
     let mut contract = sample_contract();
 
     let user_data = UserData {
-      balance: 100,
+      balance: 0,
       user_rps: contract.last_updated_rps,
       unclaimed_rewards: 0,
     };
@@ -140,7 +141,6 @@ mod tests {
 
     assert_eq!(updated_user_data.balance, 100);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
-    assert!(updated_user_data.unclaimed_rewards > 0);
   }
 
   #[test]
