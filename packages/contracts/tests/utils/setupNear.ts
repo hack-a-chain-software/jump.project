@@ -1,4 +1,4 @@
-import { connect } from "near-api-js";
+import { connect, KeyPair } from "near-api-js";
 import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
 
 /**
@@ -10,17 +10,16 @@ function getNearConfig(env: "testnet" | "sandbox") {
   switch (env) {
     case "testnet":
       return {
-        networkId: "testnet",
-        nodeUrl: "https://rpc.testnet.near.org",
-        masterAccount: "test.near",
+        networkId: "shared-test",
+        nodeUrl: "https://rpc.ci-testnet.near.org",
+        keyPath: `${process.env.HOME}/near/tmp/near-sandbox/validator_key.json`,
       };
 
     case "sandbox":
       return {
         networkId: "sandbox",
         nodeUrl: "http://localhost:3030",
-        masterAccount: "test.near",
-        keyPath: `${process.env.HOME}/near/tmp/validator_key.json`,
+        keyPath: `${process.env.HOME}/near/tmp/near-sandbox/validator_key.json`,
       };
   }
 }
@@ -41,14 +40,30 @@ export async function setupNearWithEnvironment() {
     process.exit(1);
   }
 
+  const configPayload = {
+    ...getNearConfig(env),
+  };
+
   const keyStore = new InMemoryKeyStore();
+
+  if (env === "sandbox") {
+    // Create near account
+    const keyFile = {
+      account_id: "test.near",
+      public_key: "ed25519:7qmZrs3o6UMF7gmb878VFR5SU3cev5hTiXeD7NA32WLu",
+      secret_key:
+        "ed25519:JYDzayQGRvt2jrpbsokubs4BLdCz3hNh6XtNQTBSp5qzHJ4tnBo4dHQx5iHCXUjEWAAx9f7K8Xs8UXwyhCWpUJH",
+    };
+    const masterKey = KeyPair.fromString(keyFile.secret_key);
+    keyStore.setKey(configPayload.networkId, "test.near", masterKey);
+  }
 
   const config = {
     keyStore,
     ...getNearConfig(env),
-  };
+  } as any;
 
-  const near = connect(config);
+  const near = await connect(config);
 
   return {
     near,

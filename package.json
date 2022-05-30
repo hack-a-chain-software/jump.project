@@ -10,7 +10,7 @@
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
-    "contract:lib:tests": "echo 'Not implmented yet coming soon'",
+    "contract:lib:tests": "yarn workspace @near/contracts test:lib",
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged"

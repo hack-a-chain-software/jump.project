@@ -11,7 +11,7 @@
     "deploy": "npm run build:contract && npm run deploy:contract",
     "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
     "test:rust": "npm run build:contract:debug && cd staking && cargo test -- --nocapture && cd ..",
-    "test:lib": "npm run build:contract:debug && jest",
+    "test:lib": "npm run build:contract:debug && clear && NEAR_ENV=sandbox jest",
     "format": "cargo fmt --all"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
   "dependencies": {
     "@near/ts": "*",
     "@types/uuid": "^8.3.4",
-    "near-api-js": "~0.43.1",
+    "near-api-js": "^0.44.2",
     "regenerator-runtime": "~0.13.5",
     "toml": "^3.0.0",
     "uuid": "^8.3.2"

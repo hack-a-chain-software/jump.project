@@ -1,47 +1,45 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Account, connect, Contract } from "near-api-js";
-import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
+import { Account, Contract, Near } from "near-api-js";
 import { Staking } from "../lib/staking";
-import { createTestAccount, deployContract } from "./utils";
+import { deployContract } from "./utils";
 import { TokenContract } from "@near/ts";
+import { setupNearWithContractAccounts } from "./utils/accounts";
 
 const yield_per_period = "10";
 const period_duration = "604800000";
 
-const config = {
-  networkId: "testnet",
-  nodeUrl: "https://rpc.testnet.near.org",
-  contractName: "dev-1652055476064-95220052886384",
-  walletUrl: "https://wallet.testnet.near.org",
-  helperUrl: "https://helper.testnet.near.org",
-  explorerUrl: "https://explorer.testnet.near.org",
-};
-
 describe("Staking Contract", () => {
+  let masterAccount: Account;
   let account: Account;
-  let stakingContractAccount: Account;
   let tokenContractAccount: Account;
-  let tokenContract: TokenContract;
+  let stakingContractAccount: Account;
+  let near: Near;
+  let config: any;
   let stakingContract: Staking;
+  let tokenContract: TokenContract;
 
   beforeAll(async () => {
-    const keyStore = new InMemoryKeyStore();
-    const near = await connect({ ...config, keyStore });
+    const { testAccount, tokenAccount, stakingAccount, ...rest } =
+      await setupNearWithContractAccounts();
+    masterAccount = new Account(near.connection, "jump-dex.testnet");
 
-    stakingContractAccount = await createTestAccount({
-      near,
-      config,
-      keyStore,
-    });
-    tokenContractAccount = await createTestAccount({ near, config, keyStore });
-    account = await createTestAccount({ near, config, keyStore });
+    tokenContractAccount = tokenAccount;
+    stakingContractAccount = stakingAccount;
 
-    await deployContract(stakingContractAccount, "../out/staking.wasm");
-    await deployContract(tokenContractAccount, "../out/token_contract.wasm");
+    account = testAccount;
+    config = rest.config;
+    near = rest.near;
 
-    console.log(process.env);
+    await deployContract(tokenAccount, "../out/token_contract.wasm");
+    await deployContract(stakingAccount, "../out/staking.wasm");
+
+    console.log(
+      tokenContractAccount.accountId,
+      stakingContractAccount.accountId
+    );
+
     stakingContract = new Staking(
-      new Contract(account, stakingContractAccount.accountId, {
+      new Contract(account, stakingAccount.accountId, {
         viewMethods: ["get_user_data"],
         changeMethods: [
           "initialize_staking",
@@ -53,21 +51,14 @@ describe("Staking Contract", () => {
         ],
       })
     );
-    tokenContract = new Contract(account, tokenContractAccount.accountId, {
-      viewMethods: ["get_user_data"],
-      changeMethods: [
-        "initialize_staking",
-        "unregister_storage",
-        "register_storage",
-        "claim",
-        "unstake",
-        "unstake_all",
-      ],
-      // TODO: Change this when near improoves typescript types
+
+    tokenContract = new Contract(account, tokenAccount.accountId, {
+      viewMethods: [],
+      changeMethods: ["new_default_meta"],
     }) as any;
   });
 
-  it("should initialize the token contract and staking contract", async () => {
+  it("should initialize the staking program", async () => {
     await tokenContract.new_default_meta({
       params: {
         owner_id: account.accountId,
@@ -81,5 +72,9 @@ describe("Staking Contract", () => {
       yield_per_period,
       token_address: tokenContract.account.accountId,
     });
+  });
+
+  it("should stake some balance into the user account", () => {
+    expect(true).toBe(true);
   });
 });

@@ -125,7 +125,7 @@ mod tests {
     let mut contract = sample_contract();
 
     let user_data = UserData {
-      balance: 0,
+      balance: 100,
       user_rps: contract.last_updated_rps,
       unclaimed_rewards: 0,
     };
@@ -140,6 +140,7 @@ mod tests {
 
     assert_eq!(updated_user_data.balance, 100);
     assert_eq!(updated_user_data.user_rps, contract.last_updated_rps);
+    assert!(updated_user_data.unclaimed_rewards > 0);
   }
 
   #[test]
