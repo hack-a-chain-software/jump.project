@@ -2,7 +2,8 @@
 # Add location of contracts here
 members = [
   "./staking",
-  "./token_contract"
+  "./token_contract",
+  "./x_token"
 ]
 
 [profile.release]
