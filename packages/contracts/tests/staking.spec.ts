@@ -1,77 +1,75 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { Account, Contract, Near } from "near-api-js";
-import { Staking } from "../lib/staking";
-import { deployContract } from "./utils";
-import { TokenContract } from "@near/ts";
-import { setupNearWithContractAccounts } from "./utils/accounts";
+import "jest";
+import { NearAccount, Worker } from "near-workspaces";
+import { period_duration, yield_per_period } from "./constants";
 
-const yield_per_period = "10";
-const period_duration = "604800000";
+describe("Staking Contract Integration Tests", () => {
+  let worker: Worker;
+  let root: NearAccount;
 
-describe("Staking Contract", () => {
-  let masterAccount: Account;
-  let account: Account;
-  let tokenContractAccount: Account;
-  let stakingContractAccount: Account;
-  let near: Near;
-  let config: any;
-  let stakingContract: Staking;
-  let tokenContract: TokenContract;
+  let userAccount: NearAccount;
+  let ownerAccount: NearAccount;
+  let tokenContractAccount: NearAccount;
+  let stakingContractAccount: NearAccount;
 
   beforeAll(async () => {
-    const { testAccount, tokenAccount, stakingAccount, ...rest } =
-      await setupNearWithContractAccounts();
-    masterAccount = new Account(near.connection, "jump-dex.testnet");
+    console.log("Before All triggered");
 
-    tokenContractAccount = tokenAccount;
-    stakingContractAccount = stakingAccount;
+    worker = await Worker.init();
 
-    account = testAccount;
-    config = rest.config;
-    near = rest.near;
+    console.log("Worker Initialized", worker);
 
-    await deployContract(tokenAccount, "../out/token_contract.wasm");
-    await deployContract(stakingAccount, "../out/staking.wasm");
+    root = worker.rootAccount;
 
+    userAccount = await root.createAccount("staking-user-jump");
+    ownerAccount = await root.createAccount("staking-owner-jump");
+
+    console.log("Accounts", userAccount, ownerAccount);
+
+    tokenContractAccount = await root.createAndDeploy(
+      "token-contract",
+      __dirname + "/../out/token_contract.wasm"
+    );
+    stakingContractAccount = await root.createAndDeploy(
+      "token-contract",
+      __dirname + "/../out/staking.wasm"
+    );
+
+    console.log("All Accounts have been created!");
     console.log(
-      tokenContractAccount.accountId,
-      stakingContractAccount.accountId
+      stakingContractAccount,
+      tokenContractAccount,
+      userAccount,
+      ownerAccount
     );
-
-    stakingContract = new Staking(
-      new Contract(account, stakingAccount.accountId, {
-        viewMethods: ["get_user_data"],
-        changeMethods: [
-          "initialize_staking",
-          "unregister_storage",
-          "register_storage",
-          "claim",
-          "unstake",
-          "unstake_all",
-        ],
-      })
-    );
-
-    tokenContract = new Contract(account, tokenAccount.accountId, {
-      viewMethods: [],
-      changeMethods: ["new_default_meta"],
-    }) as any;
   });
 
-  it("should initialize the staking program", async () => {
-    await tokenContract.new_default_meta({
-      params: {
-        owner_id: account.accountId,
-        total_supply: "100000000",
-      },
-    });
+  afterAll(async () => {
+    console.log("Cleanup");
+    await worker.tearDown();
+  });
 
-    await stakingContract.initialize_staking({
-      owner: account.accountId,
-      period_duration,
-      yield_per_period,
-      token_address: tokenContract.account.accountId,
-    });
+  it("should initialize both contracts staking and token", async () => {
+    console.log("Initializing Contracts");
+
+    await tokenContractAccount.call(
+      tokenContractAccount.accountId,
+      "new_default_meta",
+      {
+        owner_id: ownerAccount.accountId,
+        total_supply: "100000000",
+      }
+    );
+
+    await stakingContractAccount.call(
+      stakingContractAccount.accountId,
+      "initialize_staking",
+      {
+        owner: ownerAccount.accountId,
+        period_duration: period_duration,
+        yield_per_period: yield_per_period,
+        token_address: tokenContractAccount.accountId,
+      }
+    );
   });
 
   it("should stake some balance into the user account", () => {
