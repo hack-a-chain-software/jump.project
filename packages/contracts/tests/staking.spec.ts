@@ -30,7 +30,7 @@ describe("Staking Contract Integration Tests", () => {
       __dirname + "/../out/token_contract.wasm"
     );
     stakingContractAccount = await root.createAndDeploy(
-      "token-contract",
+      "staking-contract",
       __dirname + "/../out/staking.wasm"
     );
 
@@ -51,15 +51,22 @@ describe("Staking Contract Integration Tests", () => {
   it("should initialize both contracts staking and token", async () => {
     console.log("Initializing Contracts");
 
-    await tokenContractAccount.call(
-      tokenContractAccount.accountId,
-      "new_default_meta",
-      {
-        owner_id: ownerAccount.accountId,
-        total_supply: "100000000",
-      }
-    );
+    console.log(1);
+    await tokenContractAccount.call(tokenContractAccount, "initialize", {
+      owner_id: ownerAccount.accountId,
+      total_supply: "100000000",
+      metadata: {
+        spec: "ft-1.0.0",
+        name: "name",
+        symbol: "NME",
+        icon: null,
+        reference: null,
+        reference_hash: null,
+        decimals: 24,
+      },
+    });
 
+    console.log(2);
     await stakingContractAccount.call(
       stakingContractAccount.accountId,
       "initialize_staking",
