@@ -7,6 +7,7 @@ const FT_TRANSFER_GAS: Gas = Gas(50_000_000_000_000);
 const REVERT_CALLBACK_GAS: Gas = Gas(50_000_000_000_000);
 
 // Implement custom methods
+#[allow(dead_code)]
 #[near_bindgen]
 impl Contract {
     pub fn ft_on_transfer(&mut self, sender_id: String, amount: U128, msg: String) {
@@ -18,7 +19,7 @@ impl Contract {
             "deposit_profit" => {
                 self.internal_deposit_jump_profits(amount.0)
             },
-            _ => panic!(ERR_001)
+            _ => panic!("{}", ERR_001)
         }
     }
 
@@ -27,8 +28,8 @@ impl Contract {
         assert_one_yocto();
         assert!(env::prepaid_gas() >= BASE_GAS + FT_TRANSFER_GAS + REVERT_CALLBACK_GAS);
         let account = env::predecessor_account_id();
-        let base_token_quantity = self.internal_burn_x_token(quantity_to_burn.0, account);
-        ext_token_contract::ext(self.base_token)
+        let base_token_quantity = self.internal_burn_x_token(quantity_to_burn.0, account.clone());
+        ext_token_contract::ext(self.base_token.clone())
             .with_static_gas(FT_TRANSFER_GAS)
             .with_attached_deposit(1)
             .ft_transfer(account.to_string(), U128(base_token_quantity), "xToken withdraw".to_string())

@@ -40,11 +40,11 @@ pub enum StorageKey {
 	Metadata,
 }
 
+#[allow(dead_code)]
 #[near_bindgen]
 impl Contract {
 	#[init]
 	pub fn new(
-        owner_id: String,
         x_token_name: String,
 		x_token_symbol: String,
 		x_token_icon: String,
@@ -111,6 +111,7 @@ impl Contract {
 		normal_token_withdraw
 	}
 
+
 	pub fn internal_revert_burn_x_token(&mut self, quantity_burnt: u128, recipient: AccountId, normal_tokens_released: u128) {
 		// add burnt tokens back to user
 		self.ft_functionality.internal_deposit(&recipient, quantity_burnt);
@@ -123,6 +124,7 @@ impl Contract {
 			"base_token_treasury_after_deposit": U128(self.base_token_treasury),
 			"x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
 		}).to_string();
+		FtMint { owner_id: &recipient, amount: &U128(quantity_burnt), memo: Some(memo_string) }.emit();
 	}
 
 	pub fn internal_deposit_jump_profits(&mut self, quantity_deposited: u128) {
@@ -147,8 +149,8 @@ impl Contract {
 		log!("Closed @{} with {}", account_id, balance);
 	}
 	
-	fn on_tokens_burned(&mut self, account_id: AccountId, amount: U128) {
-		FtBurn { owner_id: &account_id, amount: &amount, memo: None}.emit();
+	fn on_tokens_burned(&mut self, account_id: AccountId, amount: u128) {
+		FtBurn { owner_id: &account_id, amount: &U128(amount), memo: None}.emit();
 	}
 }
 
