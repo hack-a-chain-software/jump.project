@@ -1,6 +1,7 @@
 import "jest";
-import { NearAccount, Worker } from "near-workspaces";
+import { NearAccount, toYocto, Worker } from "near-workspaces";
 import { period_duration, yield_per_period } from "./constants";
+import { IUserData } from "./types";
 
 describe("Staking Contract Integration Tests", () => {
   let worker: Worker;
@@ -51,7 +52,6 @@ describe("Staking Contract Integration Tests", () => {
   it("should initialize both contracts staking and token", async () => {
     console.log("Initializing Contracts");
 
-    console.log(1);
     await tokenContractAccount.call(tokenContractAccount, "initialize", {
       owner_id: ownerAccount.accountId,
       total_supply: "100000000",
@@ -66,7 +66,6 @@ describe("Staking Contract Integration Tests", () => {
       },
     });
 
-    console.log(2);
     await stakingContractAccount.call(
       stakingContractAccount.accountId,
       "initialize_staking",
@@ -79,7 +78,46 @@ describe("Staking Contract Integration Tests", () => {
     );
   });
 
-  it("should stake some balance into the user account", () => {
+  it("should stake some balance into the user account", async () => {
+    try {
+      // Transfer some XToken to the user
+      await ownerAccount.call(tokenContractAccount.accountId, "ft_transfer", {
+        receiver_id: userAccount.accountId,
+        amount: "200",
+      });
+
+      // Staking Some XToken into the Contract via FT_Transfer Call
+      await userAccount.call(tokenContractAccount.accountId, "ft_transfer", {
+        receiver_id: stakingContractAccount.accountId,
+        amount: "80",
+        attachedDeposit: toYocto("1"),
+      });
+
+      // Retrieve user data from the contract
+      const userData = await stakingContractAccount.view<IUserData>(
+        "get_user_data",
+        {
+          account_id: userAccount.accountId,
+        }
+      );
+
+      console.log(userData);
+
+      const { balance } = userData;
+
+      // Expect that the balance is greater than 0 and the ammount of tokens that we deposited!
+      expect(balance).toBeGreaterThan(0);
+      expect(balance).toBe(80);
+    } catch (error) {
+      console.error(
+        "The test panicked at this error",
+        (error as Error).message
+      );
+      throw error;
+    }
+  });
+
+  it("should withdraw some funds from the user account", () => {
     expect(true).toBe(true);
   });
 });
