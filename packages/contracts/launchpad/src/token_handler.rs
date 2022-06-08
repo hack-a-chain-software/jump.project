@@ -13,10 +13,11 @@ pub enum TokenType {
   FT { account_id: AccountId },
 }
 
+#[allow(unreachable_patterns)]
 impl TokenType {
   pub fn transfer_token(&self, receiver_id: AccountId, quantity: u128) -> Promise {
     match self {
-      FT => ext_fungible_token::ext(receiver_id.clone())
+      TokenType::FT { account_id } => ext_fungible_token::ext(account_id.clone())
         .with_static_gas(GAS_FOR_FT_TRANSFER)
         .with_attached_deposit(1)
         .ft_transfer(receiver_id, U128(quantity), None),

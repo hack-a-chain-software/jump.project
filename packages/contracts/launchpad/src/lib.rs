@@ -2,9 +2,8 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedSet, Vector};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{
-	env, log, Gas, near_bindgen, AccountId, 
-	PanicOnDefault, PromiseOrValue, BorshStorageKey,
-	PromiseResult,
+	env, near_bindgen, AccountId, 
+	PanicOnDefault, BorshStorageKey,
 	utils::{assert_one_yocto},
 };
 use near_sdk::serde::{Serialize, Deserialize};
@@ -23,6 +22,7 @@ mod ext_interface;
 mod listing;
 
 const TO_NANO: u64 = 1_000_000_000;
+const FRACTION_BASE: u128 = 1_000_000_000;
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
 pub enum StorageKey {
@@ -86,21 +86,32 @@ impl Contract {
 		events::cancel_listing(listing_id);
 	}
 
+	pub fn internal_withdraw_project_funds(&mut self, listing: &mut VListing, listing_id: u64) {
+		listing.withdraw_project_funds();
+		self.listings.replace(listing_id, &listing);
+	}
 
 }
 
 // helper methods
 impl Contract {
-	pub fn assert_owner(&mut self) {
+	pub fn assert_owner(&self) {
 		assert_one_yocto();
 		assert_eq!(env::predecessor_account_id(), self.owner, "{}", ERR_001);
 	}
 
-	pub fn assert_owner_or_guardian(&mut self) {
+	pub fn assert_owner_or_guardian(&self) {
 		assert_one_yocto();
 		let predecessor = env::predecessor_account_id();
 		if predecessor != self.owner {
 			assert!(self.guardians.contains(&predecessor), "{}", ERR_002);
 		}
+	}
+
+	pub fn assert_project_owner(&mut self, listing_id: u64) -> VListing {
+		assert_one_yocto();
+		let listing = self.listings.get(listing_id).expect(ERR_003);
+		listing.assert_owner(env::predecessor_account_id());
+		listing
 	}
 }
