@@ -10,7 +10,7 @@ const baseGas = "300000000000000";
  * with the contract with better TS types
  */
 export class Staking {
-  private contract: StakingContract;
+  private contract: any;
 
   /**
    * @constructor
@@ -26,11 +26,7 @@ export class Staking {
     yield_per_period: string;
     period_duration: string;
   }) {
-    return await this.contract.initialize_staking({
-      params,
-      amount: oneYOcto,
-      gas: baseGas,
-    });
+    return await this.contract.initialize_staking(params);
   }
   async get_user_data(params: {
     account_id: Account["accountId"];
