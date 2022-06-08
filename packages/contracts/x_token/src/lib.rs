@@ -305,6 +305,8 @@ mod tests {
 		contract
 			.ft_functionality
 			.internal_register_account(&SIGNER_ACCOUNT.parse().unwrap());
+
+		let user_balance_before_mint = contract.ft_functionality.ft_balance_of(recipient.clone());
 		contract.internal_mint_x_token(quantity_deposited, recipient.clone());
 
 		//when depositing tokens for the first timw, the treasury should be equal to the amount deposited
@@ -312,7 +314,7 @@ mod tests {
 
 		assert_eq!(
 			contract.ft_functionality.ft_balance_of(recipient),
-			U128(quantity_deposited)
+			U128(quantity_deposited + u128::from(user_balance_before_mint))
 		);
 	}
 
@@ -343,6 +345,8 @@ mod tests {
 			initial_amount_of_xtoken.clone(),
 		);
 
+		let user_balance_before_mint = contract.ft_functionality.ft_balance_of(recipient.clone());
+
 		contract.internal_mint_x_token(quantity_deposited, recipient.clone());
 
 		assert_eq!(
@@ -352,7 +356,10 @@ mod tests {
 
 		assert_eq!(
 			contract.ft_functionality.ft_balance_of(recipient),
-			U128(quantity_deposited * initial_amount_of_xtoken / initial_amount_of_jump)
+			U128(
+				u128::from(user_balance_before_mint)
+					+ (quantity_deposited * initial_amount_of_xtoken / initial_amount_of_jump)
+			)
 		);
 	}
 
@@ -383,6 +390,8 @@ mod tests {
 			initial_amount_of_xtoken.clone(),
 		);
 
+		let user_balance_before_mint = contract.ft_functionality.ft_balance_of(recipient.clone());
+
 		contract.internal_mint_x_token(quantity_deposited, recipient.clone());
 
 		assert_eq!(
@@ -392,7 +401,10 @@ mod tests {
 
 		assert_eq!(
 			contract.ft_functionality.ft_balance_of(recipient),
-			U128(quantity_deposited * initial_amount_of_xtoken / initial_amount_of_jump)
+			U128(
+				u128::from(user_balance_before_mint)
+					+ (quantity_deposited * initial_amount_of_xtoken / initial_amount_of_jump)
+			)
 		);
 	}
 
