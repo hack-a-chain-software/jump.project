@@ -16,3 +16,20 @@ impl Contract {
         self.internal_withdraw_project_funds(&mut listing, listing_id);
     }
 }
+
+/// Actions to be called through token_receiver functions
+impl Contract {
+    pub fn fund_listing(&mut self, listing_id: u64, token_quantity: u128, token_type: TokenType) {
+        let mut listing = self.listings.get(listing_id).expect(ERR_003);
+
+        // refactor, create method in VListing
+        if let VListing::V1(l) = listing {
+            assert_eq!(token_type, l.project_token);
+            assert_eq!(token_quantity, l.total_amount_sale_project_tokens);
+        } else { panic!() }
+
+        // create VListing method to fund listing
+        listing.fund_listing();
+        self.listings.replace(listing_id, &listing);
+    }
+}
