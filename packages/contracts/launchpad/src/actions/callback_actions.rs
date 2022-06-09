@@ -9,9 +9,9 @@ impl Contract {
     pub fn callback_token_transfer_to_project_owner(&mut self, listing_id: U64, old_value: U128, field: String) {
         if is_promise_success() {
             let listing_id = listing_id.0;
-            let mut listing = self.listings.get(listing_id).unwrap();
+            let mut listing = self.listings.get(listing_id).unwrap().into_current();
             listing.revert_failed_project_owner_withdraw(old_value.0, field);
-            self.listings.replace(listing_id, &listing);
+            self.listings.replace(listing_id, &VListing::V1(listing));
         }
     }
 }

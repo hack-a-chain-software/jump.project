@@ -20,13 +20,13 @@ impl Contract {
 /// Actions to be called through token_receiver functions
 impl Contract {
     pub fn fund_listing(&mut self, listing_id: u64, token_quantity: u128, token_type: TokenType) {
-        let mut listing = self.listings.get(listing_id).expect(ERR_003);
+        let mut listing = self.listings.get(listing_id).expect(ERR_003).into_current();
 
         // refactor, create method in VListing
         listing.assert_funding_token(token_type, token_quantity);
 
         // create VListing method to fund listing
         listing.fund_listing();
-        self.listings.replace(listing_id, &listing);
+        self.listings.replace(listing_id, &VListing::V1(listing));
     }
 }

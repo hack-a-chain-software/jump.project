@@ -13,5 +13,25 @@ impl Contract {}
 
 /// methods to be called through the token_receiver
 impl Contract {
-    pub fn investor_updated_ranking(&mut self) {}
+  pub fn investor_stake(
+    &mut self,
+    amount: u128,
+    token_contract: &AccountId,
+    account_id: &AccountId,
+  ) {
+    assert_eq!(
+      token_contract, self.contract_settings.membership_token,
+      "{}, contract: {}",
+      ERR_204, self.contract_settings.membership_token
+    );
+    let mut investor = self.internal_get_investor(account_id).expect(ERR_004);
+    investor.staked_token += amount;
+    investor.last_check = env::block_timestamp();
+    self.investors.insert(account_id, &VInvestor::V1(investor));
+  }
+
+  pub fn buy_allocation(&mut self, listing_id: u64, price_tokens_sent: u128) {
+      let listing = self.listings.get(listing_id).expect(ERR_003);
+      
+  }
 }

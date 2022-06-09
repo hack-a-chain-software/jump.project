@@ -11,7 +11,7 @@ use near_sdk::serde_json;
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
-use crate::listing::{VListing};
+use crate::listing::{VListing, Listing};
 use crate::investor::{VInvestor, Investor};
 use crate::errors::*;
 
@@ -26,11 +26,21 @@ mod token_handler;
 const TO_NANO: u64 = 1_000_000_000;
 const FRACTION_BASE: u128 = 1_000_000_000;
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde( crate = "near_sdk::serde" )]
+pub struct ContractSettings {
+	membership_token: AccountId,
+	n_tiers: u8,
+	tiers_minimum_tokens: Vec<U128>,
+	fee_price_tokens: U128, // fee taken on price tokens received in the presale %
+	fee_liquidity_tokens: U128 // fee taken on project and price tokens sent to liquidity pool %
+}
+
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
 pub enum StorageKey {
 	Guardians,
 	Listings,
-	InvestorTreasury { listing_id: u64 },
+	InvestorTreasury { account_id: AccountId },
 	Investors,
 }
 
@@ -41,19 +51,21 @@ struct Contract {
 	pub guardians: UnorderedSet<AccountId>,
 	pub listings: Vector<VListing>,
 	pub investors: LookupMap<AccountId, VInvestor>,
+	pub contract_settings: ContractSettings
 }
 
 #[allow(dead_code)]
 #[near_bindgen]
 impl Contract {
 	#[init]
-	pub fn new(owner: AccountId) -> Self {
+	pub fn new(owner: AccountId, contract_settings: ContractSettings) -> Self {
 		assert!(!env::state_exists(), "Already initialized");
 		Self {
 			owner,
 			guardians: UnorderedSet::new(StorageKey::Guardians),
 			listings: Vector::new(StorageKey::Listings),
 			investors: LookupMap::new(StorageKey::Investors),
+			contract_settings,
 		}
 	}
 }
@@ -89,15 +101,15 @@ impl Contract {
 	}
 
 	pub fn internal_cancel_listing(&mut self, listing_id: u64) {
-		let mut listing = self.listings.get(listing_id).expect(ERR_003);
+		let mut listing = self.listings.get(listing_id).expect(ERR_003).into_current();
 		listing.cancel_listing();
-		self.listings.replace(listing_id, &listing);
+		self.listings.replace(listing_id, &VListing::V1(listing));
 		events::cancel_listing(listing_id);
 	}
 
-	pub fn internal_withdraw_project_funds(&mut self, listing: &mut VListing, listing_id: u64) {
+	pub fn internal_withdraw_project_funds(&mut self, listing: &mut Listing, listing_id: u64) {
 		listing.withdraw_project_funds();
-		self.listings.replace(listing_id, &listing);
+		self.listings.replace(listing_id, &VListing::V1(*listing));
 	}
 
 	pub fn internal_get_investor(&self, account_id: &AccountId) -> Option<Investor> {
@@ -109,11 +121,11 @@ impl Contract {
 
 	pub fn internal_deposit_storage_investor(&mut self, account_id: &AccountId, deposit: u128) {
 		let investor = match self.internal_get_investor(account_id) {
-			Some(investor) => {
+			Some(mut investor) => {
 				investor.deposit_storage_funds(deposit);
 				VInvestor::V1(investor)
 			}
-			None => VInvestor::new(deposit),
+			None => VInvestor::new(account_id.clone(), deposit),
 		};
 		self.investors.insert(account_id, &investor);
 	}
@@ -140,7 +152,7 @@ impl Contract {
 			ERR_201,
 			available
 		);
-		investor.storage_deposit -= withdraw_amount;
+		investor.withdraw_storage_funds(withdraw_amount);
 		self.investors.insert(account_id, &VInvestor::V1(investor));
 		withdraw_amount
 	}
@@ -161,10 +173,10 @@ impl Contract {
 		}
 	}
 
-	pub fn assert_project_owner(&mut self, listing_id: u64) -> VListing {
+	pub fn assert_project_owner(&mut self, listing_id: u64) -> Listing {
 		assert_one_yocto();
-		let listing = self.listings.get(listing_id).expect(ERR_003);
-		listing.assert_owner(env::predecessor_account_id());
+		let listing = self.listings.get(listing_id).expect(ERR_003).into_current();
+		listing.assert_owner(&env::predecessor_account_id());
 		listing
 	}
 }

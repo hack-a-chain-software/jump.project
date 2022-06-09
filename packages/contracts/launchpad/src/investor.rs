@@ -1,42 +1,48 @@
-use near_sdk::{env};
+use near_sdk::{env, AccountId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::serde::{Serialize};
+use near_sdk::collections::{ UnorderedMap };
 
+use crate::{StorageKey};
 use crate::errors::*;
 
 // min deposit for storage is 0.25 NEAR
 pub const MIN_STORAGE_BALANCE: u128 = 250_000_000_000_000_000_000_000;
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[derive(BorshDeserialize, BorshSerialize)]
 pub enum VInvestor {
     V1(Investor),
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[derive(BorshDeserialize, BorshSerialize)]
 pub struct Investor {
+    pub account_id: AccountId,
     // storage checks
     pub storage_deposit: u128,
     pub storage_used: u64,
 
     // launchpad membership checks
-    pub investor_level: u8,
-    pub last_check: u64
+    pub staked_token: u128,
+    pub last_check: u64,
+
+    // listing allocations treasury
+    pub allocation_count: UnorderedMap<u64, u64>,
 }
 
 impl VInvestor {
-    pub fn new(initial_deposit: u128) -> Self {
+    pub fn new(account_id: AccountId, initial_deposit: u128) -> Self {
         Self::V1(
             Investor {
+                account_id: account_id.clone(),
                 storage_deposit: initial_deposit,
                 storage_used: 0,
-                investor_level: 0,
-                last_check: 0
+                staked_token: 0,
+                last_check: 0,
+                allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury { account_id })
             }
         )
     }
 
+    #[allow(unreachable_patterns)]
     pub fn into_current(self) -> Investor {
         match self {
             VInvestor::V1(investor) => investor,
@@ -87,15 +93,6 @@ impl Investor {
 
     pub fn withdraw_storage_funds(&mut self, withdraw: u128) {
         self.storage_deposit -= withdraw;
-        self.assert_storage_usage_cost();
     }
 
-}
-
-// Implement launchpad member level logic
-impl Investor {
-    pub fn update_level(&mut self, new_level: u8, timestamp: u64) {
-        self.investor_level = new_level;
-        self.last_check = timestamp;
-    }
 }

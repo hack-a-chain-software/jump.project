@@ -66,14 +66,14 @@ impl StorageManagement for Contract {
         assert_one_yocto();
         let account_id = env::predecessor_account_id();
         if let Some(account_deposit) = self.internal_get_investor(&account_id) {
-            let contract_used_storage_initial = env::storage_usage();
-            let account_used_storage = account_deposit.storage_used;
 
+            // TODO: figure out force option logic.
+            assert!(
+                account_deposit.allocation_count.is_empty(),
+                "{}", ERR_203
+            );
             self.investors.remove(&account_id);
-            let contract_used_storage_after = env::storage_usage();
-            // assert that investor did not hold any investments
-            // assert_eq!()
-            Promise::new(account_id.clone()).transfer(account_deposit.near_amount);
+            Promise::new(account_id.clone()).transfer(account_deposit.storage_deposit);
             true
         } else {
             false

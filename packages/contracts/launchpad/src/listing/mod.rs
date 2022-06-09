@@ -9,7 +9,6 @@ use crate::listing::treasury::{Treasury};
 use crate::token_handler::{TokenType, GAS_FOR_FT_TRANSFER_CALLBACK};
 use crate::errors::*;
 
-mod investor_treasury;
 mod treasury;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
@@ -46,7 +45,7 @@ pub struct Listing {
 	pub total_amount_sale_project_tokens: u128, //quantity of tokens that will be sold to investors
 	pub token_alocation_size: u128, // quantity of tokens that each allocation is composed of
 	pub token_allocation_price: u128, //amount of price tokens that need to be paid to buy 1 project allocation
-	pub allocations_sold: u128,
+	pub allocations_sold: u64,
 	pub liquidity_pool_project_tokens: u128, // how many project tokens are going to be added to the lp in dex
 	// if presale sells off
 	pub liquidity_pool_price_tokens: u128, // how many price tokens are going to be added to the lp in dex
@@ -119,65 +118,29 @@ impl VListing {
 	}
 
 	#[allow(unreachable_patterns)]
-	pub fn cancel_listing(&mut self) {
+	pub fn into_current(self) -> Listing {
 		match self {
-			VListing::V1(listing) => listing.cancel_listing(),
-			_ => unimplemented!(),
-		}
-	}
-
-	#[allow(unreachable_patterns)]
-	pub fn assert_owner(&self, account_to_validate: AccountId) {
-		match self {
-			VListing::V1(v) => assert_eq!(v.project_owner, account_to_validate, "{}", ERR_102),
-			_ => unimplemented!(),
-		}
-	}
-
-	#[allow(unreachable_patterns)]
-	pub fn withdraw_project_funds(&mut self) {
-		match self {
-			VListing::V1(v) => v.withdraw_project_funds(),
-			_ => unimplemented!(),
-		}
-	}
-
-	#[allow(unreachable_patterns)]
-	pub fn revert_failed_project_owner_withdraw(&mut self, old_value: u128, field: String) {
-		match self {
-			VListing::V1(v) => v.revert_failed_project_owner_withdraw(old_value, field),
-			_ => unimplemented!(),
-		}
-	}
-
-	#[allow(unreachable_patterns)]
-	pub fn assert_funding_token(&self, token_type: TokenType, token_quantity: u128) {
-		match self {
-			VListing::V1(v) => {
-				assert_eq!(token_type, v.project_token, "{}", ERR_104);
-				assert_eq!(
-					token_quantity,
-					v.total_amount_sale_project_tokens + v.liquidity_pool_project_tokens,
-					"{}",
-					ERR_105
-				);
-			}
-			_ => unimplemented!(),
-		}
-	}
-
-	#[allow(unreachable_patterns)]
-	pub fn fund_listing(&mut self) {
-		match self {
-			VListing::V1(v) => {
-				v.fund_listing();
-			}
+			VListing::V1(l) => l,
 			_ => unimplemented!(),
 		}
 	}
 }
 
 impl Listing {
+	pub fn assert_owner(&self, account_id: &AccountId) {
+		assert_eq!(self.project_owner, account_id, "{}", ERR_102);
+	}
+
+	pub fn assert_funding_token(&self, token_type: TokenType, amount: u128) {
+		assert_eq!(self.project_token, token_type, "{}", ERR_104);
+		assert_eq!(
+			self.total_amount_sale_project_tokens + self.liquidity_pool_project_tokens,
+			token_type,
+			"{}",
+			ERR_104
+		);
+	}
+
 	pub fn cancel_listing(&mut self) {
 		match &self.status {
 			ListingStatus::Unfunded => (),
@@ -211,10 +174,11 @@ impl Listing {
 			match self.status {
 				ListingStatus::SaleFinalized | ListingStatus::LiquidityPoolFinalized => {
 					let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
-					let excess_project_tokens_liquidity =
-						(self.allocations_sold * self.liquidity_pool_project_tokens) / total_allocations;
+					let excess_project_tokens_liquidity = (self.allocations_sold as u128
+						* self.liquidity_pool_project_tokens)
+						/ total_allocations;
 					let correct_price_tokens_liquidity =
-						(self.allocations_sold * self.liquidity_pool_price_tokens) / total_allocations;
+						(self.allocations_sold as u128 * self.liquidity_pool_price_tokens) / total_allocations;
 					self.listing_treasury.update_treasury_after_sale(
 						excess_project_tokens_liquidity,
 						correct_price_tokens_liquidity,
@@ -261,9 +225,12 @@ impl Listing {
 							),
 					);
 
-				events::project_withdraw_listing(self.listing_id, withdraw_amounts.0, withdraw_amounts.1, &self.status);
-		
-				
+				events::project_withdraw_listing(
+					self.listing_id,
+					withdraw_amounts.0,
+					withdraw_amounts.1,
+					&self.status,
+				);
 			}
 			_ => panic!("{}", ERR_103),
 		}
@@ -273,7 +240,7 @@ impl Listing {
 		match field.as_str() {
 			"project" => {
 				self.listing_treasury.presale_project_token_balance = old_value;
-			},
+			}
 			"price" => {
 				self
 					.listing_treasury

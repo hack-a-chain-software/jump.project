@@ -1,10 +1,5 @@
-use near_sdk::{ AccountId };
-use near_sdk::collections::{ LookupMap };
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
-
-use crate::{ StorageKey };
-use crate::listing::investor_treasury::{ InvestorTreasury };
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -16,8 +11,6 @@ pub struct Treasury {
 	pub liquidity_pool_price_token_balance: u128,
 	
 	pub all_investors_project_token_balance: u128,
-    #[serde(skip_serializing)]
-	pub investors_treasuries: LookupMap<AccountId, InvestorTreasury>,
 	
     pub cancellation_funds_price_tokens: u128
 }
@@ -32,7 +25,6 @@ impl Treasury {
             liquidity_pool_price_token_balance: 0,
             
             all_investors_project_token_balance: 0,
-            investors_treasuries: LookupMap::new(StorageKey::InvestorTreasury { listing_id }),
         
             cancellation_funds_price_tokens: 0
         }
