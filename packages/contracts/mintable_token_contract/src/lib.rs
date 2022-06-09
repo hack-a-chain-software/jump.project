@@ -12,6 +12,8 @@ use near_sdk::json_types::{U128, ValidAccountId};
 use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
 use modified_contract_standards::fungible_token::events::{FtBurn, FtMint};
 
+pub mod errors;
+
 use crate::errors::ERR_001;
 pub mod burn;
 
@@ -30,19 +32,11 @@ impl Contract {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
     let mut this = Self {
-      owner_id,
+      owner_id: owner_id.clone(),
       token: FungibleToken::new(b"a".to_vec()),
       metadata: LazyOption::new(b"m".to_vec(), Some(&metadata)),
     };
     this.token.internal_register_account(&owner_id);
-    //this.token.internal_deposit(&owner_id, total_supply.into());
-    // FtMint {
-    //   owner_id: &owner_id,
-    //   amount: &total_supply.0.to_string(),
-    //   memo: Some("First minitng event"),
-    // }
-    // .emit();
-
     this
   }
 
@@ -51,9 +45,9 @@ impl Contract {
 
     self.token.internal_deposit(&recipient, quantity_to_mint);
     FtMint {
-      owner_id: &owner_id,
-      amount: &total_supply.0.to_string(),
-      memo: Some("First minitng event"),
+      user_id: &recipient,
+      amount: &quantity_to_mint.to_string(),
+      memo: Some("Mint event called by owner"),
     }
     .emit();
   }
@@ -88,73 +82,57 @@ impl Contract {
   }
 }
 
-// ----------------------------------- TEST -------------------------------------------------
+//----------------------------------- TEST -------------------------------------------------
 
-// #[cfg(all(test, not(target_arch = "wasm32")))]
-// mod tests {
-//     use near_sdk::test_utils::{accounts, VMContextBuilder};
-//     use near_sdk::MockedBlockchain;
-//     use near_sdk::{testing_env, Balance};
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
 
-//     use super::*;
+  // #[test]
+  // fn test_new() {
+  //     let mut context = get_context(accounts(1));
+  //     testing_env!(context.build());
+  //     let contract = Contract::new_default_meta(accounts(1).into(), TOTAL_SUPPLY.into());
+  //     testing_env!(context.is_view(true).build());
+  //     assert_eq!(contract.ft_total_supply().0, TOTAL_SUPPLY);
+  //     assert_eq!(contract.ft_balance_of(accounts(1)).0, TOTAL_SUPPLY);
+  // }
 
-//     const TOTAL_SUPPLY: Balance = 1_000_000_000_000_000;
+  // #[test]
+  // #[should_panic(expected = "The contract is not initialized")]
+  // fn test_default() {
+  //     let context = get_context(accounts(1));
+  //     testing_env!(context.build());
+  //     let _contract = Contract::default();
+  //}
 
-//     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
-//         let mut builder = VMContextBuilder::new();
-//         builder
-//             .current_account_id(accounts(0))
-//             .signer_account_id(predecessor_account_id.clone())
-//             .predecessor_account_id(predecessor_account_id);
-//         builder
-//     }
+  // #[test]
+  // fn test_transfer() {
+  //     let mut context = get_context(accounts(2));
+  //     testing_env!(context.build());
+  //     let mut contract = Contract::new_default_meta(accounts(2).into(), TOTAL_SUPPLY.into());
+  //     testing_env!(context
+  //         .storage_usage(env::storage_usage())
+  //         .attached_deposit(contract.storage_balance_bounds().min.into())
+  //         .predecessor_account_id(accounts(1))
+  //         .build());
+  //     // Paying for account registration, aka storage deposit
+  //     contract.storage_deposit(None, None);
 
-//     #[test]
-//     fn test_new() {
-//         let mut context = get_context(accounts(1));
-//         testing_env!(context.build());
-//         let contract = Contract::new_default_meta(accounts(1).into(), TOTAL_SUPPLY.into());
-//         testing_env!(context.is_view(true).build());
-//         assert_eq!(contract.ft_total_supply().0, TOTAL_SUPPLY);
-//         assert_eq!(contract.ft_balance_of(accounts(1)).0, TOTAL_SUPPLY);
-//     }
+  //     testing_env!(context
+  //         .storage_usage(env::storage_usage())
+  //         .attached_deposit(1)
+  //         .predecessor_account_id(accounts(2))
+  //         .build());
+  //     let transfer_amount = TOTAL_SUPPLY / 3;
+  //     contract.ft_transfer(accounts(1), transfer_amount.into(), None);
 
-//     #[test]
-//     #[should_panic(expected = "The contract is not initialized")]
-//     fn test_default() {
-//         let context = get_context(accounts(1));
-//         testing_env!(context.build());
-//         let _contract = Contract::default();
-//     }
-
-//     #[test]
-//     fn test_transfer() {
-//         let mut context = get_context(accounts(2));
-//         testing_env!(context.build());
-//         let mut contract = Contract::new_default_meta(accounts(2).into(), TOTAL_SUPPLY.into());
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .attached_deposit(contract.storage_balance_bounds().min.into())
-//             .predecessor_account_id(accounts(1))
-//             .build());
-//         // Paying for account registration, aka storage deposit
-//         contract.storage_deposit(None, None);
-
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .attached_deposit(1)
-//             .predecessor_account_id(accounts(2))
-//             .build());
-//         let transfer_amount = TOTAL_SUPPLY / 3;
-//         contract.ft_transfer(accounts(1), transfer_amount.into(), None);
-
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .account_balance(env::account_balance())
-//             .is_view(true)
-//             .attached_deposit(0)
-//             .build());
-//         assert_eq!(contract.ft_balance_of(accounts(2)).0, (TOTAL_SUPPLY - transfer_amount));
-//         assert_eq!(contract.ft_balance_of(accounts(1)).0, transfer_amount);
-//     }
-// }
+  //     testing_env!(context
+  //         .storage_usage(env::storage_usage())
+  //         .account_balance(env::account_balance())
+  //         .is_view(true)
+  //         .attached_deposit(0)
+  //         .build());
+  //     assert_eq!(contract.ft_balance_of(accounts(2)).0, (TOTAL_SUPPLY - transfer_amount));
+  //     assert_eq!(contract.ft_balance_of(accounts(1)).0, transfer_amount);
+  // }
+}
