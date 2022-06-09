@@ -3,6 +3,7 @@
 members = [
   "./staking",
   "./token_contract",
+  "./mintable_token_contract",
   "./x_token"
 ]
 

@@ -14,7 +14,7 @@
 //! or [`FtBurn::emit_many`] respectively.
 
 use crate::event::NearEvent;
-use near_sdk::{Balance, AccountId};
+use near_sdk::{AccountId};
 //use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
 use serde::Serialize;
 
