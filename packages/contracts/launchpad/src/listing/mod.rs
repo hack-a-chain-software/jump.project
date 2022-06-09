@@ -3,6 +3,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
 use near_sdk::json_types::{U64, U128};
 
+use crate::events;
 use crate::ext_interface::{ext_self};
 use crate::listing::treasury::{Treasury};
 use crate::token_handler::{TokenType, GAS_FOR_FT_TRANSFER_CALLBACK};
@@ -196,7 +197,13 @@ impl Listing {
 		self.listing_treasury.fund_listing(
 			self.total_amount_sale_project_tokens,
 			self.liquidity_pool_project_tokens,
-		)
+		);
+		self.status = ListingStatus::Funded;
+		events::project_fund_listing(
+			self.listing_id,
+			self.total_amount_sale_project_tokens,
+			self.liquidity_pool_project_tokens,
+		);
 	}
 
 	fn update_treasury_after_sale(&mut self) {
@@ -253,6 +260,10 @@ impl Listing {
 								"price".to_string(),
 							),
 					);
+
+				events::project_withdraw_listing(self.listing_id, withdraw_amounts.0, withdraw_amounts.1, &self.status);
+		
+				
 			}
 			_ => panic!("{}", ERR_103),
 		}
@@ -260,7 +271,9 @@ impl Listing {
 
 	pub fn revert_failed_project_owner_withdraw(&mut self, old_value: u128, field: String) {
 		match field.as_str() {
-			"project" => self.listing_treasury.presale_project_token_balance = old_value,
+			"project" => {
+				self.listing_treasury.presale_project_token_balance = old_value;
+			},
 			"price" => {
 				self
 					.listing_treasury
@@ -268,5 +281,6 @@ impl Listing {
 			}
 			_ => panic!("wrongly formatted argument"),
 		}
+		events::project_withdraw_reverted_error(self.listing_id, old_value, field);
 	}
 }

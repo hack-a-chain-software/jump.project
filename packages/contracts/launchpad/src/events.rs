@@ -2,7 +2,7 @@ use near_sdk::{log, AccountId};
 use near_sdk::serde::{Serialize};
 use near_sdk::serde_json::{json};
 
-use crate::listing::{VListing};
+use crate::listing::{VListing, ListingStatus};
 
 fn log_event<T: Serialize>(event: &str, data: T) {
     let event = json!({
@@ -34,3 +34,40 @@ pub fn cancel_listing(listing_id: u64) {
     log_event("cancel_listing", data);
 }
 
+/// Project owner actions events
+pub fn project_fund_listing(listing_id: u64, tokens_sale: u128, tokens_liquidity: u128) {
+    let data = json!({
+        "listing_id": listing_id,
+        "tokens_sale": tokens_sale,
+        "tokens_liquidity": tokens_liquidity
+    });
+    log_event("fund_listing", data.to_string());
+}
+
+pub fn project_withdraw_listing(listing_id: u64, project_tokens_withdraw: u128, price_tokens_withdraw: u128, project_status: &ListingStatus) {
+    let data = json!({
+        "listing_id": listing_id,
+        "project_tokens_withdraw": project_tokens_withdraw,
+        "price_tokens_withdraw": price_tokens_withdraw,
+        "project_status": project_status
+    });
+    log_event("project_withdraw", data.to_string());
+}
+
+pub fn project_withdraw_reverted_error(listing_id: u64, token_quantity: u128, token_type: String) {
+    let data = json!({
+        "listing_id": listing_id,
+        "tokens_withdraw": token_quantity,
+        "token_type": token_type
+    });
+    log_event("reverted_project_withdraw", data.to_string());
+}
+
+/// Normal user actions events
+pub fn investor_buy_allocation(sale_phase: u128, allocations_purchased: u128) {
+    let data = json!({
+        "sale_phase": sale_phase,
+        "allocations_purchased": allocations_purchased
+    });
+    log_event("investor_buy_allocation", data.to_string());
+}

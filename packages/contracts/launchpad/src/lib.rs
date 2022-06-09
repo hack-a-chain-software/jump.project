@@ -1,26 +1,27 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{UnorderedSet, Vector};
+use near_sdk::collections::{UnorderedSet, Vector, LookupMap};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{
-	env, near_bindgen, AccountId, 
-	PanicOnDefault, BorshStorageKey,
+	env, near_bindgen, AccountId, PanicOnDefault, BorshStorageKey,
 	utils::{assert_one_yocto},
 };
-use near_sdk::serde::{Serialize, Deserialize,};
+use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::serde_json;
 
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
 use crate::listing::{VListing};
+use crate::investor::{VInvestor, Investor};
 use crate::errors::*;
 
 mod actions;
-mod token_handler;
 mod errors;
 mod events;
 mod ext_interface;
+mod investor;
 mod listing;
+mod token_handler;
 
 const TO_NANO: u64 = 1_000_000_000;
 const FRACTION_BASE: u128 = 1_000_000_000;
@@ -30,6 +31,7 @@ pub enum StorageKey {
 	Guardians,
 	Listings,
 	InvestorTreasury { listing_id: u64 },
+	Investors,
 }
 
 #[near_bindgen]
@@ -38,6 +40,7 @@ struct Contract {
 	pub owner: AccountId,
 	pub guardians: UnorderedSet<AccountId>,
 	pub listings: Vector<VListing>,
+	pub investors: LookupMap<AccountId, VInvestor>,
 }
 
 #[allow(dead_code)]
@@ -50,6 +53,7 @@ impl Contract {
 			owner,
 			guardians: UnorderedSet::new(StorageKey::Guardians),
 			listings: Vector::new(StorageKey::Listings),
+			investors: LookupMap::new(StorageKey::Investors),
 		}
 	}
 }
@@ -61,8 +65,12 @@ impl Contract {
 		let new_listing = VListing::new(
 			listing_index,
 			listing_data.project_owner,
-			TokenType::FT { account_id: listing_data.project_token },
-			TokenType::FT { account_id: listing_data.price_token },
+			TokenType::FT {
+				account_id: listing_data.project_token,
+			},
+			TokenType::FT {
+				account_id: listing_data.price_token,
+			},
 			listing_data.open_sale_1_timestamp_seconds.0 * TO_NANO,
 			listing_data.open_sale_2_timestamp_seconds.0 * TO_NANO,
 			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
@@ -92,6 +100,50 @@ impl Contract {
 		self.listings.replace(listing_id, &listing);
 	}
 
+	pub fn internal_get_investor(&self, account_id: &AccountId) -> Option<Investor> {
+		match self.investors.get(account_id) {
+			Some(v) => Some(v.into_current()),
+			None => None,
+		}
+	}
+
+	pub fn internal_deposit_storage_investor(&mut self, account_id: &AccountId, deposit: u128) {
+		let investor = match self.internal_get_investor(account_id) {
+			Some(investor) => {
+				investor.deposit_storage_funds(deposit);
+				VInvestor::V1(investor)
+			}
+			None => VInvestor::new(deposit),
+		};
+		self.investors.insert(account_id, &investor);
+	}
+
+	pub fn internal_storage_withdraw_investor(
+		&mut self,
+		account_id: &AccountId,
+		amount: u128,
+	) -> u128 {
+		let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
+		let available = investor.storage_funds_available();
+		assert!(
+			available > 0,
+			"{}. No funds available for withdraw",
+			ERR_201
+		);
+		let mut withdraw_amount = amount;
+		if amount == 0 {
+			withdraw_amount = available;
+		}
+		assert!(
+			withdraw_amount <= available,
+			"{}. Only {} available for withdraw",
+			ERR_201,
+			available
+		);
+		investor.storage_deposit -= withdraw_amount;
+		self.investors.insert(account_id, &VInvestor::V1(investor));
+		withdraw_amount
+	}
 }
 
 // helper methods
