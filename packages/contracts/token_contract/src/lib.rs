@@ -79,11 +79,13 @@ impl Contract {
       metadata: LazyOption::new(b"m".to_vec(), Some(&metadata)),
     };
     this.token.internal_register_account(&owner_id);
-    this.token.internal_deposit(&owner_id, total_supply.into());
+    this
+      .token
+      .internal_deposit(&owner_id, total_supply.clone().into());
     FtMint {
-      owner_id: &owner_id,
+      user_id: &owner_id,
       amount: &total_supply.0.to_string(),
-      memo: Some("Unique minting event"),
+      memo: Some("Single Mint event on contract creation"),
     }
     .emit();
 
