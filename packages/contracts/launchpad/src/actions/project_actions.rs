@@ -23,10 +23,7 @@ impl Contract {
         let mut listing = self.listings.get(listing_id).expect(ERR_003);
 
         // refactor, create method in VListing
-        if let VListing::V1(l) = listing {
-            assert_eq!(token_type, l.project_token);
-            assert_eq!(token_quantity, l.total_amount_sale_project_tokens);
-        } else { panic!() }
+        listing.assert_funding_token(token_type, token_quantity);
 
         // create VListing method to fund listing
         listing.fund_listing();

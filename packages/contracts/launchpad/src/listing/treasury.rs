@@ -38,6 +38,11 @@ impl Treasury {
         }
     }
 
+    pub fn fund_listing(&mut self, token_sale_amount: u128, token_liquidity_amount: u128) {
+        self.presale_project_token_balance = token_sale_amount;
+        self.liquidity_pool_project_token_balance = token_liquidity_amount;
+    }
+
     pub fn update_treasury_after_sale(&mut self, lp_project_tokens_excess: u128, lp_price_tokens_to_deposit: u128) {
         self.presale_project_token_balance += lp_project_tokens_excess;
         self.liquidity_pool_project_token_balance -= lp_project_tokens_excess;
