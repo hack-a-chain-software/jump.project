@@ -6,6 +6,7 @@ use near_sdk::serde::{Serialize};
 use crate::ext_interface::{ext_fungible_token};
 
 pub const GAS_FOR_FT_TRANSFER: Gas = Gas(20_000_000_000_000);
+pub const GAS_FOR_FT_TRANSFER_CALLBACK: Gas = Gas(50_000_000_000_000);
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Eq, PartialEq)]
 #[serde(crate = "near_sdk::serde")]

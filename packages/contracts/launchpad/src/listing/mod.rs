@@ -1,8 +1,11 @@
 use near_sdk::{AccountId, env};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
+use near_sdk::json_types::{U64, U128};
+
+use crate::ext_interface::{ext_self};
 use crate::listing::treasury::{Treasury};
-use crate::token_handler::{TokenType};
+use crate::token_handler::{TokenType, GAS_FOR_FT_TRANSFER_CALLBACK};
 use crate::errors::*;
 
 mod investor_treasury;
@@ -167,7 +170,7 @@ impl VListing {
 		match self {
 			VListing::V1(v) => {
 				v.fund_listing();
-			},
+			}
 			_ => unimplemented!(),
 		}
 	}
@@ -228,10 +231,28 @@ impl Listing {
 				let withdraw_amounts = self.listing_treasury.withdraw_project_funds();
 				self
 					.project_token
-					.transfer_token(self.project_owner.clone(), withdraw_amounts.0);
+					.transfer_token(self.project_owner.clone(), withdraw_amounts.0)
+					.then(
+						ext_self::ext(env::current_account_id())
+							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+							.callback_token_transfer_to_project_owner(
+								U64(self.listing_id),
+								U128(withdraw_amounts.0),
+								"project".to_string(),
+							),
+					);
 				self
 					.price_token
-					.transfer_token(self.project_owner.clone(), withdraw_amounts.1);
+					.transfer_token(self.project_owner.clone(), withdraw_amounts.1)
+					.then(
+						ext_self::ext(env::current_account_id())
+							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+							.callback_token_transfer_to_project_owner(
+								U64(self.listing_id),
+								U128(withdraw_amounts.1),
+								"price".to_string(),
+							),
+					);
 			}
 			_ => panic!("{}", ERR_103),
 		}
