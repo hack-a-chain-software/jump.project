@@ -324,4 +324,20 @@ mod tests {
 		assert_eq!(contract.contract_settings, settings);
 
 	}
+
+	#[test]
+    #[should_panic(expected = "The contract is not initialized")]
+    fn test_default() {
+        let context = get_context(
+			vec![],
+			0,
+			0,
+			OWNER_ACCOUNT.parse().unwrap(),
+			0,
+			Gas(300u64 * 10u64.pow(12)),
+		);
+        testing_env!(context);
+        let _contract = Contract::default();
+    }
+
 }
