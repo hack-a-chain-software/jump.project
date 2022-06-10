@@ -14,15 +14,15 @@
 //! or [`FtBurn::emit_many`] respectively.
 
 use crate::event::NearEvent;
-use near_sdk::{Balance, AccountId};
+use near_sdk::{AccountId};
 //use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
 use serde::Serialize;
 
-/// Data to log for an NFT mint event. To log this event, call [`.emit()`](FtMint::emit).
+/// Data to log for an FT mint event. To log this event, call [`.emit()`](FtMint::emit).
 #[must_use]
 #[derive(Serialize, Debug, Clone)]
 pub struct FtMint<'a> {
-  pub owner_id: &'a AccountId,
+  pub user_id: &'a AccountId,
   pub amount: &'a String,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub memo: Option<&'a str>,
