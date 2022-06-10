@@ -28,6 +28,7 @@ const FRACTION_BASE: u128 = 10_000;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
+#[cfg_attr(test, derive(Clone, Eq, PartialEq, Debug))]
 pub struct ContractSettings {
 	membership_token: AccountId,
 	tiers_minimum_tokens: Vec<U128>,
@@ -47,7 +48,7 @@ pub enum StorageKey {
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
-struct Contract {
+pub struct Contract {
 	pub owner: AccountId,
 	pub guardians: UnorderedSet<AccountId>,
 	pub listings: Vector<VListing>,
@@ -105,7 +106,7 @@ impl Contract {
 		self.listings.get(listing_id).expect(ERR_003).into_current()
 	}
 
-	pub fn internal_update_listing(&self, listing_id: u64, listing: Listing) {
+	pub fn internal_update_listing(&mut self, listing_id: u64, listing: Listing) {
 		self.listings.replace(listing_id, &VListing::V1(listing));
 	}
 
@@ -116,9 +117,10 @@ impl Contract {
 		events::cancel_listing(listing_id);
 	}
 
-	pub fn internal_withdraw_project_funds(&mut self, listing: &mut Listing, listing_id: u64) {
+	pub fn internal_withdraw_project_funds(&mut self, listing: Listing, listing_id: u64) {
+		let mut listing = listing;
 		listing.withdraw_project_funds();
-		self.internal_update_listing(listing_id, *listing);
+		self.internal_update_listing(listing_id, listing);
 	}
 
 	pub fn internal_get_investor(&self, account_id: &AccountId) -> Option<Investor> {
@@ -128,7 +130,7 @@ impl Contract {
 		}
 	}
 
-	pub fn internal_update_investor(&self, account_id: &AccountId, investor: Investor) {
+	pub fn internal_update_investor(&mut self, account_id: &AccountId, investor: Investor) {
 		self.investors.insert(account_id, &VInvestor::V1(investor));
 	}
 
@@ -172,7 +174,6 @@ impl Contract {
 
 	pub fn check_investor_allowance(
 		&self,
-		listing: &Listing,
 		investor: &Investor,
 		listing_phase: &SalePhase,
 		allocations_bought: u64,
@@ -200,7 +201,7 @@ impl Contract {
 		};
 		match listing_phase {
 			SalePhase::Phase1 => (),
-			SalePhase::Phase1 => base_allowance += self.contract_settings.allowance_phase_2.0,
+			SalePhase::Phase2 => base_allowance += self.contract_settings.allowance_phase_2.0,
 		}
 		if base_allowance >= allocations_bought {
 			base_allowance - allocations_bought
@@ -230,5 +231,97 @@ impl Contract {
 		let listing = self.internal_get_listing(listing_id);
 		listing.assert_owner(&env::predecessor_account_id());
 		listing
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
+	use near_sdk::{VMConfig, RuntimeFeesConfig};
+
+	use std::collections::HashMap;
+	pub use std::convert::{TryFrom, TryInto};
+
+	pub use super::*;
+
+	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
+	pub const TOKEN_ACCOUNT: &str = "token.testnet";
+	pub const OWNER_ACCOUNT: &str = "owner.testnet";
+	pub const USER_ACCOUNT: &str = "user.testnet";
+
+	pub fn get_context(
+		input: Vec<u8>,
+		attached_deposit: u128,
+		account_balance: u128,
+		signer_id: AccountId,
+		block_timestamp: u64,
+		prepaid_gas: Gas,
+	) -> VMContext {
+		VMContext {
+			current_account_id: CONTRACT_ACCOUNT.parse().unwrap(),
+			signer_account_id: signer_id.clone(),
+			signer_account_pk: vec![0; 33].try_into().unwrap(),
+			predecessor_account_id: signer_id.clone(),
+			input,
+			block_index: 0,
+			block_timestamp,
+			account_balance,
+			account_locked_balance: 0,
+			storage_usage: 0,
+			attached_deposit,
+			prepaid_gas,
+			random_seed: [0; 32],
+			view_config: None,
+			output_data_receivers: vec![],
+			epoch_height: 19,
+		}
+	}
+
+	pub fn init_contract() -> Contract {
+		Contract {
+			owner: OWNER_ACCOUNT.parse().unwrap(),
+			guardians: UnorderedSet::new(StorageKey::Guardians),
+			listings: Vector::new(StorageKey::Listings),
+			investors: LookupMap::new(StorageKey::Investors),
+			contract_settings: standard_settings(),
+		}
+	}
+
+	pub fn standard_settings() -> ContractSettings {
+		ContractSettings {
+			membership_token: TOKEN_ACCOUNT.parse().unwrap(),
+			tiers_minimum_tokens: vec![U128(10), U128(20), U128(30), U128(40), U128(50), U128(60)],
+			tiers_entitled_allocations: vec![U64(1), U64(2), U64(4), U64(5), U64(9), U64(17)], // number of allocations to which each tier of members is entitled in phase 1
+			allowance_phase_2: U64(2), // number of allocations to which every user is entitled in phase 2
+			fee_price_tokens: U128(100), // fee taken on price tokens received in the presale %
+			fee_liquidity_tokens: U128(100), // fee taken on project and price tokens sent to liquidity pool %
+		}
+	}
+
+	#[test]
+	fn test_new() {
+		let context = get_context(
+			vec![],
+			0,
+			0,
+			OWNER_ACCOUNT.parse().unwrap(),
+			0,
+			Gas(300u64 * 10u64.pow(12)),
+		);
+		testing_env!(
+			context,
+			VMConfig::test(),
+			RuntimeFeesConfig::test(),
+			HashMap::default(),
+			Vec::default()
+		);
+
+		let settings = standard_settings();
+
+		let contract = Contract::new(OWNER_ACCOUNT.parse().unwrap(), settings.clone());
+
+		assert_eq!(contract.owner, OWNER_ACCOUNT.parse().unwrap());
+		assert_eq!(contract.contract_settings, settings);
+
 	}
 }

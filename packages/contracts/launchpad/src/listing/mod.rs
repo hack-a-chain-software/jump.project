@@ -109,7 +109,7 @@ impl VListing {
 			liquidity_pool_price_tokens,
 			fraction_instant_release,
 			cliff_timestamp,
-			listing_treasury: Treasury::new(listing_id),
+			listing_treasury: Treasury::new(),
 			status: ListingStatus::Unfunded,
 			is_treasury_updated: false,
 		})
@@ -124,6 +124,8 @@ impl VListing {
 	}
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize)]
+#[serde(crate = "near_sdk::serde")]
 pub enum SalePhase {
 	Phase1,
 	Phase2,
@@ -131,14 +133,14 @@ pub enum SalePhase {
 
 impl Listing {
 	pub fn assert_owner(&self, account_id: &AccountId) {
-		assert_eq!(self.project_owner, account_id, "{}", ERR_102);
+		assert_eq!(&self.project_owner, account_id, "{}", ERR_102);
 	}
 
 	pub fn assert_funding_token(&self, token_type: TokenType, amount: u128) {
 		assert_eq!(self.project_token, token_type, "{}", ERR_104);
 		assert_eq!(
 			self.total_amount_sale_project_tokens + self.liquidity_pool_project_tokens,
-			token_type,
+			amount,
 			"{}",
 			ERR_104
 		);
@@ -287,7 +289,7 @@ impl Listing {
 	) -> (u64, u128) {
 		let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
 		let available_allocations = total_allocations - self.allocations_sold as u128;
-		let try_allocations_buy = self.token_allocation_price / price_token_amount;
+		let mut try_allocations_buy = self.token_allocation_price / price_token_amount;
 		if try_allocations_buy > investor_allowance as u128 {
 			try_allocations_buy = investor_allowance as u128;
 		}

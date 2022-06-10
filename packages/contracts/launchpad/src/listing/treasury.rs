@@ -17,7 +17,7 @@ pub struct Treasury {
 }
 
 impl Treasury {
-  pub fn new(listing_id: u64) -> Self {
+  pub fn new() -> Self {
     Self {
       presale_project_token_balance: 0,
       total_received_presale_price_token_balance: 0,

@@ -13,8 +13,8 @@ use near_sdk::{Promise};
 impl Contract {
   pub fn withdraw_allocations(&mut self, listing_id: u64) -> Promise {
     let account_id = env::predecessor_account_id();
-    let listing = self.internal_get_listing(listing_id);
-    let investor = self.internal_get_investor(&account_id).expect(ERR_004);
+    let mut listing = self.internal_get_listing(listing_id);
+    let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     // figure if cliff has already passed
     let investor_allocations = investor
       .allocation_count
@@ -50,15 +50,14 @@ impl Contract {
     account_id: AccountId,
   ) -> u128 {
     let initial_storage = env::storage_usage();
-    let listing = self.internal_get_listing(listing_id);
-    let investor = self.internal_get_investor(&account_id).expect(ERR_004);
+    let mut listing = self.internal_get_listing(listing_id);
+    let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     let current_sale_phase = listing.get_current_sale_phase();
     let previous_allocations_bought = investor
       .allocation_count
       .get(&listing.listing_id)
       .unwrap_or([0, 0]);
     let investor_allocations = self.check_investor_allowance(
-      &listing,
       &investor,
       &current_sale_phase,
       previous_allocations_bought[0],

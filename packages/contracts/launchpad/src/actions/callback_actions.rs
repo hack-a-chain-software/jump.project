@@ -35,7 +35,7 @@ impl Contract {
       let listing_id = listing_id.0;
       let total_allocations = [total_allocations[0].0, total_allocations[1].0];
       let mut listing = self.internal_get_listing(listing_id);
-      let investor = self.internal_get_investor(&investor_id).unwrap();
+      let mut investor = self.internal_get_investor(&investor_id).unwrap();
       investor
         .allocation_count
         .insert(&listing_id, &total_allocations);
@@ -46,7 +46,7 @@ impl Contract {
       // and return storage funds to investor instance
       if allocations_remaining != [U64(0); 2] {
         let initial_storage = env::storage_usage();
-        let investor = self.internal_get_investor(&investor_id).unwrap();
+        let mut investor = self.internal_get_investor(&investor_id).unwrap();
         investor.allocation_count.remove(&listing_id.0);
         investor.track_storage_usage(initial_storage);
         self.internal_update_investor(&investor_id, investor);

@@ -12,8 +12,8 @@ impl Contract {
     #[payable]
     pub fn withdraw_tokens_after_sale(&mut self, listing_id: U64) {
         let listing_id = listing_id.0;
-        let mut listing = self.assert_project_owner(listing_id);
-        self.internal_withdraw_project_funds(&mut listing, listing_id);
+        let listing = self.assert_project_owner(listing_id);
+        self.internal_withdraw_project_funds(listing, listing_id);
     }
 }
 
