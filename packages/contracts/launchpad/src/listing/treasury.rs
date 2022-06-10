@@ -70,4 +70,15 @@ impl Treasury {
         self.presale_project_token_balance -= project_tokens_bought;
         self.total_received_presale_price_token_balance += price_tokens_sent;
     }
+
+    pub fn withdraw_investor_funds(&mut self, allocations_to_withdraw: u64) -> (u128, u128) {
+        let allocations_to_withdraw = allocations_to_withdraw as u128;
+        let project_tokens = self.all_investors_project_token_balance / allocations_to_withdraw;
+        let price_tokens = self.cancellation_funds_price_tokens / allocations_to_withdraw;
+
+        self.all_investors_project_token_balance -= project_tokens;
+        self.cancellation_funds_price_tokens -= price_tokens;
+
+        (project_tokens, price_tokens)
+    }
 }

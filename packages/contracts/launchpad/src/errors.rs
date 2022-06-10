@@ -20,3 +20,4 @@ pub const ERR_204: &str = "ERR_204: Membership can only be validated through the
 
 /// Action errors
 pub const ERR_301: &str = "ERR_301: Could not parse String from msg. Not compliant with CallType format";
+pub const ERR_302: &str = "ERR_302: No allocations available to withdraw";

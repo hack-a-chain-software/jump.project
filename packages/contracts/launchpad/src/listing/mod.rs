@@ -1,5 +1,5 @@
 use std::convert::TryInto;
-use near_sdk::{AccountId, env};
+use near_sdk::{AccountId, env, Promise};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
 use near_sdk::json_types::{U64, U128};
@@ -56,7 +56,7 @@ pub struct Listing {
 	// vesting information
 	pub fraction_instant_release: u128, // divide by FRACTION_BASE will multiply token_alocation_size to see
 	// how many tokens the investor will receive right at the end of presale
-	pub cliff_period: u64, // nanoseconds after end of sale to receive vested tokens
+	pub cliff_timestamp: u64, // nanoseconds after end of sale to receive vested tokens
 
 	// structure to storage count of tokens in the
 	#[serde(skip_serializing)]
@@ -83,7 +83,7 @@ impl VListing {
 		liquidity_pool_project_tokens: u128,
 		liquidity_pool_price_tokens: u128,
 		fraction_instant_release: u128,
-		cliff_period: u64,
+		cliff_timestamp: u64,
 	) -> Self {
 		// assert correct timestamps
 		assert!(open_sale_1_timestamp < open_sale_2_timestamp);
@@ -109,7 +109,7 @@ impl VListing {
 			liquidity_pool_project_tokens,
 			liquidity_pool_price_tokens,
 			fraction_instant_release,
-			cliff_period,
+			cliff_timestamp,
 			listing_treasury: Treasury::new(listing_id),
 			status: ListingStatus::Unfunded,
 			is_treasury_updated: false,
@@ -235,7 +235,15 @@ impl Listing {
 					withdraw_amounts.1,
 					&self.status,
 				);
-			}
+			},
+			ListingStatus::Funded => {
+				if env::block_timestamp() > self.final_sale_2_timestamp {
+					self.status = ListingStatus::SaleFinalized;
+					self.withdraw_project_funds()
+				} else {
+					panic!("{}", ERR_103)
+				}
+			},
 			_ => panic!("{}", ERR_103),
 		}
 	}
@@ -301,5 +309,79 @@ impl Listing {
 			allocations_bought as u128 * self.token_allocation_price,
 		);
 		(allocations_bought, leftover)
+	}
+
+	pub fn withdraw_investor_funds(
+		&mut self,
+		allocations_to_withdraw: u64,
+		investor_id: AccountId,
+	) -> Promise {
+		match self.status {
+			ListingStatus::SaleFinalized
+			| ListingStatus::LiquidityPoolFinalized
+			| ListingStatus::Cancelled => {
+				self.update_treasury_after_sale();
+				let withdraw_amounts = self
+					.listing_treasury
+					.withdraw_investor_funds(allocations_to_withdraw);
+				events::investor_withdraw_allocations(
+					self.listing_id,
+					withdraw_amounts.0,
+					withdraw_amounts.1,
+					&self.status,
+				);
+				if withdraw_amounts.0 > 0 {
+					self
+						.project_token
+						.transfer_token(self.project_owner.clone(), withdraw_amounts.0)
+						.then(
+							ext_self::ext(env::current_account_id())
+								.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+								.callback_token_transfer_to_investor(
+									investor_id,
+									U64(self.listing_id),
+									U64(allocations_to_withdraw),
+									U128(withdraw_amounts.0),
+									"project".to_string(),
+								),
+						)
+				} else {
+					self
+						.price_token
+						.transfer_token(self.project_owner.clone(), withdraw_amounts.1)
+						.then(
+							ext_self::ext(env::current_account_id())
+								.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+								.callback_token_transfer_to_investor(
+									investor_id,
+									U64(self.listing_id),
+									U64(allocations_to_withdraw),
+									U128(withdraw_amounts.1),
+									"price".to_string(),
+								),
+						)
+				}
+			},
+			ListingStatus::Funded => {
+				if env::block_timestamp() > self.final_sale_2_timestamp {
+					self.status = ListingStatus::SaleFinalized;
+					self.withdraw_investor_funds(allocations_to_withdraw, investor_id)
+				} else {
+					panic!("{}", ERR_103)
+				}
+			},
+			_ => panic!("{}", ERR_103),
+		}
+	}
+
+	pub fn revert_failed_investor_withdraw(&mut self, returned_value: u128, field: String) {
+		match field.as_str() {
+			"project" => {
+				self.listing_treasury.all_investors_project_token_balance += returned_value;
+			}
+			"price" => self.listing_treasury.cancellation_funds_price_tokens += returned_value,
+			_ => panic!("wrongly formatted argument"),
+		}
+		events::investor_withdraw_reverted_error(self.listing_id, returned_value, field);
 	}
 }

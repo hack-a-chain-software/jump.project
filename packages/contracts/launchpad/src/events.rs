@@ -71,3 +71,22 @@ pub fn investor_buy_allocation(sale_phase: SalePhase, allocations_purchased: u64
     });
     log_event("investor_buy_allocation", data.to_string());
 }
+
+pub fn investor_withdraw_allocations(listing_id: u64, project_tokens_withdraw: u128, price_tokens_withdraw: u128, project_status: &ListingStatus) {
+    let data = json!({
+        "listing_id": listing_id,
+        "project_tokens_withdraw": project_tokens_withdraw,
+        "price_tokens_withdraw": price_tokens_withdraw,
+        "project_status": project_status
+    });
+    log_event("investor_withdraw", data.to_string());
+}
+
+pub fn investor_withdraw_reverted_error(listing_id: u64, token_quantity: u128, token_type: String) {
+    let data = json!({
+        "listing_id": listing_id,
+        "tokens_withdraw": token_quantity,
+        "token_type": token_type
+    });
+    log_event("reverted_investor_withdraw", data.to_string());
+}

@@ -11,4 +11,12 @@ pub trait FunglibleToken {
 #[ext_contract(ext_self)]
 pub trait SelfCalls {
   fn callback_token_transfer_to_project_owner(listing_id: U64, old_value: U128, field: String);
+
+  fn callback_token_transfer_to_investor(
+    investor_id: AccountId,
+    listing_id: U64,
+    allocations: U64,
+    returned_value: U128,
+    field: String,
+  );
 }
