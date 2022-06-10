@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use near_sdk::{AccountId, env};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
@@ -63,7 +64,6 @@ pub struct Listing {
 
 	// keep track of listing phases and progress
 	pub status: ListingStatus,
-	pub sale_1_sold_out: Option<bool>, // keeps track of whether sale_1 sold out to calculate vesting period
 	pub is_treasury_updated: bool, // keeps track of whether treasury has been updated after end of sale or cancellation
 }
 
@@ -112,7 +112,6 @@ impl VListing {
 			cliff_period,
 			listing_treasury: Treasury::new(listing_id),
 			status: ListingStatus::Unfunded,
-			sale_1_sold_out: None,
 			is_treasury_updated: false,
 		})
 	}
@@ -124,6 +123,11 @@ impl VListing {
 			_ => unimplemented!(),
 		}
 	}
+}
+
+pub enum SalePhase {
+	Phase1,
+	Phase2,
 }
 
 impl Listing {
@@ -249,5 +253,53 @@ impl Listing {
 			_ => panic!("wrongly formatted argument"),
 		}
 		events::project_withdraw_reverted_error(self.listing_id, old_value, field);
+	}
+
+	pub fn get_current_sale_phase(&self) -> SalePhase {
+		match self.status {
+			ListingStatus::Funded => {
+				let timestamp = env::block_timestamp();
+				if self.open_sale_1_timestamp <= timestamp {
+					if self.open_sale_2_timestamp <= timestamp {
+						SalePhase::Phase2
+					} else {
+						SalePhase::Phase1
+					}
+				} else {
+					panic!("ERR_OPERATIONAL")
+				}
+			}
+			_ => panic!("{}", ERR_106),
+		}
+	}
+
+	pub fn buy_allocation(
+		&mut self,
+		price_token_amount: u128,
+		investor_allowance: u64,
+	) -> (u64, u128) {
+		let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
+		let available_allocations = total_allocations - self.allocations_sold as u128;
+		let try_allocations_buy = self.token_allocation_price / price_token_amount;
+		if try_allocations_buy > investor_allowance as u128 {
+			try_allocations_buy = investor_allowance as u128;
+		}
+
+		let allocations_bought: u64;
+		let leftover: u128;
+		if try_allocations_buy >= available_allocations {
+			allocations_bought = available_allocations.try_into().unwrap();
+			leftover = price_token_amount - (allocations_bought as u128 * self.token_allocation_price);
+			self.status = ListingStatus::SaleFinalized
+		} else {
+			allocations_bought = try_allocations_buy.try_into().unwrap();
+			leftover = price_token_amount - (allocations_bought as u128 * self.token_allocation_price);
+		}
+		self.allocations_sold += allocations_bought;
+		self.listing_treasury.update_after_investment(
+			allocations_bought as u128 * self.token_alocation_size,
+			allocations_bought as u128 * self.token_allocation_price,
+		);
+		(allocations_bought, leftover)
 	}
 }

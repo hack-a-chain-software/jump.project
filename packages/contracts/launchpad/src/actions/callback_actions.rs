@@ -11,7 +11,7 @@ impl Contract {
             let listing_id = listing_id.0;
             let mut listing = self.listings.get(listing_id).unwrap().into_current();
             listing.revert_failed_project_owner_withdraw(old_value.0, field);
-            self.listings.replace(listing_id, &VListing::V1(listing));
+            self.internal_update_listing(listing_id, listing);
         }
     }
 }

@@ -11,7 +11,6 @@ pub struct Treasury {
 	pub liquidity_pool_price_token_balance: u128,
 	
 	pub all_investors_project_token_balance: u128,
-	
     pub cancellation_funds_price_tokens: u128
 }
 
@@ -66,5 +65,9 @@ impl Treasury {
         (project_tokens, price_tokens)
     }
 
-    
+    pub fn update_after_investment(&mut self, project_tokens_bought: u128, price_tokens_sent: u128) {
+        self.all_investors_project_token_balance += project_tokens_bought;
+        self.presale_project_token_balance -= project_tokens_bought;
+        self.total_received_presale_price_token_balance += price_tokens_sent;
+    }
 }

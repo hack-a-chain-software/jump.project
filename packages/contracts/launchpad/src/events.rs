@@ -2,7 +2,7 @@ use near_sdk::{log, AccountId};
 use near_sdk::serde::{Serialize};
 use near_sdk::serde_json::{json};
 
-use crate::listing::{VListing, ListingStatus};
+use crate::listing::{VListing, ListingStatus, SalePhase};
 
 fn log_event<T: Serialize>(event: &str, data: T) {
     let event = json!({
@@ -64,7 +64,7 @@ pub fn project_withdraw_reverted_error(listing_id: u64, token_quantity: u128, to
 }
 
 /// Normal user actions events
-pub fn investor_buy_allocation(sale_phase: u128, allocations_purchased: u128) {
+pub fn investor_buy_allocation(sale_phase: SalePhase, allocations_purchased: u64) {
     let data = json!({
         "sale_phase": sale_phase,
         "allocations_purchased": allocations_purchased
