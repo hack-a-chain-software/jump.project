@@ -59,7 +59,6 @@ pub struct Listing {
 	pub cliff_timestamp: u64, // nanoseconds after end of sale to receive vested tokens
 
 	// structure to storage count of tokens in the
-	#[serde(skip_serializing)]
 	pub listing_treasury: Treasury,
 
 	// keep track of listing phases and progress
@@ -235,7 +234,7 @@ impl Listing {
 					withdraw_amounts.1,
 					&self.status,
 				);
-			},
+			}
 			ListingStatus::Funded => {
 				if env::block_timestamp() > self.final_sale_2_timestamp {
 					self.status = ListingStatus::SaleFinalized;
@@ -243,7 +242,7 @@ impl Listing {
 				} else {
 					panic!("{}", ERR_103)
 				}
-			},
+			}
 			_ => panic!("{}", ERR_103),
 		}
 	}
@@ -313,63 +312,83 @@ impl Listing {
 
 	pub fn withdraw_investor_funds(
 		&mut self,
-		allocations_to_withdraw: u64,
+		total_allocations: [u64; 2],
+		allocations_to_withdraw: [u64; 2],
+		allocations_remaining: [u64; 2],
 		investor_id: AccountId,
 	) -> Promise {
 		match self.status {
-			ListingStatus::SaleFinalized
-			| ListingStatus::LiquidityPoolFinalized
-			| ListingStatus::Cancelled => {
+			ListingStatus::SaleFinalized | ListingStatus::LiquidityPoolFinalized => {
+				self.update_treasury_after_sale();
+				let withdraw_amounts = self.listing_treasury.withdraw_investor_funds(
+					self.token_alocation_size,
+					self.fraction_instant_release,
+					allocations_to_withdraw,
+				);
+				events::investor_withdraw_allocations(self.listing_id, withdraw_amounts, 0, &self.status);
+				self
+					.project_token
+					.transfer_token(self.project_owner.clone(), withdraw_amounts)
+					.then(
+						ext_self::ext(env::current_account_id())
+							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+							.callback_token_transfer_to_investor(
+								investor_id,
+								U64(self.listing_id),
+								[
+									U64(allocations_to_withdraw[0]),
+									U64(allocations_to_withdraw[1]),
+								],
+								[
+									U64(allocations_remaining[0]),
+									U64(allocations_remaining[1]),
+								],
+								U128(withdraw_amounts),
+								"project".to_string(),
+							),
+					)
+			}
+			ListingStatus::Cancelled => {
 				self.update_treasury_after_sale();
 				let withdraw_amounts = self
 					.listing_treasury
-					.withdraw_investor_funds(allocations_to_withdraw);
-				events::investor_withdraw_allocations(
-					self.listing_id,
-					withdraw_amounts.0,
-					withdraw_amounts.1,
-					&self.status,
-				);
-				if withdraw_amounts.0 > 0 {
-					self
-						.project_token
-						.transfer_token(self.project_owner.clone(), withdraw_amounts.0)
-						.then(
-							ext_self::ext(env::current_account_id())
-								.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
-								.callback_token_transfer_to_investor(
-									investor_id,
-									U64(self.listing_id),
-									U64(allocations_to_withdraw),
-									U128(withdraw_amounts.0),
-									"project".to_string(),
-								),
-						)
-				} else {
-					self
-						.price_token
-						.transfer_token(self.project_owner.clone(), withdraw_amounts.1)
-						.then(
-							ext_self::ext(env::current_account_id())
-								.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
-								.callback_token_transfer_to_investor(
-									investor_id,
-									U64(self.listing_id),
-									U64(allocations_to_withdraw),
-									U128(withdraw_amounts.1),
-									"price".to_string(),
-								),
-						)
-				}
-			},
+					.withdraw_investor_funds_cancelled(self.token_alocation_size, allocations_to_withdraw);
+				events::investor_withdraw_allocations(self.listing_id, 0, withdraw_amounts, &self.status);
+				self
+					.price_token
+					.transfer_token(self.project_owner.clone(), withdraw_amounts)
+					.then(
+						ext_self::ext(env::current_account_id())
+							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+							.callback_token_transfer_to_investor(
+								investor_id,
+								U64(self.listing_id),
+								[
+									U64(allocations_to_withdraw[0]),
+									U64(allocations_to_withdraw[1]),
+								],
+								[
+									U64(allocations_remaining[0]),
+									U64(allocations_remaining[1]),
+								],
+								U128(withdraw_amounts),
+								"price".to_string(),
+							),
+					)
+			}
 			ListingStatus::Funded => {
 				if env::block_timestamp() > self.final_sale_2_timestamp {
 					self.status = ListingStatus::SaleFinalized;
-					self.withdraw_investor_funds(allocations_to_withdraw, investor_id)
+					self.withdraw_investor_funds(
+						total_allocations,
+						allocations_to_withdraw,
+						allocations_remaining,
+						investor_id,
+					)
 				} else {
 					panic!("{}", ERR_103)
 				}
-			},
+			}
 			_ => panic!("{}", ERR_103),
 		}
 	}

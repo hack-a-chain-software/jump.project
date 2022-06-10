@@ -15,7 +15,8 @@ pub trait SelfCalls {
   fn callback_token_transfer_to_investor(
     investor_id: AccountId,
     listing_id: U64,
-    allocations: U64,
+    total_allocations: [U64; 2],
+    allocations_remaining: [U64; 2],
     returned_value: U128,
     field: String,
   );

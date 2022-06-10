@@ -24,7 +24,7 @@ mod listing;
 mod token_handler;
 
 const TO_NANO: u64 = 1_000_000_000;
-const FRACTION_BASE: u128 = 1_000_000_000;
+const FRACTION_BASE: u128 = 10_000;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]

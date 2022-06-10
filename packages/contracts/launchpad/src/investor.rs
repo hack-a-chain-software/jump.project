@@ -25,7 +25,7 @@ pub struct Investor {
     pub last_check: u64,
 
     // listing allocations treasury
-    pub allocation_count: UnorderedMap<u64, u64>,
+    pub allocation_count: UnorderedMap<u64, [u64; 2]>,
 }
 
 impl VInvestor {
