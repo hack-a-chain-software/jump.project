@@ -4,8 +4,9 @@
   "license": "UNLICENSED",
   "main": "lib/index.ts",
   "scripts": {
+    "clean:contract": "cargo clean",
     "build:contract": "node compile.js",
-    "build:contract:debug": "node compile.js --debug",
+    "build:contract:debug": "node compile.js",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
     "deploy": "npm run build:contract && npm run deploy:contract",
