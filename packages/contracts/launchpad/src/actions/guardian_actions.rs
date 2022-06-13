@@ -29,12 +29,33 @@ impl Contract {
   #[payable]
   pub fn create_new_listing(&mut self, listing_data: ListingData) -> u64 {
     self.assert_owner_or_guardian();
-    self.internal_create_new_listing(listing_data)
+    let initial_storage = env::storage_usage();
+    let contract_account_id = env::current_account_id();
+    let mut contract_account = self.internal_get_investor(&contract_account_id).unwrap();
+    let listing_id = self.internal_create_new_listing(listing_data);
+    contract_account.track_storage_usage(initial_storage);
+    self.internal_update_investor(&contract_account_id, contract_account);
+    listing_id
   }
 
   #[payable]
   pub fn cancel_listing(&mut self, listing_id: U64) {
     self.assert_owner_or_guardian();
+    let initial_storage = env::storage_usage();
+    let contract_account_id = env::current_account_id();
+    let mut contract_account = self.internal_get_investor(&contract_account_id).unwrap();
     self.internal_cancel_listing(listing_id.0);
+    contract_account.track_storage_usage(initial_storage);
+    self.internal_update_investor(&contract_account_id, contract_account);
   }
+
+}
+
+#[cfg(test)]
+mod tests {
+
+  use crate::tests::*;
+  pub use super::*;
+
+  
 }

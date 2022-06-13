@@ -70,6 +70,8 @@ impl Contract {
 			investors: LookupMap::new(StorageKey::Investors),
 			contract_settings,
 		};
+		// adding the contract's account as an investor so that it will pay for 
+		// cost of storage for listings and other administrative data
 		let current_account = env::current_account_id();
 		let mut base_storage_account = Investor {
 			account_id: current_account.clone(),
@@ -292,13 +294,23 @@ mod tests {
 	}
 
 	pub fn init_contract() -> Contract {
-		Contract {
+		let mut contract = Contract {
 			owner: OWNER_ACCOUNT.parse().unwrap(),
 			guardians: UnorderedSet::new(StorageKey::Guardians),
 			listings: Vector::new(StorageKey::Listings),
 			investors: LookupMap::new(StorageKey::Investors),
 			contract_settings: standard_settings(),
-		}
+		};
+		let base_storage_account = Investor {
+			account_id: CONTRACT_ACCOUNT.parse().unwrap(),
+			storage_deposit: 1_000_000_000_000_000_000_000_000,
+			storage_used: 10_000,
+			staked_token: 0,
+			last_check: 0,
+			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury { account_id: CONTRACT_ACCOUNT.parse().unwrap() })
+		};
+		contract.investors.insert(&CONTRACT_ACCOUNT.parse().unwrap(), &VInvestor::V1(base_storage_account));
+		contract
 	}
 
 	pub fn standard_settings() -> ContractSettings {
@@ -317,7 +329,7 @@ mod tests {
 		let context = get_context(
 			vec![],
 			0,
-			0,
+			1_000_000_000_000_000_000_000_000,
 			OWNER_ACCOUNT.parse().unwrap(),
 			0,
 			Gas(300u64 * 10u64.pow(12)),

@@ -7,8 +7,9 @@ use crate::*;
 #[serde(crate = "near_sdk::serde", tag = "type")]
 pub enum CallType {
   FundListing { listing_id: U64 },
-  BuyAllocation { listing_id: u64 },
+  BuyAllocation { listing_id: U64 },
 }
+
 
 #[allow(dead_code)]
 #[near_bindgen]
@@ -27,7 +28,7 @@ impl Contract {
         U128(0)
       },
       CallType::BuyAllocation { listing_id } => {
-        U128(self.buy_allocation(listing_id, amount.0, sender_id))
+        U128(self.buy_allocation(listing_id.0, amount.0, sender_id))
       },
       _ => unimplemented!(),
     }

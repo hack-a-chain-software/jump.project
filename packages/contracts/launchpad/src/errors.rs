@@ -3,6 +3,8 @@ pub const ERR_001: &str = "ERR_001: Only owner can call this method";
 pub const ERR_002: &str = "ERR_002: Only owner or guardian can call this method";
 pub const ERR_003: &str = "ERR_003: listing_id does not exist";
 pub const ERR_004: &str = "ERR_004: investor is not registered";
+pub const ERR_005: &str = "ERR_005: Guardian already registered";
+pub const ERR_006: &str = "ERR_006: Account not registered as guardian";
 
 /// Listing errors
 pub const ERR_101: &str = "ERR_101: Can only cancel funded listings before their start date";
