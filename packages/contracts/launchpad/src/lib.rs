@@ -1,5 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{UnorderedSet, Vector, LookupMap};
+use near_sdk::collections::{UnorderedSet, Vector, LookupMap, UnorderedMap};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{
 	env, near_bindgen, AccountId, PanicOnDefault, BorshStorageKey,
@@ -23,8 +23,8 @@ mod investor;
 mod listing;
 mod token_handler;
 
-const TO_NANO: u64 = 1_000_000_000;
-const FRACTION_BASE: u128 = 10_000;
+pub const TO_NANO: u64 = 1_000_000_000;
+pub const FRACTION_BASE: u128 = 10_000;
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -62,13 +62,27 @@ impl Contract {
 	#[init]
 	pub fn new(owner: AccountId, contract_settings: ContractSettings) -> Self {
 		assert!(!env::state_exists(), "Already initialized");
-		Self {
+		let initial_storage = env::storage_usage();
+		let mut contract = Self {
 			owner,
 			guardians: UnorderedSet::new(StorageKey::Guardians),
 			listings: Vector::new(StorageKey::Listings),
 			investors: LookupMap::new(StorageKey::Investors),
 			contract_settings,
-		}
+		};
+		let current_account = env::current_account_id();
+		let mut base_storage_account = Investor {
+			account_id: current_account.clone(),
+			storage_deposit: env::account_balance(),
+			storage_used: 0,
+			staked_token: 0,
+			last_check: 0,
+			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury { account_id: current_account.clone() })
+		};
+		contract.investors.insert(&env::current_account_id(), &VInvestor::new(current_account, 0));
+		base_storage_account.track_storage_usage(initial_storage);
+		contract.investors.insert(&env::current_account_id(), &VInvestor::V1(base_storage_account));
+		contract
 	}
 }
 
@@ -237,9 +251,9 @@ impl Contract {
 #[cfg(test)]
 mod tests {
 	pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
-	use near_sdk::{VMConfig, RuntimeFeesConfig};
+	pub use near_sdk::{VMConfig, RuntimeFeesConfig};
 
-	use std::collections::HashMap;
+	pub use std::collections::HashMap;
 	pub use std::convert::{TryFrom, TryInto};
 
 	pub use super::*;
