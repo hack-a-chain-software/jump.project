@@ -1,5 +1,3 @@
-/// The core methods for a basic fungible token. Extension standards may be
-/// added in addition to this macro.
 #[macro_export]
 macro_rules! impl_fungible_token_core {
     ($contract: ident, $token: ident $(, $on_tokens_burned_fn:ident)?) => {
