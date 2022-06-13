@@ -30,6 +30,7 @@ mod tests {
   use near_sdk::test_utils::{accounts, VMContextBuilder};
   use near_sdk::MockedBlockchain;
   use near_sdk::{testing_env, VMContext, Balance};
+  use modified_contract_standards::fungible_token::FungibleToken;
 
   use super::*;
   use std::convert::TryFrom;
@@ -53,6 +54,7 @@ mod tests {
     contract
       .token
       .internal_deposit(&SIGNER_ACCOUNT.to_string(), initial_balance);
+    let total_supply = contract.token.total_supply;
 
     let mint_amount = 10;
 
@@ -64,6 +66,8 @@ mod tests {
         .0,
       (initial_balance + mint_amount)
     );
+
+    assert_eq!(contract.token.total_supply, total_supply + mint_amount);
   }
 
   #[test]
