@@ -21,7 +21,7 @@ pub struct ListingData {
   pub liquidity_pool_project_tokens: U128,
   pub liquidity_pool_price_tokens: U128,
   pub fraction_instant_release: U128,
-  pub cliff_period_seconds: U64,
+  pub cliff_timestamp_seconds: U64,
 }
 #[allow(dead_code)]
 #[near_bindgen]
@@ -57,5 +57,54 @@ mod tests {
   use crate::tests::*;
   pub use super::*;
 
-  
+  pub fn standard_listing_data() -> ListingData {
+    ListingData {
+      project_owner: PROJECT_ACCOUNT.parse().unwrap(),
+      project_token: TOKEN_ACCOUNT.parse().unwrap(),
+      price_token: PRICE_TOKEN_ACCOUNT.parse().unwrap(),
+      open_sale_1_timestamp_seconds: U64(1_000_000_000),
+      open_sale_2_timestamp_seconds: U64(2_000_000_000),
+      final_sale_2_timestamp_seconds: U64(3_000_000_000),
+      liquidity_pool_timestamp_seconds: U64(4_000_000_000),
+      total_amount_sale_project_tokens: U128(1_000_000),
+      token_alocation_size: U128(1_000),
+      token_allocation_price: U128(500),
+      liquidity_pool_project_tokens: U128(1_000),
+      liquidity_pool_price_tokens: U128(800),
+      fraction_instant_release: U128(2_000),
+      cliff_timestamp_seconds: U64(8_000_000_000),
+    }
+  }
+
+  /// let result = std::panic::catch_unwind(|| <expected_to_panic_operation_here>).is_err()
+
+  /// create_new_listing
+  /// Method must:
+  /// 1. Assert caller is owner or guardian
+  /// 2. Assert 1 yocto near was deposited
+  /// 3. Assert that data for listing is valid:
+  ///    (a) Timestamps are sequential;
+  ///    (b) fraction_instant_release is within FRACTION_BASE range;
+  ///    (c) allocation size preciselly divides total_amount_sale_project_tokens
+  ///    (d) (liquidity_pool_project_tokens / liquidity_pool_price_tokens) <= 
+  ///        (token_allocation_price / token_alocation_size)
+  ///        to ensure that price on presale isn't larger than on DEX
+  /// 4. Insert listing into trie;
+  /// 5. Charge storage fees from contract account;
+  #[test]
+  #[should_panic(expected = "ERR_002: Only owner or guardian can call this method")]
+  fn test_create_new_listing_1() {
+    let context = get_context(
+      vec![],
+      1,
+      0,
+      USER_ACCOUNT.parse().unwrap(),
+      0,
+      Gas(300u64 * 10u64.pow(12)),
+    );
+    testing_env!(context);
+
+    let mut contract = init_contract();
+    contract.assign_guardian(USER_ACCOUNT.parse().unwrap());
+  }  
 }

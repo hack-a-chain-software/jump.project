@@ -45,9 +45,10 @@ mod tests {
   /// 1. Assert caller is owner
   /// 2. Assert 1 yocto near was deposited
   /// 3. Add new guardian to set
+  /// #[should_panic(expected = "ERR_001: Only owner can call this method")]
   #[test]
-  #[should_panic(expected = "ERR_001: Only owner can call this method")]
   fn test_assign_guardian_1() {
+    
     let context = get_context(
       vec![],
       1,
@@ -58,8 +59,11 @@ mod tests {
     );
     testing_env!(context);
 
-    let mut contract = init_contract();
-    contract.assign_guardian(USER_ACCOUNT.parse().unwrap());
+    expect_panic_msg(|| {
+      let mut contract = init_contract();
+      contract.assign_guardian(USER_ACCOUNT.parse().unwrap())
+    }, Some(ERR_001.to_string()));
+    
   }
 
   #[test]

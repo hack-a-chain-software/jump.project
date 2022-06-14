@@ -111,7 +111,7 @@ impl Contract {
 			listing_data.liquidity_pool_project_tokens.0,
 			listing_data.liquidity_pool_price_tokens.0,
 			listing_data.fraction_instant_release.0,
-			listing_data.cliff_period_seconds.0 * TO_NANO,
+			listing_data.cliff_timestamp_seconds.0 * TO_NANO,
 		);
 		self.listings.push(&new_listing);
 		events::create_listing(new_listing);
@@ -255,6 +255,7 @@ mod tests {
 	pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
 	pub use near_sdk::{VMConfig, RuntimeFeesConfig};
 
+	pub use std::panic::{UnwindSafe, catch_unwind};
 	pub use std::collections::HashMap;
 	pub use std::convert::{TryFrom, TryInto};
 
@@ -262,9 +263,29 @@ mod tests {
 
 	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
 	pub const TOKEN_ACCOUNT: &str = "token.testnet";
+	pub const PRICE_TOKEN_ACCOUNT: &str = "pricetoken.testnet";
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";
+	pub const PROJECT_ACCOUNT: &str = "project.testnet";
 	pub const USER_ACCOUNT: &str = "user.testnet";
 
+	pub fn expect_panic_msg<F: FnOnce() -> R + UnwindSafe, R>(f: F, expected_panic_msg: Option<String>) {
+		match catch_unwind(f) {
+			Ok(_) => panic!("call did not panic at all"),
+			Err(e) => {
+				match expected_panic_msg {
+					Some(expected) => {
+						if let Ok(panic_msg) = e.downcast::<String>() {
+							assert!(panic_msg.contains(&expected), "panic messages did not match");
+						} else {
+							panic!("panic did not produce any msg");
+						}
+					},
+					None => {},
+				}
+			},
+		}
+	}
+	
 	pub fn get_context(
 		input: Vec<u8>,
 		attached_deposit: u128,
