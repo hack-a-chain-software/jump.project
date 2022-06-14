@@ -48,7 +48,6 @@ impl Contract {
     contract_account.track_storage_usage(initial_storage);
     self.internal_update_investor(&contract_account_id, contract_account);
   }
-
 }
 
 #[cfg(test)]
@@ -86,25 +85,40 @@ mod tests {
   ///    (a) Timestamps are sequential;
   ///    (b) fraction_instant_release is within FRACTION_BASE range;
   ///    (c) allocation size preciselly divides total_amount_sale_project_tokens
-  ///    (d) (liquidity_pool_project_tokens / liquidity_pool_price_tokens) <= 
+  ///    (d) (liquidity_pool_project_tokens / liquidity_pool_price_tokens) <=
   ///        (token_allocation_price / token_alocation_size)
   ///        to ensure that price on presale isn't larger than on DEX
   /// 4. Insert listing into trie;
   /// 5. Charge storage fees from contract account;
   #[test]
-  #[should_panic(expected = "ERR_002: Only owner or guardian can call this method")]
   fn test_create_new_listing_1() {
-    let context = get_context(
-      vec![],
-      1,
-      0,
-      USER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+    fn closure_generator(caller: AccountId, deposit: u128, seed: u128) -> impl FnOnce() {
+      move || {
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          caller,
+          0,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
+        let mut contract_inst = init_contract(seed);
+        contract_inst.assign_guardian(USER_ACCOUNT.parse().unwrap());
+      }
+    }
 
-    let mut contract = init_contract();
-    contract.assign_guardian(USER_ACCOUNT.parse().unwrap());
-  }  
+    println!("A");
+    // 1. Assert caller is owner or guardian
+    expect_panic_msg(
+      closure_generator(USER_ACCOUNT.parse().unwrap(), 1, 1),
+      Some(ERR_001.to_string())
+    );
+    println!("B");
+    // 2. Assert 1 yocto near was deposited
+    expect_panic_msg(
+      closure_generator(OWNER_ACCOUNT.parse().unwrap(), 0, 2),
+      Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())
+    );
+    println!("C");
+  }
 }

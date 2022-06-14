@@ -70,7 +70,7 @@ impl Contract {
 			investors: LookupMap::new(StorageKey::Investors),
 			contract_settings,
 		};
-		// adding the contract's account as an investor so that it will pay for 
+		// adding the contract's account as an investor so that it will pay for
 		// cost of storage for listings and other administrative data
 		let current_account = env::current_account_id();
 		let mut base_storage_account = Investor {
@@ -79,11 +79,19 @@ impl Contract {
 			storage_used: 0,
 			staked_token: 0,
 			last_check: 0,
-			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury { account_id: current_account.clone() })
+			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {
+				account_id: current_account.clone(),
+			}),
 		};
-		contract.investors.insert(&env::current_account_id(), &VInvestor::new(current_account, 0));
+		contract.investors.insert(
+			&env::current_account_id(),
+			&VInvestor::new(current_account, 0),
+		);
 		base_storage_account.track_storage_usage(initial_storage);
-		contract.investors.insert(&env::current_account_id(), &VInvestor::V1(base_storage_account));
+		contract.investors.insert(
+			&env::current_account_id(),
+			&VInvestor::V1(base_storage_account),
+		);
 		contract
 	}
 }
@@ -268,24 +276,30 @@ mod tests {
 	pub const PROJECT_ACCOUNT: &str = "project.testnet";
 	pub const USER_ACCOUNT: &str = "user.testnet";
 
-	pub fn expect_panic_msg<F: FnOnce() -> R + UnwindSafe, R>(f: F, expected_panic_msg: Option<String>) {
+	/// This function can be used witha  higher order closure (that outputs
+	/// other closures) to iteratively test diffent cenarios for a call
+	pub fn expect_panic_msg<F: FnOnce() -> R + UnwindSafe, R>(
+		f: F,
+		expected_panic_msg: Option<String>,
+	) {
 		match catch_unwind(f) {
 			Ok(_) => panic!("call did not panic at all"),
-			Err(e) => {
-				match expected_panic_msg {
-					Some(expected) => {
-						if let Ok(panic_msg) = e.downcast::<String>() {
-							assert!(panic_msg.contains(&expected), "panic messages did not match");
-						} else {
-							panic!("panic did not produce any msg");
-						}
-					},
-					None => {},
+			Err(e) => match expected_panic_msg {
+				Some(expected) => {
+					if let Ok(panic_msg) = e.downcast::<String>() {
+						assert!(
+							panic_msg.contains(&expected),
+							"panic messages did not match, found {}",
+							panic_msg
+						);
+					} else {
+						panic!("panic did not produce any msg");
+					}
 				}
+				None => {}
 			},
 		}
 	}
-	
 	pub fn get_context(
 		input: Vec<u8>,
 		attached_deposit: u128,
@@ -314,12 +328,12 @@ mod tests {
 		}
 	}
 
-	pub fn init_contract() -> Contract {
+	pub fn init_contract(seed: u128) -> Contract {
 		let mut contract = Contract {
 			owner: OWNER_ACCOUNT.parse().unwrap(),
-			guardians: UnorderedSet::new(StorageKey::Guardians),
-			listings: Vector::new(StorageKey::Listings),
-			investors: LookupMap::new(StorageKey::Investors),
+			guardians: UnorderedSet::new((seed * 1000).to_string().into_bytes().to_vec()),
+			listings: Vector::new((seed * 2000).to_string().into_bytes().to_vec()),
+			investors: LookupMap::new((seed * 3000).to_string().into_bytes().to_vec()),
 			contract_settings: standard_settings(),
 		};
 		let base_storage_account = Investor {
@@ -328,9 +342,14 @@ mod tests {
 			storage_used: 10_000,
 			staked_token: 0,
 			last_check: 0,
-			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury { account_id: CONTRACT_ACCOUNT.parse().unwrap() })
+			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {
+				account_id: CONTRACT_ACCOUNT.parse().unwrap(),
+			}),
 		};
-		contract.investors.insert(&CONTRACT_ACCOUNT.parse().unwrap(), &VInvestor::V1(base_storage_account));
+		contract.investors.insert(
+			&CONTRACT_ACCOUNT.parse().unwrap(),
+			&VInvestor::V1(base_storage_account),
+		);
 		contract
 	}
 
@@ -369,13 +388,12 @@ mod tests {
 
 		assert_eq!(contract.owner, OWNER_ACCOUNT.parse().unwrap());
 		assert_eq!(contract.contract_settings, settings);
-
 	}
 
 	#[test]
-    #[should_panic(expected = "The contract is not initialized")]
-    fn test_default() {
-        let context = get_context(
+	#[should_panic(expected = "The contract is not initialized")]
+	fn test_default() {
+		let context = get_context(
 			vec![],
 			0,
 			0,
@@ -383,8 +401,7 @@ mod tests {
 			0,
 			Gas(300u64 * 10u64.pow(12)),
 		);
-        testing_env!(context);
-        let _contract = Contract::default();
-    }
-
+		testing_env!(context);
+		let _contract = Contract::default();
+	}
 }

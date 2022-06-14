@@ -17,7 +17,7 @@ impl Contract {
     let mut contract_account = self.internal_get_investor(&contract_account_id).unwrap();
     events::add_guardian(&new_guardian);
     self.guardians.insert(&new_guardian);
-    contract_account.track_storage_usage(initial_storage);
+    // contract_account.track_storage_usage(initial_storage);
     self.internal_update_investor(&contract_account_id, contract_account);
   }
 
@@ -60,7 +60,7 @@ mod tests {
     testing_env!(context);
 
     expect_panic_msg(|| {
-      let mut contract = init_contract();
+      let mut contract = init_contract(1);
       contract.assign_guardian(USER_ACCOUNT.parse().unwrap())
     }, Some(ERR_001.to_string()));
     
@@ -79,7 +79,7 @@ mod tests {
     );
     testing_env!(context);
 
-    let mut contract = init_contract();
+    let mut contract = init_contract(2);
     contract.assign_guardian(USER_ACCOUNT.parse().unwrap());
   }
 
@@ -97,7 +97,7 @@ mod tests {
 
     let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
 
-    let mut contract = init_contract();
+    let mut contract = init_contract(3);
     assert!(contract.guardians.is_empty());
     contract.assign_guardian(guardian.clone());
     assert!(contract.guardians.contains(&guardian))
@@ -121,7 +121,7 @@ mod tests {
     );
     testing_env!(context);
 
-    let mut contract = init_contract();
+    let mut contract = init_contract(4);
     contract.remove_guardian(USER_ACCOUNT.parse().unwrap());
   }
 
@@ -140,7 +140,7 @@ mod tests {
 
     let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
 
-    let mut contract = init_contract();
+    let mut contract = init_contract(5);
     contract.guardians.insert(&guardian);
     contract.remove_guardian(guardian.clone());
   }
@@ -159,7 +159,7 @@ mod tests {
 
     let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
 
-    let mut contract = init_contract();
+    let mut contract = init_contract(6);
     contract.guardians.insert(&guardian);
     assert!(contract.guardians.contains(&guardian));
     contract.remove_guardian(guardian.clone());
