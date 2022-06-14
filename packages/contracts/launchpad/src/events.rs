@@ -17,16 +17,19 @@ fn log_event<T: Serialize>(event: &str, data: T) {
 
 /// Owner actions events
 pub fn add_guardian(new_guardian: &AccountId) {
-    log_event("create_guardian", new_guardian);
+    let data = json!({"new_guardian": new_guardian}).to_string();
+    log_event("create_guardian", data);
 }
 
 pub fn remove_guardian(old_guardian: &AccountId) {
-    log_event("old_guardian", old_guardian);
+    let data = json!({"old_guardian": old_guardian}).to_string();
+    log_event("remove_guardian", data);
 }
 
 /// Guardian actions events
 pub fn create_listing(listing_data: VListing) {
-    log_event("create_listing", listing_data);
+    let data = json!({"listing_data": listing_data}).to_string();
+    log_event("create_listing", data);
 }
 
 pub fn cancel_listing(listing_id: u64) {

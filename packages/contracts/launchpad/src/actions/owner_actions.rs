@@ -18,6 +18,7 @@ impl Contract {
     events::add_guardian(&new_guardian);
     self.guardians.insert(&new_guardian);
     // contract_account.track_storage_usage(initial_storage);
+    contract_account.track_storage_usage(initial_storage);
     self.internal_update_investor(&contract_account_id, contract_account);
   }
 

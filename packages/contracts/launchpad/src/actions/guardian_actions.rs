@@ -104,21 +104,27 @@ mod tests {
         ));
         let mut contract_inst = init_contract(seed);
         contract_inst.assign_guardian(USER_ACCOUNT.parse().unwrap());
+        println!("A");
       }
     }
 
-    println!("A");
+    let test_cases: [(AccountId, u128, u128, Option<String>); 2] = [
+      (USER_ACCOUNT.parse().unwrap(), 1, 1, Some(ERR_001.to_string())), // 1. Assert caller is owner or guardian
+      (OWNER_ACCOUNT.parse().unwrap(), 0, 2, Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())),// 2. Assert 1 yocto near was deposited
+    ];
+
+    IntoIter::new(test_cases).for_each(|v| expect_panic_msg(closure_generator(v.0, v.1, v.2), v.3));
     // 1. Assert caller is owner or guardian
-    expect_panic_msg(
-      closure_generator(USER_ACCOUNT.parse().unwrap(), 1, 1),
-      Some(ERR_001.to_string())
-    );
-    println!("B");
+    // expect_panic_msg(
+    //   closure_generator(USER_ACCOUNT.parse().unwrap(), 1, 2),
+    //   Some(ERR_001.to_string())
+    // );
+
     // 2. Assert 1 yocto near was deposited
-    expect_panic_msg(
-      closure_generator(OWNER_ACCOUNT.parse().unwrap(), 0, 2),
-      Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())
-    );
-    println!("C");
+    // expect_panic_msg(
+    //   closure_generator(OWNER_ACCOUNT.parse().unwrap(), 0, 2),
+    //   Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())
+    // );
+
   }
 }

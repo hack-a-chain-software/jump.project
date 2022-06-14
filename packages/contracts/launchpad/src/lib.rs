@@ -266,6 +266,7 @@ mod tests {
 	pub use std::panic::{UnwindSafe, catch_unwind};
 	pub use std::collections::HashMap;
 	pub use std::convert::{TryFrom, TryInto};
+	pub use std::array::{IntoIter};
 
 	pub use super::*;
 
@@ -300,6 +301,7 @@ mod tests {
 			},
 		}
 	}
+	
 	pub fn get_context(
 		input: Vec<u8>,
 		attached_deposit: u128,
@@ -331,9 +333,9 @@ mod tests {
 	pub fn init_contract(seed: u128) -> Contract {
 		let mut contract = Contract {
 			owner: OWNER_ACCOUNT.parse().unwrap(),
-			guardians: UnorderedSet::new((seed * 1000).to_string().into_bytes().to_vec()),
-			listings: Vector::new((seed * 2000).to_string().into_bytes().to_vec()),
-			investors: LookupMap::new((seed * 3000).to_string().into_bytes().to_vec()),
+			guardians: UnorderedSet::new((seed * 2).to_string().into_bytes().to_vec()),
+			listings: Vector::new((seed * 3).to_string().into_bytes().to_vec()),
+			investors: LookupMap::new((seed * 5).to_string().into_bytes().to_vec()),
 			contract_settings: standard_settings(),
 		};
 		let base_storage_account = Investor {
