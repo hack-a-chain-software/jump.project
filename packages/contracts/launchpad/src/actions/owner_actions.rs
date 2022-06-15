@@ -50,21 +50,35 @@ mod tests {
   #[test]
   fn test_assign_guardian_1() {
     
-    let context = get_context(
-      vec![],
-      1,
-      0,
-      USER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+    fn closure_generator(caller: AccountId, deposit: u128, seed: u128) -> impl FnOnce() {
+      move || {
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          caller,
+          0,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
+        let mut contract_inst = init_contract(seed);
+        contract_inst.assign_guardian(USER_ACCOUNT.parse().unwrap());
+      }
+    }
 
-    expect_panic_msg(|| {
-      let mut contract = init_contract(1);
-      contract.assign_guardian(USER_ACCOUNT.parse().unwrap())
-    }, Some(ERR_001.to_string()));
-    
+    let test_cases: [(AccountId, u128, Option<String>); 2] = [
+      (USER_ACCOUNT.parse().unwrap(), 1, Some(ERR_001.to_string())), // 1. Assert caller is owner or guardian
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        0,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ), // 2. Assert 1 yocto near was deposited
+    ];
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, counter), v.2);
+      counter += 1;
+    });
   }
 
   #[test]

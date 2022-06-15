@@ -266,7 +266,6 @@ mod tests {
 	pub use std::panic::{UnwindSafe, catch_unwind};
 	pub use std::collections::HashMap;
 	pub use std::convert::{TryFrom, TryInto};
-	pub use std::array::{IntoIter};
 
 	pub use super::*;
 
@@ -279,29 +278,31 @@ mod tests {
 
 	/// This function can be used witha  higher order closure (that outputs
 	/// other closures) to iteratively test diffent cenarios for a call
-	pub fn expect_panic_msg<F: FnOnce() -> R + UnwindSafe, R>(
+	pub fn run_test_case<F: FnOnce() -> R + UnwindSafe, R>(
 		f: F,
 		expected_panic_msg: Option<String>,
 	) {
-		match catch_unwind(f) {
-			Ok(_) => panic!("call did not panic at all"),
-			Err(e) => match expected_panic_msg {
-				Some(expected) => {
-					if let Ok(panic_msg) = e.downcast::<String>() {
-						assert!(
-							panic_msg.contains(&expected),
-							"panic messages did not match, found {}",
-							panic_msg
-						);
-					} else {
-						panic!("panic did not produce any msg");
+		match expected_panic_msg {
+			Some(expected) => {
+				match catch_unwind(f) {
+					Ok(_) => panic!("call did not panic at all"),
+					Err(e) => {
+						if let Ok(panic_msg) = e.downcast::<String>() {
+							assert!(
+								panic_msg.contains(&expected),
+								"panic messages did not match, found {}",
+								panic_msg
+							);
+						} else {
+							panic!("panic did not produce any msg");
+						}
 					}
 				}
-				None => {}
 			},
+			None => {f();},
 		}
 	}
-	
+
 	pub fn get_context(
 		input: Vec<u8>,
 		attached_deposit: u128,
@@ -331,11 +332,14 @@ mod tests {
 	}
 
 	pub fn init_contract(seed: u128) -> Contract {
+		let hash1 = env::keccak256(&seed.to_be_bytes());
+		let hash2 = env::keccak256(&hash1[..]);
+		let hash3 = env::keccak256(&hash2[..]);
 		let mut contract = Contract {
 			owner: OWNER_ACCOUNT.parse().unwrap(),
-			guardians: UnorderedSet::new((seed * 2).to_string().into_bytes().to_vec()),
-			listings: Vector::new((seed * 3).to_string().into_bytes().to_vec()),
-			investors: LookupMap::new((seed * 5).to_string().into_bytes().to_vec()),
+			guardians: UnorderedSet::new(hash1),
+			listings: Vector::new(hash2),
+			investors: LookupMap::new(hash3),
 			contract_settings: standard_settings(),
 		};
 		let base_storage_account = Investor {

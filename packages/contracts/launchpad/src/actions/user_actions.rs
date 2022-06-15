@@ -64,6 +64,8 @@ impl Contract {
     );
     let (allocations_bought, leftover) =
       listing.buy_allocation(price_tokens_sent, investor_allocations);
+
+    events::investor_buy_allocation(&account_id, listing_id, current_sale_phase, allocations_bought, listing.allocations_sold);
     self.internal_update_listing(listing_id, listing);
     let new_allocation_balance = [previous_allocations_bought[0] + allocations_bought; 2];
     investor.allocation_count.insert(
@@ -73,7 +75,6 @@ impl Contract {
     investor.track_storage_usage(initial_storage);
     self.internal_update_investor(&account_id, investor);
 
-    events::investor_buy_allocation(current_sale_phase, allocations_bought);
     leftover
   }
 }

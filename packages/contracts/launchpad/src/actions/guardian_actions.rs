@@ -7,6 +7,7 @@ use crate::*;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
+#[cfg_attr(test, derive(Clone))]
 pub struct ListingData {
   pub project_owner: AccountId,
   pub project_token: AccountId,
@@ -103,28 +104,74 @@ mod tests {
           Gas(300u64 * 10u64.pow(12)),
         ));
         let mut contract_inst = init_contract(seed);
-        contract_inst.assign_guardian(USER_ACCOUNT.parse().unwrap());
-        println!("A");
+        let mut listing = standard_listing_data();
+        let current_index = contract_inst.listings.len();
+        let listing_id = contract_inst.create_new_listing(listing.clone());
+        assert_eq!(current_index, contract_inst.listings.len());
+
+        let inserted_listing = contract_inst
+          .listings
+          .get(listing_id)
+          .unwrap()
+          .into_current();
+        assert_eq!(
+          inserted_listing.open_sale_1_timestamp,
+          listing.open_sale_1_timestamp_seconds.0 * TO_NANO
+        );
+        assert_eq!(
+          inserted_listing.open_sale_2_timestamp,
+          listing.open_sale_2_timestamp_seconds.0 * TO_NANO
+        );
+        assert_eq!(
+          inserted_listing.final_sale_2_timestamp,
+          listing.final_sale_2_timestamp_seconds.0 * TO_NANO
+        );
+        assert_eq!(
+          inserted_listing.liquidity_pool_timestamp,
+          listing.liquidity_pool_timestamp_seconds.0 * TO_NANO
+        );
+        assert_eq!(
+          inserted_listing.total_amount_sale_project_tokens,
+          listing.total_amount_sale_project_tokens.0
+        );
+        assert_eq!(
+          inserted_listing.token_alocation_size,
+          listing.token_alocation_size.0
+        );
+        assert_eq!(
+          inserted_listing.token_allocation_price,
+          listing.token_allocation_price.0
+        );
+        assert_eq!(
+          inserted_listing.liquidity_pool_project_tokens,
+          listing.liquidity_pool_project_tokens.0
+        );
+        assert_eq!(
+          inserted_listing.liquidity_pool_price_tokens,
+          listing.liquidity_pool_price_tokens.0
+        );
+        assert_eq!(
+          inserted_listing.fraction_instant_release,
+          listing.fraction_instant_release.0
+        );
+        // assert_eq!(inserted_listing.cliff_timestamp, listing.cliff_timestamp_seconds.0 * TO_NANO);
       }
     }
 
-    let test_cases: [(AccountId, u128, u128, Option<String>); 2] = [
-      (USER_ACCOUNT.parse().unwrap(), 1, 1, Some(ERR_001.to_string())), // 1. Assert caller is owner or guardian
-      (OWNER_ACCOUNT.parse().unwrap(), 0, 2, Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())),// 2. Assert 1 yocto near was deposited
+    let test_cases = [
+      (USER_ACCOUNT.parse().unwrap(), 1, Some(ERR_002.to_string())), // 1. Assert caller is owner or guardian
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        0,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ), // 2. Assert 1 yocto near was deposited
+      (OWNER_ACCOUNT.parse().unwrap(), 1, None),
     ];
 
-    IntoIter::new(test_cases).for_each(|v| expect_panic_msg(closure_generator(v.0, v.1, v.2), v.3));
-    // 1. Assert caller is owner or guardian
-    // expect_panic_msg(
-    //   closure_generator(USER_ACCOUNT.parse().unwrap(), 1, 2),
-    //   Some(ERR_001.to_string())
-    // );
-
-    // 2. Assert 1 yocto near was deposited
-    // expect_panic_msg(
-    //   closure_generator(OWNER_ACCOUNT.parse().unwrap(), 0, 2),
-    //   Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())
-    // );
-
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, counter), v.2);
+      counter += 1;
+    });
   }
 }
