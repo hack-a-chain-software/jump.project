@@ -43,53 +43,53 @@ impl StakingFT {
   }
 }
 
-#[cfg(test)]
-mod tests {
-  use crate::*;
-  use crate::tests::{get_context, sample_contract, TOKEN_ACCOUNT};
-  use near_sdk::testing_env;
-  use near_sdk::MockedBlockchain;
+// #[cfg(test)]
+// mod tests {
+//   use crate::*;
+//   use crate::tests::{get_context, sample_contract, TOKEN_ACCOUNT};
+//   use near_sdk::testing_env;
+//   use near_sdk::MockedBlockchain;
 
-  #[test]
-  // should update the blockchain rps based on the timestamp
-  fn test_update_rps() {
-    let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
-    testing_env!(context);
-    let mut contract = sample_contract();
-    assert!(contract.last_updated_rps == 0);
-    let contract_last_rps = contract.last_updated_rps;
-    contract.update_contract_rps();
-    assert!(contract_last_rps != contract.last_updated_rps);
-  }
+//   #[test]
+//   // should update the blockchain rps based on the timestamp
+//   fn test_update_rps() {
+//     let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
+//     testing_env!(context);
+//     let mut contract = sample_contract();
+//     assert!(contract.last_updated_rps == 0);
+//     let contract_last_rps = contract.last_updated_rps;
+//     contract.update_contract_rps();
+//     assert!(contract_last_rps != contract.last_updated_rps);
+//   }
 
-  #[test]
-  // should update the blockchain rps based on the timestamp
-  fn test_update_user_rps() {
-    let test_account = "test.near".to_string();
-    let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
-    testing_env!(context);
-    let mut contract = sample_contract();
-    let user_data = UserData {
-      balance: 1000,
-      user_rps: contract.last_updated_rps,
-      unclaimed_rewards: 0,
-    };
-    contract.user_map.insert(&test_account, &user_data);
-  }
+//   #[test]
+//   // should update the blockchain rps based on the timestamp
+//   fn test_update_user_rps() {
+//     let test_account = "test.near".to_string();
+//     let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
+//     testing_env!(context);
+//     let mut contract = sample_contract();
+//     let user_data = UserData {
+//       balance: 1000,
+//       user_rps: contract.last_updated_rps,
+//       unclaimed_rewards: 0,
+//     };
+//     contract.user_map.insert(&test_account, &user_data);
+//   }
 
-  #[test]
-  // should calculate the user rewards of the user after a certain ammount of time
-  fn test_calculate_user_rewards() {
-    let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
-    testing_env!(context);
-    let contract = sample_contract();
-  }
+//   #[test]
+//   // should calculate the user rewards of the user after a certain ammount of time
+//   fn test_calculate_user_rewards() {
+//     let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
+//     testing_env!(context);
+//     let contract = sample_contract();
+//   }
 
-  #[test]
-  // should update the blockchain rps based on the timestamp
-  fn test_calculate_rps() {
-    let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
-    testing_env!(context);
-    let contract = sample_contract();
-  }
-}
+//   #[test]
+//   // should update the blockchain rps based on the timestamp
+//   fn test_calculate_rps() {
+//     let context = get_context(vec![], false, 1, 100, TOKEN_ACCOUNT.to_string());
+//     testing_env!(context);
+//     let contract = sample_contract();
+//   }
+// }

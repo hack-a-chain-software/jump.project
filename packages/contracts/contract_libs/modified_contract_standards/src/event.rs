@@ -1,4 +1,3 @@
-use near_sdk::env;
 use serde::Serialize;
 use near_sdk::log;
 
