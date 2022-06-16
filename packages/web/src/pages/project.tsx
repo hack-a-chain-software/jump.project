@@ -183,7 +183,7 @@ export const Project = () => {
             <Text fontSize="16px" fontWeight="bold" color="white">
               Social Media
             </Text>
-            <Flex direction="row" gap="10px">
+            <Flex color="white" direction="row" gap="10px">
               <Flex
                 cursor="pointer"
                 w="40px"

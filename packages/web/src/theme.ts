@@ -8,7 +8,14 @@ const config: ThemeConfig = {
 export const theme = extendTheme({
   colors: {
     brand: {
+      100: "#7646FF",
+      200: "#7646FF",
+      300: "#7646FF",
+      400: "#7646FF",
       500: "#7646FF", // you need this
+      600: "#7646FF", // you need this
+      700: "#7646FF", // you need this
+      800: "#7646FF",
       900: "#7646FF",
     },
     darkerGrey: "#1E1E1E",

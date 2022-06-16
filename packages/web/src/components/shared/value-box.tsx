@@ -20,7 +20,7 @@ export function ValueBox({
     <Box
       p="20px"
       borderRadius={20}
-      borderWidth={2}
+      borderWidth="1px"
       gap="5px"
       borderColor={
         variant === "brand"
