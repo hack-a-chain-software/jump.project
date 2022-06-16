@@ -7,3 +7,4 @@ export * from "./page-container";
 export * from "./select";
 export * from "./value-box";
 export * from "./modals";
+export * from "./tabs";
