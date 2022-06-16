@@ -21,7 +21,9 @@ module.exports = {
   },
   plugins: ["react", "@typescript-eslint"],
   rules: {
+    "@typescript-eslint/no-empty-function": "off",
     "react/prop-types": "off",
+    "@typescript-eslint/no-empty-interface": "off",
     "react/react-in-jsx-scope": "off",
     "no-extra-boolean-cast": "off",
     "@typescript-eslint/ban-ts-comment": "off",
