@@ -26,9 +26,9 @@ mod token_handler;
 pub const TO_NANO: u64 = 1_000_000_000;
 pub const FRACTION_BASE: u128 = 10_000;
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
-#[cfg_attr(test, derive(Clone, Eq, PartialEq, Debug))]
+#[cfg_attr(test, derive(Eq, PartialEq, Debug))]
 pub struct ContractSettings {
 	membership_token: AccountId,
 	token_lock_period: U64,
@@ -203,24 +203,15 @@ impl Contract {
 		listing_phase: &SalePhase,
 		allocations_bought: u64,
 	) -> u64 {
-		let investor_level = self
-			.contract_settings
-			.tiers_minimum_tokens
-			.iter()
-			.fold(0, |sum, v| {
-				if investor.staked_token >= v.0 {
-					sum + 1
-				} else {
-					sum
-				}
-			});
+		let investor_level =
+			investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens);
 		let mut base_allowance = if investor_level == 0 {
 			0
 		} else {
 			self
 				.contract_settings
 				.tiers_entitled_allocations
-				.get(investor_level - 1)
+				.get(investor_level as usize - 1)
 				.unwrap()
 				.0
 		};
@@ -279,28 +270,25 @@ mod tests {
 
 	/// This function can be used witha  higher order closure (that outputs
 	/// other closures) to iteratively test diffent cenarios for a call
-	pub fn run_test_case<F: FnOnce() -> R + UnwindSafe, R>(
-		f: F,
-		expected_panic_msg: Option<String>,
-	) {
+	pub fn run_test_case<F: FnOnce() -> R + UnwindSafe, R>(f: F, expected_panic_msg: Option<String>) {
 		match expected_panic_msg {
-			Some(expected) => {
-				match catch_unwind(f) {
-					Ok(_) => panic!("call did not panic at all"),
-					Err(e) => {
-						if let Ok(panic_msg) = e.downcast::<String>() {
-							assert!(
-								panic_msg.contains(&expected),
-								"panic messages did not match, found {}",
-								panic_msg
-							);
-						} else {
-							panic!("panic did not produce any msg");
-						}
+			Some(expected) => match catch_unwind(f) {
+				Ok(_) => panic!("call did not panic at all"),
+				Err(e) => {
+					if let Ok(panic_msg) = e.downcast::<String>() {
+						assert!(
+							panic_msg.contains(&expected),
+							"panic messages did not match, found {}",
+							panic_msg
+						);
+					} else {
+						panic!("panic did not produce any msg");
 					}
 				}
 			},
-			None => {f();},
+			None => {
+				f();
+			}
 		}
 	}
 

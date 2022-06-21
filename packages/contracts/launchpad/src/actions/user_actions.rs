@@ -34,6 +34,7 @@ impl Contract {
       .allocation_count
       .insert(&listing_id, &allocations_remaining)
       .expect(ERR_302);
+    self.internal_update_investor(&account_id, investor);
     listing.withdraw_investor_funds(
       investor_allocations,
       allocations_to_withdraw,

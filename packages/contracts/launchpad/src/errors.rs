@@ -23,6 +23,7 @@ pub const ERR_205: &str = "ERR_205: Requested membership level does not exist";
 pub const ERR_206: &str = "ERR_206: Not enough tokens deposited for this membership level";
 pub const ERR_207: &str = "ERR_207: Cannot downgrade membership level with increase_membership_tier call";
 pub const ERR_208: &str = "ERR_208: Not enough membership tokens to withdraw";
+pub const ERR_209: &str = "ERR_209: Cannot withdraw membership tokens before lock period";
 
 /// Action errors
 pub const ERR_301: &str = "ERR_301: Could not parse String from msg. Not compliant with CallType format";
