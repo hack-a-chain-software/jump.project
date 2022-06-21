@@ -46,17 +46,19 @@ impl Contract {
       ListingStatus::PoolCreated => {
         // send call to deposit project token
         let deposit = listing.withdraw_liquidity_project_token();
+        let launchpad_fee = (deposit * listing.fee_liquidity_tokens) / FRACTION_BASE;
+        let liquid_deposit = deposit - launchpad_fee;
         let promise = listing
           .project_token
           .transfer_token_call(
             self.contract_settings.partner_dex.clone(),
-            deposit,
+            liquid_deposit,
             String::new(),
           )
           .then(
             ext_self::ext(env::current_account_id())
               .with_static_gas(DEX_CALLBACK_GAS)
-              .callback_dex_deposit_project_token(listing_id, U128(deposit)),
+              .callback_dex_deposit_project_token(listing_id, U128(deposit), U128(launchpad_fee)),
           );
         self.internal_update_listing(listing_id.0, listing);
         promise
@@ -64,17 +66,19 @@ impl Contract {
       ListingStatus::PoolProjectTokenSent => {
         // send call to deposit project token
         let deposit = listing.withdraw_liquidity_price_token();
+        let launchpad_fee = (deposit * listing.fee_liquidity_tokens) / FRACTION_BASE;
+        let liquid_deposit = deposit - launchpad_fee;
         let promise = listing
           .price_token
           .transfer_token_call(
             self.contract_settings.partner_dex.clone(),
-            deposit,
+            liquid_deposit,
             String::new(),
           )
           .then(
             ext_self::ext(env::current_account_id())
               .with_static_gas(DEX_CALLBACK_GAS)
-              .callback_dex_deposit_price_token(listing_id, U128(deposit)),
+              .callback_dex_deposit_price_token(listing_id, U128(deposit), U128(launchpad_fee)),
           );
         self.internal_update_listing(listing_id.0, listing);
         promise

@@ -21,7 +21,7 @@ impl Contract {
     } else if field == "price".to_string() {
       self.internal_add_to_treasury(&listing.price_token, fee.unwrap().0);
     }
-    
+
     self.internal_update_listing(listing_id, listing);
   }
 
@@ -108,7 +108,8 @@ impl Contract {
   pub fn callback_dex_deposit_project_token(
     &mut self,
     listing_id: U64,
-    original_deposit: U128
+    original_deposit: U128,
+    launchpad_fee: U128,
   ) {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
@@ -118,6 +119,7 @@ impl Contract {
       listing.undo_withdraw_liquidity_project_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolProjectTokenSent;
+      self.internal_add_to_treasury(&listing.project_token,launchpad_fee.0);
     }
 
     self.internal_update_listing(listing_id.0, listing);
@@ -127,7 +129,8 @@ impl Contract {
   pub fn callback_dex_deposit_price_token(
     &mut self,
     listing_id: U64,
-    original_deposit: U128
+    original_deposit: U128,
+    launchpad_fee: U128,
   ) {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
@@ -137,6 +140,7 @@ impl Contract {
       listing.undo_withdraw_liquidity_price_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolPriceTokenSent;
+      self.internal_add_to_treasury(&listing.price_token,launchpad_fee.0);
     }
 
     self.internal_update_listing(listing_id.0, listing);

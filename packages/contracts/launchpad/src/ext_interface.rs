@@ -40,9 +40,9 @@ pub trait SelfCalls {
     original_deposit: U128,
   ) -> PromiseOrValue<bool>;
 
-  fn callback_dex_deposit_project_token(listing_id: U64, original_deposit: U128);
+  fn callback_dex_deposit_project_token(listing_id: U64, original_deposit: U128, launchpad_fee: U128,);
 
-  fn callback_dex_deposit_price_token(listing_id: U64, original_deposit: U128);
+  fn callback_dex_deposit_price_token(listing_id: U64, original_deposit: U128, launchpad_fee: U128,);
 
   fn callback_dex_add_liquidity(
     &mut self,
