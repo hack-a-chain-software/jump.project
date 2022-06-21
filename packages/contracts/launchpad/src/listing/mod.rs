@@ -25,6 +25,9 @@ pub enum ListingStatus {
 	Funded,        // project has received all resources
 	SaleFinalized, // sale is finalized, either by selling off or selling over the minum threshold and
 	// the final_sale_2_timestamp arriving
+	PoolCreated,
+	PoolProjectTokenSent,
+	PoolPriceTokenSent,
 	LiquidityPoolFinalized, // liquidity pool has been sent to dex
 	Cancelled,              // either target not met or manual cancel, everyone can withdraw assets
 }
@@ -64,6 +67,10 @@ pub struct Listing {
 	// keep track of listing phases and progress
 	pub status: ListingStatus,
 	pub is_treasury_updated: bool, // keeps track of whether treasury has been updated after end of sale or cancellation
+	pub dex_id: Option<u64>,
+	pub dex_project_tokens: Option<u128>,
+	pub dex_price_tokens: Option<u128>,
+	pub dex_lock_time: u64,
 }
 
 impl VListing {
@@ -112,6 +119,10 @@ impl VListing {
 			listing_treasury: Treasury::new(),
 			status: ListingStatus::Unfunded,
 			is_treasury_updated: false,
+			dex_id: None,
+			dex_project_tokens: None,
+			dex_price_tokens: None,
+			dex_lock_time: 0,
 		})
 	}
 
@@ -174,10 +185,14 @@ impl Listing {
 		);
 	}
 
-	fn update_treasury_after_sale(&mut self) {
+	pub fn update_treasury_after_sale(&mut self) {
 		if !self.is_treasury_updated {
 			match self.status {
-				ListingStatus::SaleFinalized | ListingStatus::LiquidityPoolFinalized => {
+				ListingStatus::SaleFinalized 
+				| ListingStatus::PoolCreated
+				| ListingStatus::PoolProjectTokenSent
+				| ListingStatus::PoolPriceTokenSent
+				| ListingStatus::LiquidityPoolFinalized => {
 					let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
 					let excess_project_tokens_liquidity = (self.allocations_sold as u128
 						* self.liquidity_pool_project_tokens)
@@ -201,6 +216,9 @@ impl Listing {
 	pub fn withdraw_project_funds(&mut self) {
 		match self.status {
 			ListingStatus::SaleFinalized
+			| ListingStatus::PoolCreated
+			| ListingStatus::PoolProjectTokenSent
+			| ListingStatus::PoolPriceTokenSent
 			| ListingStatus::LiquidityPoolFinalized
 			| ListingStatus::Cancelled => {
 				self.update_treasury_after_sale();
@@ -320,7 +338,11 @@ impl Listing {
 		investor_id: AccountId,
 	) -> Promise {
 		match self.status {
-			ListingStatus::SaleFinalized | ListingStatus::LiquidityPoolFinalized => {
+			ListingStatus::SaleFinalized 
+			| ListingStatus::PoolCreated
+			| ListingStatus::PoolProjectTokenSent
+			| ListingStatus::PoolPriceTokenSent
+			| ListingStatus::LiquidityPoolFinalized => {
 				self.update_treasury_after_sale();
 				let withdraw_amounts = self.listing_treasury.withdraw_investor_funds(
 					self.token_alocation_size,
@@ -404,5 +426,27 @@ impl Listing {
 			_ => panic!("wrongly formatted argument"),
 		}
 		events::investor_withdraw_reverted_error(self.listing_id, returned_value, field);
+	}
+
+	pub fn withdraw_liquidity_project_token(&mut self) -> u128 {
+		let amount = self.listing_treasury.withdraw_liquidity_project_token();
+		self.dex_project_tokens = Some(amount);
+		amount
+	}
+
+	pub fn undo_withdraw_liquidity_project_token(&mut self, amount: u128) {
+		self.listing_treasury.undo_withdraw_liquidity_project_token(amount);
+		self.dex_project_tokens = None;
+	}
+
+	pub fn withdraw_liquidity_price_token(&mut self) -> u128 {
+		let amount = self.listing_treasury.withdraw_liquidity_price_token();
+		self.dex_price_tokens = Some(amount);
+		amount
+	}
+
+	pub fn undo_withdraw_liquidity_price_token(&mut self, amount: u128) {
+		self.listing_treasury.undo_withdraw_liquidity_price_token(amount);
+		self.dex_price_tokens = None;
 	}
 }

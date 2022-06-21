@@ -2,7 +2,8 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedSet, Vector, LookupMap, UnorderedMap};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{
-	env, near_bindgen, AccountId, PanicOnDefault, BorshStorageKey,
+	env, near_bindgen, AccountId, Gas, Promise, PromiseResult,
+	PromiseOrValue, PanicOnDefault, BorshStorageKey,
 	utils::{assert_one_yocto},
 };
 use near_sdk::serde::{Serialize, Deserialize};
@@ -37,6 +38,7 @@ pub struct ContractSettings {
 	allowance_phase_2: U64, // number of allocations to which every user is entitled in phase 2
 	fee_price_tokens: U128, // fee taken on price tokens received in the presale %
 	fee_liquidity_tokens: U128, // fee taken on project and price tokens sent to liquidity pool %
+	partner_dex: AccountId,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
@@ -267,6 +269,7 @@ mod tests {
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";
 	pub const PROJECT_ACCOUNT: &str = "project.testnet";
 	pub const USER_ACCOUNT: &str = "user.testnet";
+	pub const DEX_ACCOUNT: &str = "dex.testnet";
 
 	/// This function can be used witha  higher order closure (that outputs
 	/// other closures) to iteratively test diffent cenarios for a call
@@ -357,6 +360,7 @@ mod tests {
 			allowance_phase_2: U64(2), // number of allocations to which every user is entitled in phase 2
 			fee_price_tokens: U128(100), // fee taken on price tokens received in the presale %
 			fee_liquidity_tokens: U128(100), // fee taken on project and price tokens sent to liquidity pool %
+			partner_dex: DEX_ACCOUNT.parse().unwrap(),
 		}
 	}
 

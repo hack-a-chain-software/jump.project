@@ -103,4 +103,24 @@ impl Treasury {
 
     withdrawn_tokens
   }
+
+  pub fn withdraw_liquidity_project_token(&mut self) -> u128 {
+    let withdrawn = self.liquidity_pool_project_token_balance;
+    self.liquidity_pool_project_token_balance = 0;
+    withdrawn
+  }
+
+  pub fn undo_withdraw_liquidity_project_token(&mut self, amount: u128) {
+    self.liquidity_pool_project_token_balance = amount;
+  }
+
+  pub fn withdraw_liquidity_price_token(&mut self) -> u128 {
+    let withdrawn = self.liquidity_pool_price_token_balance;
+    self.liquidity_pool_price_token_balance = 0;
+    withdrawn
+  }
+
+  pub fn undo_withdraw_liquidity_price_token(&mut self, amount: u128) {
+    self.liquidity_pool_price_token_balance = amount;
+  }
 }

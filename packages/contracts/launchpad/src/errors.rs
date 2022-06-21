@@ -28,3 +28,8 @@ pub const ERR_209: &str = "ERR_209: Cannot withdraw membership tokens before loc
 /// Action errors
 pub const ERR_301: &str = "ERR_301: Could not parse String from msg. Not compliant with CallType format";
 pub const ERR_302: &str = "ERR_302: No allocations available to withdraw";
+
+/// Dex integration errors
+pub const ERR_401: &str = "ERR_401: Inconsistent state after call";
+pub const ERR_402: &str = "ERR_402: Callback value could not be parsed";
+pub const ERR_403: &str = "ERR_403: Transaction concurrency lock enforced, wait for lock realease";
