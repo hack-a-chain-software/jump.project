@@ -2,8 +2,11 @@
 
 // 1. Designate new guardians;
 // 2. Remove guardian privileges;
+// 3. Withdraw treasury funds; 
 
 use crate::*;
+use crate::ext_interface::{ext_self};
+use crate::token_handler::{GAS_FOR_FT_TRANSFER_CALLBACK};
 
 #[allow(dead_code)]
 #[near_bindgen]
@@ -34,6 +37,24 @@ impl Contract {
     contract_account.track_storage_usage(initial_storage);
     self.internal_update_investor(&contract_account_id, contract_account);
   }
+
+  #[payable]
+  pub fn retrieve_treasury_funds(&mut self, token_index: U64) -> Promise {
+    self.assert_owner();
+    let key = self
+      .treasury
+      .keys_as_vector()
+      .get(token_index.0)
+      .expect(ERR_204);
+    let value = self.treasury.values_as_vector().get(token_index.0).unwrap();
+    assert!(value > 0, "{}", ERR_009);
+    self.treasury.insert(&key, &0);
+    key.transfer_token(self.owner, value).then(
+      ext_self::ext(env::current_account_id())
+        .with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+        .callback_token_transfer_to_owner(key, U128(value)),
+    )
+  }
 }
 
 #[cfg(test)]
@@ -49,7 +70,6 @@ mod tests {
   /// #[should_panic(expected = "ERR_001: Only owner can call this method")]
   #[test]
   fn test_assign_guardian_1() {
-    
     fn closure_generator(caller: AccountId, deposit: u128, seed: u128) -> impl FnOnce() {
       move || {
         testing_env!(get_context(

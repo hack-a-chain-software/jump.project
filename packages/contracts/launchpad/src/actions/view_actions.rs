@@ -38,13 +38,14 @@ impl Contract {
     pagination: U64,
   ) -> Option<Vec<U64>> {
     match self.internal_get_investor(&account_id) {
-      Some(investor) => Some(investor
-        .allocation_count
-        .keys()
-        .skip(start.0 as usize)
-        .take(pagination.0 as usize)
-        .map(|v| U64(v))
-        .collect()
+      Some(investor) => Some(
+        investor
+          .allocation_count
+          .keys()
+          .skip(start.0 as usize)
+          .take(pagination.0 as usize)
+          .map(|v| U64(v))
+          .collect(),
       ),
       None => None,
     }
@@ -52,5 +53,23 @@ impl Contract {
 
   pub fn view_contract_settings(&self) -> ContractSettings {
     self.contract_settings.clone()
+  }
+
+  pub fn view_contract_treasury_length(&self) -> U64 {
+    U64(self.treasury.len())
+  }
+
+  pub fn view_contract_treasury_balance(
+    &self,
+    start: U64,
+    pagination: U64,
+  ) -> Vec<(TokenType, U128)> {
+    self
+      .treasury
+      .iter()
+      .skip(start.0 as usize)
+      .take(pagination.0 as usize)
+      .map(|v| (v.0, U128(v.1)))
+      .collect()
   }
 }

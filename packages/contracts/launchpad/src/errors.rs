@@ -7,6 +7,8 @@ pub const ERR_005: &str = "ERR_005: Guardian already registered";
 pub const ERR_006: &str = "ERR_006: Account not registered as guardian";
 pub const ERR_007: &str = "ERR_007: Token not registered in treasury";
 pub const ERR_008: &str = "ERR_008: Attempted to withdraw from treasury with underflow";
+pub const ERR_009: &str = "ERR_009: Cannot withdraw from empty treasury";
+
 
 /// Listing errors
 pub const ERR_101: &str = "ERR_101: Can only cancel funded listings before their start date";

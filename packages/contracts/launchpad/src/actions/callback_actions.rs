@@ -6,6 +6,23 @@ use near_sdk::utils::{is_promise_success};
 #[near_bindgen]
 impl Contract {
   #[private]
+  pub fn callback_token_transfer_to_owner(
+    &mut self,
+    token_type: TokenType,
+    old_value: U128,
+  ) {
+    if !is_promise_success() {
+      match self.treasury.get(&token_type) {
+        Some(current_value) => {
+          self.treasury.insert(&token_type, &(current_value + old_value.0));
+        },
+        None => panic!("{}", ERR_401)
+      }
+      
+    } 
+  }
+
+  #[private]
   pub fn callback_token_transfer_to_project_owner(
     &mut self,
     listing_id: U64,
