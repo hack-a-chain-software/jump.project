@@ -1,6 +1,7 @@
 use near_sdk::{env, AccountId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{ UnorderedMap };
+use near_sdk::json_types::{U128};
 
 use crate::{StorageKey};
 use crate::errors::*;
@@ -95,4 +96,27 @@ impl Investor {
         self.storage_deposit -= withdraw;
     }
 
+}
+
+// implement membership related methods
+impl Investor {
+    pub fn get_current_membership_level(&self, tiers_quantities: &Vec<U128>) -> u64 {
+        let mut membership_level = 0;
+        let mut iterator = tiers_quantities.iter();
+        loop {
+            if let Some(v) = iterator.next() {
+                if self.staked_token >= v.0 {
+                    membership_level += 1;
+                } else {
+                    break
+                }
+            } else {
+                break
+            }
+        } 
+        membership_level
+    }
+    pub fn update_time_check(&mut self) {
+        self.last_check = env::block_timestamp();
+    }
 }

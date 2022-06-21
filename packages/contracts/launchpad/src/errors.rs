@@ -19,6 +19,10 @@ pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transa
 pub const ERR_202: &str = "ERR_202: Storage deposited was less tha minimum deposit";
 pub const ERR_203: &str = "ERR_203: Cannot delete investor account, pending investment allocations to withdraw";
 pub const ERR_204: &str = "ERR_204: Membership can only be validated through the membership_token";
+pub const ERR_205: &str = "ERR_205: Requested membership level does not exist";
+pub const ERR_206: &str = "ERR_206: Not enough tokens deposited for this membership level";
+pub const ERR_207: &str = "ERR_207: Cannot downgrade membership level with increase_membership_tier call";
+pub const ERR_208: &str = "ERR_208: Not enough membership tokens to withdraw";
 
 /// Action errors
 pub const ERR_301: &str = "ERR_301: Could not parse String from msg. Not compliant with CallType format";

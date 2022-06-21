@@ -8,8 +8,8 @@ use crate::*;
 pub enum CallType {
   FundListing { listing_id: U64 },
   BuyAllocation { listing_id: U64 },
+  VerifyAccount { membership_tier: U64 },
 }
-
 
 #[allow(dead_code)]
 #[near_bindgen]
@@ -26,10 +26,16 @@ impl Contract {
           },
         );
         U128(0)
-      },
+      }
       CallType::BuyAllocation { listing_id } => {
         U128(self.buy_allocation(listing_id.0, amount.0, sender_id))
-      },
+      }
+      CallType::VerifyAccount { membership_tier } => self.increase_membership_tier(
+        sender_id,
+        amount.0,
+        membership_tier.0 as usize,
+        env::predecessor_account_id(),
+      ),
       _ => unimplemented!(),
     }
   }

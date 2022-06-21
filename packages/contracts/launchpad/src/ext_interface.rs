@@ -20,4 +20,6 @@ pub trait SelfCalls {
     returned_value: U128,
     field: String,
   );
+
+  fn callback_membership_token_transfer_to_investor(investor_id: AccountId, amount: U128);
 }

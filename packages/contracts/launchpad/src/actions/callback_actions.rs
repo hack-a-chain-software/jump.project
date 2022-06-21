@@ -53,4 +53,18 @@ impl Contract {
       }
     }
   }
+
+  #[private]
+  pub fn callback_membership_token_transfer_to_investor(
+    &mut self,
+    investor_id: AccountId,
+    amount: U128
+  ) {
+    if !is_promise_success() {
+      // revert changes to listing treasury and to investor's allocations
+      let mut investor = self.internal_get_investor(&investor_id).unwrap();
+      investor.staked_token += amount.0;
+      self.internal_update_investor(&investor_id, investor);
+    }
+  }
 }

@@ -104,7 +104,7 @@ mod tests {
           Gas(300u64 * 10u64.pow(12)),
         ));
         let mut contract_inst = init_contract(seed);
-        let mut listing = standard_listing_data();
+        let listing = standard_listing_data();
         let current_index = contract_inst.listings.len();
         let listing_id = contract_inst.create_new_listing(listing.clone());
         assert_eq!(current_index, contract_inst.listings.len());

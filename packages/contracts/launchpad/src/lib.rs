@@ -31,6 +31,7 @@ pub const FRACTION_BASE: u128 = 10_000;
 #[cfg_attr(test, derive(Clone, Eq, PartialEq, Debug))]
 pub struct ContractSettings {
 	membership_token: AccountId,
+	token_lock_period: U64,
 	tiers_minimum_tokens: Vec<U128>,
 	tiers_entitled_allocations: Vec<U64>, // number of allocations to which each tier of members is entitled in phase 1
 	allowance_phase_2: U64, // number of allocations to which every user is entitled in phase 2
@@ -362,6 +363,7 @@ mod tests {
 	pub fn standard_settings() -> ContractSettings {
 		ContractSettings {
 			membership_token: TOKEN_ACCOUNT.parse().unwrap(),
+			token_lock_period: U64(1_000_000_000),
 			tiers_minimum_tokens: vec![U128(10), U128(20), U128(30), U128(40), U128(50), U128(60)],
 			tiers_entitled_allocations: vec![U64(1), U64(2), U64(4), U64(5), U64(9), U64(17)], // number of allocations to which each tier of members is entitled in phase 1
 			allowance_phase_2: U64(2), // number of allocations to which every user is entitled in phase 2

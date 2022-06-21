@@ -7,6 +7,8 @@
 // 5. withdraw price_tokens from a listing they invested in in case the listing is cancelled;
 
 use crate::*;
+use crate::ext_interface::{ext_self};
+use crate::token_handler::{TokenType, GAS_FOR_FT_TRANSFER_CALLBACK};
 use near_sdk::{Promise};
 
 #[near_bindgen]
@@ -16,12 +18,9 @@ impl Contract {
     let mut listing = self.internal_get_listing(listing_id);
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     // figure if cliff has already passed
-    let investor_allocations = investor
-      .allocation_count
-      .get(&listing_id)
-      .expect(ERR_302);
-    let allocations_to_withdraw;// = (investor_allocations.0, 0);
-    let allocations_remaining;// = (0, investor_allocations.1);
+    let investor_allocations = investor.allocation_count.get(&listing_id).expect(ERR_302);
+    let allocations_to_withdraw; // = (investor_allocations.0, 0);
+    let allocations_remaining; // = (0, investor_allocations.1);
     if env::block_timestamp() > listing.cliff_timestamp {
       allocations_to_withdraw = investor_allocations;
       allocations_remaining = [0; 2];
@@ -35,7 +34,39 @@ impl Contract {
       .allocation_count
       .insert(&listing_id, &allocations_remaining)
       .expect(ERR_302);
-    listing.withdraw_investor_funds(investor_allocations, allocations_to_withdraw, allocations_remaining, account_id)
+    listing.withdraw_investor_funds(
+      investor_allocations,
+      allocations_to_withdraw,
+      allocations_remaining,
+      account_id,
+    )
+  }
+
+  #[payable]
+  pub fn decrease_membership_level(&mut self, withdraw_amount: U128) -> Promise {
+    assert_one_yocto();
+    let account_id = env::predecessor_account_id();
+    let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
+    assert!(investor.staked_token >= withdraw_amount.0, "{}", ERR_208);
+    assert!(
+      env::block_timestamp() - investor.last_check >= self.contract_settings.token_lock_period.0,
+      "{}. Will be able to retrieve at timestamp {}",
+      ERR_209,
+      investor.last_check + self.contract_settings.token_lock_period.0
+    );
+
+    investor.staked_token -= withdraw_amount.0;
+    self.internal_update_investor(&account_id, investor);
+
+    TokenType::FT {
+      account_id: self.contract_settings.membership_token.clone(),
+    }
+    .transfer_token(account_id.clone(), withdraw_amount.0)
+    .then(
+      ext_self::ext(env::current_account_id())
+        .with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
+        .callback_membership_token_transfer_to_investor(account_id, withdraw_amount),
+    )
   }
 }
 
@@ -65,16 +96,54 @@ impl Contract {
     let (allocations_bought, leftover) =
       listing.buy_allocation(price_tokens_sent, investor_allocations);
 
-    events::investor_buy_allocation(&account_id, listing_id, current_sale_phase, allocations_bought, listing.allocations_sold);
+    events::investor_buy_allocation(
+      &account_id,
+      listing_id,
+      current_sale_phase,
+      allocations_bought,
+      listing.allocations_sold,
+    );
     self.internal_update_listing(listing_id, listing);
     let new_allocation_balance = [previous_allocations_bought[0] + allocations_bought; 2];
-    investor.allocation_count.insert(
-      &listing_id,
-      &new_allocation_balance,
-    );
+    investor
+      .allocation_count
+      .insert(&listing_id, &new_allocation_balance);
     investor.track_storage_usage(initial_storage);
     self.internal_update_investor(&account_id, investor);
 
     leftover
+  }
+
+  pub fn increase_membership_tier(
+    &mut self,
+    account_id: AccountId,
+    token_count: u128,
+    membership_tier: usize,
+    token_type: AccountId,
+  ) -> U128 {
+    assert_eq!(
+      token_type, self.contract_settings.membership_token,
+      "{}",
+      ERR_204
+    );
+    let tokens_needed = self
+      .contract_settings
+      .tiers_minimum_tokens
+      .get(membership_tier - 1)
+      .expect(ERR_205)
+      .0;
+    let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
+    let total_tokens = token_count + investor.staked_token;
+    assert!(total_tokens >= tokens_needed, "{}", ERR_206);
+    assert!(
+      membership_tier as u64
+        > investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens),
+      "{}",
+      ERR_207
+    );
+    investor.staked_token = tokens_needed;
+    investor.update_time_check();
+    self.internal_update_investor(&account_id, investor);
+    U128(total_tokens - tokens_needed)
   }
 }
