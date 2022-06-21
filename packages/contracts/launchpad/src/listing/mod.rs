@@ -4,6 +4,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
 use near_sdk::json_types::{U64, U128};
 
+use crate::{FRACTION_BASE};
 use crate::events;
 use crate::ext_interface::{ext_self};
 use crate::listing::treasury::{Treasury};
@@ -64,6 +65,10 @@ pub struct Listing {
 	// structure to storage count of tokens in the
 	pub listing_treasury: Treasury,
 
+	// fees charged from project
+	pub fee_price_tokens: u128, // fee taken on price tokens received in the presale %
+	pub fee_liquidity_tokens: u128, // fee taken on project and price tokens sent to liquidity pool %
+
 	// keep track of listing phases and progress
 	pub status: ListingStatus,
 	pub is_treasury_updated: bool, // keeps track of whether treasury has been updated after end of sale or cancellation
@@ -90,6 +95,8 @@ impl VListing {
 		liquidity_pool_price_tokens: u128,
 		fraction_instant_release: u128,
 		cliff_timestamp: u64,
+		fee_price_tokens: u128,
+		fee_liquidity_tokens: u128
 	) -> Self {
 		// assert correct timestamps
 		assert!(open_sale_1_timestamp < open_sale_2_timestamp);
@@ -117,6 +124,8 @@ impl VListing {
 			fraction_instant_release,
 			cliff_timestamp,
 			listing_treasury: Treasury::new(),
+			fee_price_tokens,
+			fee_liquidity_tokens,
 			status: ListingStatus::Unfunded,
 			is_treasury_updated: false,
 			dex_id: None,
@@ -222,7 +231,16 @@ impl Listing {
 			| ListingStatus::LiquidityPoolFinalized
 			| ListingStatus::Cancelled => {
 				self.update_treasury_after_sale();
-				let withdraw_amounts = self.listing_treasury.withdraw_project_funds();
+				let mut withdraw_amounts = self.listing_treasury.withdraw_project_funds();
+				let mut launchpad_fees = (0, 0);
+				match self.status {
+					ListingStatus::Cancelled => (),
+					_ => {
+						let price_fee = (withdraw_amounts.1 * self.fee_price_tokens) / FRACTION_BASE;
+						withdraw_amounts.1 -= price_fee;
+						launchpad_fees.1 += price_fee
+					}
+				}
 				self
 					.project_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts.0)
@@ -233,6 +251,7 @@ impl Listing {
 								U64(self.listing_id),
 								U128(withdraw_amounts.0),
 								"project".to_string(),
+								None
 							),
 					);
 				self
@@ -243,8 +262,9 @@ impl Listing {
 							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
 							.callback_token_transfer_to_project_owner(
 								U64(self.listing_id),
-								U128(withdraw_amounts.1),
+								U128(withdraw_amounts.1 + launchpad_fees.1),
 								"price".to_string(),
+								Some(U128(launchpad_fees.1))
 							),
 					);
 

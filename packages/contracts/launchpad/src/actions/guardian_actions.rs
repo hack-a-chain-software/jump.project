@@ -23,6 +23,8 @@ pub struct ListingData {
   pub liquidity_pool_price_tokens: U128,
   pub fraction_instant_release: U128,
   pub cliff_timestamp_seconds: U64,
+  pub fee_price_tokens: U128,
+  pub fee_liquidity_tokens: U128,
 }
 #[allow(dead_code)]
 #[near_bindgen]
@@ -73,6 +75,8 @@ mod tests {
       liquidity_pool_price_tokens: U128(800),
       fraction_instant_release: U128(2_000),
       cliff_timestamp_seconds: U64(8_000_000_000),
+      fee_price_tokens: U128(100),
+      fee_liquidity_tokens: U128(100),
     }
   }
 

@@ -11,13 +11,18 @@ impl Contract {
     listing_id: U64,
     old_value: U128,
     field: String,
+    fee: Option<U128>,
   ) {
+    let listing_id = listing_id.0;
+    let mut listing = self.internal_get_listing(listing_id);
+
     if !is_promise_success() {
-      let listing_id = listing_id.0;
-      let mut listing = self.internal_get_listing(listing_id);
       listing.revert_failed_project_owner_withdraw(old_value.0, field);
-      self.internal_update_listing(listing_id, listing);
+    } else if field == "price".to_string() {
+      self.internal_add_to_treasury(&listing.price_token, fee.unwrap().0);
     }
+    
+    self.internal_update_listing(listing_id, listing);
   }
 
   #[private]

@@ -17,7 +17,12 @@ pub trait Dex {
 
 #[ext_contract(ext_self)]
 pub trait SelfCalls {
-  fn callback_token_transfer_to_project_owner(listing_id: U64, old_value: U128, field: String);
+  fn callback_token_transfer_to_project_owner(
+    listing_id: U64,
+    old_value: U128,
+    field: String,
+    fee: Option<U128>,
+  );
 
   fn callback_token_transfer_to_investor(
     investor_id: AccountId,
@@ -37,14 +42,11 @@ pub trait SelfCalls {
 
   fn callback_dex_deposit_project_token(listing_id: U64, original_deposit: U128);
 
-  fn callback_dex_deposit_price_token(
-    listing_id: U64,
-    original_deposit: U128
-  );
+  fn callback_dex_deposit_price_token(listing_id: U64, original_deposit: U128);
 
   fn callback_dex_add_liquidity(
     &mut self,
     listing_id: U64,
-    original_deposit: U128
+    original_deposit: U128,
   ) -> PromiseOrValue<bool>;
 }

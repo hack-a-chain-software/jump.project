@@ -2,8 +2,8 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedSet, Vector, LookupMap, UnorderedMap};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{
-	env, near_bindgen, AccountId, Gas, Promise, PromiseResult,
-	PromiseOrValue, PanicOnDefault, BorshStorageKey,
+	env, near_bindgen, AccountId, Gas, Promise, PromiseResult, PromiseOrValue, PanicOnDefault,
+	BorshStorageKey,
 	utils::{assert_one_yocto},
 };
 use near_sdk::serde::{Serialize, Deserialize};
@@ -36,8 +36,6 @@ pub struct ContractSettings {
 	tiers_minimum_tokens: Vec<U128>,
 	tiers_entitled_allocations: Vec<U64>, // number of allocations to which each tier of members is entitled in phase 1
 	allowance_phase_2: U64, // number of allocations to which every user is entitled in phase 2
-	fee_price_tokens: U128, // fee taken on price tokens received in the presale %
-	fee_liquidity_tokens: U128, // fee taken on project and price tokens sent to liquidity pool %
 	partner_dex: AccountId,
 }
 
@@ -47,6 +45,7 @@ pub enum StorageKey {
 	Listings,
 	InvestorTreasury { account_id: AccountId },
 	Investors,
+	Treasury,
 }
 
 #[near_bindgen]
@@ -56,6 +55,7 @@ pub struct Contract {
 	pub guardians: UnorderedSet<AccountId>,
 	pub listings: Vector<VListing>,
 	pub investors: LookupMap<AccountId, VInvestor>,
+	pub treasury: UnorderedMap<TokenType, u128>,
 	pub contract_settings: ContractSettings,
 }
 
@@ -71,6 +71,7 @@ impl Contract {
 			guardians: UnorderedSet::new(StorageKey::Guardians),
 			listings: Vector::new(StorageKey::Listings),
 			investors: LookupMap::new(StorageKey::Investors),
+			treasury: UnorderedMap::new(StorageKey::Treasury),
 			contract_settings,
 		};
 		// adding the contract's account as an investor so that it will pay for
@@ -103,15 +104,17 @@ impl Contract {
 impl Contract {
 	pub fn internal_create_new_listing(&mut self, listing_data: ListingData) -> u64 {
 		let listing_index = self.listings.len();
+		let project_token = TokenType::FT {
+			account_id: listing_data.project_token,
+		};
+		let price_token = TokenType::FT {
+			account_id: listing_data.price_token,
+		};
 		let new_listing = VListing::new(
 			listing_index,
 			listing_data.project_owner,
-			TokenType::FT {
-				account_id: listing_data.project_token,
-			},
-			TokenType::FT {
-				account_id: listing_data.price_token,
-			},
+			project_token,
+			price_token,
 			listing_data.open_sale_1_timestamp_seconds.0 * TO_NANO,
 			listing_data.open_sale_2_timestamp_seconds.0 * TO_NANO,
 			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
@@ -123,10 +126,23 @@ impl Contract {
 			listing_data.liquidity_pool_price_tokens.0,
 			listing_data.fraction_instant_release.0,
 			listing_data.cliff_timestamp_seconds.0 * TO_NANO,
+			listing_data.fee_price_tokens.0,
+			listing_data.fee_liquidity_tokens.0,
 		);
+		self.internal_create_treasury_token(&project_token);
+		self.internal_create_treasury_token(&price_token);
 		self.listings.push(&new_listing);
 		events::create_listing(new_listing);
 		listing_index
+	}
+
+	fn internal_create_treasury_token(&mut self, token_type: &TokenType) {
+		match self.treasury.get(token_type) {
+			Some(_) => (),
+			None => {
+				self.treasury.insert(token_type, &0);
+			}
+		}
 	}
 
 	pub fn internal_get_listing(&self, listing_id: u64) -> Listing {
@@ -225,6 +241,29 @@ impl Contract {
 			base_allowance - allocations_bought
 		} else {
 			0
+		}
+	}
+
+	pub fn internal_add_to_treasury(&mut self, token_type: &TokenType, amount: u128) -> u128 {
+		match self.treasury.get(token_type) {
+			Some(previous_value) => {
+				let total = previous_value + amount;
+				self.treasury.insert(token_type, &total);
+				total
+			}
+			None => panic!("{}", ERR_007),
+		}
+	}
+
+	pub fn internal_withdraw_from_treasury(&mut self, token_type: &TokenType, amount: u128) -> u128 {
+		match self.treasury.get(token_type) {
+			Some(previous_value) => {
+				assert!(previous_value >= amount, "{}", ERR_008);
+				let total = previous_value - amount;
+				self.treasury.insert(token_type, &total);
+				total
+			}
+			None => panic!("{}", ERR_007),
 		}
 	}
 }
@@ -327,11 +366,13 @@ mod tests {
 		let hash1 = env::keccak256(&seed.to_be_bytes());
 		let hash2 = env::keccak256(&hash1[..]);
 		let hash3 = env::keccak256(&hash2[..]);
+		let hash4 = env::keccak256(&hash3[..]);
 		let mut contract = Contract {
 			owner: OWNER_ACCOUNT.parse().unwrap(),
 			guardians: UnorderedSet::new(hash1),
 			listings: Vector::new(hash2),
 			investors: LookupMap::new(hash3),
+			treasury: UnorderedMap::new(hash4),
 			contract_settings: standard_settings(),
 		};
 		let base_storage_account = Investor {
@@ -358,8 +399,6 @@ mod tests {
 			tiers_minimum_tokens: vec![U128(10), U128(20), U128(30), U128(40), U128(50), U128(60)],
 			tiers_entitled_allocations: vec![U64(1), U64(2), U64(4), U64(5), U64(9), U64(17)], // number of allocations to which each tier of members is entitled in phase 1
 			allowance_phase_2: U64(2), // number of allocations to which every user is entitled in phase 2
-			fee_price_tokens: U128(100), // fee taken on price tokens received in the presale %
-			fee_liquidity_tokens: U128(100), // fee taken on project and price tokens sent to liquidity pool %
 			partner_dex: DEX_ACCOUNT.parse().unwrap(),
 		}
 	}
