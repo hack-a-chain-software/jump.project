@@ -1,10 +1,11 @@
 use std::convert::TryInto;
 use near_sdk::{AccountId, env, Promise};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::serde::{Serialize};
+use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::json_types::{U64, U128};
+use near_sdk::collections::{LookupMap, LazyOption};
 
-use crate::{FRACTION_BASE};
+use crate::{FRACTION_BASE, StorageKey};
 use crate::events;
 use crate::ext_interface::{ext_self};
 use crate::listing::treasury::{Treasury};
@@ -34,6 +35,13 @@ pub enum ListingStatus {
 	Cancelled,              // either target not met or manual cancel, everyone can withdraw assets
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ListingType {
+	Public,
+	Private,
+}
+
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Listing {
@@ -42,6 +50,10 @@ pub struct Listing {
 	pub project_owner: AccountId,
 	pub project_token: TokenType,
 	pub price_token: TokenType,
+	pub listing_type: ListingType,
+	#[serde(skip)]
+	pub whitelist: LazyOption<LookupMap<AccountId, u64>>,
+
 	// timestamp information
 	#[serde(with = "crate::string")]
 	pub open_sale_1_timestamp: u64,
@@ -105,6 +117,7 @@ impl VListing {
 		project_owner: AccountId,
 		project_token: TokenType,
 		price_token: TokenType,
+		listing_type: ListingType,
 		open_sale_1_timestamp: u64,
 		open_sale_2_timestamp: u64,
 		final_sale_2_timestamp: u64,
@@ -117,7 +130,7 @@ impl VListing {
 		fraction_instant_release: u128,
 		cliff_timestamp: u64,
 		fee_price_tokens: u128,
-		fee_liquidity_tokens: u128
+		fee_liquidity_tokens: u128,
 	) -> Self {
 		// assert correct timestamps
 		assert!(open_sale_1_timestamp < open_sale_2_timestamp);
@@ -126,11 +139,23 @@ impl VListing {
 
 		// assert allocations are a divisor of total projetct tokens
 		assert_eq!(total_amount_sale_project_tokens % token_alocation_size, 0);
+
+		let whitelist_map = LookupMap::new(StorageKey::ListingWhitelist { listing_id });
+		let whitelist = match listing_type {
+			ListingType::Public => None,
+			ListingType::Private => Some(&whitelist_map),
+		};
+
 		Self::V1(Listing {
 			listing_id,
 			project_owner,
 			project_token,
 			price_token,
+			listing_type,
+			whitelist: LazyOption::new(
+				StorageKey::ListingWhitelistLazyOption { listing_id },
+				whitelist,
+			),
 			open_sale_1_timestamp,
 			open_sale_2_timestamp,
 			final_sale_2_timestamp,
@@ -215,10 +240,28 @@ impl Listing {
 		);
 	}
 
+	pub fn check_private_sale_investor_allowance(&self, investor_id: &AccountId) -> u64 {
+		match self.listing_type {
+			ListingType::Private => self.whitelist.get().unwrap().get(investor_id).unwrap_or(0),
+			ListingType::Public => unimplemented!(),
+		}
+	}
+
+	pub fn update_private_sale_investor_allowance(
+		&self,
+		investor_id: &AccountId,
+		new_allowance: u64,
+	) {
+		match self.listing_type {
+			ListingType::Private => self.whitelist.get().unwrap().insert(investor_id, &new_allowance),
+			ListingType::Public => unimplemented!(),
+		};
+	}
+
 	pub fn update_treasury_after_sale(&mut self) {
 		if !self.is_treasury_updated {
 			match self.status {
-				ListingStatus::SaleFinalized 
+				ListingStatus::SaleFinalized
 				| ListingStatus::PoolCreated
 				| ListingStatus::PoolProjectTokenSent
 				| ListingStatus::PoolPriceTokenSent
@@ -272,7 +315,7 @@ impl Listing {
 								U64(self.listing_id),
 								U128(withdraw_amounts.0),
 								"project".to_string(),
-								None
+								None,
 							),
 					);
 				self
@@ -285,7 +328,7 @@ impl Listing {
 								U64(self.listing_id),
 								U128(withdraw_amounts.1 + launchpad_fees.1),
 								"price".to_string(),
-								Some(U128(launchpad_fees.1))
+								Some(U128(launchpad_fees.1)),
 							),
 					);
 
@@ -379,7 +422,7 @@ impl Listing {
 		investor_id: AccountId,
 	) -> Promise {
 		match self.status {
-			ListingStatus::SaleFinalized 
+			ListingStatus::SaleFinalized
 			| ListingStatus::PoolCreated
 			| ListingStatus::PoolProjectTokenSent
 			| ListingStatus::PoolPriceTokenSent
@@ -404,10 +447,7 @@ impl Listing {
 									U64(allocations_to_withdraw[0]),
 									U64(allocations_to_withdraw[1]),
 								],
-								[
-									U64(allocations_remaining[0]),
-									U64(allocations_remaining[1]),
-								],
+								[U64(allocations_remaining[0]), U64(allocations_remaining[1])],
 								U128(withdraw_amounts),
 								"project".to_string(),
 							),
@@ -432,10 +472,7 @@ impl Listing {
 									U64(allocations_to_withdraw[0]),
 									U64(allocations_to_withdraw[1]),
 								],
-								[
-									U64(allocations_remaining[0]),
-									U64(allocations_remaining[1]),
-								],
+								[U64(allocations_remaining[0]), U64(allocations_remaining[1])],
 								U128(withdraw_amounts),
 								"price".to_string(),
 							),
@@ -476,7 +513,9 @@ impl Listing {
 	}
 
 	pub fn undo_withdraw_liquidity_project_token(&mut self, amount: u128) {
-		self.listing_treasury.undo_withdraw_liquidity_project_token(amount);
+		self
+			.listing_treasury
+			.undo_withdraw_liquidity_project_token(amount);
 		self.dex_project_tokens = None;
 	}
 
@@ -487,7 +526,9 @@ impl Listing {
 	}
 
 	pub fn undo_withdraw_liquidity_price_token(&mut self, amount: u128) {
-		self.listing_treasury.undo_withdraw_liquidity_price_token(amount);
+		self
+			.listing_treasury
+			.undo_withdraw_liquidity_price_token(amount);
 		self.dex_price_tokens = None;
 	}
 }

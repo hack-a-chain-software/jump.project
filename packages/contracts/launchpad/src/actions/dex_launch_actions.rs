@@ -18,9 +18,9 @@ impl Contract {
     listing.dex_lock_time = timestamp + LOCK_PERIOD;
     match listing.status {
       ListingStatus::Unfunded
-      | ListingStatus::Funded
-      | ListingStatus::Cancelled
-      | ListingStatus::LiquidityPoolFinalized => panic!(),
+      | ListingStatus::Funded => panic!("{}", ERR_404),
+      ListingStatus::Cancelled => panic!("{}", ERR_406),
+      ListingStatus::LiquidityPoolFinalized => panic!("{}", ERR_405),
 
       ListingStatus::SaleFinalized => {
         // send call to create liquidity pool

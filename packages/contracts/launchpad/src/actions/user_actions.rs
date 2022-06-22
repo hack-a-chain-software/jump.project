@@ -93,6 +93,7 @@ impl Contract {
       &investor,
       &current_sale_phase,
       previous_allocations_bought[0],
+      &listing,
     );
     let (allocations_bought, leftover) =
       listing.buy_allocation(price_tokens_sent, investor_allocations);

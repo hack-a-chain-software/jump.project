@@ -12,7 +12,7 @@ use near_sdk::serde_json;
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
-use crate::listing::{VListing, Listing, SalePhase};
+use crate::listing::{VListing, Listing, SalePhase, ListingType};
 use crate::investor::{VInvestor, Investor};
 use crate::errors::*;
 
@@ -43,6 +43,8 @@ pub struct ContractSettings {
 pub enum StorageKey {
 	Guardians,
 	Listings,
+	ListingWhitelistLazyOption { listing_id: u64 },
+	ListingWhitelist { listing_id: u64 },
 	InvestorTreasury { account_id: AccountId },
 	Investors,
 	Treasury,
@@ -81,6 +83,7 @@ impl Contract {
 			account_id: current_account.clone(),
 			storage_deposit: env::account_balance(),
 			storage_used: 0,
+			is_listing_owner: true,
 			staked_token: 0,
 			last_check: 0,
 			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {
@@ -117,6 +120,7 @@ impl Contract {
 			listing_data.project_owner,
 			project_token,
 			price_token,
+			listing_data.listing_type,
 			listing_data.open_sale_1_timestamp_seconds.0 * TO_NANO,
 			listing_data.open_sale_2_timestamp_seconds.0 * TO_NANO,
 			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
@@ -220,27 +224,45 @@ impl Contract {
 		investor: &Investor,
 		listing_phase: &SalePhase,
 		allocations_bought: u64,
+		listing: &Listing,
 	) -> u64 {
-		let investor_level =
-			investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens);
-		let mut base_allowance = if investor_level == 0 {
-			0
-		} else {
-			self
-				.contract_settings
-				.tiers_entitled_allocations
-				.get(investor_level as usize - 1)
-				.unwrap()
-				.0
-		};
-		match listing_phase {
-			SalePhase::Phase1 => (),
-			SalePhase::Phase2 => base_allowance += self.contract_settings.allowance_phase_2.0,
-		}
-		if base_allowance >= allocations_bought {
-			base_allowance - allocations_bought
-		} else {
-			0
+		match listing.listing_type {
+			ListingType::Public => {
+				let investor_level =
+					investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens);
+				let mut base_allowance = if investor_level == 0 {
+					0
+				} else {
+					self
+						.contract_settings
+						.tiers_entitled_allocations
+						.get(investor_level as usize - 1)
+						.unwrap()
+						.0
+				};
+				match listing_phase {
+					SalePhase::Phase1 => (),
+					SalePhase::Phase2 => base_allowance += self.contract_settings.allowance_phase_2.0,
+				}
+				if base_allowance >= allocations_bought {
+					base_allowance - allocations_bought
+				} else {
+					0
+				}
+			},
+			ListingType::Private => {
+				let mut base_allowance = listing.check_private_sale_investor_allowance(&investor.account_id);
+				match listing_phase {
+					SalePhase::Phase1 => (),
+					SalePhase::Phase2 => base_allowance += self.contract_settings.allowance_phase_2.0,
+				}
+				if base_allowance >= allocations_bought {
+					base_allowance - allocations_bought
+				} else {
+					0
+				}
+
+			}
 		}
 	}
 
@@ -292,34 +314,33 @@ impl Contract {
 }
 
 mod string {
-    use std::fmt::Display;
-    use near_sdk::serde::{Serializer};
+	use std::fmt::Display;
+	use near_sdk::serde::{Serializer};
 
-    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
-        where T: Display,
-              S: Serializer
-    {
-        serializer.collect_str(value)
-    }
-
+	pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		T: Display,
+		S: Serializer,
+	{
+		serializer.collect_str(value)
+	}
 }
 
 mod string_option {
 	use std::fmt::Display;
-    use near_sdk::serde::{Serializer};
+	use near_sdk::serde::{Serializer};
 
-    pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
-        where T: Display,
-              S: Serializer
-    {
+	pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		T: Display,
+		S: Serializer,
+	{
 		match value {
 			Some(number) => serializer.collect_str(number),
-			None => serializer.serialize_none()
+			None => serializer.serialize_none(),
 		}
-    }
-
+	}
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -409,6 +430,7 @@ mod tests {
 			account_id: CONTRACT_ACCOUNT.parse().unwrap(),
 			storage_deposit: 1_000_000_000_000_000_000_000_000,
 			storage_used: 10_000,
+			is_listing_owner: false,
 			staked_token: 0,
 			last_check: 0,
 			allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {

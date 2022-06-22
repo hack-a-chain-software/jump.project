@@ -72,6 +72,7 @@ impl StorageManagement for Contract {
                 account_deposit.allocation_count.is_empty(),
                 "{}", ERR_203
             );
+            assert!(!account_deposit.is_listing_owner, "{}", ERR_210);
             self.investors.remove(&account_id);
             Promise::new(account_id.clone()).transfer(account_deposit.storage_deposit);
             true

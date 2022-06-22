@@ -12,6 +12,7 @@ pub struct ListingData {
   pub project_owner: AccountId,
   pub project_token: AccountId,
   pub price_token: AccountId,
+  pub listing_type: ListingType,
   pub open_sale_1_timestamp_seconds: U64,
   pub open_sale_2_timestamp_seconds: U64,
   pub final_sale_2_timestamp_seconds: U64,
@@ -33,11 +34,11 @@ impl Contract {
   pub fn create_new_listing(&mut self, listing_data: ListingData) -> u64 {
     self.assert_owner_or_guardian();
     let initial_storage = env::storage_usage();
-    let contract_account_id = env::current_account_id();
-    let mut contract_account = self.internal_get_investor(&contract_account_id).unwrap();
+    let project_owner_account_id = listing_data.project_owner.clone();
+    let mut project_owner_account = self.internal_get_investor(&project_owner_account_id).expect(ERR_010);
     let listing_id = self.internal_create_new_listing(listing_data);
-    contract_account.track_storage_usage(initial_storage);
-    self.internal_update_investor(&contract_account_id, contract_account);
+    project_owner_account.track_storage_usage(initial_storage);
+    self.internal_update_investor(&project_owner_account_id, project_owner_account);
     listing_id
   }
 
@@ -45,11 +46,11 @@ impl Contract {
   pub fn cancel_listing(&mut self, listing_id: U64) {
     self.assert_owner_or_guardian();
     let initial_storage = env::storage_usage();
-    let contract_account_id = env::current_account_id();
-    let mut contract_account = self.internal_get_investor(&contract_account_id).unwrap();
+    let project_owner_account_id = env::current_account_id();
+    let mut project_owner_account = self.internal_get_investor(&project_owner_account_id).unwrap();
     self.internal_cancel_listing(listing_id.0);
-    contract_account.track_storage_usage(initial_storage);
-    self.internal_update_investor(&contract_account_id, contract_account);
+    project_owner_account.track_storage_usage(initial_storage);
+    self.internal_update_investor(&project_owner_account_id, project_owner_account);
   }
 }
 
@@ -64,6 +65,7 @@ mod tests {
       project_owner: PROJECT_ACCOUNT.parse().unwrap(),
       project_token: TOKEN_ACCOUNT.parse().unwrap(),
       price_token: PRICE_TOKEN_ACCOUNT.parse().unwrap(),
+      listing_type: ListingType::Public,
       open_sale_1_timestamp_seconds: U64(1_000_000_000),
       open_sale_2_timestamp_seconds: U64(2_000_000_000),
       final_sale_2_timestamp_seconds: U64(3_000_000_000),

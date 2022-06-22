@@ -25,6 +25,9 @@ pub struct Investor {
     #[serde(with = "crate::string")]
     pub storage_used: u64,
 
+    // marks whether is listing owner
+    pub is_listing_owner: bool,
+
     // launchpad membership checks
     #[serde(with = "crate::string")]
     pub staked_token: u128,
@@ -42,6 +45,7 @@ impl VInvestor {
             Investor {
                 account_id: account_id.clone(),
                 storage_deposit: initial_deposit,
+                is_listing_owner: false,
                 storage_used: 0,
                 staked_token: 0,
                 last_check: 0,
