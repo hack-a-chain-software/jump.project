@@ -17,6 +17,34 @@ impl Contract {
     self.internal_get_investor(&account_id)
   }
 
+  pub fn view_investor_allowance(&self, account_id: AccountId, listing_id: Option<U64>) -> U64 {
+    if let Some(investor) = self.internal_get_investor(&account_id) {
+      match listing_id {
+        Some(listing_id) => {
+          let listing = self.internal_get_listing(listing_id.0);
+          let current_sale_phase = listing.get_current_sale_phase();
+          let previous_allocations_bought = investor
+            .allocation_count
+            .get(&listing.listing_id)
+            .unwrap_or([0, 0]);
+          U64(self.check_investor_allowance(
+            &investor,
+            &current_sale_phase,
+            previous_allocations_bought[0],
+            &listing,
+          ))
+        }
+        None => {
+          let membership_level =
+            investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens);
+          self.contract_settings.tiers_entitled_allocations[membership_level as usize - 1]
+        }
+      }
+    } else {
+      U64(0)
+    }
+  }
+
   pub fn view_investor_allocation(
     &self,
     account_id: AccountId,
