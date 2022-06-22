@@ -83,6 +83,19 @@ impl Contract {
     self.contract_settings.clone()
   }
 
+  pub fn view_contract_owner(&self) -> AccountId {
+    self.owner.clone()
+  }
+
+  pub fn view_guardians_paginated(&self, start: U64, size: U64) -> HashSet<AccountId> {
+    self
+      .guardians
+      .iter()
+      .skip(start.0 as usize)
+      .take(size.0 as usize)
+      .collect()
+  }
+
   pub fn view_contract_treasury_length(&self) -> U64 {
     U64(self.treasury.len())
   }

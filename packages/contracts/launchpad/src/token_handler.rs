@@ -9,7 +9,7 @@ pub const GAS_FOR_FT_TRANSFER: Gas = Gas(20_000_000_000_000);
 pub const GAS_FOR_FT_TRANSFER_CALL: Gas = Gas(200_000_000_000_000);
 pub const GAS_FOR_FT_TRANSFER_CALLBACK: Gas = Gas(50_000_000_000_000);
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Eq, PartialEq, Debug)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub enum TokenType {
   FT { account_id: AccountId },

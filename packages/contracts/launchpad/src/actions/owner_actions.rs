@@ -2,7 +2,7 @@
 
 // 1. Designate new guardians;
 // 2. Remove guardian privileges;
-// 3. Withdraw treasury funds; 
+// 3. Withdraw treasury funds;
 
 use crate::*;
 use crate::ext_interface::{ext_self};
@@ -49,6 +49,7 @@ impl Contract {
     let value = self.treasury.values_as_vector().get(token_index.0).unwrap();
     assert!(value > 0, "{}", ERR_009);
     self.treasury.insert(&key, &0);
+    events::retrieve_treasury_funds(&key, U128(value));
     key.transfer_token(self.owner.clone(), value).then(
       ext_self::ext(env::current_account_id())
         .with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
@@ -67,9 +68,9 @@ mod tests {
   /// 1. Assert caller is owner
   /// 2. Assert 1 yocto near was deposited
   /// 3. Add new guardian to set
-  /// #[should_panic(expected = "ERR_001: Only owner can call this method")]
+  /// 4. emit new guardian event
   #[test]
-  fn test_assign_guardian_1() {
+  fn test_assign_guardian() {
     fn closure_generator(caller: AccountId, deposit: u128, seed: u128) -> impl FnOnce() {
       move || {
         testing_env!(get_context(
@@ -80,18 +81,43 @@ mod tests {
           0,
           Gas(300u64 * 10u64.pow(12)),
         ));
-        let mut contract_inst = init_contract(seed);
-        contract_inst.assign_guardian(USER_ACCOUNT.parse().unwrap());
+
+        let guardian_account: AccountId = USER_ACCOUNT.parse().unwrap();
+
+        let mut contract = init_contract(seed);
+
+        assert!(!contract.guardians.contains(&guardian_account));
+        contract.assign_guardian(guardian_account.clone());
+        assert!(contract.guardians.contains(&guardian_account));
+        let logs = get_logs();
+        assert_eq!(logs.len(), 1);
+
+        let event_log = logs.get(0).unwrap();
+        let serde_blob: serde_json::Value =
+          serde_json::from_str(event_log.chars().skip(11).collect::<String>().as_str()).unwrap();
+
+        assert_eq!(serde_blob["standard"], "jump_launchpad");
+        assert_eq!(serde_blob["version"], "1.0.0");
+        assert_eq!(serde_blob["event"], "create_guardian");
+        assert_eq!(
+          serde_blob["data"][0]["new_guardian"],
+          guardian_account.to_string()
+        );
       }
     }
 
-    let test_cases: [(AccountId, u128, Option<String>); 2] = [
-      (USER_ACCOUNT.parse().unwrap(), 1, Some(ERR_001.to_string())), // 1. Assert caller is owner or guardian
+    let test_cases = [
+      // 1. Assert caller is owner or guardian
+      (USER_ACCOUNT.parse().unwrap(), 1, Some(ERR_001.to_string())),
+      // 2. Assert 1 yocto near was deposited
       (
         OWNER_ACCOUNT.parse().unwrap(),
         0,
         Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
-      ), // 2. Assert 1 yocto near was deposited
+      ),
+      // 3. Add new guardian to set
+      // 4. emit new guardian event
+      (OWNER_ACCOUNT.parse().unwrap(), 1, None),
     ];
 
     let mut counter = 0;
@@ -101,103 +127,203 @@ mod tests {
     });
   }
 
+  /// assign_guardian
+  /// Method must:
+  /// 1. Assert caller is owner
+  /// 2. Assert 1 yocto near was deposited
+  /// 3. remove guardian from set
+  /// 4. emit remove guardian event
   #[test]
-  #[should_panic(expected = "Requires attached deposit of exactly 1 yoctoNEAR")]
-  fn test_assign_guardian_2() {
-    let context = get_context(
-      vec![],
-      0,
-      0,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+  fn test_remove_guardian() {
+    fn closure_generator(caller: AccountId, deposit: u128, seed: u128) -> impl FnOnce() {
+      move || {
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          caller,
+          0,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
 
-    let mut contract = init_contract(2);
-    contract.assign_guardian(USER_ACCOUNT.parse().unwrap());
-  }
+        let guardian_account: AccountId = USER_ACCOUNT.parse().unwrap();
 
-  #[test]
-  fn test_assign_guardian_3() {
-    let context = get_context(
-      vec![],
-      1,
-      0,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+        let mut contract = init_contract(seed);
+        contract.guardians.insert(&guardian_account);
 
-    let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
+        assert!(contract.guardians.contains(&guardian_account));
+        contract.remove_guardian(guardian_account.clone());
+        assert!(!contract.guardians.contains(&guardian_account));
+        let logs = get_logs();
+        assert_eq!(logs.len(), 1);
 
-    let mut contract = init_contract(3);
-    assert!(contract.guardians.is_empty());
-    contract.assign_guardian(guardian.clone());
-    assert!(contract.guardians.contains(&guardian))
+        let event_log = logs.get(0).unwrap();
+        let serde_blob: serde_json::Value =
+          serde_json::from_str(event_log.chars().skip(11).collect::<String>().as_str()).unwrap();
+
+        assert_eq!(serde_blob["standard"], "jump_launchpad");
+        assert_eq!(serde_blob["version"], "1.0.0");
+        assert_eq!(serde_blob["event"], "remove_guardian");
+        assert_eq!(
+          serde_blob["data"][0]["old_guardian"],
+          guardian_account.to_string()
+        );
+      }
+    }
+
+    let test_cases = [
+      // 1. Assert caller is owner or guardian
+      (USER_ACCOUNT.parse().unwrap(), 1, Some(ERR_001.to_string())),
+      // 2. Assert 1 yocto near was deposited
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        0,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ),
+      // 3. remove guardian from set
+      // 4. emit remove guardian event
+      (OWNER_ACCOUNT.parse().unwrap(), 1, None),
+    ];
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, counter), v.2);
+      counter += 1;
+    });
   }
 
   /// assign_guardian
   /// Method must:
   /// 1. Assert caller is owner
   /// 2. Assert 1 yocto near was deposited
-  /// 3. Add new guardian to set
+  /// 3. Assert provided index exist
+  /// 4. Assert token balance is above 0
+  /// 5. Update token balance to 0
+  /// 6. Create Promise to transfer token to owner account
+  /// 7. Emit owner withdraw event
   #[test]
-  #[should_panic(expected = "ERR_001: Only owner can call this method")]
-  fn test_remove_guardian_1() {
-    let context = get_context(
-      vec![],
-      1,
-      0,
-      USER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+  fn test_retrieve_treasury_funds() {
+    fn closure_generator(
+      caller: AccountId,
+      deposit: u128,
+      index: u64,
+      seed: u128,
+    ) -> impl FnOnce() {
+      move || {
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          caller,
+          0,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
 
-    let mut contract = init_contract(4);
-    contract.remove_guardian(USER_ACCOUNT.parse().unwrap());
-  }
+        let mut contract = init_contract(seed);
 
-  #[test]
-  #[should_panic(expected = "Requires attached deposit of exactly 1 yoctoNEAR")]
-  fn test_remove_guardian_2() {
-    let context = get_context(
-      vec![],
-      0,
-      0,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+        let token1 = TokenType::FT {
+          account_id: PRICE_TOKEN_ACCOUNT.parse().unwrap(),
+        };
+        let balance1 = 1000;
+        let token2 = TokenType::FT {
+          account_id: TOKEN_ACCOUNT.parse().unwrap(),
+        };
+        let balance2 = 0;
+        contract.treasury.insert(&token1, &balance1);
+        contract.treasury.insert(&token2, &balance2);
 
-    let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
+        let key = contract.treasury.keys_as_vector().get(index).unwrap_or(token1);
+        let initial_value = contract.treasury.get(&key).unwrap_or(0);
 
-    let mut contract = init_contract(5);
-    contract.guardians.insert(&guardian);
-    contract.remove_guardian(guardian.clone());
-  }
+        contract.retrieve_treasury_funds(U64(index));
 
-  #[test]
-  fn test_remove_guardian_3() {
-    let context = get_context(
-      vec![],
-      1,
-      0,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
+        assert_eq!(contract.treasury.get(&key).unwrap(), 0);
+        let receipts = get_created_receipts();
+        assert_eq!(receipts.len(), 2);
 
-    let guardian: AccountId = AccountId::try_from(USER_ACCOUNT.to_string()).unwrap();
+        assert_eq!(receipts[0].receiver_id, key.ft_get_account_id());
+        assert_eq!(receipts[0].actions.len(), 1);
+        match receipts[0].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args: _,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "ft_transfer");
+            assert_eq!(deposit, 1);
+          }
+          _ => panic!(),
+        }
 
-    let mut contract = init_contract(6);
-    contract.guardians.insert(&guardian);
-    assert!(contract.guardians.contains(&guardian));
-    contract.remove_guardian(guardian.clone());
-    assert!(!contract.guardians.contains(&guardian))
+        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+        assert_eq!(receipts[1].actions.len(), 1);
+        match receipts[1].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args: _,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "callback_token_transfer_to_owner");
+            assert_eq!(deposit, 0);
+          }
+          _ => panic!(),
+        }
+
+        let logs = get_logs();
+        assert_eq!(logs.len(), 1);
+
+        let event_log = logs.get(0).unwrap();
+        let serde_blob: serde_json::Value =
+          serde_json::from_str(event_log.chars().skip(11).collect::<String>().as_str()).unwrap();
+
+        assert_eq!(serde_blob["standard"], "jump_launchpad");
+        assert_eq!(serde_blob["version"], "1.0.0");
+        assert_eq!(serde_blob["event"], "retrieve_treasury_funds");
+        // assert_eq!(serde_blob["data"][0]["token_type"], key);
+        assert_eq!(serde_blob["data"][0]["quantity"], initial_value.to_string());
+      }
+    }
+
+    let test_cases = [
+      // 1. Assert caller is owner or guardian
+      (
+        USER_ACCOUNT.parse().unwrap(),
+        1,
+        0,
+        Some(ERR_001.to_string()),
+      ),
+      // 2. Assert 1 yocto near was deposited
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        0,
+        0,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ),
+      // 3. Assert provided index exist
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        1,
+        113,
+        Some(ERR_204.to_string()),
+      ),
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        1,
+        1,
+        Some(ERR_009.to_string()),
+      ),
+      // 5. Update token balance to 0
+      // 6. Create Promise to transfer token to owner account
+      // 7. Emit owner withdraw event
+      (OWNER_ACCOUNT.parse().unwrap(), 1, 0, None),
+    ];
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, v.2, counter), v.3);
+      counter += 1;
+    });
   }
 }

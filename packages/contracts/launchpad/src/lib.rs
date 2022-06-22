@@ -9,6 +9,8 @@ use near_sdk::{
 use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::serde_json;
 
+use std::collections::{HashSet};
+
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
@@ -346,14 +348,18 @@ mod string_option {
 mod tests {
 	pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
 	pub use near_sdk::{VMConfig, RuntimeFeesConfig};
+	pub use near_sdk::test_utils::{get_logs, get_created_receipts};
+	pub use near_sdk::mock::{VmAction};
+	pub use near_sdk::serde_json::{json};
 
 	pub use std::panic::{UnwindSafe, catch_unwind};
-	pub use std::collections::HashMap;
+	pub use std::collections::{HashMap};
 	pub use std::convert::{TryFrom, TryInto};
 
 	pub use super::*;
 
 	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
+	pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
 	pub const TOKEN_ACCOUNT: &str = "token.testnet";
 	pub const PRICE_TOKEN_ACCOUNT: &str = "pricetoken.testnet";
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";

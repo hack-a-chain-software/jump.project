@@ -1,8 +1,10 @@
 use near_sdk::{log, AccountId};
 use near_sdk::serde::{Serialize};
 use near_sdk::serde_json::{json};
+use near_sdk::json_types::{U128};
 
 use crate::listing::{VListing, ListingStatus, SalePhase};
+use crate::token_handler::{TokenType};
 
 fn log_event<T: Serialize>(event: &str, data: T) {
   let event = json!({
@@ -17,13 +19,18 @@ fn log_event<T: Serialize>(event: &str, data: T) {
 
 /// Owner actions events
 pub fn add_guardian(new_guardian: &AccountId) {
-  let data = json!({ "new_guardian": new_guardian }).to_string();
+  let data = json!({ "new_guardian": new_guardian });
   log_event("create_guardian", data);
 }
 
 pub fn remove_guardian(old_guardian: &AccountId) {
-  let data = json!({ "old_guardian": old_guardian }).to_string();
+  let data = json!({ "old_guardian": old_guardian });
   log_event("remove_guardian", data);
+}
+
+pub fn retrieve_treasury_funds(token_type: &TokenType, quantity: U128) {
+  let data = json!({ "token_type": token_type, "quantity": quantity });
+  log_event("retrieve_treasury_funds", data);
 }
 
 /// Guardian actions events
@@ -70,7 +77,6 @@ pub fn project_withdraw_reverted_error(listing_id: u64, token_quantity: u128, to
   });
   log_event("reverted_project_withdraw", data.to_string());
 }
-
 
 pub fn investor_buy_allocation(
   investor: &AccountId,
