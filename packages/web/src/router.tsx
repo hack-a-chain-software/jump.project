@@ -1,6 +1,9 @@
+import { Grid, useColorModeValue } from "@chakra-ui/react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Header } from "./components";
+import { Header, Nav } from "./components";
 import { Home } from "./pages/home";
+import { Project } from "./pages/project";
+import { Staking } from "./pages/staking";
 import { routes } from "./routes";
 
 /**
@@ -10,12 +13,24 @@ import { routes } from "./routes";
  */
 function Router() {
   return (
-    <BrowserRouter>
-      <Header />
-      <Routes>
-        <Route path={routes.home} element={<Home />} />
-      </Routes>
-    </BrowserRouter>
+    <div className={`${useColorModeValue("bg-white", "bg-black")}`}>
+      <BrowserRouter>
+        <Header />
+        <Grid
+          ml="120px"
+          minH="100vh"
+          templateColumns="1fr"
+          bg={useColorModeValue("white", "black")}
+        >
+          <Nav />
+          <Routes>
+            <Route path={routes.home} element={<Home />} />
+            <Route path={routes.projectDetails} element={<Project />} />
+            <Route path={routes.staking} element={<Staking />} />
+          </Routes>
+        </Grid>
+      </BrowserRouter>
+    </div>
   );
 }
 

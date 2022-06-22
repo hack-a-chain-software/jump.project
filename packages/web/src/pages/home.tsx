@@ -1,10 +1,21 @@
-import { useMemo, useState } from "react";
-import { useNearUser, useNearWallet } from "react-near";
-import { LoadingLottie } from "../assets/animations";
-import { Button } from "../components/button";
-import { If } from "../components/if";
-import { NearLogo } from "../components/nearLogo";
-import { contractName } from "../env/contract";
+import {
+  Box,
+  Flex,
+  Image,
+  Input,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import { useNavigate } from "react-router";
+import { CardEndWithJumpLogo } from "../assets/svg/cardEnd";
+import { Select } from "../components";
 
 /**
  * @route - '/'
@@ -12,62 +23,94 @@ import { contractName } from "../env/contract";
  * @name Home
  */
 export function Home() {
-  const [newGreetingForm, setNewGreetingForm] = useState("");
-  const wallet = useNearWallet();
-  const user = useNearUser(contractName);
-
-  const connectToNear = async () => {
-    await wallet?.requestSignIn();
-    await user.connect();
-  };
-
-  const walletConnected = useMemo(() => !!wallet?.isSignedIn(), [wallet]);
-
+  const navigate = useNavigate();
   return (
-    <div className="p-4 flex min-h-[70vh] flex-1 flex-col items-center justify-center">
-      <If fallback={<LoadingLottie />} condition={!user.loading && !!wallet}>
-        <div className="flex flex-col justify-between items-center mb-[-80px] px-4">
-          <div className="mb-[-180px]">
-            <NearLogo size={200} />
-          </div>
-          <LoadingLottie />
-        </div>
-        <If
-          fallback={
-            <>
-              <div className="overflow-hidden">
-                <h1 className="h-auto text-center font-[800] text-4xl tracking-[-0.06em] w3-animate-bottom overflow-hidden">
-                  Welcome to the{" "}
-                  <strong className="w3-animate-bottom">Near Monorepo</strong>
-                </h1>
-              </div>
-              <h1 className="mb-8 max-w-[600px] text-center font-semibold opacity-[0.6] text-xl tracking-[-0.06em] ">
-                A Monorepo that helps you building Dapps on NEAR in the right
-                way, Please Sign In to Interact with The Sample Contract
-              </h1>
-              <Button onClick={connectToNear}>
-                Click Here to Connect Your Wallet
-              </Button>
-            </>
-          }
-          condition={walletConnected}
-        >
-          <div className="overflow-hidden">
-            <h1 className="h-auto text-center font-[800] text-4xl tracking-[-0.06em]  overflow-hidden delay-75">
-              <strong className="mr-2 w3-animate-bottom">Hello</strong>
-              {user.account?.accountId}
-            </h1>
-          </div>
-          <div className="overflow-hidden">
-            <h1 className="h-auto text-center font-[800] text-3xl tracking-[-0.06em] w3-animate-bottom overflow-hidden">
-              Welcome to the Jump Project on NEAR Protocol
-            </h1>
-          </div>
-          <h1 className="mt-3 max-w-[600px] text-center font-semibold opacity-[0.6] text-xl tracking-[-0.06em] w3-animate-fading-in">
-            More Coming Soon
-          </h1>
-        </If>
-      </If>
-    </div>
+    <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
+      <Box
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        w="100%"
+        borderRadius="25px"
+        bg="darkerGrey"
+      >
+        <Flex direction="column" pl="60px">
+          <Text color="white" fontFamily="Damion" fontSize="50px" as="h1">
+            Launchpad
+          </Text>
+          <Text color="white" fontSize="16px" w="500px">
+            A launchpad for new projects to raise capital and for the community
+            to participate in new NEAR project launches.
+          </Text>
+        </Flex>
+        <CardEndWithJumpLogo />
+      </Box>
+
+      <Flex justifyContent="space-between">
+        <Select placeholder="Select the status">
+          <option value="option1">All</option>
+          <option value="option2">Open</option>
+          <option value="option3">Closed</option>
+        </Select>
+        <Flex maxW="330px" w="100%">
+          <Input
+            bg={useColorModeValue("#dddddd", "grey.600")}
+            h="60px"
+            maxW="330px"
+            w="100%"
+            borderRadius={15}
+            placeholder="Search by Pool Name, Token, Address"
+            _placeholder={{
+              color: useColorModeValue("black", "white"),
+            }}
+            borderColor="transparent"
+            outline="none"
+            px="20px"
+          />
+        </Flex>
+      </Flex>
+
+      <TableContainer borderWidth="1px" px="20px" py="20px" borderRadius={20}>
+        <Table size="lg" variant="unstyled">
+          <Thead>
+            <Tr>
+              <Th>Image</Th>
+              <Th>Name</Th>
+              <Th>Price</Th>
+              <Th>Access</Th>
+              <Th>Max Allocation</Th>
+              <Th>Raise Size</Th>
+              <Th>Filled</Th>
+              <Th>Status</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            <Tr
+              cursor="pointer"
+              onClick={() => navigate(`/project/1`)}
+              h="50px"
+              alignItems="center"
+            >
+              <Td>
+                <Image
+                  borderRadius={100}
+                  w={30}
+                  h={30}
+                  src="https://img.raydium.io/icon/poLisWXnNRwC6oBu1vHiuKQzFjGL4XDSu4g9qjz9qVk.png"
+                />
+              </Td>
+              <Td>ATLAS</Td>
+              <Td>0.012 USDC</Td>
+              <Td>JUMP Pool</Td>
+              <Td>Lottery</Td>
+              <Td>30,000,000 ATLAS</Td>
+              <Td>6159.22%</Td>
+              <Td>Closed</Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </Flex>
   );
 }
