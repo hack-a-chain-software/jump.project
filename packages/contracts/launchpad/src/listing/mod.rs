@@ -21,6 +21,7 @@ pub enum VListing {
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
+#[cfg_attr(test, derive(Eq, PartialEq, Debug))]
 pub enum ListingStatus {
 	Unfunded,      // project has not yet deposited initial funds to start the offer
 	Funded,        // project has received all resources
@@ -182,7 +183,7 @@ impl Listing {
 			self.total_amount_sale_project_tokens + self.liquidity_pool_project_tokens,
 			amount,
 			"{}",
-			ERR_104
+			ERR_105
 		);
 	}
 

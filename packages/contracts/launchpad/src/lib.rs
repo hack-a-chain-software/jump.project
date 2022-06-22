@@ -110,6 +110,8 @@ impl Contract {
 		let price_token = TokenType::FT {
 			account_id: listing_data.price_token,
 		};
+		self.internal_create_treasury_token(&project_token);
+		self.internal_create_treasury_token(&price_token);
 		let new_listing = VListing::new(
 			listing_index,
 			listing_data.project_owner,
@@ -129,8 +131,6 @@ impl Contract {
 			listing_data.fee_price_tokens.0,
 			listing_data.fee_liquidity_tokens.0,
 		);
-		self.internal_create_treasury_token(&project_token);
-		self.internal_create_treasury_token(&price_token);
 		self.listings.push(&new_listing);
 		events::create_listing(new_listing);
 		listing_index
@@ -293,9 +293,7 @@ impl Contract {
 
 mod string {
     use std::fmt::Display;
-    use std::str::FromStr;
-
-    use near_sdk::serde::{de, Serializer, Deserialize, Deserializer};
+    use near_sdk::serde::{Serializer};
 
     pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
         where T: Display,
@@ -304,18 +302,10 @@ mod string {
         serializer.collect_str(value)
     }
 
-    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
-        where T: FromStr,
-              T::Err: Display,
-              D: Deserializer<'de>
-    {
-        String::deserialize(deserializer)?.parse().map_err(de::Error::custom)
-    }
 }
 
 mod string_option {
 	use std::fmt::Display;
-
     use near_sdk::serde::{Serializer};
 
     pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>

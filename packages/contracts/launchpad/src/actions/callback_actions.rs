@@ -6,20 +6,17 @@ use near_sdk::utils::{is_promise_success};
 #[near_bindgen]
 impl Contract {
   #[private]
-  pub fn callback_token_transfer_to_owner(
-    &mut self,
-    token_type: TokenType,
-    old_value: U128,
-  ) {
+  pub fn callback_token_transfer_to_owner(&mut self, token_type: TokenType, old_value: U128) {
     if !is_promise_success() {
       match self.treasury.get(&token_type) {
         Some(current_value) => {
-          self.treasury.insert(&token_type, &(current_value + old_value.0));
-        },
-        None => panic!("{}", ERR_401)
+          self
+            .treasury
+            .insert(&token_type, &(current_value + old_value.0));
+        }
+        None => panic!("{}", ERR_401),
       }
-      
-    } 
+    }
   }
 
   #[private]
@@ -80,7 +77,7 @@ impl Contract {
   pub fn callback_membership_token_transfer_to_investor(
     &mut self,
     investor_id: AccountId,
-    amount: U128
+    amount: U128,
   ) {
     if !is_promise_success() {
       // revert changes to listing treasury and to investor's allocations
@@ -94,7 +91,7 @@ impl Contract {
   pub fn callback_dex_launch_create_pool(
     &mut self,
     listing_id: U64,
-    original_deposit: U128
+    original_deposit: U128,
   ) -> PromiseOrValue<bool> {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
@@ -102,7 +99,11 @@ impl Contract {
     match env::promise_result(0) {
       PromiseResult::NotReady => unreachable!(),
       PromiseResult::Successful(value) => {
-        assert_eq!(listing.status, ListingStatus::SaleFinalized, "{}", ERR_401);
+        assert!(
+          matches!(listing.status, ListingStatus::SaleFinalized),
+          "{}",
+          ERR_401
+        );
         if let Ok(parsed_value) = serde_json::from_slice::<u64>(&value) {
           listing.dex_id = Some(parsed_value);
           listing.status = ListingStatus::PoolCreated;
@@ -111,12 +112,10 @@ impl Contract {
           panic!("{}", ERR_402);
         }
         PromiseOrValue::Value(true)
-      },
+      }
       PromiseResult::Failed => {
         self.internal_update_listing(listing_id.0, listing);
-        PromiseOrValue::Promise(
-          Promise::new(env::signer_account_id()).transfer(original_deposit.0)
-        )
+        PromiseOrValue::Promise(Promise::new(env::signer_account_id()).transfer(original_deposit.0))
       }
     }
   }
@@ -130,13 +129,16 @@ impl Contract {
   ) {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
-    assert_eq!(listing.status, ListingStatus::PoolCreated, "{}", ERR_401);
-    
+    assert!(
+      matches!(listing.status, ListingStatus::PoolCreated),
+      "{}",
+      ERR_401
+    );
     if !is_promise_success() {
       listing.undo_withdraw_liquidity_project_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolProjectTokenSent;
-      self.internal_add_to_treasury(&listing.project_token,launchpad_fee.0);
+      self.internal_add_to_treasury(&listing.project_token, launchpad_fee.0);
     }
 
     self.internal_update_listing(listing_id.0, listing);
@@ -151,13 +153,17 @@ impl Contract {
   ) {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
-    assert_eq!(listing.status, ListingStatus::PoolProjectTokenSent, "{}", ERR_401);
+    assert!(
+      matches!(listing.status, ListingStatus::PoolProjectTokenSent),
+      "{}",
+      ERR_401
+    );
 
     if !is_promise_success() {
       listing.undo_withdraw_liquidity_price_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolPriceTokenSent;
-      self.internal_add_to_treasury(&listing.price_token,launchpad_fee.0);
+      self.internal_add_to_treasury(&listing.price_token, launchpad_fee.0);
     }
 
     self.internal_update_listing(listing_id.0, listing);
@@ -167,17 +173,19 @@ impl Contract {
   pub fn callback_dex_add_liquidity(
     &mut self,
     listing_id: U64,
-    original_deposit: U128
+    original_deposit: U128,
   ) -> PromiseOrValue<bool> {
     let mut listing = self.internal_get_listing(listing_id.0);
     listing.dex_lock_time = 0;
     if !is_promise_success() {
       self.internal_update_listing(listing_id.0, listing);
-      PromiseOrValue::Promise(
-        Promise::new(env::signer_account_id()).transfer(original_deposit.0)
-      )
+      PromiseOrValue::Promise(Promise::new(env::signer_account_id()).transfer(original_deposit.0))
     } else {
-      assert_eq!(listing.status, ListingStatus::PoolPriceTokenSent, "{}", ERR_401);
+      assert!(
+        matches!(listing.status, ListingStatus::PoolPriceTokenSent),
+        "{}",
+        ERR_401
+      );
       listing.status = ListingStatus::LiquidityPoolFinalized;
       self.internal_update_listing(listing_id.0, listing);
       PromiseOrValue::Value(true)

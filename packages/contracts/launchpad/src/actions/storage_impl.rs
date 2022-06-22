@@ -42,7 +42,9 @@ impl StorageManagement for Contract {
         } else {
             self.internal_deposit_storage_investor(&account_id, amount);
         }
-        self.internal_get_investor(&account_id).unwrap().track_storage_usage(initial_storage);
+        let mut investor = self.internal_get_investor(&account_id).unwrap();
+        investor.track_storage_usage(initial_storage);
+        self.internal_update_investor(&account_id, investor);
         self.storage_balance_of(account_id)
             .unwrap()
     }
@@ -58,8 +60,6 @@ impl StorageManagement for Contract {
             .unwrap()
     }
 
-    // Change behaviour so that investor's allocations are stored in
-    // their account and not inside each listing
     #[allow(unused_variables)]
     #[payable]
     fn storage_unregister(&mut self, force: Option<bool>) -> bool {

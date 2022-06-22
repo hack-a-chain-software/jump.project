@@ -49,7 +49,7 @@ impl Contract {
     let value = self.treasury.values_as_vector().get(token_index.0).unwrap();
     assert!(value > 0, "{}", ERR_009);
     self.treasury.insert(&key, &0);
-    key.transfer_token(self.owner, value).then(
+    key.transfer_token(self.owner.clone(), value).then(
       ext_self::ext(env::current_account_id())
         .with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
         .callback_token_transfer_to_owner(key, U128(value)),

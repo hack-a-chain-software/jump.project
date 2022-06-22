@@ -44,7 +44,7 @@ impl Contract {
   }
 
   #[payable]
-  pub fn decrease_membership_level(&mut self, withdraw_amount: U128) -> Promise {
+  pub fn decrease_membership_tier(&mut self, withdraw_amount: U128) -> Promise {
     assert_one_yocto();
     let account_id = env::predecessor_account_id();
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
@@ -121,7 +121,7 @@ impl Contract {
     token_count: u128,
     membership_tier: usize,
     token_type: AccountId,
-  ) -> U128 {
+  ) -> u128 {
     assert_eq!(
       token_type, self.contract_settings.membership_token,
       "{}",
@@ -145,6 +145,6 @@ impl Contract {
     investor.staked_token = tokens_needed;
     investor.update_time_check();
     self.internal_update_investor(&account_id, investor);
-    U128(total_tokens - tokens_needed)
+    total_tokens - tokens_needed
   }
 }
