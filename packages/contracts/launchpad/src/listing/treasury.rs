@@ -6,13 +6,19 @@ use crate::{FRACTION_BASE};
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Treasury {
+  #[serde(with = "crate::string")]
   pub presale_project_token_balance: u128,
+  #[serde(with = "crate::string")]
   pub total_received_presale_price_token_balance: u128,
 
+  #[serde(with = "crate::string")]
   pub liquidity_pool_project_token_balance: u128,
+  #[serde(with = "crate::string")]
   pub liquidity_pool_price_token_balance: u128,
 
+  #[serde(with = "crate::string")]
   pub all_investors_project_token_balance: u128,
+  #[serde(with = "crate::string")]
   pub cancellation_funds_price_tokens: u128,
 }
 

@@ -36,45 +36,65 @@ pub enum ListingStatus {
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Listing {
+	#[serde(with = "crate::string")]
 	pub listing_id: u64,
 	pub project_owner: AccountId,
 	pub project_token: TokenType,
 	pub price_token: TokenType,
 	// timestamp information
+	#[serde(with = "crate::string")]
 	pub open_sale_1_timestamp: u64,
+	#[serde(with = "crate::string")]
 	pub open_sale_2_timestamp: u64,
+	#[serde(with = "crate::string")]
 	pub final_sale_2_timestamp: u64,
+	#[serde(with = "crate::string")]
 	pub liquidity_pool_timestamp: u64,
 
 	// financial information
+	#[serde(with = "crate::string")]
 	pub total_amount_sale_project_tokens: u128, //quantity of tokens that will be sold to investors
+	#[serde(with = "crate::string")]
 	pub token_alocation_size: u128, // quantity of tokens that each allocation is composed of
+	#[serde(with = "crate::string")]
 	pub token_allocation_price: u128, //amount of price tokens that need to be paid to buy 1 project allocation
+	#[serde(with = "crate::string")]
 	pub allocations_sold: u64,
+	#[serde(with = "crate::string")]
 	pub liquidity_pool_project_tokens: u128, // how many project tokens are going to be added to the lp in dex
 	// if presale sells off
+	#[serde(with = "crate::string")]
 	pub liquidity_pool_price_tokens: u128, // how many price tokens are going to be added to the lp in dex
 	// if presale sells off
 	// in case presale does not sell off, the percentage of sold allocations will mutiple the pool size
 
 	// vesting information
+	#[serde(with = "crate::string")]
 	pub fraction_instant_release: u128, // divide by FRACTION_BASE will multiply token_alocation_size to see
 	// how many tokens the investor will receive right at the end of presale
+	#[serde(with = "crate::string")]
 	pub cliff_timestamp: u64, // nanoseconds after end of sale to receive vested tokens
 
 	// structure to storage count of tokens in the
 	pub listing_treasury: Treasury,
 
 	// fees charged from project
+	#[serde(with = "crate::string")]
 	pub fee_price_tokens: u128, // fee taken on price tokens received in the presale %
+	#[serde(with = "crate::string")]
 	pub fee_liquidity_tokens: u128, // fee taken on project and price tokens sent to liquidity pool %
 
 	// keep track of listing phases and progress
 	pub status: ListingStatus,
 	pub is_treasury_updated: bool, // keeps track of whether treasury has been updated after end of sale or cancellation
+
+	#[serde(with = "crate::string_option")]
 	pub dex_id: Option<u64>,
+	#[serde(with = "crate::string_option")]
 	pub dex_project_tokens: Option<u128>,
+	#[serde(with = "crate::string_option")]
 	pub dex_price_tokens: Option<u128>,
+	#[serde(with = "crate::string")]
 	pub dex_lock_time: u64,
 }
 

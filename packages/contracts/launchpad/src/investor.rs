@@ -2,6 +2,7 @@ use near_sdk::{env, AccountId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{ UnorderedMap };
 use near_sdk::json_types::{U128};
+use near_sdk::serde::{Serialize};
 
 use crate::{StorageKey};
 use crate::errors::*;
@@ -14,18 +15,24 @@ pub enum VInvestor {
     V1(Investor),
 }
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize)]
+#[serde( crate = "near_sdk::serde" )]
 pub struct Investor {
     pub account_id: AccountId,
     // storage checks
+    #[serde(with = "crate::string")]
     pub storage_deposit: u128,
+    #[serde(with = "crate::string")]
     pub storage_used: u64,
 
     // launchpad membership checks
+    #[serde(with = "crate::string")]
     pub staked_token: u128,
+    #[serde(with = "crate::string")]
     pub last_check: u64,
 
     // listing allocations treasury
+    #[serde(skip)]
     pub allocation_count: UnorderedMap<u64, [u64; 2]>,
 }
 
