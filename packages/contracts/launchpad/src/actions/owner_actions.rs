@@ -232,7 +232,11 @@ mod tests {
         contract.treasury.insert(&token1, &balance1);
         contract.treasury.insert(&token2, &balance2);
 
-        let key = contract.treasury.keys_as_vector().get(index).unwrap_or(token1);
+        let key = contract
+          .treasury
+          .keys_as_vector()
+          .get(index)
+          .unwrap_or(token1);
         let initial_value = contract.treasury.get(&key).unwrap_or(0);
 
         contract.retrieve_treasury_funds(U64(index));
@@ -281,7 +285,12 @@ mod tests {
         assert_eq!(serde_blob["standard"], "jump_launchpad");
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "retrieve_treasury_funds");
-        // assert_eq!(serde_blob["data"][0]["token_type"], key);
+        println!("{}", serde_blob["data"][0]["token_type"]);
+        assert_eq!(
+          serde_json::from_str::<TokenType>(&serde_blob["data"][0]["token_type"].to_string())
+            .unwrap(),
+          key
+        );
         assert_eq!(serde_blob["data"][0]["quantity"], initial_value.to_string());
       }
     }
