@@ -285,7 +285,6 @@ mod tests {
         assert_eq!(serde_blob["standard"], "jump_launchpad");
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "retrieve_treasury_funds");
-        println!("{}", serde_blob["data"][0]["token_type"]);
         assert_eq!(
           serde_json::from_str::<TokenType>(&serde_blob["data"][0]["token_type"].to_string())
             .unwrap(),

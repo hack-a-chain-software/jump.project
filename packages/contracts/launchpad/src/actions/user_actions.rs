@@ -100,10 +100,10 @@ impl Contract {
 
     events::investor_buy_allocation(
       &account_id,
-      listing_id,
+      U64(listing_id),
       current_sale_phase,
-      allocations_bought,
-      listing.allocations_sold,
+      U64(allocations_bought),
+      U64(listing.allocations_sold),
     );
     self.internal_update_listing(listing_id, listing);
     let new_allocation_balance = [previous_allocations_bought[0] + allocations_bought; 2];

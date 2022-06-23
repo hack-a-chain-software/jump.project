@@ -60,28 +60,6 @@ mod tests {
   use crate::tests::*;
   pub use super::*;
 
-  pub fn standard_listing_data() -> ListingData {
-    ListingData {
-      project_owner: PROJECT_ACCOUNT.parse().unwrap(),
-      project_token: TOKEN_ACCOUNT.parse().unwrap(),
-      price_token: PRICE_TOKEN_ACCOUNT.parse().unwrap(),
-      listing_type: ListingType::Public,
-      open_sale_1_timestamp_seconds: U64(1_000_000_000),
-      open_sale_2_timestamp_seconds: U64(2_000_000_000),
-      final_sale_2_timestamp_seconds: U64(3_000_000_000),
-      liquidity_pool_timestamp_seconds: U64(4_000_000_000),
-      total_amount_sale_project_tokens: U128(1_000_000),
-      token_alocation_size: U128(1_000),
-      token_allocation_price: U128(500),
-      liquidity_pool_project_tokens: U128(1_000),
-      liquidity_pool_price_tokens: U128(800),
-      fraction_instant_release: U128(2_000),
-      cliff_timestamp_seconds: U64(8_000_000_000),
-      fee_price_tokens: U128(100),
-      fee_liquidity_tokens: U128(100),
-    }
-  }
-
   /// create_new_listing
   /// Method must:
   /// 1. Assert caller is owner or guardian

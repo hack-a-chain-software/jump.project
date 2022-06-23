@@ -14,7 +14,7 @@ use std::collections::{HashSet};
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
-use crate::listing::{VListing, Listing, SalePhase, ListingType};
+use crate::listing::{VListing, Listing, SalePhase, ListingType, ListingStatus};
 use crate::investor::{VInvestor, Investor};
 use crate::errors::*;
 
@@ -163,7 +163,7 @@ impl Contract {
 		let mut listing = self.internal_get_listing(listing_id);
 		listing.cancel_listing();
 		self.internal_update_listing(listing_id, listing);
-		events::cancel_listing(listing_id);
+		events::cancel_listing(U64(listing_id));
 	}
 
 	pub fn internal_withdraw_project_funds(&mut self, listing: Listing, listing_id: u64) {
@@ -251,9 +251,10 @@ impl Contract {
 				} else {
 					0
 				}
-			},
+			}
 			ListingType::Private => {
-				let mut base_allowance = listing.check_private_sale_investor_allowance(&investor.account_id);
+				let mut base_allowance =
+					listing.check_private_sale_investor_allowance(&investor.account_id);
 				match listing_phase {
 					SalePhase::Phase1 => (),
 					SalePhase::Phase2 => base_allowance += self.contract_settings.allowance_phase_2.0,
@@ -263,7 +264,6 @@ impl Contract {
 				} else {
 					0
 				}
-
 			}
 		}
 	}
@@ -459,6 +459,52 @@ mod tests {
 			allowance_phase_2: U64(2), // number of allocations to which every user is entitled in phase 2
 			partner_dex: DEX_ACCOUNT.parse().unwrap(),
 		}
+	}
+
+	pub fn standard_listing_data() -> ListingData {
+		ListingData {
+			project_owner: PROJECT_ACCOUNT.parse().unwrap(),
+			project_token: TOKEN_ACCOUNT.parse().unwrap(),
+			price_token: PRICE_TOKEN_ACCOUNT.parse().unwrap(),
+			listing_type: ListingType::Public,
+			open_sale_1_timestamp_seconds: U64(1_000_000_000),
+			open_sale_2_timestamp_seconds: U64(2_000_000_000),
+			final_sale_2_timestamp_seconds: U64(3_000_000_000),
+			liquidity_pool_timestamp_seconds: U64(4_000_000_000),
+			total_amount_sale_project_tokens: U128(1_000_000),
+			token_alocation_size: U128(1_000),
+			token_allocation_price: U128(500),
+			liquidity_pool_project_tokens: U128(1_000),
+			liquidity_pool_price_tokens: U128(800),
+			fraction_instant_release: U128(2_000),
+			cliff_timestamp_seconds: U64(8_000_000_000),
+			fee_price_tokens: U128(100),
+			fee_liquidity_tokens: U128(100),
+		}
+	}
+
+	pub fn standard_listing(listing_id: u64) -> VListing {
+		let listing_data = standard_listing_data();
+		VListing::new(
+			listing_id,
+			PROJECT_ACCOUNT.parse().unwrap(),
+			TokenType::FT { account_id: listing_data.project_token},
+			TokenType::FT { account_id: listing_data.price_token},
+			ListingType::Public,
+			listing_data.open_sale_1_timestamp_seconds.0 * TO_NANO,
+			listing_data.open_sale_2_timestamp_seconds.0 * TO_NANO,
+			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
+			listing_data.liquidity_pool_timestamp_seconds.0 * TO_NANO,
+			listing_data.total_amount_sale_project_tokens.0,
+			listing_data.token_alocation_size.0,
+			listing_data.token_allocation_price.0,
+			listing_data.liquidity_pool_project_tokens.0,
+			listing_data.liquidity_pool_price_tokens.0,
+			listing_data.fraction_instant_release.0,
+			listing_data.cliff_timestamp_seconds.0 * TO_NANO,
+			listing_data.fee_price_tokens.0,
+			listing_data.fee_liquidity_tokens.0,
+		) 
 	}
 
 	#[test]

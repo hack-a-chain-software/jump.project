@@ -1,7 +1,7 @@
 use near_sdk::{log, AccountId};
 use near_sdk::serde::{Serialize};
 use near_sdk::serde_json::{json};
-use near_sdk::json_types::{U128};
+use near_sdk::json_types::{U128, U64};
 
 use crate::listing::{VListing, ListingStatus, SalePhase};
 use crate::token_handler::{TokenType};
@@ -39,13 +39,13 @@ pub fn create_listing(listing_data: VListing) {
   log_event("create_listing", data);
 }
 
-pub fn cancel_listing(listing_id: u64) {
+pub fn cancel_listing(listing_id: U64) {
   let data = json!({ "listing_id": listing_id }).to_string();
   log_event("cancel_listing", data);
 }
 
 /// Project owner actions events
-pub fn project_fund_listing(listing_id: u64, tokens_sale: u128, tokens_liquidity: u128) {
+pub fn project_fund_listing(listing_id: U64, tokens_sale: U128, tokens_liquidity: U128) {
   let data = json!({
       "listing_id": listing_id,
       "tokens_sale": tokens_sale,
@@ -55,9 +55,9 @@ pub fn project_fund_listing(listing_id: u64, tokens_sale: u128, tokens_liquidity
 }
 
 pub fn project_withdraw_listing(
-  listing_id: u64,
-  project_tokens_withdraw: u128,
-  price_tokens_withdraw: u128,
+  listing_id: U64,
+  project_tokens_withdraw: U128,
+  price_tokens_withdraw: U128,
   project_status: &ListingStatus,
 ) {
   let data = json!({
@@ -69,7 +69,7 @@ pub fn project_withdraw_listing(
   log_event("project_withdraw", data.to_string());
 }
 
-pub fn project_withdraw_reverted_error(listing_id: u64, token_quantity: u128, token_type: String) {
+pub fn project_withdraw_reverted_error(listing_id: U64, token_quantity: U128, token_type: String) {
   let data = json!({
       "listing_id": listing_id,
       "tokens_withdraw": token_quantity,
@@ -80,10 +80,10 @@ pub fn project_withdraw_reverted_error(listing_id: u64, token_quantity: u128, to
 
 pub fn investor_buy_allocation(
   investor: &AccountId,
-  listing_id: u64,
+  listing_id: U64,
   sale_phase: SalePhase,
-  allocations_purchased: u64,
-  total_allocations_sold: u64,
+  allocations_purchased: U64,
+  total_allocations_sold: U64,
 ) {
   let data = json!({
       "investor": investor,
@@ -96,9 +96,9 @@ pub fn investor_buy_allocation(
 }
 
 pub fn investor_withdraw_allocations(
-  listing_id: u64,
-  project_tokens_withdraw: u128,
-  price_tokens_withdraw: u128,
+  listing_id: U64,
+  project_tokens_withdraw: U128,
+  price_tokens_withdraw: U128,
   project_status: &ListingStatus,
 ) {
   let data = json!({
@@ -110,7 +110,7 @@ pub fn investor_withdraw_allocations(
   log_event("investor_withdraw", data.to_string());
 }
 
-pub fn investor_withdraw_reverted_error(listing_id: u64, token_quantity: u128, token_type: String) {
+pub fn investor_withdraw_reverted_error(listing_id: U64, token_quantity: U128, token_type: String) {
   let data = json!({
       "listing_id": listing_id,
       "tokens_withdraw": token_quantity,

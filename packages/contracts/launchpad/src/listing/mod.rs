@@ -20,7 +20,7 @@ pub enum VListing {
 	V1(Listing),
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 #[cfg_attr(test, derive(Eq, PartialEq, Debug))]
 pub enum ListingStatus {
@@ -225,6 +225,7 @@ impl Listing {
 		}
 
 		self.status = ListingStatus::Cancelled;
+		self.update_treasury_after_sale();
 	}
 
 	pub fn fund_listing(&mut self) {
@@ -234,9 +235,9 @@ impl Listing {
 		);
 		self.status = ListingStatus::Funded;
 		events::project_fund_listing(
-			self.listing_id,
-			self.total_amount_sale_project_tokens,
-			self.liquidity_pool_project_tokens,
+			U64(self.listing_id),
+			U128(self.total_amount_sale_project_tokens),
+			U128(self.liquidity_pool_project_tokens),
 		);
 	}
 
@@ -286,7 +287,20 @@ impl Listing {
 		self.is_treasury_updated = true;
 	}
 
+	pub fn get_status_sale(&mut self) -> ListingStatus {
+		match self.status.clone() {
+			ListingStatus::Funded => {
+				if env::block_timestamp() > self.final_sale_2_timestamp {
+					// self.status = ListingStatus::SaleFinalized;
+				}
+			}
+			_ => (),
+		};
+		self.status.clone()
+	}
+
 	pub fn withdraw_project_funds(&mut self) {
+		let status = self.get_status_sale();
 		match self.status {
 			ListingStatus::SaleFinalized
 			| ListingStatus::PoolCreated
@@ -333,19 +347,11 @@ impl Listing {
 					);
 
 				events::project_withdraw_listing(
-					self.listing_id,
-					withdraw_amounts.0,
-					withdraw_amounts.1,
+					U64(self.listing_id),
+					U128(withdraw_amounts.0),
+					U128(withdraw_amounts.1),
 					&self.status,
 				);
-			}
-			ListingStatus::Funded => {
-				if env::block_timestamp() > self.final_sale_2_timestamp {
-					self.status = ListingStatus::SaleFinalized;
-					self.withdraw_project_funds()
-				} else {
-					panic!("{}", ERR_103)
-				}
 			}
 			_ => panic!("{}", ERR_103),
 		}
@@ -363,7 +369,7 @@ impl Listing {
 			}
 			_ => panic!("wrongly formatted argument"),
 		}
-		events::project_withdraw_reverted_error(self.listing_id, old_value, field);
+		events::project_withdraw_reverted_error(U64(self.listing_id), U128(old_value), field);
 	}
 
 	pub fn get_current_sale_phase(&self) -> SalePhase {
@@ -433,7 +439,7 @@ impl Listing {
 					self.fraction_instant_release,
 					allocations_to_withdraw,
 				);
-				events::investor_withdraw_allocations(self.listing_id, withdraw_amounts, 0, &self.status);
+				events::investor_withdraw_allocations(U64(self.listing_id), U128(withdraw_amounts), U128(0), &self.status);
 				self
 					.project_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts)
@@ -458,7 +464,7 @@ impl Listing {
 				let withdraw_amounts = self
 					.listing_treasury
 					.withdraw_investor_funds_cancelled(self.token_alocation_size, allocations_to_withdraw);
-				events::investor_withdraw_allocations(self.listing_id, 0, withdraw_amounts, &self.status);
+				events::investor_withdraw_allocations(U64(self.listing_id), U128(0), U128(withdraw_amounts), &self.status);
 				self
 					.price_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts)
@@ -503,7 +509,7 @@ impl Listing {
 			"price" => self.listing_treasury.cancellation_funds_price_tokens += returned_value,
 			_ => panic!("wrongly formatted argument"),
 		}
-		events::investor_withdraw_reverted_error(self.listing_id, returned_value, field);
+		events::investor_withdraw_reverted_error(U64(self.listing_id), U128(returned_value), field);
 	}
 
 	pub fn withdraw_liquidity_project_token(&mut self) -> u128 {
