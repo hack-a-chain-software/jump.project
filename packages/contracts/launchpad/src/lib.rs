@@ -166,10 +166,11 @@ impl Contract {
 		events::cancel_listing(U64(listing_id));
 	}
 
-	pub fn internal_withdraw_project_funds(&mut self, listing: Listing, listing_id: u64) {
+	pub fn internal_withdraw_project_funds(&mut self, listing: Listing, listing_id: u64) -> Promise {
 		let mut listing = listing;
-		listing.withdraw_project_funds();
+		let promise = listing.withdraw_project_funds();
 		self.internal_update_listing(listing_id, listing);
+		promise
 	}
 
 	pub fn internal_get_investor(&self, account_id: &AccountId) -> Option<Investor> {
@@ -351,10 +352,12 @@ mod tests {
 	pub use near_sdk::test_utils::{get_logs, get_created_receipts};
 	pub use near_sdk::mock::{VmAction};
 	pub use near_sdk::serde_json::{json};
+	pub use near_sdk::collections::{LazyOption};
 
 	pub use std::panic::{UnwindSafe, catch_unwind};
 	pub use std::collections::{HashMap};
 	pub use std::convert::{TryFrom, TryInto};
+	pub use std::str::{from_utf8};
 
 	pub use super::*;
 

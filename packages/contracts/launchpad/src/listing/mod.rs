@@ -254,7 +254,11 @@ impl Listing {
 		new_allowance: u64,
 	) {
 		match self.listing_type {
-			ListingType::Private => self.whitelist.get().unwrap().insert(investor_id, &new_allowance),
+			ListingType::Private => self
+				.whitelist
+				.get()
+				.unwrap()
+				.insert(investor_id, &new_allowance),
 			ListingType::Public => unimplemented!(),
 		};
 	}
@@ -268,7 +272,7 @@ impl Listing {
 				| ListingStatus::PoolPriceTokenSent
 				| ListingStatus::LiquidityPoolFinalized => {
 					let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
-					let excess_project_tokens_liquidity = (self.allocations_sold as u128
+					let excess_project_tokens_liquidity = self.liquidity_pool_project_tokens - (self.allocations_sold as u128
 						* self.liquidity_pool_project_tokens)
 						/ total_allocations;
 					let correct_price_tokens_liquidity =
@@ -287,20 +291,7 @@ impl Listing {
 		self.is_treasury_updated = true;
 	}
 
-	pub fn get_status_sale(&mut self) -> ListingStatus {
-		match self.status.clone() {
-			ListingStatus::Funded => {
-				if env::block_timestamp() > self.final_sale_2_timestamp {
-					// self.status = ListingStatus::SaleFinalized;
-				}
-			}
-			_ => (),
-		};
-		self.status.clone()
-	}
-
-	pub fn withdraw_project_funds(&mut self) {
-		let status = self.get_status_sale();
+	pub fn withdraw_project_funds(&mut self) -> Promise {
 		match self.status {
 			ListingStatus::SaleFinalized
 			| ListingStatus::PoolCreated
@@ -308,7 +299,9 @@ impl Listing {
 			| ListingStatus::PoolPriceTokenSent
 			| ListingStatus::LiquidityPoolFinalized
 			| ListingStatus::Cancelled => {
+				println!("presale_project_token_balance: {}", self.listing_treasury.presale_project_token_balance);
 				self.update_treasury_after_sale();
+				println!("presale_project_token_balance: {}", self.listing_treasury.presale_project_token_balance);
 				let mut withdraw_amounts = self.listing_treasury.withdraw_project_funds();
 				let mut launchpad_fees = (0, 0);
 				match self.status {
@@ -319,7 +312,7 @@ impl Listing {
 						launchpad_fees.1 += price_fee
 					}
 				}
-				self
+				let project_promise = self
 					.project_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts.0)
 					.then(
@@ -332,7 +325,8 @@ impl Listing {
 								None,
 							),
 					);
-				self
+
+				let price_promise = self
 					.price_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts.1)
 					.then(
@@ -345,13 +339,21 @@ impl Listing {
 								Some(U128(launchpad_fees.1)),
 							),
 					);
-
 				events::project_withdraw_listing(
 					U64(self.listing_id),
 					U128(withdraw_amounts.0),
 					U128(withdraw_amounts.1),
 					&self.status,
 				);
+				project_promise.and(price_promise)
+			}
+			ListingStatus::Funded => {
+				if env::block_timestamp() > self.final_sale_2_timestamp {
+					self.status = ListingStatus::SaleFinalized;
+					self.withdraw_project_funds()
+				} else {
+					panic!("{}", ERR_103);
+				}
 			}
 			_ => panic!("{}", ERR_103),
 		}
@@ -397,7 +399,7 @@ impl Listing {
 	) -> (u64, u128) {
 		let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
 		let available_allocations = total_allocations - self.allocations_sold as u128;
-		let mut try_allocations_buy = self.token_allocation_price / price_token_amount;
+		let mut try_allocations_buy = price_token_amount / self.token_allocation_price;
 		if try_allocations_buy > investor_allowance as u128 {
 			try_allocations_buy = investor_allowance as u128;
 		}
@@ -439,7 +441,12 @@ impl Listing {
 					self.fraction_instant_release,
 					allocations_to_withdraw,
 				);
-				events::investor_withdraw_allocations(U64(self.listing_id), U128(withdraw_amounts), U128(0), &self.status);
+				events::investor_withdraw_allocations(
+					U64(self.listing_id),
+					U128(withdraw_amounts),
+					U128(0),
+					&self.status,
+				);
 				self
 					.project_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts)
@@ -464,7 +471,12 @@ impl Listing {
 				let withdraw_amounts = self
 					.listing_treasury
 					.withdraw_investor_funds_cancelled(self.token_alocation_size, allocations_to_withdraw);
-				events::investor_withdraw_allocations(U64(self.listing_id), U128(0), U128(withdraw_amounts), &self.status);
+				events::investor_withdraw_allocations(
+					U64(self.listing_id),
+					U128(0),
+					U128(withdraw_amounts),
+					&self.status,
+				);
 				self
 					.price_token
 					.transfer_token(self.project_owner.clone(), withdraw_amounts)
