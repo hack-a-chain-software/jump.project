@@ -14,7 +14,7 @@ use std::collections::{HashSet};
 use crate::actions::guardian_actions::{ListingData};
 use crate::token_handler::{TokenType};
 
-use crate::listing::{VListing, Listing, SalePhase, ListingType, ListingStatus};
+pub use crate::listing::{VListing, Listing, SalePhase, ListingType, ListingStatus};
 use crate::investor::{VInvestor, Investor};
 use crate::errors::*;
 
@@ -362,7 +362,7 @@ mod tests {
 	pub use super::*;
 
 	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
-	pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
+	// pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
 	pub const TOKEN_ACCOUNT: &str = "token.testnet";
 	pub const PRICE_TOKEN_ACCOUNT: &str = "pricetoken.testnet";
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";

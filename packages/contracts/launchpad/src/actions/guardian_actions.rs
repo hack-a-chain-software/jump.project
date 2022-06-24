@@ -47,14 +47,7 @@ impl Contract {
   #[payable]
   pub fn cancel_listing(&mut self, listing_id: U64) {
     self.assert_owner_or_guardian();
-    let initial_storage = env::storage_usage();
-    let project_owner_account_id = env::current_account_id();
-    let mut project_owner_account = self
-      .internal_get_investor(&project_owner_account_id)
-      .unwrap();
     self.internal_cancel_listing(listing_id.0);
-    project_owner_account.track_storage_usage(initial_storage);
-    self.internal_update_investor(&project_owner_account_id, project_owner_account);
   }
 }
 
@@ -357,6 +350,120 @@ mod tests {
       run_test_case(
         closure_generator(v.0, v.1, v.2, v.3, v.4, v.5, v.6, v.7, v.8, counter),
         v.9,
+      );
+      println!("counter: {}", counter);
+      counter += 1;
+    });
+  }
+
+  /// cancel_listing
+  /// Method must:
+  /// 1. assert owner or guardian is caller;
+  /// 2. assert one yocto;
+  /// 3. assert sale phase has not yet started
+  /// 4. change listing status to cancelled;
+  /// 5. emit cancel listing event;
+  #[test]
+  fn test_cancel_listing() {
+    fn closure_generator(
+      caller: AccountId,
+      deposit: u128,
+      sale_started: bool,
+      seed: u128,
+    ) -> impl FnOnce() {
+      move || {
+        let timestamp: u64;
+
+        timestamp = if sale_started {
+          standard_listing_data().open_sale_1_timestamp_seconds.0 * TO_NANO + 1
+        } else {
+          standard_listing_data().open_sale_1_timestamp_seconds.0 * TO_NANO - 1
+        };
+
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          caller,
+          timestamp,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
+        let mut contract = init_contract(seed);
+        contract.guardians.insert(&GUARDIAN_ACCOUNT.parse().unwrap());
+
+        let mut listing = standard_listing(contract.listings.len()).into_current();
+
+        listing.status = ListingStatus::Funded;
+
+        contract.listings.push(&VListing::V1(listing));
+
+        contract.cancel_listing(U64(0));
+
+        let listing = contract.listings.get(0).unwrap().into_current();
+
+        assert!(matches!(listing.status, ListingStatus::Cancelled));
+        
+        // assert_eq!(inserted_listing.cliff_timestamp, listing.cliff_timestamp_seconds.0 * TO_NANO);
+        let logs = get_logs();
+        assert_eq!(logs.len(), 1);
+
+        let event_log = logs.get(0).unwrap();
+        let serde_blob: serde_json::Value =
+          serde_json::from_str(event_log.chars().skip(11).collect::<String>().as_str()).unwrap();
+
+        assert_eq!(serde_blob["standard"], "jump_launchpad");
+        assert_eq!(serde_blob["version"], "1.0.0");
+        assert_eq!(serde_blob["event"], "cancel_listing");
+
+        let data: serde_json::Value =
+          serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
+        assert_eq!(data["listing_id"], "0");
+      }
+    }
+
+    let test_cases = [
+      // 1. assert owner or guardian is caller;
+      (
+        USER_ACCOUNT.parse().unwrap(),
+        1,
+        true,
+        Some(ERR_002.to_string()),
+      ),
+      // 2. assert one yocto;
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        0,
+        true,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ),
+      // 3. assert sale phase has not yet started
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        1,
+        false,
+        Some(ERR_101.to_string()),
+      ),
+      // 4. change listing status to cancelled;
+      // 5. emit cancel listing event;
+      (
+        OWNER_ACCOUNT.parse().unwrap(),
+        1,
+        true,
+        None,
+      ),
+      (
+        GUARDIAN_ACCOUNT.parse().unwrap(),
+        1,
+        true,
+        None,
+      ),
+    ];
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(
+        closure_generator(v.0, v.1, v.2, counter),
+        v.3,
       );
       println!("counter: {}", counter);
       counter += 1;
