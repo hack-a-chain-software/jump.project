@@ -68,7 +68,7 @@ pub struct Listing {
 	#[serde(with = "crate::string")]
 	pub total_amount_sale_project_tokens: u128, //quantity of tokens that will be sold to investors
 	#[serde(with = "crate::string")]
-	pub token_alocation_size: u128, // quantity of tokens that each allocation is composed of
+	pub token_allocation_size: u128, // quantity of tokens that each allocation is composed of
 	#[serde(with = "crate::string")]
 	pub token_allocation_price: u128, //amount of price tokens that need to be paid to buy 1 project allocation
 	#[serde(with = "crate::string")]
@@ -83,7 +83,7 @@ pub struct Listing {
 
 	// vesting information
 	#[serde(with = "crate::string")]
-	pub fraction_instant_release: u128, // divide by FRACTION_BASE will multiply token_alocation_size to see
+	pub fraction_instant_release: u128, // divide by FRACTION_BASE will multiply token_allocation_size to see
 	// how many tokens the investor will receive right at the end of presale
 	#[serde(with = "crate::string")]
 	pub cliff_timestamp: u64, // nanoseconds after end of sale to receive vested tokens
@@ -123,7 +123,7 @@ impl VListing {
 		final_sale_2_timestamp: u64,
 		liquidity_pool_timestamp: u64,
 		total_amount_sale_project_tokens: u128,
-		token_alocation_size: u128,
+		token_allocation_size: u128,
 		token_allocation_price: u128,
 		liquidity_pool_project_tokens: u128,
 		liquidity_pool_price_tokens: u128,
@@ -133,12 +133,49 @@ impl VListing {
 		fee_liquidity_tokens: u128,
 	) -> Self {
 		// assert correct timestamps
-		assert!(open_sale_1_timestamp < open_sale_2_timestamp);
-		assert!(open_sale_2_timestamp < final_sale_2_timestamp);
-		assert!(final_sale_2_timestamp < liquidity_pool_timestamp);
+		assert!(open_sale_1_timestamp < open_sale_2_timestamp, "{}", ERR_108);
+		assert!(
+			open_sale_2_timestamp < final_sale_2_timestamp,
+			"{}",
+			ERR_108
+		);
+		assert!(
+			final_sale_2_timestamp < liquidity_pool_timestamp,
+			"{}",
+			ERR_108
+		);
 
-		// assert allocations are a divisor of total projetct tokens
-		assert_eq!(total_amount_sale_project_tokens % token_alocation_size, 0);
+		// assert allocations are a divisor of total project tokens
+		assert_eq!(
+			total_amount_sale_project_tokens % token_allocation_size,
+			0,
+			"{}",
+			ERR_109
+		);
+
+		// assert fraction instant release within FRACTION_BASE
+		assert!(fraction_instant_release <= FRACTION_BASE, "{}", ERR_110);
+
+		// assert dex launch price >= launchpad price
+		assert!(
+			if token_allocation_price >= token_allocation_size {
+				(token_allocation_price / token_allocation_size)
+				<= (liquidity_pool_price_tokens / liquidity_pool_project_tokens)
+			} else {
+				(token_allocation_size / token_allocation_price)
+				>= (liquidity_pool_project_tokens / liquidity_pool_price_tokens)
+			}
+			,
+			"{}",
+			ERR_111
+		);
+
+		// assert dex price_token_liquidity <= price_tokens_expected
+		assert!(
+			token_allocation_price * (total_amount_sale_project_tokens / token_allocation_size) >= liquidity_pool_price_tokens,
+			"{}",
+			ERR_112
+		);
 
 		let whitelist_map = LookupMap::new(StorageKey::ListingWhitelist { listing_id });
 		let whitelist = match listing_type {
@@ -162,7 +199,7 @@ impl VListing {
 			liquidity_pool_timestamp,
 
 			total_amount_sale_project_tokens,
-			token_alocation_size,
+			token_allocation_size,
 			token_allocation_price,
 			allocations_sold: 0,
 			liquidity_pool_project_tokens,
@@ -271,10 +308,10 @@ impl Listing {
 				| ListingStatus::PoolProjectTokenSent
 				| ListingStatus::PoolPriceTokenSent
 				| ListingStatus::LiquidityPoolFinalized => {
-					let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
-					let excess_project_tokens_liquidity = self.liquidity_pool_project_tokens - (self.allocations_sold as u128
-						* self.liquidity_pool_project_tokens)
-						/ total_allocations;
+					let total_allocations = self.total_amount_sale_project_tokens / self.token_allocation_size;
+					let excess_project_tokens_liquidity = self.liquidity_pool_project_tokens
+						- (self.allocations_sold as u128 * self.liquidity_pool_project_tokens)
+							/ total_allocations;
 					let correct_price_tokens_liquidity =
 						(self.allocations_sold as u128 * self.liquidity_pool_price_tokens) / total_allocations;
 					self.listing_treasury.update_treasury_after_sale(
@@ -299,9 +336,15 @@ impl Listing {
 			| ListingStatus::PoolPriceTokenSent
 			| ListingStatus::LiquidityPoolFinalized
 			| ListingStatus::Cancelled => {
-				println!("presale_project_token_balance: {}", self.listing_treasury.presale_project_token_balance);
+				println!(
+					"presale_project_token_balance: {}",
+					self.listing_treasury.presale_project_token_balance
+				);
 				self.update_treasury_after_sale();
-				println!("presale_project_token_balance: {}", self.listing_treasury.presale_project_token_balance);
+				println!(
+					"presale_project_token_balance: {}",
+					self.listing_treasury.presale_project_token_balance
+				);
 				let mut withdraw_amounts = self.listing_treasury.withdraw_project_funds();
 				let mut launchpad_fees = (0, 0);
 				match self.status {
@@ -397,7 +440,7 @@ impl Listing {
 		price_token_amount: u128,
 		investor_allowance: u64,
 	) -> (u64, u128) {
-		let total_allocations = self.total_amount_sale_project_tokens / self.token_alocation_size;
+		let total_allocations = self.total_amount_sale_project_tokens / self.token_allocation_size;
 		let available_allocations = total_allocations - self.allocations_sold as u128;
 		let mut try_allocations_buy = price_token_amount / self.token_allocation_price;
 		if try_allocations_buy > investor_allowance as u128 {
@@ -416,7 +459,7 @@ impl Listing {
 		}
 		self.allocations_sold += allocations_bought;
 		self.listing_treasury.update_after_investment(
-			allocations_bought as u128 * self.token_alocation_size,
+			allocations_bought as u128 * self.token_allocation_size,
 			allocations_bought as u128 * self.token_allocation_price,
 		);
 		(allocations_bought, leftover)
@@ -437,7 +480,7 @@ impl Listing {
 			| ListingStatus::LiquidityPoolFinalized => {
 				self.update_treasury_after_sale();
 				let withdraw_amounts = self.listing_treasury.withdraw_investor_funds(
-					self.token_alocation_size,
+					self.token_allocation_size,
 					self.fraction_instant_release,
 					allocations_to_withdraw,
 				);
@@ -470,7 +513,7 @@ impl Listing {
 				self.update_treasury_after_sale();
 				let withdraw_amounts = self
 					.listing_treasury
-					.withdraw_investor_funds_cancelled(self.token_alocation_size, allocations_to_withdraw);
+					.withdraw_investor_funds_cancelled(self.token_allocation_size, allocations_to_withdraw);
 				events::investor_withdraw_allocations(
 					U64(self.listing_id),
 					U128(0),

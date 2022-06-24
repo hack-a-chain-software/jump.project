@@ -24,10 +24,9 @@ impl Contract {
   ) {
     let listing_id = listing_id.0;
     let listing = self.assert_project_owner(listing_id);
-    let project_owner_id = env::current_account_id();
+    let project_owner_id = listing.project_owner.clone();
     let initial_storage = env::storage_usage();
     let mut project_owner_account = self.internal_get_investor(&project_owner_id).unwrap();
-
     assert!(
       matches!(listing.listing_type, ListingType::Private),
       "{}",
@@ -48,7 +47,7 @@ impl Contract {
   ) {
     let listing_id = listing_id.0;
     let listing = self.assert_project_owner(listing_id);
-    let project_owner_id = env::current_account_id();
+    let project_owner_id = listing.project_owner.clone();
     let initial_storage = env::storage_usage();
     let mut project_owner_account = self.internal_get_investor(&project_owner_id).unwrap();
 
@@ -132,7 +131,7 @@ mod tests {
           .push(&standard_listing(contract.listings.len()));
         let mut listing = contract.listings.get(0).unwrap().into_current();
         let total_allocations =
-          listing.total_amount_sale_project_tokens / listing.token_alocation_size;
+          listing.total_amount_sale_project_tokens / listing.token_allocation_size;
         listing.status = status.clone();
 
         match listing.status {
@@ -459,6 +458,7 @@ mod tests {
       account: AccountId,
       listing_type: ListingType,
       add: bool,
+      enough_storage: bool,
       seed: u128,
     ) -> impl FnOnce() {
       move || {
@@ -482,29 +482,33 @@ mod tests {
         let hash_seed_2 = env::keccak256(&hash_seed);
         listing.whitelist = LazyOption::new(hash_seed, Some(&LookupMap::new(hash_seed_2)));
         if add {
-          listing.whitelist.get().unwrap().insert(&account, &initial_allocations);
+          listing
+            .whitelist
+            .get()
+            .unwrap()
+            .insert(&account, &initial_allocations);
         }
-        
-        contract
-          .listings
-          .push(&VListing::V1(listing));
-        
-        
-        contract.add_investor_private_sale_whitelist(U64(0),
-          account.clone(),
-          U64(allocations));
 
+        let storage_deposit = if enough_storage {
+          1_000_000_000_000_000_000_000_000
+        } else {
+          0
+        };
+
+        contract.internal_deposit_storage_investor(&listing.project_owner, storage_deposit);
+
+        contract.listings.push(&VListing::V1(listing));
+
+        contract.add_investor_private_sale_whitelist(U64(0), account.clone(), U64(allocations));
         let listing = contract.internal_get_listing(0);
-        
         assert_eq!(
           listing.whitelist.get().unwrap().get(&account).unwrap(),
-          if add { 
+          if add {
             allocations + initial_allocations
           } else {
-            allocations 
+            allocations
           }
         )
-
       }
     }
 
@@ -516,6 +520,7 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
         true,
+        true,
         Some(ERR_102.to_string()),
       ),
       // 2. Assert 1 yocto near was deposited
@@ -524,6 +529,7 @@ mod tests {
         0,
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
+        true,
         true,
         Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
       ),
@@ -534,15 +540,35 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Public,
         true,
+        true,
         Some(ERR_107.to_string()),
       ),
       // 4. Track new storage costs and charge to project_owner;
+      (
+        PROJECT_ACCOUNT.parse().unwrap(),
+        1,
+        USER_ACCOUNT.parse().unwrap(),
+        ListingType::Private,
+        false,
+        false,
+        Some(ERR_201.to_string()),
+      ),
+      (
+        PROJECT_ACCOUNT.parse().unwrap(),
+        1,
+        USER_ACCOUNT.parse().unwrap(),
+        ListingType::Private,
+        true,
+        false,
+        None,
+      ),
       // 5. update whitelist to add param allocations to account_id (+=);
       (
         PROJECT_ACCOUNT.parse().unwrap(),
         1,
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
+        true,
         true,
         None,
       ),
@@ -552,15 +578,17 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
         false,
+        true,
         None,
       ),
-
-
     ];
 
     let mut counter = 0;
     IntoIterator::into_iter(test_cases).for_each(|v| {
-      run_test_case(closure_generator(v.0, v.1, v.2, v.3, v.4, counter), v.5);
+      run_test_case(
+        closure_generator(v.0, v.1, v.2, v.3, v.4, v.5, counter),
+        v.6,
+      );
       println!("{}", counter);
       counter += 1;
     });
@@ -581,6 +609,7 @@ mod tests {
       account: AccountId,
       listing_type: ListingType,
       add: bool,
+      enough_storage: bool,
       seed: u128,
     ) -> impl FnOnce() {
       move || {
@@ -604,25 +633,29 @@ mod tests {
         let hash_seed_2 = env::keccak256(&hash_seed);
         listing.whitelist = LazyOption::new(hash_seed, Some(&LookupMap::new(hash_seed_2)));
         if add {
-          listing.whitelist.get().unwrap().insert(&account, &initial_allocations);
+          listing
+            .whitelist
+            .get()
+            .unwrap()
+            .insert(&account, &initial_allocations);
         }
-        
-        contract
-          .listings
-          .push(&VListing::V1(listing));
-        
-        
-        contract.alter_investor_private_sale_whitelist(U64(0),
-          account.clone(),
-          U64(allocations));
 
+        let storage_deposit = if enough_storage {
+          1_000_000_000_000_000_000_000_000
+        } else {
+          0
+        };
+
+        contract.internal_deposit_storage_investor(&listing.project_owner, storage_deposit);
+
+        contract.listings.push(&VListing::V1(listing));
+
+        contract.alter_investor_private_sale_whitelist(U64(0), account.clone(), U64(allocations));
         let listing = contract.internal_get_listing(0);
-        
         assert_eq!(
           listing.whitelist.get().unwrap().get(&account).unwrap(),
           allocations
         )
-
       }
     }
 
@@ -634,6 +667,7 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
         true,
+        true,
         Some(ERR_102.to_string()),
       ),
       // 2. Assert 1 yocto near was deposited
@@ -642,6 +676,7 @@ mod tests {
         0,
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
+        true,
         true,
         Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
       ),
@@ -652,15 +687,35 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Public,
         true,
+        true,
         Some(ERR_107.to_string()),
       ),
       // 4. Track new storage costs and charge to project_owner
+      (
+        PROJECT_ACCOUNT.parse().unwrap(),
+        1,
+        USER_ACCOUNT.parse().unwrap(),
+        ListingType::Private,
+        false,
+        false,
+        Some(ERR_201.to_string()),
+      ),
+      (
+        PROJECT_ACCOUNT.parse().unwrap(),
+        1,
+        USER_ACCOUNT.parse().unwrap(),
+        ListingType::Private,
+        true,
+        false,
+        None,
+      ),
       // 5. update whitelist to be param allocations to account_id (=)
       (
         PROJECT_ACCOUNT.parse().unwrap(),
         1,
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
+        true,
         true,
         None,
       ),
@@ -670,15 +725,17 @@ mod tests {
         USER_ACCOUNT.parse().unwrap(),
         ListingType::Private,
         false,
+        true,
         None,
       ),
-
-
     ];
 
     let mut counter = 0;
     IntoIterator::into_iter(test_cases).for_each(|v| {
-      run_test_case(closure_generator(v.0, v.1, v.2, v.3, v.4, counter), v.5);
+      run_test_case(
+        closure_generator(v.0, v.1, v.2, v.3, v.4, v.5, counter),
+        v.6,
+      );
       println!("{}", counter);
       counter += 1;
     });

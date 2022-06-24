@@ -128,7 +128,7 @@ impl Contract {
 			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
 			listing_data.liquidity_pool_timestamp_seconds.0 * TO_NANO,
 			listing_data.total_amount_sale_project_tokens.0,
-			listing_data.token_alocation_size.0,
+			listing_data.token_allocation_size.0,
 			listing_data.token_allocation_price.0,
 			listing_data.liquidity_pool_project_tokens.0,
 			listing_data.liquidity_pool_price_tokens.0,
@@ -366,6 +366,7 @@ mod tests {
 	pub const TOKEN_ACCOUNT: &str = "token.testnet";
 	pub const PRICE_TOKEN_ACCOUNT: &str = "pricetoken.testnet";
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";
+	pub const GUARDIAN_ACCOUNT: &str = "guardian.testnet";
 	pub const PROJECT_ACCOUNT: &str = "project.testnet";
 	pub const USER_ACCOUNT: &str = "user.testnet";
 	pub const DEX_ACCOUNT: &str = "dex.testnet";
@@ -475,7 +476,7 @@ mod tests {
 			final_sale_2_timestamp_seconds: U64(3_000_000_000),
 			liquidity_pool_timestamp_seconds: U64(4_000_000_000),
 			total_amount_sale_project_tokens: U128(1_000_000),
-			token_alocation_size: U128(1_000),
+			token_allocation_size: U128(1_000),
 			token_allocation_price: U128(500),
 			liquidity_pool_project_tokens: U128(1_000),
 			liquidity_pool_price_tokens: U128(800),
@@ -499,7 +500,7 @@ mod tests {
 			listing_data.final_sale_2_timestamp_seconds.0 * TO_NANO,
 			listing_data.liquidity_pool_timestamp_seconds.0 * TO_NANO,
 			listing_data.total_amount_sale_project_tokens.0,
-			listing_data.token_alocation_size.0,
+			listing_data.token_allocation_size.0,
 			listing_data.token_allocation_price.0,
 			listing_data.liquidity_pool_project_tokens.0,
 			listing_data.liquidity_pool_price_tokens.0,

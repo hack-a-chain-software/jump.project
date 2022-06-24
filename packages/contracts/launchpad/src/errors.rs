@@ -19,6 +19,11 @@ pub const ERR_104: &str = "ERR_104: Transferred token doesn't match listing toke
 pub const ERR_105: &str = "ERR_105: Transferred quantity doesn't match listing requirement";
 pub const ERR_106: &str = "ERR_106: Listing is not in sale phase";
 pub const ERR_107: &str = "ERR_107: Only private listings have whitelists";
+pub const ERR_108: &str = "ERR_108: Provided timestamp data is not sequential";
+pub const ERR_109: &str = "ERR_109: Allocations must be a exact divisor of total project tokens";
+pub const ERR_110: &str = "ERR_110: fraction_instant_release must be <= FRACTION_BASE";
+pub const ERR_111: &str = "ERR_111: Dex launch price cannot be smaller than presale";
+pub const ERR_112: &str = "ERR_112: Cannot allocate more price tokens to dex launch than received fom presale";
 
 /// Investor errors
 pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transaction";
