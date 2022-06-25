@@ -294,10 +294,66 @@ export const Project = () => {
             Social Networks
           </Text>
         </Flex>
-
-        <Button px="50px" onClick={() => {}} bg="white" color="black">
+        <Flex color="white" gap={1}>
+          <Flex
+            w="40px"
+            h="40px"
+            alignItems="center"
+            justifyContent="center"
+            bg="black"
+            p="3px"
+            borderRadius={10}
+          >
+            <DiscordIcon />
+          </Flex>
+          <Flex
+            w="40px"
+            h="40px"
+            alignItems="center"
+            justifyContent="center"
+            bg="black"
+            p="3px"
+            borderRadius={10}
+          >
+            <TwitterIcon />
+          </Flex>
+          <Flex
+            w="40px"
+            h="40px"
+            alignItems="center"
+            justifyContent="center"
+            bg="black"
+            p="3px"
+            borderRadius={10}
+          >
+            <TelegramIcon />
+          </Flex>
+          <Flex
+            w="40px"
+            h="40px"
+            alignItems="center"
+            justifyContent="center"
+            bg="black"
+            p="3px"
+            borderRadius={10}
+          >
+            <WebIcon />
+          </Flex>
+          <Flex
+            w="40px"
+            h="40px"
+            alignItems="center"
+            justifyContent="center"
+            bg="black"
+            p="3px"
+            borderRadius={10}
+          >
+            <WhitepaperIcon />
+          </Flex>
+        </Flex>
+        {/* <Button px="50px" onClick={() => {}} bg="white" color="black">
           Learn More Here
-        </Button>
+        </Button> */}
       </Box>
     </PageContainer>
   );
