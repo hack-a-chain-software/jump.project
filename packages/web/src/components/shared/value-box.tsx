@@ -1,62 +1,47 @@
-import { Box, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, BoxProps, Text, useColorModeValue } from "@chakra-ui/react";
+import { useTheme } from "../../hooks/theme";
 import { If } from "./if";
 
 type Props = {
-  variant?: "regular" | "brand";
-  title: string;
-  value: string;
-  bottomText?: string;
-  darkModeInteraction?: boolean;
+  title: string | JSX.Element;
+  value: string | JSX.Element;
+  bottomText?: string | JSX.Element;
 };
 
 export function ValueBox({
   title,
   value,
-  variant = "regular",
   bottomText,
-  darkModeInteraction,
-}: Props) {
+  ...boxProps
+}: Props & BoxProps) {
   return (
     <Box
       p="20px"
       borderRadius={20}
       borderWidth="1px"
       gap="5px"
-      borderColor={
-        variant === "brand"
-          ? "brand.900"
-          : !darkModeInteraction
-          ? "white"
-          : useColorModeValue("white", "black")
-      }
+      border="2px solid"
+      borderColor={useColorModeValue(
+        "rgba(0,0,0,0.3)",
+        "rgba(255,255,255,0.3)"
+      )}
       display="flex"
       flexDirection="column"
-      w="100%"
+      minW="200px"
+      {...boxProps}
     >
-      <Text
-        color={!darkModeInteraction ? "white" : undefined}
-        fontSize="14px"
-        fontWeight="bold"
-      >
+      <Text fontSize="14px" fontWeight="bold">
         {title}
       </Text>
       <Text
         fontSize="28px"
-        color={
-          variant === "brand"
-            ? "brand.900"
-            : !darkModeInteraction
-            ? "white"
-            : useColorModeValue("white", "black")
-        }
+        color={useColorModeValue("black", "white")}
         fontWeight="bold"
       >
         {value}
       </Text>
       <If condition={!!bottomText}>
-        <Text color={!darkModeInteraction ? "white" : undefined}>
-          {bottomText}
-        </Text>
+        <Text>{bottomText}</Text>
       </If>
     </Box>
   );

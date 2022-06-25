@@ -1,6 +1,7 @@
-import { Grid, useColorModeValue } from "@chakra-ui/react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Flex, Grid, useColorModeValue } from "@chakra-ui/react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
+import { useTheme } from "./hooks/theme";
 import { Home } from "./pages/home";
 import { Project } from "./pages/project";
 import { Staking } from "./pages/staking";
@@ -12,25 +13,22 @@ import { routes } from "./routes";
  * And also some business logic to handle near initialization
  */
 function Router() {
+  const { gradientBackground } = useTheme();
   return (
-    <div className={`${useColorModeValue("bg-white", "bg-black")}`}>
+    <Flex flex={1} bg={gradientBackground}>
       <BrowserRouter>
         <Header />
-        <Grid
-          ml="120px"
-          minH="100vh"
-          templateColumns="1fr"
-          bg={useColorModeValue("white", "black")}
-        >
+        <Grid w="100%" ml="120px" minH="100vh" templateColumns="1fr">
           <Nav />
           <Routes>
+            <Route path="/" element={<Navigate to={routes.home} />} />
             <Route path={routes.home} element={<Home />} />
             <Route path={routes.projectDetails} element={<Project />} />
             <Route path={routes.staking} element={<Staking />} />
           </Routes>
         </Grid>
       </BrowserRouter>
-    </div>
+    </Flex>
   );
 }
 

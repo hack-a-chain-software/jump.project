@@ -7,4 +7,7 @@ export * from "./page-container";
 export * from "./select";
 export * from "./value-box";
 export * from "./modals";
-export * from "./tabs";
+export * from "./top-card";
+export * from "./gradient-box";
+export * from "./gradient-text";
+export * from "./gradient-button";
