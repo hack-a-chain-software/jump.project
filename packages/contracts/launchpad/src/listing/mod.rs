@@ -160,19 +160,19 @@ impl VListing {
 		assert!(
 			if token_allocation_price >= token_allocation_size {
 				(token_allocation_price / token_allocation_size)
-				<= (liquidity_pool_price_tokens / liquidity_pool_project_tokens)
+					<= (liquidity_pool_price_tokens / liquidity_pool_project_tokens)
 			} else {
 				(token_allocation_size / token_allocation_price)
-				>= (liquidity_pool_project_tokens / liquidity_pool_price_tokens)
-			}
-			,
+					>= (liquidity_pool_project_tokens / liquidity_pool_price_tokens)
+			},
 			"{}",
 			ERR_111
 		);
 
 		// assert dex price_token_liquidity <= price_tokens_expected
 		assert!(
-			token_allocation_price * (total_amount_sale_project_tokens / token_allocation_size) >= liquidity_pool_price_tokens,
+			token_allocation_price * (total_amount_sale_project_tokens / token_allocation_size)
+				>= liquidity_pool_price_tokens,
 			"{}",
 			ERR_112
 		);
@@ -266,6 +266,7 @@ impl Listing {
 	}
 
 	pub fn fund_listing(&mut self) {
+		
 		self.listing_treasury.fund_listing(
 			self.total_amount_sale_project_tokens,
 			self.liquidity_pool_project_tokens,
@@ -308,7 +309,8 @@ impl Listing {
 				| ListingStatus::PoolProjectTokenSent
 				| ListingStatus::PoolPriceTokenSent
 				| ListingStatus::LiquidityPoolFinalized => {
-					let total_allocations = self.total_amount_sale_project_tokens / self.token_allocation_size;
+					let total_allocations =
+						self.total_amount_sale_project_tokens / self.token_allocation_size;
 					let excess_project_tokens_liquidity = self.liquidity_pool_project_tokens
 						- (self.allocations_sold as u128 * self.liquidity_pool_project_tokens)
 							/ total_allocations;

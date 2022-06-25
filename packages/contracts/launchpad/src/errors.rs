@@ -24,6 +24,8 @@ pub const ERR_109: &str = "ERR_109: Allocations must be a exact divisor of total
 pub const ERR_110: &str = "ERR_110: fraction_instant_release must be <= FRACTION_BASE";
 pub const ERR_111: &str = "ERR_111: Dex launch price cannot be smaller than presale";
 pub const ERR_112: &str = "ERR_112: Cannot allocate more price tokens to dex launch than received fom presale";
+pub const ERR_113: &str = "ERR_113: Listing can only be funded once";
+pub const ERR_114: &str = "ERR_114: Cannot fund listing after sale start time";
 
 /// Investor errors
 pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transaction";
