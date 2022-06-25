@@ -10,7 +10,7 @@ import { JumpIcon } from "../../assets/svg/jump-logo";
 import { useTheme } from "../../hooks/theme";
 import { navRoutes, routes } from "../../routes";
 
-const enabledRoutes = [routes.staking, routes.home];
+const enabledRoutes = [routes.staking, routes.home, routes.nftStaking];
 
 export const Nav = () => {
   const navigate = useNavigate();

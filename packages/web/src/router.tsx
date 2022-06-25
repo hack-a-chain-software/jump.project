@@ -1,8 +1,9 @@
-import { Flex, Grid, useColorModeValue } from "@chakra-ui/react";
+import { Flex, Grid } from "@chakra-ui/react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
 import { useTheme } from "./hooks/theme";
 import { Home } from "./pages/home";
+import { NFTStaking } from "./pages/nft-staking";
 import { Project } from "./pages/project";
 import { Staking } from "./pages/staking";
 import { routes } from "./routes";
@@ -25,6 +26,7 @@ function Router() {
             <Route path={routes.home} element={<Home />} />
             <Route path={routes.projectDetails} element={<Project />} />
             <Route path={routes.staking} element={<Staking />} />
+            <Route path={routes.nftStaking} element={<NFTStaking />} />
           </Routes>
         </Grid>
       </BrowserRouter>

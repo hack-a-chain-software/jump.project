@@ -8,7 +8,8 @@ import { SwapIcon } from "./assets/svg/swap";
 export const routes = {
   home: "/launchpad",
   projectDetails: "/launchpad/:id",
-  staking: "/staking",
+  staking: "/coin-staking",
+  nftStaking: "/nft-staking",
 };
 
 export const navRoutes = [
@@ -21,8 +22,8 @@ export const navRoutes = [
   {
     title: "Staking",
     icon: <WalletIcon />,
-    route: "/staking",
-    subroutePrefix: "staking",
+    route: "/coin-staking",
+    subroutePrefix: "coin-staking",
   },
   {
     title: "NFT Staking",
