@@ -78,6 +78,7 @@ pub fn project_withdraw_reverted_error(listing_id: U64, token_quantity: U128, to
   log_event("reverted_project_withdraw", data.to_string());
 }
 
+/// Investor action events
 pub fn investor_buy_allocation(
   investor: &AccountId,
   listing_id: U64,
@@ -129,4 +130,30 @@ pub fn investor_withdraw_reverted_error(
       "token_type": token_type
   });
   log_event("reverted_investor_withdraw", data.to_string());
+}
+
+pub fn investor_stake_membership(
+  account_id: &AccountId,
+  token_quantity: U128,
+  new_membership_level: U64
+) {
+  let data = json!({
+      "account_id": account_id,
+      "token_quantity": token_quantity,
+      "new_membership_level": new_membership_level
+  });
+  log_event("stake_membership", data.to_string());
+}
+
+pub fn investor_unstake_membership(
+  account_id: &AccountId,
+  token_quantity: U128,
+  new_membership_level: U64
+) {
+  let data = json!({
+      "account_id": account_id,
+      "token_quantity": token_quantity,
+      "new_membership_level": new_membership_level
+  });
+  log_event("unstake_membership", data.to_string());
 }

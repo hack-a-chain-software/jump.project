@@ -80,10 +80,12 @@ impl Contract {
     listing_id: u64,
     price_tokens_sent: u128,
     account_id: AccountId,
+    token_type: TokenType
   ) -> u128 {
     let initial_storage = env::storage_usage();
     let mut listing = self.internal_get_listing(listing_id);
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
+    assert_eq!(token_type, listing.price_token, "{}", ERR_104);
     let current_sale_phase = listing.get_current_sale_phase();
     let previous_allocations_bought = investor
       .allocation_count
@@ -139,13 +141,14 @@ impl Contract {
     assert!(total_tokens >= tokens_needed, "{}", ERR_206);
     assert!(
       membership_tier as u64
-        > investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens),
+        >= investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens),
       "{}",
       ERR_207
     );
     investor.staked_token = tokens_needed;
     investor.update_time_check();
     self.internal_update_investor(&account_id, investor);
+    events::investor_stake_membership(&account_id, U128(tokens_needed), U64(membership_tier as u64));
     total_tokens - tokens_needed
   }
 }

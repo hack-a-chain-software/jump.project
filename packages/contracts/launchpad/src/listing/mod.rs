@@ -429,7 +429,7 @@ impl Listing {
 						SalePhase::Phase1
 					}
 				} else {
-					panic!("ERR_OPERATIONAL")
+					panic!("{}", ERR_106)
 				}
 			}
 			_ => panic!("{}", ERR_106),

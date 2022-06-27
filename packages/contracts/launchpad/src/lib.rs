@@ -362,7 +362,7 @@ mod tests {
 	pub use super::*;
 
 	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
-	// pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
+	pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
 	pub const TOKEN_ACCOUNT: &str = "token.testnet";
 	pub const PRICE_TOKEN_ACCOUNT: &str = "pricetoken.testnet";
 	pub const OWNER_ACCOUNT: &str = "owner.testnet";
@@ -456,7 +456,7 @@ mod tests {
 
 	pub fn standard_settings() -> ContractSettings {
 		ContractSettings {
-			membership_token: TOKEN_ACCOUNT.parse().unwrap(),
+			membership_token: X_TOKEN_ACCOUNT.parse().unwrap(),
 			token_lock_period: U64(1_000_000_000),
 			tiers_minimum_tokens: vec![U128(10), U128(20), U128(30), U128(40), U128(50), U128(60)],
 			tiers_entitled_allocations: vec![U64(1), U64(2), U64(4), U64(5), U64(9), U64(17)], // number of allocations to which each tier of members is entitled in phase 1
