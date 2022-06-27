@@ -22,6 +22,19 @@ pub struct StakedNFT {
   pub balance: FungibleTokenBalance,
 }
 
+impl StakedNFT {
+  pub fn new(token_id: NonFungibleTokenID, owner_id: AccountId, staked_timestamp: u64) -> Self {
+    let balance = UnorderedMap::new(StorageKey::StakedNFT(token_id.clone()));
+
+    StakedNFT {
+      token_id,
+      owner_id,
+      staked_timestamp,
+      balance,
+    }
+  }
+}
+
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct StakingProgram {
   pub collection: NFTCollection,
@@ -76,33 +89,38 @@ impl StakingProgram {
     }
   }
 
-  pub fn stake_nft(&mut self, token_id: NonFungibleTokenID, owner_id: &AccountId) {
-    let staked_nft = StakedNFT {
-      token_id: token_id.clone(),
-      owner_id: owner_id.clone(),
-      staked_timestamp: env::block_timestamp(),
-      balance: UnorderedMap::new(StorageKey::StakedNFT(token_id.clone())),
-    };
+  pub fn insert_staked_nft(&mut self, staked_nft: StakedNFT) {
+    let token_id = &staked_nft.token_id;
+    let owner_id = &staked_nft.owner_id;
 
-    self.staked_nfts.insert(&token_id, &staked_nft);
+    self.staked_nfts.insert(token_id, &staked_nft);
 
-    let mut nfts_by_owner = self.nfts_by_owner.get(&owner_id).unwrap_or_else(|| {
+    let mut nfts_by_owner = self.nfts_by_owner.get(owner_id).unwrap_or_else(|| {
       UnorderedSet::new(StorageKey::NFTsByOwner {
         collection: self.collection.clone(),
         owner_id: owner_id.clone(),
       })
     });
+    nfts_by_owner.insert(token_id);
 
-    nfts_by_owner.insert(&token_id);
-    self.nfts_by_owner.insert(&owner_id, &nfts_by_owner);
-
-    self.farm.add_nft(&token_id);
+    self.nfts_by_owner.insert(owner_id, &nfts_by_owner);
+    self.farm.add_nft(token_id);
   }
 
-  pub fn unstake_nft(&mut self, token_id: &NonFungibleTokenID, owner_id: &AccountId) {
+  pub fn stake_nft(&mut self, token_id: NonFungibleTokenID, owner_id: AccountId) {
+    let staked_nft = StakedNFT::new(token_id, owner_id, env::block_timestamp());
+
+    self.insert_staked_nft(staked_nft);
+  }
+
+  pub fn unstake_nft(&mut self, token_id: &NonFungibleTokenID, owner_id: &AccountId) -> StakedNFT {
+    let staked_nft = self.staked_nfts.get(token_id).unwrap();
+
     self.staked_nfts.remove(token_id);
     self.nfts_by_owner.get(owner_id).unwrap().remove(token_id);
     self.farm.nfts_rps.remove(token_id);
+
+    staked_nft
   }
 
   pub fn claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
@@ -246,7 +264,7 @@ mod tests {
 
     let nft_id = (collection, "#1".to_string());
 
-    staking_program.stake_nft(nft_id.clone(), &owner_id);
+    staking_program.stake_nft(nft_id.clone(), owner_id.clone());
 
     assert!(staking_program
       .nfts_by_owner

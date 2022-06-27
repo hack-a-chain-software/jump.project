@@ -1,11 +1,11 @@
 use crate::actions::transfer::NFTRoutePayload;
-use crate::constants::{FT_TRANSFER_GAS, NFT_TRANSFER_GAS};
-use crate::ext_interfaces::{ext_fungible_token, ext_non_fungible_token};
-use crate::staking::StakingProgram;
+use crate::constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS};
+use crate::ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self};
+use crate::staking::{StakedNFT, StakingProgram};
 use crate::types::*;
 use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise};
+use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise, PromiseResult};
 
 impl StakingProgram {
   #[inline]
@@ -29,7 +29,7 @@ impl Contract {
     let collection = payload.collection;
 
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
-    staking_program.stake_nft(token_id, &owner_id);
+    staking_program.stake_nft(token_id, owner_id.clone());
     self.staking_programs.insert(&collection, &staking_program);
 
     self.track_storage_usage(&owner_id, initial_storage);
@@ -38,6 +38,29 @@ impl Contract {
 
 #[near_bindgen]
 impl Contract {
+  #[private]
+  pub fn compensate_unstake(
+    &mut self,
+    token_id: NonFungibleTokenID,
+    owner_id: AccountId,
+    staked_timestamp: u64,
+  ) {
+    assert_eq!(env::predecessor_account_id(), env::current_account_id()); // idk if this is redundant with private
+
+    match env::promise_result(0) {
+      PromiseResult::NotReady => env::abort(),
+      PromiseResult::Successful(_) => {}
+      PromiseResult::Failed => {
+        let collection = token_id.0.clone();
+
+        let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp);
+        let mut staking_program = self.staking_programs.get(&collection).unwrap();
+        staking_program.insert_staked_nft(staked_nft);
+        self.staking_programs.insert(&collection, &staking_program);
+      }
+    }
+  }
+
   #[payable]
   pub fn unstake(&mut self, token_id: NonFungibleTokenID) -> Promise {
     assert_one_yocto();
@@ -50,7 +73,7 @@ impl Contract {
 
     staking_program.inner_withdraw(&token_id);
 
-    staking_program.unstake_nft(&token_id, &caller_id);
+    let staked_nft = staking_program.unstake_nft(&token_id, &caller_id);
     self.staking_programs.insert(&collection, &staking_program);
 
     self.track_storage_usage(&caller_id, initial_storage);
@@ -59,7 +82,16 @@ impl Contract {
       NFTCollection::NFTContract { account_id } => ext_non_fungible_token::ext(account_id)
         .with_static_gas(NFT_TRANSFER_GAS)
         .with_attached_deposit(1)
-        .nft_transfer(caller_id.clone(), token_id.1.clone(), None, None),
+        .nft_transfer(caller_id.clone(), token_id.1.clone(), None, None)
+        .then(
+          ext_self::ext(env::current_account_id())
+            .with_static_gas(COMPENSATE_GAS)
+            .compensate_unstake(
+              staked_nft.token_id,
+              staked_nft.owner_id,
+              staked_nft.staked_timestamp,
+            ),
+        ),
     }
   }
 
