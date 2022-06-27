@@ -10,6 +10,7 @@ export const routes = {
   projectDetails: "/launchpad/:id",
   staking: "/coin-staking",
   nftStaking: "/nft-staking",
+  nftStakingProject: "/nft-staking/:id",
 };
 
 export const navRoutes = [

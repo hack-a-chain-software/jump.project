@@ -1,5 +1,11 @@
-import { Image, Stack } from "@chakra-ui/react";
-import { NFTStakingCard, PageContainer, TopCard } from "../components";
+import { Flex, Grid, Image, Stack } from "@chakra-ui/react";
+import { useNavigate } from "react-router";
+import {
+  NFTStakingCard,
+  PageContainer,
+  TopCard,
+  ValueBox,
+} from "../components";
 
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
@@ -9,6 +15,7 @@ const collectionImages = [
 ];
 
 export const NFTStaking = () => {
+  const navigate = useNavigate();
   return (
     <PageContainer>
       <TopCard
@@ -32,6 +39,7 @@ export const NFTStaking = () => {
       />
       <Stack>
         <NFTStakingCard
+          onClick={() => navigate(`/nft-staking/${1}`)}
           collectionLogo="https://d1fdloi71mui9q.cloudfront.net/7gfrOO2CQ7OSk7s9Bpiv_roo-king.png"
           collectionName="Classy Kangaroos"
           tokens={[

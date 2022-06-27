@@ -1,4 +1,5 @@
-import { Box, Flex, Image, Text } from "@chakra-ui/react";
+import * as R from "ramda";
+import { Box, BoxProps, Flex, Image, Text } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
@@ -13,7 +14,7 @@ type Props = {
   frequency?: "weekly" | "daily" | "monthly";
 };
 
-export function NFTStakingCard(props: Props) {
+export function NFTStakingCard(props: Props & BoxProps) {
   const { jumpGradient, gradientBoxTopCard } = useTheme();
 
   const bottomText = useMemo(() => {
@@ -30,7 +31,16 @@ export function NFTStakingCard(props: Props) {
   }, [props.frequency]);
 
   return (
-    <Box cursor="pointer" p="3px" background={jumpGradient} borderRadius="26px">
+    <Box
+      cursor="pointer"
+      p="3px"
+      background={jumpGradient}
+      borderRadius="26px"
+      {...(R.omit(
+        ["collectionName", "collectionLogo", "tokens", "frequency"],
+        props
+      ) as Record<string, string>)}
+    >
       <Box
         display="flex"
         flexDirection="row"
@@ -41,7 +51,7 @@ export function NFTStakingCard(props: Props) {
         borderRadius="24px"
         bg={gradientBoxTopCard}
       >
-        <Flex direction="column">
+        <Flex userSelect="none" direction="column">
           <Image
             src={props.collectionLogo}
             w="60px"
