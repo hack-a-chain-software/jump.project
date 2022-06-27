@@ -86,11 +86,17 @@ impl Contract {
     investor_id: AccountId,
     amount: U128,
   ) {
+    let mut investor = self.internal_get_investor(&investor_id).unwrap();
     if !is_promise_success() {
       // revert changes to listing treasury and to investor's allocations
-      let mut investor = self.internal_get_investor(&investor_id).unwrap();
       investor.staked_token += amount.0;
       self.internal_update_investor(&investor_id, investor);
+    } else {
+      events::investor_unstake_membership(
+        &investor_id,
+        amount,
+        U64(investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens))
+      );
     }
   }
 

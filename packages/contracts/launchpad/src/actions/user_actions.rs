@@ -80,7 +80,7 @@ impl Contract {
     listing_id: u64,
     price_tokens_sent: u128,
     account_id: AccountId,
-    token_type: TokenType
+    token_type: TokenType,
   ) -> u128 {
     let initial_storage = env::storage_usage();
     let mut listing = self.internal_get_listing(listing_id);
@@ -148,7 +148,156 @@ impl Contract {
     investor.staked_token = tokens_needed;
     investor.update_time_check();
     self.internal_update_investor(&account_id, investor);
-    events::investor_stake_membership(&account_id, U128(tokens_needed), U64(membership_tier as u64));
+    events::investor_stake_membership(
+      &account_id,
+      U128(tokens_needed),
+      U64(membership_tier as u64),
+    );
     total_tokens - tokens_needed
+  }
+}
+
+#[cfg(test)]
+mod tests {
+
+  use crate::tests::*;
+
+  /// decrease_membership_tier
+  /// Method must:
+  /// 1. assert one yocto;
+  /// 2. assert investor is registered in storage;
+  /// 3. assert lock period for staked tokens has passed;
+  /// 4. assert withdraw requested amount is smaller or equal to staked balance;
+  /// 5. reduce staked balance in the amount requested for withdrawal;
+  /// 6. promise transfer staked tokens with fail safe callback;
+  #[test]
+  fn test_decrease_membership_tier() {
+    fn closure_generator(
+      one_yocto: bool,
+      investor_exists: bool,
+      lock_passed: bool,
+      withdraw_size: u128,
+      initial_balance: u128,
+      seed: u128,
+    ) -> impl FnOnce() {
+      move || {
+        let investor_correct: AccountId = format!("user{}.testnet", seed).parse().unwrap();
+        let investor_incorrect = "dummy.testnet".parse().unwrap();
+
+        let predecessor = if investor_exists {
+          investor_correct.clone()
+        } else {
+          investor_incorrect
+        };
+
+        let deposit = if one_yocto { 1 } else { 0 };
+
+        let base_time = 1_000_000_000_000_000_000;
+
+        testing_env!(get_context(
+          vec![],
+          deposit,
+          0,
+          predecessor,
+          base_time,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
+
+        let mut contract = init_contract(seed);
+        
+        contract
+          .internal_deposit_storage_investor(&investor_correct, 1_000_000_000_000_000_000_000_000);
+
+        let mut investor = contract.internal_get_investor(&investor_correct).unwrap();
+        investor.staked_token = initial_balance;
+        investor.last_check = if lock_passed {
+          base_time - standard_settings().token_lock_period.0 - 1
+        } else {
+          base_time
+        };
+        contract.internal_update_investor(&investor_correct, investor);
+
+        contract.decrease_membership_tier(
+          U128(withdraw_size)
+        );
+
+        let investor = contract.internal_get_investor(&investor_correct).unwrap();
+        assert_eq!(investor.staked_token, initial_balance - withdraw_size);
+
+        let receipts = get_created_receipts();
+        assert_eq!(receipts.len(), 2);
+
+        assert_eq!(receipts[0].receiver_id, contract.contract_settings.membership_token.clone());
+        assert_eq!(receipts[0].actions.len(), 1);
+        match receipts[0].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "ft_transfer");
+            assert_eq!(deposit, 1);
+            let json_args: serde_json::Value =
+              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+            assert_eq!(json_args["receiver_id"], investor_correct.to_string());
+            assert_eq!(json_args["amount"], withdraw_size.to_string());
+          }
+          _ => panic!(),
+        }
+
+        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+        assert_eq!(receipts[1].actions.len(), 1);
+        match receipts[1].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "callback_membership_token_transfer_to_investor");
+            assert_eq!(deposit, 0);
+            let json_args: serde_json::Value =
+              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+            assert_eq!(json_args["investor_id"], investor_correct.to_string());
+            assert_eq!(json_args["amount"], withdraw_size.to_string());
+          }
+          _ => panic!(),
+        }
+
+      }
+    }
+
+    let test_cases = [
+      // 1. assert one yocto;
+      (false, true, true, 50, 100, Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())),
+      // 2. assert investor is registered in storage;
+      (true, false, true, 50, 100, Some(ERR_004.to_string())),
+      // 3. assert lock period for staked tokens has passed;
+      (true, true, false, 50, 100, Some(ERR_209.to_string())),
+      // 4. assert withdraw requested amount is smaller or equal to staked balance;
+      (true, true, true, 150, 100, Some(ERR_208.to_string())),
+      (true, true, true, 250, 100, Some(ERR_208.to_string())),
+      (true, true, true, 101, 100, Some(ERR_208.to_string())),
+      // 5. reduce staked balance in the amount requested for withdrawal;
+      // 6. promise transfer staked tokens with fail safe callback;
+      (true, true, true, 50, 100, None),
+      (true, true, true, 1000, 5000, None),
+      (true, true, true, 737, 6890, None),
+    ];
+
+    // one_yocto: bool,
+    // investor_exists: bool,
+    // lock_passed: bool,
+    // withdraw_size: u128,
+    // initial_balance: u128,
+    // seed: u128,
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, v.2, v.3, v.4, counter), v.5);
+      println!("{}", counter);
+      counter += 1;
+    });
   }
 }
