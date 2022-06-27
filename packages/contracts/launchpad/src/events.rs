@@ -90,29 +90,41 @@ pub fn investor_buy_allocation(
       "listing_id": listing_id,
       "sale_phase": sale_phase,
       "allocations_purchased": allocations_purchased,
-      "total_allocations_sold": total_allocations_sold, 
+      "total_allocations_sold": total_allocations_sold,
   });
   log_event("investor_buy_allocation", data.to_string());
 }
 
 pub fn investor_withdraw_allocations(
   listing_id: U64,
-  project_tokens_withdraw: U128,
-  price_tokens_withdraw: U128,
+  free_allocations_withdrew: U64,
+  vested_allocations_withdrew: U64,
+  project_tokens_withdrew: U128,
+  price_tokens_withdrew: U128,
   project_status: &ListingStatus,
 ) {
   let data = json!({
       "listing_id": listing_id,
-      "project_tokens_withdraw": project_tokens_withdraw,
-      "price_tokens_withdraw": price_tokens_withdraw,
+      "free_allocations_withdrew": free_allocations_withdrew,
+      "vested_allocations_withdrew": vested_allocations_withdrew,
+      "project_tokens_withdrew": project_tokens_withdrew,
+      "price_tokens_withdrew": price_tokens_withdrew,
       "project_status": project_status
   });
   log_event("investor_withdraw", data.to_string());
 }
 
-pub fn investor_withdraw_reverted_error(listing_id: U64, token_quantity: U128, token_type: String) {
+pub fn investor_withdraw_reverted_error(
+  listing_id: U64,
+  free_allocations_withdrew: U64,
+  vested_allocations_withdrew: U64,
+  token_quantity: U128,
+  token_type: String,
+) {
   let data = json!({
       "listing_id": listing_id,
+      "free_allocations_withdrew": free_allocations_withdrew,
+      "vested_allocations_withdrew": vested_allocations_withdrew,
       "tokens_withdraw": token_quantity,
       "token_type": token_type
   });

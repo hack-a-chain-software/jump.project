@@ -44,7 +44,7 @@ impl Contract {
     &mut self,
     investor_id: AccountId,
     listing_id: U64,
-    total_allocations: [U64; 2],
+    allocations_to_withdraw: [U64; 2],
     allocations_remaining: [U64; 2],
     returned_value: U128,
     field: String,
@@ -52,13 +52,20 @@ impl Contract {
     if !is_promise_success() {
       // revert changes to listing treasury and to investor's allocations
       let listing_id = listing_id.0;
-      let total_allocations = [total_allocations[0].0, total_allocations[1].0];
+      let total_allocations = [
+        allocations_to_withdraw[0].0 + allocations_remaining[0].0,
+        allocations_to_withdraw[1].0 + allocations_remaining[1].0,
+      ];
       let mut listing = self.internal_get_listing(listing_id);
       let mut investor = self.internal_get_investor(&investor_id).unwrap();
       investor
         .allocation_count
         .insert(&listing_id, &total_allocations);
-      listing.revert_failed_investor_withdraw(returned_value.0, field);
+      listing.revert_failed_investor_withdraw(
+        [allocations_to_withdraw[0].0, allocations_to_withdraw[1].0],
+        returned_value.0,
+        field,
+      );
       self.internal_update_listing(listing_id, listing);
     } else {
       // if no more allocations remaining, remove allocations storage

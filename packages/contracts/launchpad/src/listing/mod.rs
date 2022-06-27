@@ -266,7 +266,6 @@ impl Listing {
 	}
 
 	pub fn fund_listing(&mut self) {
-		
 		self.listing_treasury.fund_listing(
 			self.total_amount_sale_project_tokens,
 			self.liquidity_pool_project_tokens,
@@ -488,6 +487,8 @@ impl Listing {
 				);
 				events::investor_withdraw_allocations(
 					U64(self.listing_id),
+					U64(allocations_to_withdraw[0]),
+					U64(allocations_to_withdraw[1]),
 					U128(withdraw_amounts),
 					U128(0),
 					&self.status,
@@ -518,6 +519,8 @@ impl Listing {
 					.withdraw_investor_funds_cancelled(self.token_allocation_size, allocations_to_withdraw);
 				events::investor_withdraw_allocations(
 					U64(self.listing_id),
+					U64(allocations_to_withdraw[0]),
+					U64(allocations_to_withdraw[1]),
 					U128(0),
 					U128(withdraw_amounts),
 					&self.status,
@@ -558,7 +561,12 @@ impl Listing {
 		}
 	}
 
-	pub fn revert_failed_investor_withdraw(&mut self, returned_value: u128, field: String) {
+	pub fn revert_failed_investor_withdraw(
+		&mut self,
+		returned_allocations: [u64; 2],
+		returned_value: u128,
+		field: String,
+	) {
 		match field.as_str() {
 			"project" => {
 				self.listing_treasury.all_investors_project_token_balance += returned_value;
@@ -566,7 +574,13 @@ impl Listing {
 			"price" => self.listing_treasury.cancellation_funds_price_tokens += returned_value,
 			_ => panic!("wrongly formatted argument"),
 		}
-		events::investor_withdraw_reverted_error(U64(self.listing_id), U128(returned_value), field);
+		events::investor_withdraw_reverted_error(
+			U64(self.listing_id),
+			U64(returned_allocations[0]),
+			U64(returned_allocations[1]),
+			U128(returned_value),
+			field,
+		);
 	}
 
 	pub fn withdraw_liquidity_project_token(&mut self) -> u128 {
