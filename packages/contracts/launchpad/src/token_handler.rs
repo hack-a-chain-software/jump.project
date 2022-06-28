@@ -11,6 +11,7 @@ pub const GAS_FOR_FT_TRANSFER_CALLBACK: Gas = Gas(50_000_000_000_000);
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
+#[cfg_attr(test, derive(Clone))]
 pub enum TokenType {
   FT { account_id: AccountId },
 }

@@ -400,12 +400,12 @@ impl Listing {
 	pub fn revert_failed_project_owner_withdraw(&mut self, old_value: u128, field: String) {
 		match field.as_str() {
 			"project" => {
-				self.listing_treasury.presale_project_token_balance = old_value;
+				self.listing_treasury.presale_project_token_balance += old_value;
 			}
 			"price" => {
 				self
 					.listing_treasury
-					.total_received_presale_price_token_balance = old_value
+					.total_received_presale_price_token_balance += old_value
 			}
 			_ => panic!("wrongly formatted argument"),
 		}
