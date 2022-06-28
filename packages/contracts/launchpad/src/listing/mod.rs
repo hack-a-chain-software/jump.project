@@ -391,12 +391,6 @@ impl Listing {
 								Some(U128(launchpad_fees.1)),
 							),
 					);
-				events::project_withdraw_listing(
-					U64(self.listing_id),
-					U128(withdraw_amounts.0),
-					U128(withdraw_amounts.1),
-					&self.status,
-				);
 				project_promise.and(price_promise)
 			}
 			ListingStatus::Funded => {
@@ -423,7 +417,6 @@ impl Listing {
 			}
 			_ => panic!("wrongly formatted argument"),
 		}
-		events::project_withdraw_reverted_error(U64(self.listing_id), U128(old_value), field);
 	}
 
 	pub fn get_current_sale_phase(&self) -> SalePhase {

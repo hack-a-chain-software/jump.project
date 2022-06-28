@@ -69,15 +69,6 @@ pub fn project_withdraw_listing(
   log_event("project_withdraw", data.to_string());
 }
 
-pub fn project_withdraw_reverted_error(listing_id: U64, token_quantity: U128, token_type: String) {
-  let data = json!({
-      "listing_id": listing_id,
-      "tokens_withdraw": token_quantity,
-      "token_type": token_type
-  });
-  log_event("reverted_project_withdraw", data.to_string());
-}
-
 /// Investor action events
 pub fn investor_buy_allocation(
   investor: &AccountId,

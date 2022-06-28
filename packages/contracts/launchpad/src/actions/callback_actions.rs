@@ -33,7 +33,10 @@ impl Contract {
     if !is_promise_success() {
       listing.revert_failed_project_owner_withdraw(old_value.0, field);
     } else if field == "price".to_string() {
+      events::project_withdraw_listing(U64(listing_id), U128(0), old_value, &listing.status);
       self.internal_add_to_treasury(&listing.price_token, fee.unwrap().0);
+    } else if field == "project".to_string() {
+      events::project_withdraw_listing(U64(listing_id), old_value, U128(0), &listing.status);
     }
 
     self.internal_update_listing(listing_id, listing);
