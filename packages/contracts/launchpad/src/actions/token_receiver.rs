@@ -317,10 +317,10 @@ mod tests {
 
         assert_eq!(leftover.0, leftover_goal);
         assert_eq!(listing.allocations_sold as u128, allocations_sold);
-        let expected_count: [u64; 2] = [
+        let expected_count: (u64, u128) = (
           allocations_to_buy.try_into().unwrap(),
-          allocations_to_buy.try_into().unwrap(),
-        ];
+          0,
+        );
         assert_eq!(investor.allocation_count.get(&0).unwrap(), expected_count);
 
         let logs = get_logs();

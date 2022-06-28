@@ -13,14 +13,19 @@ use near_sdk::{Promise};
 
 #[near_bindgen]
 impl Contract {
-  pub fn withdraw_allocations(&mut self, listing_id: u64) -> Promise {
+  #[payable]
+  pub fn withdraw_allocations(&mut self, listing_id: U64) -> Promise {
+    assert_one_yocto();
+    let listing_id = listing_id.0;
     let account_id = env::predecessor_account_id();
     let mut listing = self.internal_get_listing(listing_id);
     listing.update_treasury_after_sale();
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     // figure if cliff has already passed
     let investor_allocations = investor.allocation_count.get(&listing_id).expect(ERR_302);
-    let vested_tokens = listing.calculate_vested_investor_withdraw(investor_allocations.0, env::block_timestamp());
+    assert!(investor_allocations.0 > 0, "{}", ERR_302);
+    let vested_tokens =
+      listing.calculate_vested_investor_withdraw(investor_allocations.0, env::block_timestamp());
     let tokens_to_withdraw = if vested_tokens >= investor_allocations.1 {
       vested_tokens - investor_allocations.1
     } else {
@@ -101,7 +106,10 @@ impl Contract {
       U64(listing.allocations_sold),
     );
     self.internal_update_listing(listing_id, listing);
-    let new_allocation_balance = (previous_allocations_bought.0 + allocations_bought, previous_allocations_bought.1);
+    let new_allocation_balance = (
+      previous_allocations_bought.0 + allocations_bought,
+      previous_allocations_bought.1,
+    );
     investor
       .allocation_count
       .insert(&listing_id, &new_allocation_balance);
@@ -155,6 +163,274 @@ mod tests {
 
   use crate::tests::*;
 
+  /// withdraw_allocations
+  /// Method must:
+  /// 1. assert investor exists
+  /// 2. assert investor has allocations;
+  /// 3. assert sale is finalized;
+  /// 4. calculate vested tokens;
+  /// 6. update withdrawn count in investor balance;
+  /// 7. promise to transfer tokens to investor with fail safe callback;
+  #[test]
+  fn test_withdraw_allocations() {
+    enum VestingTime {
+      NotFinalized,
+      Initial,
+      Cliff { passed_time: u64 },
+      Finalized,
+    }
+
+    fn closure_generator(
+      investor_exists: bool,
+      sale_state: VestingTime,
+      investor_allocations: u64,
+      investor_already_withdrawn: u128,
+      seed: u128,
+    ) -> impl FnOnce() {
+      move || {
+        let investor_correct: AccountId = format!("user{}.testnet", seed).parse().unwrap();
+        let investor_incorrect = "dummy.testnet".parse().unwrap();
+
+        let predecessor = if investor_exists {
+          investor_correct.clone()
+        } else {
+          investor_incorrect
+        };
+
+        let base_time = match sale_state {
+          VestingTime::NotFinalized => {
+            standard_listing_data().final_sale_2_timestamp_seconds.0 * TO_NANO - 1
+          }
+          VestingTime::Initial => {
+            standard_listing_data().final_sale_2_timestamp_seconds.0 * TO_NANO + 1
+          }
+          VestingTime::Cliff { passed_time } => {
+            standard_listing_data().cliff_timestamp_seconds.0 * TO_NANO + passed_time
+          }
+          VestingTime::Finalized => {
+            standard_listing_data().end_cliff_timestamp_seconds.0 * TO_NANO + 1
+          }
+        };
+
+        testing_env!(get_context(
+          vec![],
+          1,
+          1000,
+          predecessor,
+          base_time,
+          Gas(300u64 * 10u64.pow(12)),
+        ));
+
+        let mut contract = init_contract(seed);
+        let mut listing = standard_listing(contract.listings.len()).into_current();
+        let vested_tokens =
+          listing.calculate_vested_investor_withdraw(investor_allocations, base_time);
+        let expected_transfer = vested_tokens - investor_already_withdrawn;
+        listing.fund_listing();
+        listing.buy_allocation(1_000_000_000_000_000_000_000_000, investor_allocations);
+        listing.status = ListingStatus::SaleFinalized;
+        listing.allocations_sold = investor_allocations;
+        contract.listings.push(&VListing::V1(listing));
+
+        contract
+          .internal_deposit_storage_investor(&investor_correct, 1_000_000_000_000_000_000_000_000);
+
+        let mut investor = contract.internal_get_investor(&investor_correct).unwrap();
+        investor
+          .allocation_count
+          .insert(&0, &(investor_allocations, investor_already_withdrawn));
+        contract.internal_update_investor(&investor_correct, investor);
+
+        
+        contract.withdraw_allocations(U64(0));
+
+        let investor = contract.internal_get_investor(&investor_correct).unwrap();
+        let allocation_count = investor.allocation_count.get(&0).unwrap();
+        assert_eq!(allocation_count.0, investor_allocations);
+        assert_eq!(allocation_count.1, vested_tokens);
+
+        let receipts = get_created_receipts();
+        assert_eq!(receipts.len(), 2);
+
+        assert_eq!(
+          receipts[0].receiver_id,
+          standard_listing_data().project_token
+        );
+        assert_eq!(receipts[0].actions.len(), 1);
+        match receipts[0].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "ft_transfer");
+            assert_eq!(deposit, 1);
+            let json_args: serde_json::Value =
+              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+            assert_eq!(json_args["receiver_id"], investor_correct.to_string());
+            assert_eq!(json_args["amount"], expected_transfer.to_string());
+          }
+          _ => panic!(),
+        }
+
+        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+        assert_eq!(receipts[1].actions.len(), 1);
+        match receipts[1].actions[0].clone() {
+          VmAction::FunctionCall {
+            function_name,
+            args,
+            gas: _,
+            deposit,
+          } => {
+            assert_eq!(function_name, "callback_token_transfer_to_investor");
+            assert_eq!(deposit, 0);
+            let json_args: serde_json::Value =
+              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+            assert_eq!(json_args["investor_id"], investor_correct.to_string());
+            assert_eq!(json_args["listing_id"], "0");
+            assert_eq!(json_args["withdraw_amount"], expected_transfer.to_string());
+          }
+          _ => panic!(),
+        }
+      }
+    }
+
+    let allocation_size = standard_listing_data().token_allocation_size.0;
+    let test_cases = [
+      // 1. assert investor exists
+      (
+        false,
+        VestingTime::Finalized,
+        3,
+        0,
+        Some(ERR_004.to_string()),
+      ),
+      // 2. assert investor has allocations;
+      (
+        true,
+        VestingTime::Finalized,
+        0,
+        0,
+        Some(ERR_302.to_string()),
+      ),
+      // 3. assert sale is finalized;
+      (
+        true,
+        VestingTime::NotFinalized,
+        3,
+        0,
+        None,
+      ),
+      // 4. calculate vested tokens;
+      // 6. update withdrawn count in investor balance;
+      // 7. promise to transfer tokens to investor with fail safe callback;
+      (true, VestingTime::Initial, 3, 0, None),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 100 * TO_NANO,
+        },
+        3,
+        0,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1000 * TO_NANO,
+        },
+        3,
+        0,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_000_000_000 * TO_NANO,
+        },
+        3,
+        0,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_500_000_000 * TO_NANO,
+        },
+        3,
+        0,
+        None,
+      ),
+      (true, VestingTime::Finalized, 3, 0, None),
+      (true, VestingTime::Initial, 3, 0, None),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_000_000_000 * TO_NANO,
+        },
+        3,
+        allocation_size,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_500_000_000 * TO_NANO,
+        },
+        3,
+        allocation_size,
+        None,
+      ),
+      (true, VestingTime::Finalized, 3, allocation_size * 2, None),
+      (true, VestingTime::Initial, 3, 0, None),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 100 * TO_NANO,
+        },
+        3,
+        allocation_size / 2,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1000 * TO_NANO,
+        },
+        3,
+        allocation_size / 2,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_000_000_000 * TO_NANO,
+        },
+        3,
+        allocation_size / 2,
+        None,
+      ),
+      (
+        true,
+        VestingTime::Cliff {
+          passed_time: 1_500_000_000 * TO_NANO,
+        },
+        3,
+        allocation_size / 2,
+        None,
+      ),
+      (true, VestingTime::Finalized, 3, allocation_size / 2, None),
+    ];
+
+    let mut counter = 0;
+    IntoIterator::into_iter(test_cases).for_each(|v| {
+      run_test_case(closure_generator(v.0, v.1, v.2, v.3, counter), v.4);
+      println!("{}", counter);
+      counter += 1;
+    });
+  }
+
   /// decrease_membership_tier
   /// Method must:
   /// 1. assert one yocto;
@@ -197,7 +473,6 @@ mod tests {
         ));
 
         let mut contract = init_contract(seed);
-        
         contract
           .internal_deposit_storage_investor(&investor_correct, 1_000_000_000_000_000_000_000_000);
 
@@ -210,9 +485,7 @@ mod tests {
         };
         contract.internal_update_investor(&investor_correct, investor);
 
-        contract.decrease_membership_tier(
-          U128(withdraw_size)
-        );
+        contract.decrease_membership_tier(U128(withdraw_size));
 
         let investor = contract.internal_get_investor(&investor_correct).unwrap();
         assert_eq!(investor.staked_token, initial_balance - withdraw_size);
@@ -220,7 +493,10 @@ mod tests {
         let receipts = get_created_receipts();
         assert_eq!(receipts.len(), 2);
 
-        assert_eq!(receipts[0].receiver_id, contract.contract_settings.membership_token.clone());
+        assert_eq!(
+          receipts[0].receiver_id,
+          contract.contract_settings.membership_token.clone()
+        );
         assert_eq!(receipts[0].actions.len(), 1);
         match receipts[0].actions[0].clone() {
           VmAction::FunctionCall {
@@ -248,7 +524,10 @@ mod tests {
             gas: _,
             deposit,
           } => {
-            assert_eq!(function_name, "callback_membership_token_transfer_to_investor");
+            assert_eq!(
+              function_name,
+              "callback_membership_token_transfer_to_investor"
+            );
             assert_eq!(deposit, 0);
             let json_args: serde_json::Value =
               serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
@@ -257,13 +536,19 @@ mod tests {
           }
           _ => panic!(),
         }
-
       }
     }
 
     let test_cases = [
       // 1. assert one yocto;
-      (false, true, true, 50, 100, Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())),
+      (
+        false,
+        true,
+        true,
+        50,
+        100,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ),
       // 2. assert investor is registered in storage;
       (true, false, true, 50, 100, Some(ERR_004.to_string())),
       // 3. assert lock period for staked tokens has passed;

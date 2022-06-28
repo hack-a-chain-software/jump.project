@@ -102,12 +102,10 @@ mod tests {
   ///       with failsafe callback
   ///    f. send ft_transfer promise for leftover project tokens
   ///       with failsafe callback
-  ///    g. emit withdrawal event
   /// 5. is sale is cancelled:
   ///    a. reduce project tokens in treasury to 0;
   ///    b. send ft_transfer promise for leftover project tokens
   ///       with failsafe callback
-  ///    c. emit withdrawal event
   #[test]
   fn test_withdraw_tokens_project() {
     fn closure_generator(
@@ -294,28 +292,6 @@ mod tests {
           }
           _ => panic!(),
         };
-        let logs = get_logs();
-        assert_eq!(logs.len(), 2);
-
-        let event_log = logs.get(1).unwrap();
-        let serde_blob: serde_json::Value =
-          serde_json::from_str(event_log.chars().skip(11).collect::<String>().as_str()).unwrap();
-
-        assert_eq!(serde_blob["standard"], "jump_launchpad");
-        assert_eq!(serde_blob["version"], "1.0.0");
-        assert_eq!(serde_blob["event"], "project_withdraw");
-
-        let data: serde_json::Value =
-          serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
-        assert_eq!(data["listing_id"], "0");
-        assert_eq!(
-          data["price_tokens_withdraw"],
-          price_tokens_withdraw.to_string()
-        );
-        assert_eq!(
-          data["project_tokens_withdraw"],
-          project_tokens_withdraw.to_string()
-        );
       }
     }
 
@@ -364,7 +340,6 @@ mod tests {
       //       with failsafe callback
       //    f. send ft_transfer promise for leftover project tokens
       //       with failsafe callback
-      //    g. emit withdrawal event
       (
         PROJECT_ACCOUNT.parse().unwrap(),
         1,
@@ -409,7 +384,6 @@ mod tests {
       //    a. reduce project tokens in treasury to 0;
       //    b. send ft_transfer promise for leftover project tokens
       //       with failsafe callback
-      //    c. emit withdrawal event
       (
         PROJECT_ACCOUNT.parse().unwrap(),
         1,

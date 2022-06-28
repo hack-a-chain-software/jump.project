@@ -160,7 +160,7 @@ impl VListing {
 		);
 
 		// assert fraction instant release within FRACTION_BASE
-		assert!(fraction_instant_release <= FRACTION_BASE, "{}", ERR_110);
+		assert!(fraction_instant_release + fraction_cliff_release <= FRACTION_BASE, "{}", ERR_110);
 
 		// assert dex launch price >= launchpad price
 		assert!(
@@ -345,15 +345,7 @@ impl Listing {
 			| ListingStatus::PoolPriceTokenSent
 			| ListingStatus::LiquidityPoolFinalized
 			| ListingStatus::Cancelled => {
-				println!(
-					"presale_project_token_balance: {}",
-					self.listing_treasury.presale_project_token_balance
-				);
 				self.update_treasury_after_sale();
-				println!(
-					"presale_project_token_balance: {}",
-					self.listing_treasury.presale_project_token_balance
-				);
 				let mut withdraw_amounts = self.listing_treasury.withdraw_project_funds();
 				let mut launchpad_fees = (0, 0);
 				match self.status {
@@ -475,9 +467,9 @@ impl Listing {
 		let cliff_release =
 			((self.token_allocation_size * self.fraction_cliff_release) / FRACTION_BASE) * allocations;
 		let final_release =
-			(self.token_allocation_size - initial_release - cliff_release) * allocations;
+			self.token_allocation_size * allocations - initial_release - cliff_release;
 		let mut total_release = initial_release;
-		if timestamp >= self.cliff_timestamp || timestamp < self.end_cliff_timestamp {
+		if timestamp >= self.cliff_timestamp && timestamp < self.end_cliff_timestamp && timestamp >= self.cliff_timestamp {
 			total_release += (cliff_release * (timestamp - self.cliff_timestamp) as u128)
 				/ (self.end_cliff_timestamp - self.cliff_timestamp) as u128
 		} else if timestamp >= self.end_cliff_timestamp {
@@ -503,7 +495,7 @@ impl Listing {
 
 				self
 					.project_token
-					.transfer_token(self.project_owner.clone(), tokens_to_withdraw)
+					.transfer_token(investor_id.clone(), tokens_to_withdraw)
 					.then(
 						ext_self::ext(env::current_account_id())
 							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
