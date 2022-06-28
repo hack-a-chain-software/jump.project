@@ -150,6 +150,16 @@ impl VListing {
       "{}",
       ERR_108
     );
+    assert!(
+      final_sale_2_timestamp < cliff_timestamp,
+      "{}",
+      ERR_108
+    );
+    assert!(
+      cliff_timestamp <= end_cliff_timestamp,
+      "{}",
+      ERR_108
+    );
 
     // assert allocations are a divisor of total project tokens
     assert_eq!(
