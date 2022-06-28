@@ -16,31 +16,24 @@ impl Contract {
   pub fn withdraw_allocations(&mut self, listing_id: u64) -> Promise {
     let account_id = env::predecessor_account_id();
     let mut listing = self.internal_get_listing(listing_id);
+    listing.update_treasury_after_sale();
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     // figure if cliff has already passed
     let investor_allocations = investor.allocation_count.get(&listing_id).expect(ERR_302);
-    let allocations_to_withdraw; // = (investor_allocations.0, 0);
-    let allocations_remaining; // = (0, investor_allocations.1);
-    if env::block_timestamp() > listing.cliff_timestamp {
-      allocations_to_withdraw = investor_allocations;
-      allocations_remaining = [0; 2];
+    let vested_tokens = listing.calculate_vested_investor_withdraw(investor_allocations.0, env::block_timestamp());
+    let tokens_to_withdraw = if vested_tokens >= investor_allocations.1 {
+      vested_tokens - investor_allocations.1
     } else {
-      allocations_to_withdraw = [investor_allocations[0], 0];
-      allocations_remaining = [0, investor_allocations[1]];
-    }
-    // cannot remove key right away because promise might fail and
-    // storage deposit might be wrongly released
-    let investor_allocations = investor
+      0
+    };
+    let allocations_remaining = (investor_allocations.0, vested_tokens);
+    investor
       .allocation_count
       .insert(&listing_id, &allocations_remaining)
       .expect(ERR_302);
     self.internal_update_investor(&account_id, investor);
-    listing.withdraw_investor_funds(
-      investor_allocations,
-      allocations_to_withdraw,
-      allocations_remaining,
-      account_id,
-    )
+
+    listing.withdraw_investor_funds(tokens_to_withdraw, account_id)
   }
 
   #[payable]
@@ -90,11 +83,11 @@ impl Contract {
     let previous_allocations_bought = investor
       .allocation_count
       .get(&listing.listing_id)
-      .unwrap_or([0, 0]);
+      .unwrap_or((0, 0));
     let investor_allocations = self.check_investor_allowance(
       &investor,
       &current_sale_phase,
-      previous_allocations_bought[0],
+      previous_allocations_bought.0,
       &listing,
     );
     let (allocations_bought, leftover) =
@@ -108,7 +101,7 @@ impl Contract {
       U64(listing.allocations_sold),
     );
     self.internal_update_listing(listing_id, listing);
-    let new_allocation_balance = [previous_allocations_bought[0] + allocations_bought; 2];
+    let new_allocation_balance = (previous_allocations_bought.0 + allocations_bought, previous_allocations_bought.1);
     investor
       .allocation_count
       .insert(&listing_id, &new_allocation_balance);

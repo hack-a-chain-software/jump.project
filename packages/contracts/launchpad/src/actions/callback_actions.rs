@@ -44,36 +44,37 @@ impl Contract {
     &mut self,
     investor_id: AccountId,
     listing_id: U64,
-    allocations_to_withdraw: [U64; 2],
-    allocations_remaining: [U64; 2],
-    returned_value: U128,
-    field: String,
+    withdraw_amount: U128,
   ) {
+    let listing_id = listing_id.0;
+    let withdraw_amount = withdraw_amount.0;
+    let mut listing = self.internal_get_listing(listing_id);
+    let mut investor = self.internal_get_investor(&investor_id).unwrap();
+    let registered_withdraws = investor.allocation_count.get(&listing_id).unwrap();
     if !is_promise_success() {
       // revert changes to listing treasury and to investor's allocations
-      let listing_id = listing_id.0;
-      let total_allocations = [
-        allocations_to_withdraw[0].0 + allocations_remaining[0].0,
-        allocations_to_withdraw[1].0 + allocations_remaining[1].0,
-      ];
-      let mut listing = self.internal_get_listing(listing_id);
-      let mut investor = self.internal_get_investor(&investor_id).unwrap();
-      investor
-        .allocation_count
-        .insert(&listing_id, &total_allocations);
-      listing.revert_failed_investor_withdraw(
-        [allocations_to_withdraw[0].0, allocations_to_withdraw[1].0],
-        returned_value.0,
-        field,
+      investor.allocation_count.insert(
+        &listing_id,
+        &(
+          registered_withdraws.0,
+          registered_withdraws.1 - withdraw_amount,
+        ),
       );
+      listing.revert_failed_investor_withdraw(withdraw_amount);
       self.internal_update_listing(listing_id, listing);
     } else {
       // if no more allocations remaining, remove allocations storage
       // and return storage funds to investor instance
-      if allocations_remaining != [U64(0); 2] {
+      events::investor_withdraw_allocations(
+        U64(listing.listing_id),
+        U128(withdraw_amount),
+        U128(0),
+        &listing.status,
+      );
+      let total_amount = listing.token_allocation_size * registered_withdraws.0 as u128;
+      if total_amount == registered_withdraws.1 {
         let initial_storage = env::storage_usage();
-        let mut investor = self.internal_get_investor(&investor_id).unwrap();
-        investor.allocation_count.remove(&listing_id.0);
+        investor.allocation_count.remove(&listing_id);
         investor.track_storage_usage(initial_storage);
         self.internal_update_investor(&investor_id, investor);
       }
@@ -95,7 +96,7 @@ impl Contract {
       events::investor_unstake_membership(
         &investor_id,
         amount,
-        U64(investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens))
+        U64(investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens)),
       );
     }
   }

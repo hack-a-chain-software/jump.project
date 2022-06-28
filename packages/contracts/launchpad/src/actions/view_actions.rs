@@ -26,11 +26,11 @@ impl Contract {
           let previous_allocations_bought = investor
             .allocation_count
             .get(&listing.listing_id)
-            .unwrap_or([0, 0]);
+            .unwrap_or((0, 0));
           U64(self.check_investor_allowance(
             &investor,
             &current_sale_phase,
-            previous_allocations_bought[0],
+            previous_allocations_bought.0,
             &listing,
           ))
         }
@@ -49,10 +49,10 @@ impl Contract {
     &self,
     account_id: AccountId,
     listing_id: U64,
-  ) -> Option<[U64; 2]> {
+  ) -> Option<(U64, U128)> {
     match self.internal_get_investor(&account_id) {
       Some(investor) => match investor.allocation_count.get(&listing_id.0) {
-        Some(alloc) => Some([U64(alloc[0]), U64(alloc[1])]),
+        Some(alloc) => Some((U64(alloc.0), U128(alloc.1))),
         None => None,
       },
       None => None,

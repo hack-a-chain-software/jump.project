@@ -1,8 +1,6 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Serialize};
 
-use crate::{FRACTION_BASE};
-
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Treasury {
@@ -82,21 +80,9 @@ impl Treasury {
 
   pub fn withdraw_investor_funds(
     &mut self,
-    allocation_size: u128,
-    fraction_instant_release: u128,
-    allocations_to_withdraw: [u64; 2],
-  ) -> u128 {
-    let allocations_to_withdraw = [
-      allocations_to_withdraw[0] as u128,
-      allocations_to_withdraw[1] as u128,
-    ];
-    let pre_cliff_alloc = allocation_size * fraction_instant_release / FRACTION_BASE;
-    let after_cliff_alloc = allocation_size - pre_cliff_alloc;
-    let withdrawn_tokens =
-      allocations_to_withdraw[0] * pre_cliff_alloc + allocations_to_withdraw[1] * after_cliff_alloc;
-    self.all_investors_project_token_balance -= withdrawn_tokens;
-
-    withdrawn_tokens
+    amount: u128
+  ) {
+    self.all_investors_project_token_balance -= amount;
   }
 
   pub fn withdraw_investor_funds_cancelled(

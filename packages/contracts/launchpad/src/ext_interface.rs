@@ -31,12 +31,10 @@ pub trait SelfCalls {
   );
 
   fn callback_token_transfer_to_investor(
+    &mut self,
     investor_id: AccountId,
     listing_id: U64,
-    total_allocations: [U64; 2],
-    allocations_remaining: [U64; 2],
-    returned_value: U128,
-    field: String,
+    withdraw_amount: U128,
   );
 
   fn callback_membership_token_transfer_to_investor(investor_id: AccountId, amount: U128);

@@ -14,7 +14,7 @@ pub const ERR_010: &str = "ERR_010: Appointed listing owner is not registered";
 /// Listing errors
 pub const ERR_101: &str = "ERR_101: Can only cancel funded listings before their start date";
 pub const ERR_102: &str = "ERR_102: Only the project owner can call this method";
-pub const ERR_103: &str = "ERR_103: Can only withdraw funds after sale is finalized or cancelled";
+pub const ERR_103: &str = "ERR_103: Can only withdraw funds after sale is finalized";
 pub const ERR_104: &str = "ERR_104: Transferred token doesn't match listing token type";
 pub const ERR_105: &str = "ERR_105: Transferred quantity doesn't match listing requirement";
 pub const ERR_106: &str = "ERR_106: Listing is not in sale phase";

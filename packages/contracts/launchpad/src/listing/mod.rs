@@ -86,7 +86,11 @@ pub struct Listing {
 	pub fraction_instant_release: u128, // divide by FRACTION_BASE will multiply token_allocation_size to see
 	// how many tokens the investor will receive right at the end of presale
 	#[serde(with = "crate::string")]
-	pub cliff_timestamp: u64, // nanoseconds after end of sale to receive vested tokens
+	pub fraction_cliff_release: u128, // divide by FRACTION_BASE will multiply token_allocation_size to see tokens released after cliff
+	#[serde(with = "crate::string")]
+	pub cliff_timestamp: u64, // timestamp to start receiving vested tokens
+	#[serde(with = "crate::string")]
+	pub end_cliff_timestamp: u64, // timestamp to receive all vested tokens
 
 	// structure to storage count of tokens in the
 	pub listing_treasury: Treasury,
@@ -128,7 +132,9 @@ impl VListing {
 		liquidity_pool_project_tokens: u128,
 		liquidity_pool_price_tokens: u128,
 		fraction_instant_release: u128,
+		fraction_cliff_release: u128,
 		cliff_timestamp: u64,
+		end_cliff_timestamp: u64,
 		fee_price_tokens: u128,
 		fee_liquidity_tokens: u128,
 	) -> Self {
@@ -205,7 +211,9 @@ impl VListing {
 			liquidity_pool_project_tokens,
 			liquidity_pool_price_tokens,
 			fraction_instant_release,
+			fraction_cliff_release,
 			cliff_timestamp,
+			end_cliff_timestamp,
 			listing_treasury: Treasury::new(),
 			fee_price_tokens,
 			fee_liquidity_tokens,
@@ -466,11 +474,28 @@ impl Listing {
 		(allocations_bought, leftover)
 	}
 
+	// only called inside withdraw_investor_funds - does not need to assert state
+	pub fn calculate_vested_investor_withdraw(&self, allocations: u64, timestamp: u64) -> u128 {
+		let allocations = allocations as u128;
+		let initial_release =
+			((self.token_allocation_size * self.fraction_instant_release) / FRACTION_BASE) * allocations;
+		let cliff_release =
+			((self.token_allocation_size * self.fraction_cliff_release) / FRACTION_BASE) * allocations;
+		let final_release =
+			(self.token_allocation_size - initial_release - cliff_release) * allocations;
+		let mut total_release = initial_release;
+		if timestamp >= self.cliff_timestamp || timestamp < self.end_cliff_timestamp {
+			total_release += (cliff_release * (timestamp - self.cliff_timestamp) as u128)
+				/ (self.end_cliff_timestamp - self.cliff_timestamp) as u128
+		} else if timestamp >= self.end_cliff_timestamp {
+			total_release += cliff_release + final_release;
+		}
+		total_release
+	}
+
 	pub fn withdraw_investor_funds(
 		&mut self,
-		total_allocations: [u64; 2],
-		allocations_to_withdraw: [u64; 2],
-		allocations_remaining: [u64; 2],
+		tokens_to_withdraw: u128,
 		investor_id: AccountId,
 	) -> Promise {
 		match self.status {
@@ -479,68 +504,20 @@ impl Listing {
 			| ListingStatus::PoolProjectTokenSent
 			| ListingStatus::PoolPriceTokenSent
 			| ListingStatus::LiquidityPoolFinalized => {
-				self.update_treasury_after_sale();
-				let withdraw_amounts = self.listing_treasury.withdraw_investor_funds(
-					self.token_allocation_size,
-					self.fraction_instant_release,
-					allocations_to_withdraw,
-				);
-				events::investor_withdraw_allocations(
-					U64(self.listing_id),
-					U64(allocations_to_withdraw[0]),
-					U64(allocations_to_withdraw[1]),
-					U128(withdraw_amounts),
-					U128(0),
-					&self.status,
-				);
+				self
+					.listing_treasury
+					.withdraw_investor_funds(tokens_to_withdraw);
+
 				self
 					.project_token
-					.transfer_token(self.project_owner.clone(), withdraw_amounts)
+					.transfer_token(self.project_owner.clone(), tokens_to_withdraw)
 					.then(
 						ext_self::ext(env::current_account_id())
 							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
 							.callback_token_transfer_to_investor(
 								investor_id,
 								U64(self.listing_id),
-								[
-									U64(allocations_to_withdraw[0]),
-									U64(allocations_to_withdraw[1]),
-								],
-								[U64(allocations_remaining[0]), U64(allocations_remaining[1])],
-								U128(withdraw_amounts),
-								"project".to_string(),
-							),
-					)
-			}
-			ListingStatus::Cancelled => {
-				self.update_treasury_after_sale();
-				let withdraw_amounts = self
-					.listing_treasury
-					.withdraw_investor_funds_cancelled(self.token_allocation_size, allocations_to_withdraw);
-				events::investor_withdraw_allocations(
-					U64(self.listing_id),
-					U64(allocations_to_withdraw[0]),
-					U64(allocations_to_withdraw[1]),
-					U128(0),
-					U128(withdraw_amounts),
-					&self.status,
-				);
-				self
-					.price_token
-					.transfer_token(self.project_owner.clone(), withdraw_amounts)
-					.then(
-						ext_self::ext(env::current_account_id())
-							.with_static_gas(GAS_FOR_FT_TRANSFER_CALLBACK)
-							.callback_token_transfer_to_investor(
-								investor_id,
-								U64(self.listing_id),
-								[
-									U64(allocations_to_withdraw[0]),
-									U64(allocations_to_withdraw[1]),
-								],
-								[U64(allocations_remaining[0]), U64(allocations_remaining[1])],
-								U128(withdraw_amounts),
-								"price".to_string(),
+								U128(tokens_to_withdraw)
 							),
 					)
 			}
@@ -548,9 +525,7 @@ impl Listing {
 				if env::block_timestamp() > self.final_sale_2_timestamp {
 					self.status = ListingStatus::SaleFinalized;
 					self.withdraw_investor_funds(
-						total_allocations,
-						allocations_to_withdraw,
-						allocations_remaining,
+						tokens_to_withdraw,
 						investor_id,
 					)
 				} else {
@@ -563,24 +538,9 @@ impl Listing {
 
 	pub fn revert_failed_investor_withdraw(
 		&mut self,
-		returned_allocations: [u64; 2],
 		returned_value: u128,
-		field: String,
 	) {
-		match field.as_str() {
-			"project" => {
-				self.listing_treasury.all_investors_project_token_balance += returned_value;
-			}
-			"price" => self.listing_treasury.cancellation_funds_price_tokens += returned_value,
-			_ => panic!("wrongly formatted argument"),
-		}
-		events::investor_withdraw_reverted_error(
-			U64(self.listing_id),
-			U64(returned_allocations[0]),
-			U64(returned_allocations[1]),
-			U128(returned_value),
-			field,
-		);
+		self.listing_treasury.all_investors_project_token_balance += returned_value;
 	}
 
 	pub fn withdraw_liquidity_project_token(&mut self) -> u128 {

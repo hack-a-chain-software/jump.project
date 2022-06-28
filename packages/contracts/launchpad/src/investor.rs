@@ -36,7 +36,7 @@ pub struct Investor {
 
     // listing allocations treasury
     #[serde(skip)]
-    pub allocation_count: UnorderedMap<u64, [u64; 2]>,
+    pub allocation_count: UnorderedMap<u64, (u64, u128)>,
 }
 
 impl VInvestor {

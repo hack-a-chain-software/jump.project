@@ -23,7 +23,9 @@ pub struct ListingData {
   pub liquidity_pool_project_tokens: U128,
   pub liquidity_pool_price_tokens: U128,
   pub fraction_instant_release: U128,
+  pub fraction_cliff_release: U128,
   pub cliff_timestamp_seconds: U64,
+  pub end_cliff_timestamp_seconds: U64,
   pub fee_price_tokens: U128,
   pub fee_liquidity_tokens: U128,
 }

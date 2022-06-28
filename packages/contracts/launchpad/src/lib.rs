@@ -133,7 +133,9 @@ impl Contract {
 			listing_data.liquidity_pool_project_tokens.0,
 			listing_data.liquidity_pool_price_tokens.0,
 			listing_data.fraction_instant_release.0,
+			listing_data.fraction_cliff_release.0,
 			listing_data.cliff_timestamp_seconds.0 * TO_NANO,
+			listing_data.end_cliff_timestamp_seconds.0 * TO_NANO,
 			listing_data.fee_price_tokens.0,
 			listing_data.fee_liquidity_tokens.0,
 		);
@@ -481,7 +483,9 @@ mod tests {
 			liquidity_pool_project_tokens: U128(1_000),
 			liquidity_pool_price_tokens: U128(800),
 			fraction_instant_release: U128(2_000),
+			fraction_cliff_release: U128(6_000),
 			cliff_timestamp_seconds: U64(8_000_000_000),
+			end_cliff_timestamp_seconds: U64(10_000_000_000),
 			fee_price_tokens: U128(100),
 			fee_liquidity_tokens: U128(100),
 		}
@@ -505,7 +509,9 @@ mod tests {
 			listing_data.liquidity_pool_project_tokens.0,
 			listing_data.liquidity_pool_price_tokens.0,
 			listing_data.fraction_instant_release.0,
+			listing_data.fraction_cliff_release.0,
 			listing_data.cliff_timestamp_seconds.0 * TO_NANO,
+			listing_data.end_cliff_timestamp_seconds.0 * TO_NANO,
 			listing_data.fee_price_tokens.0,
 			listing_data.fee_liquidity_tokens.0,
 		) 
