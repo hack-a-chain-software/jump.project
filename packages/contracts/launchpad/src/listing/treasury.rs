@@ -78,10 +78,7 @@ impl Treasury {
     self.total_received_presale_price_token_balance += price_tokens_sent;
   }
 
-  pub fn withdraw_investor_funds(
-    &mut self,
-    amount: u128
-  ) {
+  pub fn withdraw_investor_funds(&mut self, amount: u128) {
     self.all_investors_project_token_balance -= amount;
   }
 

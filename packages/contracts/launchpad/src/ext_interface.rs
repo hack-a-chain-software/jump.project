@@ -18,10 +18,7 @@ pub trait Dex {
 
 #[ext_contract(ext_self)]
 pub trait SelfCalls {
-  fn callback_token_transfer_to_owner(
-    token_type: TokenType,
-    old_value: U128,
-  );
+  fn callback_token_transfer_to_owner(token_type: TokenType, old_value: U128);
 
   fn callback_token_transfer_to_project_owner(
     listing_id: U64,
@@ -44,9 +41,13 @@ pub trait SelfCalls {
     original_deposit: U128,
   ) -> PromiseOrValue<bool>;
 
-  fn callback_dex_deposit_project_token(listing_id: U64, original_deposit: U128, launchpad_fee: U128,);
+  fn callback_dex_deposit_project_token(
+    listing_id: U64,
+    original_deposit: U128,
+    launchpad_fee: U128,
+  );
 
-  fn callback_dex_deposit_price_token(listing_id: U64, original_deposit: U128, launchpad_fee: U128,);
+  fn callback_dex_deposit_price_token(listing_id: U64, original_deposit: U128, launchpad_fee: U128);
 
   fn callback_dex_add_liquidity(
     &mut self,

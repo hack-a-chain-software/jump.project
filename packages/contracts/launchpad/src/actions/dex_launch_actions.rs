@@ -17,8 +17,7 @@ impl Contract {
     listing.update_treasury_after_sale();
     listing.dex_lock_time = timestamp + LOCK_PERIOD;
     match listing.status {
-      ListingStatus::Unfunded
-      | ListingStatus::Funded => panic!("{}", ERR_404),
+      ListingStatus::Unfunded | ListingStatus::Funded => panic!("{}", ERR_404),
       ListingStatus::Cancelled => panic!("{}", ERR_406),
       ListingStatus::LiquidityPoolFinalized => panic!("{}", ERR_405),
 

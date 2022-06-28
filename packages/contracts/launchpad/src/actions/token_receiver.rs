@@ -317,10 +317,7 @@ mod tests {
 
         assert_eq!(leftover.0, leftover_goal);
         assert_eq!(listing.allocations_sold as u128, allocations_sold);
-        let expected_count: (u64, u128) = (
-          allocations_to_buy.try_into().unwrap(),
-          0,
-        );
+        let expected_count: (u64, u128) = (allocations_to_buy.try_into().unwrap(), 0);
         assert_eq!(investor.allocation_count.get(&0).unwrap(), expected_count);
 
         let logs = get_logs();
@@ -472,23 +469,18 @@ mod tests {
 
         let desired_tier: u64 = 4;
         let desired_tier_requirement = standard_settings()
-        .tiers_minimum_tokens
-        .get(desired_tier as usize - 1)
-        .unwrap()
-        .0;
+          .tiers_minimum_tokens
+          .get(desired_tier as usize - 1)
+          .unwrap()
+          .0;
         let deposit_value = if enough_to_upgrade {
-          desired_tier_requirement
-            + 150
+          desired_tier_requirement + 150
         } else {
-          desired_tier_requirement
-            - 5
-            - initial_balance
+          desired_tier_requirement - 5 - initial_balance
         };
 
         let excess_tokens = if enough_to_upgrade {
-          initial_balance + deposit_value
-            - desired_tier_requirement
-
+          initial_balance + deposit_value - desired_tier_requirement
         } else {
           0
         };
@@ -513,11 +505,14 @@ mod tests {
         contract.internal_update_investor(&investor_correct, investor);
 
         println!("{}", deposit_value);
-        println!("{}", json!({
-          "type": "VerifyAccount",
-          "membership_tier": U64(desired_tier)
-        })
-        .to_string(),);
+        println!(
+          "{}",
+          json!({
+            "type": "VerifyAccount",
+            "membership_tier": U64(desired_tier)
+          })
+          .to_string(),
+        );
         let leftover = contract.ft_on_transfer(
           if investor_exists {
             investor_correct.clone()
@@ -533,10 +528,9 @@ mod tests {
         );
 
         let investor = contract.internal_get_investor(&investor_correct).unwrap();
-        
+
         assert_eq!(investor.staked_token, desired_tier_requirement);
         assert_eq!(leftover.0, excess_tokens);
-
 
         let logs = get_logs();
         assert_eq!(logs.len(), 1);
@@ -565,11 +559,13 @@ mod tests {
       // 3. assert investor has enough staked tokens to reach desired membership level;
       (true, true, false, 0, Some(ERR_206.to_string())),
       // 4. assert investor is trying to upgrade membership level (not trying to maliciously use the call to withdraw staked tokens)
-      (true, true, true, standard_settings()
-      .tiers_minimum_tokens
-      .get(4)
-      .unwrap()
-      .0, Some(ERR_207.to_string())),
+      (
+        true,
+        true,
+        true,
+        standard_settings().tiers_minimum_tokens.get(4).unwrap().0,
+        Some(ERR_207.to_string()),
+      ),
       (true, true, true, 1040, Some(ERR_207.to_string())),
       // 5. update staked tokens in investor data;
       // 6. emit stake event;
@@ -578,15 +574,11 @@ mod tests {
       (true, true, true, 3, None),
       (true, true, true, 30, None),
       (true, true, true, 40, None),
-      
     ];
 
     let mut counter = 0;
     IntoIterator::into_iter(test_cases).for_each(|v| {
-      run_test_case(
-        closure_generator(v.0, v.1, v.2, v.3, counter),
-        v.4,
-      );
+      run_test_case(closure_generator(v.0, v.1, v.2, v.3, counter), v.4);
       println!("{}", counter);
       counter += 1;
     });

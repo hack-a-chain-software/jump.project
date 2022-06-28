@@ -241,7 +241,6 @@ mod tests {
           .insert(&0, &(investor_allocations, investor_already_withdrawn));
         contract.internal_update_investor(&investor_correct, investor);
 
-        
         contract.withdraw_allocations(U64(0));
 
         let investor = contract.internal_get_investor(&investor_correct).unwrap();
@@ -315,13 +314,7 @@ mod tests {
         Some(ERR_302.to_string()),
       ),
       // 3. assert sale is finalized;
-      (
-        true,
-        VestingTime::NotFinalized,
-        3,
-        0,
-        None,
-      ),
+      (true, VestingTime::NotFinalized, 3, 0, None),
       // 4. calculate vested tokens;
       // 6. update withdrawn count in investor balance;
       // 7. promise to transfer tokens to investor with fail safe callback;

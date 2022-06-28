@@ -10,7 +10,6 @@ pub const ERR_008: &str = "ERR_008: Attempted to withdraw from treasury with und
 pub const ERR_009: &str = "ERR_009: Cannot withdraw from empty treasury";
 pub const ERR_010: &str = "ERR_010: Appointed listing owner is not registered";
 
-
 /// Listing errors
 pub const ERR_101: &str = "ERR_101: Can only cancel funded listings before their start date";
 pub const ERR_102: &str = "ERR_102: Only the project owner can call this method";
@@ -23,24 +22,28 @@ pub const ERR_108: &str = "ERR_108: Provided timestamp data is not sequential";
 pub const ERR_109: &str = "ERR_109: Allocations must be a exact divisor of total project tokens";
 pub const ERR_110: &str = "ERR_110: fraction_instant_release must be <= FRACTION_BASE";
 pub const ERR_111: &str = "ERR_111: Dex launch price cannot be smaller than presale";
-pub const ERR_112: &str = "ERR_112: Cannot allocate more price tokens to dex launch than received fom presale";
+pub const ERR_112: &str =
+  "ERR_112: Cannot allocate more price tokens to dex launch than received fom presale";
 pub const ERR_113: &str = "ERR_113: Listing can only be funded once";
 pub const ERR_114: &str = "ERR_114: Cannot fund listing after sale start time";
 
 /// Investor errors
 pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transaction";
 pub const ERR_202: &str = "ERR_202: Storage deposited was less tha minimum deposit";
-pub const ERR_203: &str = "ERR_203: Cannot delete investor account, pending investment allocations to withdraw";
+pub const ERR_203: &str =
+  "ERR_203: Cannot delete investor account, pending investment allocations to withdraw";
 pub const ERR_204: &str = "ERR_204: Membership can only be validated through the membership_token";
 pub const ERR_205: &str = "ERR_205: Requested membership level does not exist";
 pub const ERR_206: &str = "ERR_206: Not enough tokens deposited for this membership level";
-pub const ERR_207: &str = "ERR_207: Cannot downgrade membership level with increase_membership_tier call";
+pub const ERR_207: &str =
+  "ERR_207: Cannot downgrade membership level with increase_membership_tier call";
 pub const ERR_208: &str = "ERR_208: Not enough membership tokens to withdraw";
 pub const ERR_209: &str = "ERR_209: Cannot withdraw membership tokens before lock period";
 pub const ERR_210: &str = "ERR_210: Listing owner accounts can never be unregistered";
 
 /// Action errors
-pub const ERR_301: &str = "ERR_301: Could not parse String from msg. Not compliant with CallType format";
+pub const ERR_301: &str =
+  "ERR_301: Could not parse String from msg. Not compliant with CallType format";
 pub const ERR_302: &str = "ERR_302: No allocations available to withdraw";
 
 /// Dex integration errors

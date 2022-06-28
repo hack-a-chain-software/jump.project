@@ -99,7 +99,9 @@ mod tests {
           Gas(300u64 * 10u64.pow(12)),
         ));
         let mut contract = init_contract(seed);
-        contract.guardians.insert(&GUARDIAN_ACCOUNT.parse().unwrap());
+        contract
+          .guardians
+          .insert(&GUARDIAN_ACCOUNT.parse().unwrap());
 
         let mut listing_data = standard_listing_data();
 
@@ -290,7 +292,6 @@ mod tests {
         true,
         Some(ERR_112.to_string()),
       ),
-      
       // 4. assert enough storage in listing owner account;
       (
         OWNER_ACCOUNT.parse().unwrap(),
@@ -344,7 +345,6 @@ mod tests {
         false,
         None,
       ),
-      
     ];
 
     let mut counter = 0;
@@ -391,7 +391,9 @@ mod tests {
           Gas(300u64 * 10u64.pow(12)),
         ));
         let mut contract = init_contract(seed);
-        contract.guardians.insert(&GUARDIAN_ACCOUNT.parse().unwrap());
+        contract
+          .guardians
+          .insert(&GUARDIAN_ACCOUNT.parse().unwrap());
 
         let mut listing = standard_listing(contract.listings.len()).into_current();
 
@@ -404,7 +406,7 @@ mod tests {
         let listing = contract.listings.get(0).unwrap().into_current();
 
         assert!(matches!(listing.status, ListingStatus::Cancelled));
-        
+
         // assert_eq!(inserted_listing.cliff_timestamp, listing.cliff_timestamp_seconds.0 * TO_NANO);
         let logs = get_logs();
         assert_eq!(logs.len(), 1);
@@ -447,26 +449,13 @@ mod tests {
       ),
       // 4. change listing status to cancelled;
       // 5. emit cancel listing event;
-      (
-        OWNER_ACCOUNT.parse().unwrap(),
-        1,
-        true,
-        None,
-      ),
-      (
-        GUARDIAN_ACCOUNT.parse().unwrap(),
-        1,
-        true,
-        None,
-      ),
+      (OWNER_ACCOUNT.parse().unwrap(), 1, true, None),
+      (GUARDIAN_ACCOUNT.parse().unwrap(), 1, true, None),
     ];
 
     let mut counter = 0;
     IntoIterator::into_iter(test_cases).for_each(|v| {
-      run_test_case(
-        closure_generator(v.0, v.1, v.2, counter),
-        v.3,
-      );
+      run_test_case(closure_generator(v.0, v.1, v.2, counter), v.3);
       println!("counter: {}", counter);
       counter += 1;
     });

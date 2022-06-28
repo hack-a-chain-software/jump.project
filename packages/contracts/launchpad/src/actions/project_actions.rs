@@ -69,15 +69,15 @@ impl Contract {
 
     listing.assert_funding_token(token_type, token_quantity);
     assert!(
-			matches!(listing.status, ListingStatus::Unfunded),
-			"{}",
-			ERR_113
-		);
-		assert!(
-			env::block_timestamp() < listing.open_sale_1_timestamp,
-			"{}",
-			ERR_114
-		);
+      matches!(listing.status, ListingStatus::Unfunded),
+      "{}",
+      ERR_113
+    );
+    assert!(
+      env::block_timestamp() < listing.open_sale_1_timestamp,
+      "{}",
+      ERR_114
+    );
     listing.fund_listing();
     self.internal_update_listing(listing_id, listing);
   }

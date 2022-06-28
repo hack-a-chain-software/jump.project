@@ -105,7 +105,7 @@ pub fn investor_withdraw_allocations(
 pub fn investor_stake_membership(
   account_id: &AccountId,
   token_quantity: U128,
-  new_membership_level: U64
+  new_membership_level: U64,
 ) {
   let data = json!({
       "account_id": account_id,
@@ -118,7 +118,7 @@ pub fn investor_stake_membership(
 pub fn investor_unstake_membership(
   account_id: &AccountId,
   token_quantity: U128,
-  new_membership_level: U64
+  new_membership_level: U64,
 ) {
   let data = json!({
       "account_id": account_id,
