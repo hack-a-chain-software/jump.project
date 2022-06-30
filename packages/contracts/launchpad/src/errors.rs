@@ -40,6 +40,7 @@ pub const ERR_207: &str =
 pub const ERR_208: &str = "ERR_208: Not enough membership tokens to withdraw";
 pub const ERR_209: &str = "ERR_209: Cannot withdraw membership tokens before lock period";
 pub const ERR_210: &str = "ERR_210: Listing owner accounts can never be unregistered";
+pub const ERR_211: &str = "ERR_211: No allowance for purchase size";
 
 /// Action errors
 pub const ERR_301: &str =

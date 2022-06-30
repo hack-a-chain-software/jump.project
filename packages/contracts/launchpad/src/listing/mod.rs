@@ -384,7 +384,7 @@ impl Listing {
               ),
           );
 
-        let price_promise = self
+        let _price_promise = self
           .price_token
           .transfer_token(self.project_owner.clone(), withdraw_amounts.1)
           .then(
@@ -397,7 +397,7 @@ impl Listing {
                 Some(U128(launchpad_fees.1)),
               ),
           );
-        project_promise.and(price_promise)
+        project_promise
       }
       ListingStatus::Funded => {
         if env::block_timestamp() > self.final_sale_2_timestamp {

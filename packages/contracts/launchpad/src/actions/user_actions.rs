@@ -95,6 +95,7 @@ impl Contract {
       previous_allocations_bought.0,
       &listing,
     );
+    assert!(investor_allocations > 0, "{}", ERR_211);
     let (allocations_bought, leftover) =
       listing.buy_allocation(price_tokens_sent, investor_allocations);
 

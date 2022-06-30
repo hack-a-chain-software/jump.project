@@ -59,6 +59,20 @@ impl Contract {
     }
   }
 
+  pub fn view_vested_allocations(&self, account_id: AccountId, listing_id: U64) -> U128 {
+    match self.internal_get_investor(&account_id) {
+      Some(investor) => match investor.allocation_count.get(&listing_id.0) {
+        Some(alloc) => {
+          let listing = self.internal_get_listing(listing_id.0);
+          let vested = listing.calculate_vested_investor_withdraw(alloc.0, env::block_timestamp());
+          U128(vested - alloc.1)
+        }
+        None => U128(0),
+      },
+      None => U128(0),
+    }
+  }
+
   pub fn view_iter_investor_listings(
     &self,
     account_id: AccountId,
