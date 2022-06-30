@@ -16,7 +16,7 @@ describe("Worker tests", () => {
 
     tokenContract = await root.createAndDeploy(
       "token",
-      "/../out/token_contract.wasm"
+      __dirname + "/../out/token_contract.wasm"
     );
     xtoken = await root.createAndDeploy("xtoken", "/../out/x_token.wasm");
 
