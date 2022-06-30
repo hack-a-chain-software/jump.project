@@ -155,6 +155,7 @@ impl Contract {
       listing.undo_withdraw_liquidity_project_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolProjectTokenSent;
+      listing.dex_project_tokens = Some(original_deposit.0 - launchpad_fee.0);
       self.internal_add_to_treasury(&listing.project_token, launchpad_fee.0);
     }
 
@@ -180,6 +181,7 @@ impl Contract {
       listing.undo_withdraw_liquidity_price_token(original_deposit.0);
     } else {
       listing.status = ListingStatus::PoolPriceTokenSent;
+      listing.dex_price_tokens = Some(original_deposit.0 - launchpad_fee.0);
       self.internal_add_to_treasury(&listing.price_token, launchpad_fee.0);
     }
 

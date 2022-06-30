@@ -3,10 +3,12 @@ use crate::*;
 mod storage;
 mod token;
 mod launchpad;
+mod ref_finance;
 
 pub use token::*;
 pub use storage::*;
 pub use launchpad::*;
+pub use ref_finance::*;
 
 pub fn get_wasm(file_name: &str) -> Result<Vec<u8>, Error> {
   std::fs::read(Path::new(OUT_DIR).join(file_name))

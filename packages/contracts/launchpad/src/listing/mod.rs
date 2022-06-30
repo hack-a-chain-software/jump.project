@@ -540,7 +540,6 @@ impl Listing {
 
   pub fn withdraw_liquidity_project_token(&mut self) -> u128 {
     let amount = self.listing_treasury.withdraw_liquidity_project_token();
-    self.dex_project_tokens = Some(amount);
     amount
   }
 
@@ -553,7 +552,6 @@ impl Listing {
 
   pub fn withdraw_liquidity_price_token(&mut self) -> u128 {
     let amount = self.listing_treasury.withdraw_liquidity_price_token();
-    self.dex_price_tokens = Some(amount);
     amount
   }
 
