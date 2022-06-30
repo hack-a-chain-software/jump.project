@@ -41,7 +41,7 @@ pub async fn ft_transfer_call(
     .gas(GAS_LIMIT)
     .transact()
     .await?;
-  println!("{:#?}", result.failures());
+  println!("{:#?}", result.outcomes());
 
   anyhow::Ok(())
 }

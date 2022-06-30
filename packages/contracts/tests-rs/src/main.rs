@@ -5,16 +5,16 @@ use std::vec::Vec;
 use std::io::Error;
 use serde_json::json;
 use std::collections::HashMap;
-use std::str::{from_utf8};
-use futures::future::{join_all};
+// use futures::future::{join_all};
 use near_units::parse_near;
 
 mod methods;
 mod tests_launchpad;
+mod tests_x_token;
 
 pub use methods::*;
 
-pub const OUT_DIR: &str = "../../out";
+pub const OUT_DIR: &str = "../out";
 
 pub const FRACTION_BASE: u128 = 10_000;
 

@@ -3,7 +3,7 @@ mod tests {
 
   use crate::*;
 
-  // integration test happy case - normal listing
+  /// integration test happy case - normal listing
   /// aims to test full aplication fliw for a single listing
   /// 1. Initialize contracts
   /// 2. Assign guardian
@@ -29,7 +29,6 @@ mod tests {
 
     let root = worker.root_account();
 
-    println!("Worker initialized.");
     // CREATE USER ACCOUNTS
     let owner = create_user_account(&root, &worker, "owner").await;
     let guardian = create_user_account(&root, &worker, "guardian").await;
@@ -37,8 +36,6 @@ mod tests {
     let investor_1 = create_user_account(&root, &worker, "investor1").await;
     let investor_2 = create_user_account(&root, &worker, "investor2").await;
     let investor_3 = create_user_account(&root, &worker, "investor3").await;
-
-    println!("User accounts created.");
 
     // 1. Initialize contracts
     // DEPLOY & INITIALIZE FT CONTRACTS
@@ -106,8 +103,6 @@ mod tests {
     .transact()
     .await?;
 
-    println!("Contracts deployed and initialized.");
-
     let accounts = vec![
       &owner,
       &guardian,
@@ -122,8 +117,6 @@ mod tests {
     let contracts = vec![&launchpad, &ref_finance, &ft_price, &ft_project, &ft_xtoken];
 
     bulk_register_storage(&worker, accounts, contracts).await?;
-
-    println!("Accounts registered to storage");
 
     // 2. Assign guardian
     owner
@@ -675,7 +668,6 @@ mod tests {
         .collect::<Vec<String>>(),
       vec![0.to_string(), 0.to_string()]
     );
-    println!("{:#?}", pool_info);
 
     // assert deposit of project token
     let initial_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
@@ -788,7 +780,6 @@ mod tests {
         price_tokens_liquidity.to_string()
       ]
     );
-    println!("{:#?}", pool_info);
 
     // 15. Time travel to cliff period
     time_travel(&worker, 60 * 30).await?;
@@ -827,18 +818,6 @@ mod tests {
     let after_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
-
-    println!("{}", after_balance_investor_1);
-    println!("{}", pre_balance_investor_1);
-    println!("{}", expected_withdraw_1);
-
-    println!("{}", after_balance_investor_2);
-    println!("{}", pre_balance_investor_2);
-    println!("{}", expected_withdraw_2);
-
-    println!("{}", after_balance_investor_3);
-    println!("{}", pre_balance_investor_3);
-    println!("{}", expected_withdraw_3);
 
     assert!(after_balance_investor_1 > pre_balance_investor_1);
     assert!(after_balance_investor_1 < pre_balance_investor_1 + expected_withdraw_1);
