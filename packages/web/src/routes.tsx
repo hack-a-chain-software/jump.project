@@ -6,41 +6,54 @@ import { RocketIcon } from "./assets/svg/rocket";
 import { SwapIcon } from "./assets/svg/swap";
 
 export const routes = {
-  home: "/",
-  projectDetails: "/project/:id",
-  staking: "/staking",
+  home: "/launchpad",
+  projectDetails: "/launchpad/:id",
+  staking: "/coin-staking",
+  nftStaking: "/nft-staking",
+  nftStakingProject: "/nft-staking/:id",
 };
 
 export const navRoutes = [
   {
     title: "Launchpad",
     icon: <RocketIcon />,
-    route: "/",
-    subroutePrefix: "project",
+    route: "/launchpad",
+    subroutePrefix: "/launchpad",
   },
   {
     title: "Staking",
     icon: <WalletIcon />,
-    route: "/staking",
+    route: "/coin-staking",
+    subroutePrefix: "coin-staking",
+  },
+  {
+    title: "NFT Staking",
+    icon: <WalletIcon />,
+    route: "/nft-staking",
+    subroutePrefix: "nft-staking",
   },
   {
     title: "Swap",
     icon: <SwapIcon />,
     route: "/swap",
+    subroutePrefix: "swap",
   },
   {
     title: "Pools",
     icon: <PoolsIcon />,
-    route: "/swap",
+    route: "/pools",
+    subroutePrefix: "pools",
   },
   {
     title: "Farm",
     icon: <FarmIcon />,
-    route: "/swap",
+    route: "/farm",
+    subroutePrefix: "farm",
   },
   {
     title: "Analytics",
     icon: <AnalyticsIcon />,
-    route: "/swap",
+    route: "/analytics",
+    subroutePrefix: "analytics",
   },
 ];

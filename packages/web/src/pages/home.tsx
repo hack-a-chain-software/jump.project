@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
 import { CardEndWithJumpLogo } from "../assets/svg/cardEnd";
-import { Select } from "../components";
+import { Select, TopCard } from "../components";
 
 /**
  * @route - '/'
@@ -26,26 +26,11 @@ export function Home() {
   const navigate = useNavigate();
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-        w="100%"
-        borderRadius="25px"
-        bg="darkerGrey"
-      >
-        <Flex direction="column" pl="60px">
-          <Text color="white" fontFamily="Damion" fontSize="50px" as="h1">
-            Launchpad
-          </Text>
-          <Text color="white" fontSize="16px" w="500px">
-            A launchpad for new projects to raise capital and for the community
-            to participate in new NEAR project launches.
-          </Text>
-        </Flex>
-        <CardEndWithJumpLogo />
-      </Box>
+      <TopCard
+        gradientText="Launchpad"
+        bigText="Stake. Help. Earn."
+        bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
+      />
 
       <Flex justifyContent="space-between">
         <Select placeholder="Select the status">
@@ -55,7 +40,8 @@ export function Home() {
         </Select>
         <Flex maxW="330px" w="100%">
           <Input
-            bg={useColorModeValue("#dddddd", "grey.600")}
+            // borderColor={useColorModeValue("black", "grey.600")}
+            borderWidth="2px"
             h="60px"
             maxW="330px"
             w="100%"
@@ -64,14 +50,14 @@ export function Home() {
             _placeholder={{
               color: useColorModeValue("black", "white"),
             }}
-            borderColor="transparent"
+            // borderColor="transparent"
             outline="none"
             px="20px"
           />
         </Flex>
       </Flex>
 
-      <TableContainer borderWidth="1px" px="20px" py="20px" borderRadius={20}>
+      <TableContainer borderWidth="2px" px="20px" py="20px" borderRadius={20}>
         <Table size="lg" variant="unstyled">
           <Thead>
             <Tr>
@@ -88,7 +74,7 @@ export function Home() {
           <Tbody>
             <Tr
               cursor="pointer"
-              onClick={() => navigate(`/project/1`)}
+              onClick={() => navigate(`/launchpad/1`)}
               h="50px"
               alignItems="center"
             >

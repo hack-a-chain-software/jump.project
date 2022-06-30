@@ -10,6 +10,7 @@ export const BackButton = (props: Props) => {
       direction="row"
       gap="10px"
       alignItems="center"
+      userSelect="none"
       {...props}
     >
       <ArrowRightIcon width="30px" className="rotate-180" />
