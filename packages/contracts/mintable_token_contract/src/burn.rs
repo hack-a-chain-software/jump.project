@@ -20,16 +20,14 @@ mod tests {
   use crate::tests::*;
   use crate::*;
 
-  use near_sdk::test_utils::{accounts, VMContextBuilder};
   use near_sdk::MockedBlockchain;
-  use near_sdk::{testing_env, VMContext, Balance};
+  use near_sdk::{testing_env};
 
-  use super::*;
   use std::convert::TryFrom;
 
   #[test]
   fn test_burn() {
-    let mut context = get_context(vec![], false, 1, 0, SIGNER_ACCOUNT.to_string());
+    let context = get_context(vec![], false, 1, 0, SIGNER_ACCOUNT.to_string());
     testing_env!(context);
 
     let mut contract = init_contract();

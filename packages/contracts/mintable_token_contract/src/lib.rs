@@ -2,7 +2,7 @@
 
 use modified_contract_standards;
 use modified_contract_standards::fungible_token::metadata::{
-  FungibleTokenMetadata, FungibleTokenMetadataProvider, FT_METADATA_SPEC,
+  FungibleTokenMetadata, FungibleTokenMetadataProvider,
 };
 
 use modified_contract_standards::fungible_token::FungibleToken;
@@ -89,12 +89,12 @@ mod tests {
   pub use near_sdk::AccountId;
   pub use std::convert::{TryFrom, TryInto};
 
+  use modified_contract_standards::fungible_token::metadata::{FT_METADATA_SPEC};
   pub use modified_contract_standards::fungible_token::core::FungibleTokenCore;
 
   pub use super::*;
 
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
-  pub const TOKEN_ACCOUNT: &str = "token.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
   pub const SIGNER_ACCOUNT: &str = "signer.testnet";
 
@@ -102,7 +102,6 @@ mod tests {
   pub const TOKEN_SYMBOL: &str = "XTK";
   pub const TOKEN_ICON: &str = "some.url";
   pub const TOKEN_DECIMALS: u8 = 18; //     x_token_decimals: u8,
-  pub const BASE_TOKEN_ADDRESS: &str = "token.testnet";
 
   pub fn get_context(
     input: Vec<u8>,
@@ -178,7 +177,7 @@ mod tests {
   }
   #[test]
   fn test_transfer() {
-    let mut context = get_context(vec![], false, 1, 0, SIGNER_ACCOUNT.to_string());
+    let context = get_context(vec![], false, 1, 0, SIGNER_ACCOUNT.to_string());
     testing_env!(context);
 
     let deposit: u128 = 10;

@@ -211,14 +211,9 @@ impl StakingProgram {
 
 #[cfg(test)]
 mod tests {
-  use near_sdk::test_utils::VMContextBuilder;
   use std::{collections::HashMap, str::FromStr};
 
   use super::*;
-
-  fn get_context() -> VMContextBuilder {
-    VMContextBuilder::new()
-  }
 
   fn get_token_ids() -> [AccountId; 3] {
     ["token_a.testnet", "token_b.testnet", "token_c.testnet"]

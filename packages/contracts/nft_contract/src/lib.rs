@@ -1,5 +1,5 @@
 use near_sdk::{
-  env, near_bindgen, assert_one_yocto, AccountId, PanicOnDefault, Promise, PromiseOrValue,
+  env, near_bindgen, AccountId, PanicOnDefault, Promise, PromiseOrValue,
 };
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;

@@ -1,5 +1,5 @@
 use crate::*;
-use near_sdk::{assert_one_yocto, env};
+use near_sdk::{assert_one_yocto};
 
 #[near_bindgen]
 impl Contract {
@@ -27,17 +27,14 @@ mod tests {
   use crate::tests::*;
   use crate::*;
 
-  use near_sdk::test_utils::{accounts, VMContextBuilder};
   use near_sdk::MockedBlockchain;
-  use near_sdk::{testing_env, VMContext, Balance};
-  use modified_contract_standards::fungible_token::FungibleToken;
+  use near_sdk::{testing_env};
 
-  use super::*;
   use std::convert::TryFrom;
 
   #[test]
   fn test_mint() {
-    let mut context = get_context(vec![], false, 1, 0, OWNER_ACCOUNT.to_string());
+    let context = get_context(vec![], false, 1, 0, OWNER_ACCOUNT.to_string());
     testing_env!(context);
 
     let mut contract = init_contract();
