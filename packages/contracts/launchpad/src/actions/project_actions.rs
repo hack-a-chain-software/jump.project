@@ -218,13 +218,14 @@ mod tests {
         );
 
         let receipts = get_created_receipts();
+        println!("{:#?}", receipts);
         assert_eq!(receipts.len(), 4);
         assert_eq!(
-          receipts[0].receiver_id,
+          receipts[2].receiver_id,
           listing.project_token.ft_get_account_id()
         );
-        assert_eq!(receipts[0].actions.len(), 1);
-        match receipts[0].actions[0].clone() {
+        assert_eq!(receipts[2].actions.len(), 1);
+        match receipts[2].actions[0].clone() {
           VmAction::FunctionCall {
             function_name,
             args,
@@ -241,9 +242,9 @@ mod tests {
           _ => panic!(),
         };
 
-        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
-        assert_eq!(receipts[1].actions.len(), 1);
-        match receipts[1].actions[0].clone() {
+        assert_eq!(receipts[3].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+        assert_eq!(receipts[3].actions.len(), 1);
+        match receipts[3].actions[0].clone() {
           VmAction::FunctionCall {
             function_name,
             args: _,
@@ -257,11 +258,11 @@ mod tests {
         };
 
         assert_eq!(
-          receipts[2].receiver_id,
+          receipts[0].receiver_id,
           listing.price_token.ft_get_account_id()
         );
-        assert_eq!(receipts[2].actions.len(), 1);
-        match receipts[2].actions[0].clone() {
+        assert_eq!(receipts[0].actions.len(), 1);
+        match receipts[0].actions[0].clone() {
           VmAction::FunctionCall {
             function_name,
             args,
@@ -278,9 +279,9 @@ mod tests {
           _ => panic!(),
         };
 
-        assert_eq!(receipts[3].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
-        assert_eq!(receipts[3].actions.len(), 1);
-        match receipts[3].actions[0].clone() {
+        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+        assert_eq!(receipts[1].actions.len(), 1);
+        match receipts[1].actions[0].clone() {
           VmAction::FunctionCall {
             function_name,
             args: _,

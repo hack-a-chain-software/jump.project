@@ -73,7 +73,7 @@ pub async fn initialize_ft_contract(
   owner: &Account,
 ) -> workspaces::result::CallExecutionDetails {
   contract
-    .call(&worker, "initialize")
+    .call(&worker, "new")
     .args_json(json!({
       "owner_id": owner.id(),
       "total_supply": "1000000000000000000000",
