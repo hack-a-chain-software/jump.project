@@ -6,6 +6,7 @@ members = [
   # upgrade every contract to near_sdk@4.0.0
   # "./nft_staking",
   # https://github.com/rust-lang/cargo/issues/7880
+  "./nft_contract",
   "./mintable_token_contract",
   "./token_contract",
   "./x_token",
