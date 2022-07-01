@@ -1,4 +1,3 @@
-use crate::*;
 use near_sdk::json_types::U128;
 use std::collections::HashMap;
 use near_sdk::AccountId;
@@ -8,7 +7,6 @@ use crate::non_fungible_token::TokenId;
 use crate::non_fungible_token::NonFungibleToken;
 use near_sdk::Balance;
 use serde::{Serialize, Deserialize};
-use near_sdk::near_bindgen;
 use near_sdk::env;
 use std::convert::TryInto;
 

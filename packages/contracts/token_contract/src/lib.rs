@@ -15,11 +15,6 @@ NOTES:
   - To prevent the deployed contract from being modified or deleted, it should not have any access
     keys on its account.
 */
-//TODO:
-// TROCAR TODOS OS EVENTOS DE TODAS AS FILES - ONMINT, ONBURN ONTRANSFER -> LIB E TODOS DENTRO DO FUNGIBLE_TOKENS
-//FtBurn { owner_id: &owner, amount: &[&], memo: None}.emit();
-//FtTransfer { old_owner_id: &owner, new_owner_id:,amount:, memo: None}.emit();
-//FtMint { owner_id: &owner ,amount:, memo: None}.emit();
 
 use modified_contract_standards;
 use modified_contract_standards::fungible_token::metadata::{
@@ -30,7 +25,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{U128, ValidAccountId};
 use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
-use modified_contract_standards::fungible_token::events::{FtBurn, FtMint};
+use modified_contract_standards::fungible_token::events::{FtBurn, FtMint, FtTransfer};
 
 pub mod burn;
 
@@ -47,31 +42,11 @@ const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://
 impl Contract {
   /// Initializes the contract with the given total supply owned by the given `owner_id` with
   /// default metadata (for example purposes only).
-  #[init]
-  pub fn new_default_meta(owner_id: AccountId, total_supply: U128) -> Self {
-    Self::initialize(
-      owner_id,
-      total_supply,
-      FungibleTokenMetadata {
-        spec: FT_METADATA_SPEC.to_string(),
-        name: "Example NEAR fungible token".to_string(),
-        symbol: "EXAMPLE".to_string(),
-        icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
-        reference: None,
-        reference_hash: None,
-        decimals: 24,
-      },
-    )
-  }
 
   /// Initializes the contract with the given total supply owned by the given `owner_id` with
   /// the given fungible token metadata.
   #[init]
-  pub fn initialize(
-    owner_id: AccountId,
-    total_supply: U128,
-    metadata: FungibleTokenMetadata,
-  ) -> Self {
+  pub fn new(owner_id: AccountId, total_supply: U128, metadata: FungibleTokenMetadata) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
     let mut this = Self {
@@ -81,9 +56,9 @@ impl Contract {
     this.token.internal_register_account(&owner_id);
     this.token.internal_deposit(&owner_id, total_supply.into());
     FtMint {
-      owner_id: &owner_id,
+      user_id: &owner_id,
       amount: &total_supply.0.to_string(),
-      memo: Some("Unique minting event"),
+      memo: Some("Single Mint event on contract creation"),
     }
     .emit();
 
@@ -115,73 +90,137 @@ impl FungibleTokenMetadataProvider for Contract {
   }
 }
 
-// ----------------------------------- TEST -------------------------------------------------
+//----------------------------------- TEST -------------------------------------------------
 
-// #[cfg(all(test, not(target_arch = "wasm32")))]
-// mod tests {
-//     use near_sdk::test_utils::{accounts, VMContextBuilder};
-//     use near_sdk::MockedBlockchain;
-//     use near_sdk::{testing_env, Balance};
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+  use near_sdk::test_utils::{accounts, VMContextBuilder};
+  use near_sdk::MockedBlockchain;
+  use near_sdk::{testing_env, VMContext, Balance};
 
-//     use super::*;
+  use super::*;
+  use std::convert::TryFrom;
 
-//     const TOTAL_SUPPLY: Balance = 1_000_000_000_000_000;
+  pub const TOTAL_SUPPLY: Balance = 1_000;
+  pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
+  pub const TOKEN_ACCOUNT: &str = "token.testnet";
+  pub const SIGNER_ACCOUNT: &str = "signer.testnet";
+  pub const OWNER_ACCOUNT: &str = "owner.testnet";
 
-//     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
-//         let mut builder = VMContextBuilder::new();
-//         builder
-//             .current_account_id(accounts(0))
-//             .signer_account_id(predecessor_account_id.clone())
-//             .predecessor_account_id(predecessor_account_id);
-//         builder
-//     }
+  // mock the context for testing, notice "signer_account_id" that was accessed above from env::
+  pub fn get_context(
+    input: Vec<u8>,
+    is_view: bool,
+    attached_deposit: u128,
+    account_balance: u128,
+    signer_id: AccountId,
+  ) -> VMContext {
+    VMContext {
+      current_account_id: CONTRACT_ACCOUNT.to_string(),
+      signer_account_id: signer_id.clone(),
+      signer_account_pk: vec![0, 1, 2],
+      predecessor_account_id: signer_id.clone(),
+      input,
+      block_index: 0,
+      block_timestamp: 0,
+      account_balance,
+      account_locked_balance: 0,
+      storage_usage: 0,
+      attached_deposit,
+      prepaid_gas: 10u64.pow(18),
+      random_seed: vec![0, 1, 2],
+      is_view,
+      output_data_receivers: vec![],
+      epoch_height: 19,
+    }
+  }
 
-//     #[test]
-//     fn test_new() {
-//         let mut context = get_context(accounts(1));
-//         testing_env!(context.build());
-//         let contract = Contract::new_default_meta(accounts(1).into(), TOTAL_SUPPLY.into());
-//         testing_env!(context.is_view(true).build());
-//         assert_eq!(contract.ft_total_supply().0, TOTAL_SUPPLY);
-//         assert_eq!(contract.ft_balance_of(accounts(1)).0, TOTAL_SUPPLY);
-//     }
+  pub fn get_test_meta() -> FungibleTokenMetadata {
+    FungibleTokenMetadata {
+      spec: FT_METADATA_SPEC.to_string(),
+      name: "Example NEAR fungible token".to_string(),
+      symbol: "EXAMPLE".to_string(),
+      icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
+      reference: None,
+      reference_hash: None,
+      decimals: 24,
+    }
+  }
 
-//     #[test]
-//     #[should_panic(expected = "The contract is not initialized")]
-//     fn test_default() {
-//         let context = get_context(accounts(1));
-//         testing_env!(context.build());
-//         let _contract = Contract::default();
-//     }
+  pub fn init_contract() -> Contract {
+    Contract {
+      token: FungibleToken::new(b"a".to_vec()),
+      metadata: LazyOption::new(b"m".to_vec(), Some(&get_test_meta())),
+    }
+  }
 
-//     #[test]
-//     fn test_transfer() {
-//         let mut context = get_context(accounts(2));
-//         testing_env!(context.build());
-//         let mut contract = Contract::new_default_meta(accounts(2).into(), TOTAL_SUPPLY.into());
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .attached_deposit(contract.storage_balance_bounds().min.into())
-//             .predecessor_account_id(accounts(1))
-//             .build());
-//         // Paying for account registration, aka storage deposit
-//         contract.storage_deposit(None, None);
+  #[test]
+  fn test_new() {
+    let mut context = get_context(vec![], false, 0, 0, OWNER_ACCOUNT.to_string()); // vec!() -> da pra inicializar assim, tem otimizacao ( macro vec)
 
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .attached_deposit(1)
-//             .predecessor_account_id(accounts(2))
-//             .build());
-//         let transfer_amount = TOTAL_SUPPLY / 3;
-//         contract.ft_transfer(accounts(1), transfer_amount.into(), None);
+    testing_env!(context);
+    let contract = Contract::new(
+      OWNER_ACCOUNT.to_string(),
+      TOTAL_SUPPLY.into(),
+      get_test_meta(),
+    );
+    let contract_metadata = contract.metadata.get().unwrap();
 
-//         testing_env!(context
-//             .storage_usage(env::storage_usage())
-//             .account_balance(env::account_balance())
-//             .is_view(true)
-//             .attached_deposit(0)
-//             .build());
-//         assert_eq!(contract.ft_balance_of(accounts(2)).0, (TOTAL_SUPPLY - transfer_amount));
-//         assert_eq!(contract.ft_balance_of(accounts(1)).0, transfer_amount);
-//     }
-// }
+    assert_eq!(contract.ft_total_supply().0, TOTAL_SUPPLY);
+    assert_eq!(
+      contract
+        .ft_balance_of(ValidAccountId::try_from(OWNER_ACCOUNT).unwrap())
+        .0,
+      TOTAL_SUPPLY
+    );
+    assert_eq!(contract_metadata.spec, get_test_meta().spec)
+  }
+
+  #[test]
+  #[should_panic(expected = "The contract is not initialized")]
+  fn test_default() {
+    let mut context = get_context(vec![], false, 0, 0, OWNER_ACCOUNT.to_string());
+    testing_env!(context);
+    let _contract = Contract::default();
+  }
+
+  #[test]
+  fn test_transfer() {
+    let mut context = get_context(vec![], false, 1, 0, SIGNER_ACCOUNT.to_string());
+    testing_env!(context);
+
+    let mut contract = init_contract();
+
+    //registring owner
+    contract
+      .token
+      .internal_register_account(&OWNER_ACCOUNT.to_string());
+    contract
+      .token
+      .internal_register_account(&SIGNER_ACCOUNT.to_string());
+    contract
+      .token
+      .internal_deposit(&SIGNER_ACCOUNT.to_string(), TOTAL_SUPPLY);
+
+    let transfer_amount = 10;
+
+    contract.ft_transfer(
+      ValidAccountId::try_from(OWNER_ACCOUNT).unwrap(),
+      U128(transfer_amount),
+      None,
+    );
+
+    assert_eq!(
+      contract
+        .ft_balance_of(ValidAccountId::try_from(SIGNER_ACCOUNT).unwrap())
+        .0,
+      (TOTAL_SUPPLY - transfer_amount)
+    );
+    assert_eq!(
+      contract
+        .ft_balance_of(ValidAccountId::try_from(OWNER_ACCOUNT).unwrap())
+        .0,
+      transfer_amount
+    );
+  }
+}

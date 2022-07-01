@@ -22,10 +22,8 @@ impl Contract {
         self.internal_mint_x_token(amount.0, sender_id.try_into().unwrap());
         U128(0)
       }
-      "deposit_profit" => {
-        self.internal_deposit_jump_profits(amount.0);
-        U128(0)
-      }
+      "deposit_profit" => {self.internal_deposit_jump_profits(amount.0)
+      U128(0)},
       _ => panic!("{}", ERR_001),
     }
   }

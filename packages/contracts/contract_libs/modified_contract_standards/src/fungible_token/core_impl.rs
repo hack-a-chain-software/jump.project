@@ -1,6 +1,6 @@
 use crate::fungible_token::core::FungibleTokenCore;
 use crate::fungible_token::resolver::FungibleTokenResolver;
-use crate::fungible_token::events::{FtBurn, FtMint, FtTransfer};
+use crate::fungible_token::events::{FtTransfer};
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LookupMap;
@@ -154,6 +154,7 @@ impl FungibleToken {
     .emit();
   }
 
+  #[allow(unused_variables)]
   pub fn internal_burn(&mut self, sender_id: &AccountId, amount: Balance, memo: Option<String>) {
     assert!(amount > 0, "The amount should be a positive number");
     self.internal_withdraw(sender_id, amount);
@@ -182,7 +183,10 @@ impl FungibleTokenCore for FungibleToken {
     memo: Option<String>,
     msg: String,
   ) -> PromiseOrValue<U128> {
-    assert_one_yocto();
+    assert!(
+      env::attached_deposit() >= 1,
+      "Requires attached deposit of 1 or more yoctoNEAR"
+    );
     let sender_id = env::predecessor_account_id();
     let amount: Balance = amount.into();
     self.internal_transfer(&sender_id, receiver_id.as_ref(), amount, memo);
@@ -192,7 +196,7 @@ impl FungibleTokenCore for FungibleToken {
       amount.into(),
       msg,
       receiver_id.as_ref(),
-      NO_DEPOSIT,
+      env::attached_deposit() - 1,
       env::prepaid_gas() - GAS_FOR_FT_TRANSFER_CALL,
     )
     .then(ext_self::ft_resolve_transfer(
