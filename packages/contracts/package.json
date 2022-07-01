@@ -4,8 +4,9 @@
   "license": "UNLICENSED",
   "main": "lib/index.ts",
   "scripts": {
+    "clean:contract": "cargo clean",
     "build:contract": "node compile.js",
-    "build:contract:debug": "node compile.js --debug",
+    "build:contract:debug": "node compile.js",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
     "deploy": "npm run build:contract && npm run deploy:contract",
@@ -28,6 +29,7 @@
     "@near/ts": "*",
     "@types/uuid": "^8.3.4",
     "near-api-js": "^0.44.2",
+    "near-workspaces": "https://gitpkg.now.sh/near/workspaces-js/packages/js?ba865c4b05b149a56e17c586a1355c3ef30dc335",
     "regenerator-runtime": "~0.13.5",
     "toml": "^3.0.0",
     "uuid": "^8.3.2"
