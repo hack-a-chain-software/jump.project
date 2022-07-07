@@ -10,6 +10,7 @@ import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
+import { CommonErrors } from "@/errors";
 
 export default {
   LaunchpadListing: {
@@ -34,7 +35,7 @@ export default {
         }
       );
 
-      return result[0];
+      return result[0] || null;
     },
   },
   Query: {
@@ -51,7 +52,7 @@ export default {
         }
       );
 
-      return result[0];
+      return result[0] || null;
     },
 
     async launchpad_projects(

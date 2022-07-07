@@ -1,3 +1,4 @@
+import { CommonErrors } from "@/errors";
 import { AccountIdQuery, GraphQLContext } from "@/types";
 import { NFTStaking, StakedNFT } from "@/types/nft-staking";
 import { QueryTypes } from "sequelize";
@@ -22,12 +23,14 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query(
-        'select * from "nft_investor" where "account_id" = $1',
+        'select * from "nft_investor" where "account_id" = $1;',
         {
           bind: [account_id],
           type: QueryTypes.SELECT,
         }
       );
+
+      if (!result[0]) throw new CommonErrors.NotFound();
 
       return result[0];
     },
@@ -89,6 +92,8 @@ export default {
           type: QueryTypes.SELECT,
         }
       );
+
+      if (!result[0]) throw new CommonErrors.NotFound();
 
       return result[0];
     },

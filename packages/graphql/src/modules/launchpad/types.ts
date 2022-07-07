@@ -85,7 +85,7 @@ export default gql`
       search: String
       limit: Int
       offset: Int
-    ): LaunchpadPage
+    ): LaunchpadPage!
     investor_info(account_id: ID!): LaunchpadInvestor
   }
 `;

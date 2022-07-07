@@ -1,3 +1,4 @@
+import { PaginationError } from "@/errors/pagination";
 import { ApolloError } from "apollo-server";
 import { QueryTypes, Sequelize } from "sequelize";
 
@@ -27,7 +28,7 @@ export type PaginationFilters = {
  */
 export async function createPageableQuery<
   P extends Pageable,
-  Params extends unknown[] | Record<any, any>
+  Params extends unknown[] | Record<string, unknown>
 >(
   query: string,
   sequelize: Sequelize,
@@ -60,9 +61,6 @@ export async function createPageableQuery<
       totalCount: totalCount[0]?.count || 0,
     };
   } catch (error) {
-    throw new ApolloError(
-      "The server has crashed trying to build a pagination query" +
-        (error as Error).message
-    );
+    throw new PaginationError((error as Error).message);
   }
 }
