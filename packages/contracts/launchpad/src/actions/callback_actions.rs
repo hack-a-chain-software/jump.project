@@ -69,6 +69,7 @@ impl Contract {
       // if no more allocations remaining, remove allocations storage
       // and return storage funds to investor instance
       events::investor_withdraw_allocations(
+        &investor_id,
         U64(listing.listing_id),
         U128(withdraw_amount),
         U128(0),
