@@ -46,8 +46,6 @@ export default gql`
     rewards_project_token: String
   }
 
-  # union Pageable = LaunchpadListing | NFTStaking
-
   type NFTPage {
     pageSize: Int
     totalCount: Int
