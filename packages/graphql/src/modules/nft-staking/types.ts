@@ -55,7 +55,7 @@ export default gql`
   }
 
   type Query {
-    nft_staking_projects(limit: Int, offset: Int, search: String!): NFTPage
+    nft_staking_projects(limit: Int, offset: Int, search: String): NFTPage
     staking(collection: ID!): NFTStaking
   }
 `;
