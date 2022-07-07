@@ -1,14 +1,14 @@
-import { GraphQLContext } from "@/types";
+import { CommonErrors } from "@/errors";
 
 export default {
   Query: {
-    health: async (_root: any, _args: any, context: GraphQLContext) => {
+    health: async () => {
       try {
         return {
           message: "Up and running",
         };
       } catch (error) {
-        throw new Error("Something failed: " + (error as Error)?.message);
+        throw new CommonErrors.InternalServerError((error as Error).message);
       }
     },
   },
