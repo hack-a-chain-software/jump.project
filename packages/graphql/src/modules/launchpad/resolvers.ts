@@ -10,7 +10,6 @@ import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
-import { CommonErrors } from "@/errors";
 
 export default {
   LaunchpadListing: {
