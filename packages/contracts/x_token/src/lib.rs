@@ -170,7 +170,7 @@ impl Contract {
         "version": "1.0.0",
         "event": "profit_deposit",
         "data": {
-          "quantity_deposited": quantity_deposited,
+          "quantity_deposited": U128(quantity_deposited),
           "base_token_treasury_after_deposit": U128(self.base_token_treasury),
           "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
         }

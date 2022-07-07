@@ -10,7 +10,7 @@ const REVERT_CALLBACK_GAS: Gas = Gas(50_000_000_000_000);
 #[allow(dead_code)]
 #[near_bindgen]
 impl Contract {
-  pub fn ft_on_transfer(&mut self, sender_id: String, amount: U128, msg: String) {
+  pub fn ft_on_transfer(&mut self, sender_id: String, amount: U128, msg: String) -> U128 {
     assert_eq!(
       env::predecessor_account_id(),
       self.base_token,
@@ -20,8 +20,12 @@ impl Contract {
     match msg.as_str() {
       "mint" => {
         self.internal_mint_x_token(amount.0, sender_id.try_into().unwrap());
+        U128(0)
       }
-      "deposit_profit" => self.internal_deposit_jump_profits(amount.0),
+      "deposit_profit" => {
+        self.internal_deposit_jump_profits(amount.0);
+        U128(0)
+      }
       _ => panic!("{}", ERR_001),
     }
   }

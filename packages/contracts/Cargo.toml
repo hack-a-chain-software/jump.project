@@ -2,9 +2,15 @@
 # Add location of contracts here
 members = [
   "./staking",
-  "./token_contract",
+    # we can't have nft_staking as a workspace member until we
+  # upgrade every contract to near_sdk@4.0.0
+  # "./nft_staking",
+  # https://github.com/rust-lang/cargo/issues/7880
+  "./nft_contract",
   "./mintable_token_contract",
-  "./x_token"
+  "./token_contract",
+  "./x_token",
+  "./launchpad"
 ]
 
 [profile.release]
