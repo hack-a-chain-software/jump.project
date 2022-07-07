@@ -27,6 +27,10 @@ const app = new ApolloServer({
 
 async function main(): Promise<void> {
   try {
+    console.log(
+      "Running the GraphQL Server with the following ENV for NEAR = " +
+        process.env.ENV
+    );
     console.log("Checking Database Connection ☢️");
     await sequelize.authenticate();
     console.log("Database Authenticated ✅");
