@@ -67,8 +67,6 @@ export default {
       filters: Partial<LaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
-      // console.log(filters);
-
       let sqlQuery = filters.showMineOnly
         ? `
           SELECT l.* FROM "listings" l
