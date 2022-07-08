@@ -45,6 +45,6 @@ export type LaunchpadListing = {
 export type LaunchpadFilters = {
   status: "Open" | "Ended" | "Waiting" | "All";
   visibility: "Private" | "Public" | "All";
-  showForAccountId: string;
+  showMineOnly: string;
   search: string;
 } & PaginationFilters;

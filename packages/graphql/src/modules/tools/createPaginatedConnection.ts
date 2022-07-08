@@ -1,5 +1,4 @@
 import { PaginationError } from "@/errors/pagination";
-import { ApolloError } from "apollo-server";
 import { QueryTypes, Sequelize } from "sequelize";
 
 type Pageable = Record<string, unknown>;
@@ -35,32 +34,28 @@ export async function createPageableQuery<
   { limit = 30, offset }: Partial<PaginationFilters>,
   parameters?: Params
 ): Promise<Page<P>> {
-  try {
-    const totalCount = await sequelize.query<{ count: number }>(query, {
-      bind: parameters || [],
-      type: QueryTypes.SELECT,
-    });
+  const totalCount = await sequelize.query<{ count: number }>(query, {
+    bind: Object.values(parameters as any) || [],
+    type: QueryTypes.SELECT,
+  });
 
-    let pagedQuery = query;
+  let pagedQuery = query;
 
-    pagedQuery += ` LIMIT ${limit}`;
-    if (offset) pagedQuery += ` OFFSET ${offset}`;
+  pagedQuery += ` LIMIT ${limit}`;
+  if (offset) pagedQuery += ` OFFSET ${offset}`;
 
-    const data = await sequelize.query<P>(pagedQuery, {
-      bind: parameters || [],
-      type: QueryTypes.SELECT,
-    });
+  const data = await sequelize.query<P>(pagedQuery, {
+    bind: parameters || [],
+    type: QueryTypes.SELECT,
+  });
 
-    return {
-      data,
-      hasNextPage: totalCount[0]?.count
-        ? data.length + (offset || 0) <= totalCount[0]?.count
-        : false,
-      itemsPerPage: limit,
-      pageSize: data.length || 0,
-      totalCount: totalCount[0]?.count || 0,
-    };
-  } catch (error) {
-    throw new PaginationError((error as Error).message);
-  }
+  return {
+    data,
+    hasNextPage: totalCount[0]?.count
+      ? data.length + (offset || 0) <= totalCount[0]?.count
+      : false,
+    itemsPerPage: limit,
+    pageSize: data.length || 0,
+    totalCount: totalCount[0]?.count || 0,
+  };
 }

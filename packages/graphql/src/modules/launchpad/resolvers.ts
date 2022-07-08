@@ -21,6 +21,14 @@ export default {
         symbol,
       };
     },
+    async price_token_info({ price_token }: LaunchpadListing) {
+      const { name, icon, symbol } = await findTokenMetadata(price_token);
+      return {
+        name,
+        image: icon,
+        symbol,
+      };
+    },
     async allocation(
       { listing_id }: LaunchpadListing,
       { account_id }: AccountIdQuery,
@@ -59,11 +67,13 @@ export default {
       filters: Partial<LaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
-      let sqlQuery = filters.showForAccountId
+      // console.log(filters);
+
+      let sqlQuery = filters.showMineOnly
         ? `
           SELECT l.* FROM "listings" l
-            INNER JOIN "allocations" a (account_id = a.account)
-          WHERE account_id = :account_id
+          INNER JOIN "allocations" a ON(l.listing_id = a.listing_id)
+          WHERE account_id = $1
         `
         : `SELECT * FROM "listings"`;
 
@@ -72,7 +82,7 @@ export default {
         ImportantStatusFilters.includes(filters.status as string)
       ) {
         sqlQuery +=
-          (filters.showForAccountId ? " AND " : " WHERE ") +
+          (filters.showMineOnly ? " AND " : " WHERE ") +
           queriesPerStatus[filters.status];
       }
 
@@ -83,9 +93,7 @@ export default {
           limit: filters.limit,
           offset: filters.offset,
         },
-        filters.showForAccountId
-          ? { account_id: filters.showForAccountId, timestamp: Date.now() }
-          : { timestamp: Date.now() }
+        filters.showMineOnly ? [filters.showMineOnly] : []
       );
     },
   },

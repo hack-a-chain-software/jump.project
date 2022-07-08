@@ -53,6 +53,7 @@ export default gql`
 
     # Sub Queries
     project_token_info: ProjectTokenInfo
+    price_token_info: ProjectTokenInfo
     allocation(account_id: ID!): InvestorAllocation
   }
 
@@ -81,7 +82,7 @@ export default gql`
     launchpad_projects(
       status: StatusEnum
       visibility: VisibilityEnum
-      showMineOnly: Boolean
+      showMineOnly: String
       search: String
       limit: Int
       offset: Int

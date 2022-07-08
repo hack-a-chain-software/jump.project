@@ -14,10 +14,9 @@ export const ImportantStatusFilters = ["Waiting", "Ended", "Open"];
 export const queriesPerStatus = {
   Waiting: `
     status = 'Funded'
-    AND open_sale_1_timestamp >= :timestamp 
-    AND final_sale_2_timestamp <= :timestamp`,
+    AND open_sale_1_timestamp >= CURRENT_TIMESTAMP`,
   Ended: `
-    (status = 'Funded' AND final_sale_2_timestamp <= :timestamp)
+    (status = 'Funded' AND final_sale_2_timestamp <= CURRENT_TIMESTAMP)
     OR status IN (
       'SaleFinalized',
       'PoolCreated',
@@ -27,6 +26,6 @@ export const queriesPerStatus = {
     )`,
   Open: `
     status = 'Funded'
-    AND open_sale_1_timestamp <= :timestamp 
-    AND final_sale_2_timestamp >= :timestamp`,
+    AND open_sale_1_timestamp <= CURRENT_TIMESTAMP 
+    AND final_sale_2_timestamp >= CURRENT_TIMESTAMP`,
 } as Record<LaunchpadFilters["status"], string>;
