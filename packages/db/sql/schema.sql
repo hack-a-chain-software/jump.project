@@ -4,39 +4,32 @@ not null;
 
 create domain account_id as ftext;
 
-create domain u64 as numeric(0, 20) -- TODO: testar se eu não errei por 1 (ou log_2(10))
+create domain u64 as numeric(20) -- TODO: testar se eu não errei por 1 (ou log_2(10))
 default 0
-check value > 0;
+check (value >= 0)
+not null;
 
-create domain nullable_u64 as numeric(0, 20)
-check value > 0;
+create domain nullable_u64 as numeric(20)
+check (value >= 0);
 
-create domain u128 as numeric(0, 40)
+create domain u128 as numeric(40)
 default 0
-check value > 0;
+check (value >= 0)
+not null;
 
 
 /* Esses aq eu n tenho ideia */
 
-
-create table if not exists allocations (
-    account_id account_id primary key,
-    listing_id u64 references listings (listing_id),
-
-    quantity_withdrawn u128,
-    total_quantity u128,
-    total_allocation u64,
-);
-
 create table if not exists launchpad_investors (
     account_id account_id primary key,
     staked_token u128,
-    last_check timestamptz,
+    last_check timestamptz
 );
 
 create table if not exists listings (
     listing_id u64 primary key,
     project_owner account_id references launchpad_investors (account_id),
+    project_token account_id,
     price_token account_id, 
 
     open_sale_1_timestamp timestamptz,
@@ -57,7 +50,16 @@ create table if not exists listings (
     fee_price_tokens u128,
     fee_liquidity_tokens u128,
     status ftext, -- TODO: mudar pra enum
-    dex_id nullable_u64,
+    dex_id nullable_u64
+);
+
+create table if not exists allocations (
+    account_id account_id primary key,
+    listing_id u64 references listings (listing_id),
+
+    quantity_withdrawn u128,
+    total_quantity u128,
+    total_allocation u64
 );
 
 /* STATUS
@@ -79,7 +81,7 @@ pub enum ListingStatus {
 create table if not exists nft_investors (
     account_id account_id primary key,
     storage_deposit u128,
-    storage_used u128,
+    storage_used u128
 );
 
 create table if not exists staking_programs (
@@ -90,7 +92,7 @@ create table if not exists staking_programs (
 
     min_staking_period u64,
     early_withdraw_penalty u128,
-    farm jsonb not null, -- TODO: modelar isso direito
+    farm jsonb not null -- TODO: modelar isso direito
 );
 
 create table if not exists staked_nfts (
@@ -101,5 +103,5 @@ create table if not exists staked_nfts (
     owner_id account_id references nft_investors (account_id),
     balance u128[],
 
-    staked_timestamp timestamptz,
+    staked_timestamp timestamptz
 );
