@@ -38,21 +38,12 @@ export const TopCard = ({
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
-                color="white"
                 fontWeight="800"
                 fontFamily="Inter"
                 letterSpacing="-0.05em"
                 fontSize="28px"
                 mb="-20px"
                 as="h1"
-                background={jumpGradient}
-                style={
-                  {
-                    "-webkit-background-clip": "text",
-                    "-webkit-text-fill-color": "transparent",
-                    "text-fill-color": "transparent",
-                  } as any
-                }
               >
                 {gradientText}
               </Text>

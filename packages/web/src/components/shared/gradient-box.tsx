@@ -4,7 +4,7 @@ import { useTheme } from "../../hooks/theme";
 export const GradientBox: React.FC<BoxProps> = ({ children, ...props }) => {
   const { jumpGradient, gradientBoxTopCard } = useTheme();
   return (
-    <Box p="3px" background={jumpGradient} borderRadius="26px">
+    <Box borderRadius="24px" bg={gradientBoxTopCard}>
       <Box
         display="flex"
         flexDirection="row"
@@ -13,7 +13,7 @@ export const GradientBox: React.FC<BoxProps> = ({ children, ...props }) => {
         w="100%"
         p="70px"
         borderRadius="24px"
-        bg={gradientBoxTopCard}
+        bg="rgba(0,0,0,0.1)"
         {...props}
       >
         {children}
