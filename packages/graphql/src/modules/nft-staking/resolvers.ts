@@ -23,7 +23,7 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query(
-        'select * from "nft_investor" where "account_id" = $1;',
+        'select * from "nft_investors" where "account_id" = $1;',
         {
           bind: [account_id],
           type: QueryTypes.SELECT,
@@ -86,7 +86,7 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query<NFTStaking>(
-        'select * from "staking_program" where "collection" = $1 limit 1;',
+        'select * from "staking_programs" where "collection" = $1 limit 1;',
         {
           bind: [collection],
           type: QueryTypes.SELECT,
@@ -102,10 +102,14 @@ export default {
       { limit, offset }: PaginationFilters & { search: string },
       { sequelize }: GraphQLContext
     ) {
-      return createPageableQuery('select * from "staking_program"', sequelize, {
-        limit,
-        offset,
-      });
+      return createPageableQuery(
+        'select * from "staking_programs"',
+        sequelize,
+        {
+          limit,
+          offset,
+        }
+      );
     },
   },
 };
