@@ -71,14 +71,14 @@ pub fn project_withdraw_listing(
 
 /// Investor action events
 pub fn investor_buy_allocation(
-  investor: &AccountId,
+  investor_id: &AccountId,
   listing_id: U64,
   sale_phase: SalePhase,
   allocations_purchased: U64,
   total_allocations_sold: U64,
 ) {
   let data = json!({
-      "investor": investor,
+      "investor_id": investor_id,
       "listing_id": listing_id,
       "sale_phase": sale_phase,
       "allocations_purchased": allocations_purchased,
@@ -88,27 +88,29 @@ pub fn investor_buy_allocation(
 }
 
 pub fn investor_withdraw_allocations(
+  investor_id: &AccountId
   listing_id: U64,
-  project_tokens_withdrew: U128,
-  price_tokens_withdrew: U128,
+  project_tokens_withdrawn: U128,
+  price_tokens_withdrawn: U128,
   project_status: &ListingStatus,
 ) {
   let data = json!({
+      "investor_id": investor_id,
       "listing_id": listing_id,
-      "project_tokens_withdrew": project_tokens_withdrew,
-      "price_tokens_withdrew": price_tokens_withdrew,
+      "project_tokens_withdrawn": project_tokens_withdrawn,
+      "price_tokens_withdrawn": price_tokens_withdrawn,
       "project_status": project_status
   });
   log_event("investor_withdraw", data.to_string());
 }
 
 pub fn investor_stake_membership(
-  account_id: &AccountId,
+  investor_id: &AccountId,
   token_quantity: U128,
   new_membership_level: U64,
 ) {
   let data = json!({
-      "account_id": account_id,
+      "investor_id": investor_id,
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
@@ -116,12 +118,12 @@ pub fn investor_stake_membership(
 }
 
 pub fn investor_unstake_membership(
-  account_id: &AccountId,
+  investor_id: &AccountId,
   token_quantity: U128,
   new_membership_level: U64,
 ) {
   let data = json!({
-      "account_id": account_id,
+      "investor_id": investor_id,
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
