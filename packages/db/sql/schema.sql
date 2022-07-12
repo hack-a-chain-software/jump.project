@@ -1,36 +1,41 @@
-create domain ftext as text
-check (length(value) > 0)
-not null;
-
-create domain account_id as ftext;
-
-create domain u64 as numeric(20) -- TODO: testar se eu não errei por 1 (ou log_2(10))
+create domain u64 as numeric(21)
 default 0
-check (value >= 0)
+check (value >= 0 and value <= 18446744073709551615)
 not null;
 
-create domain nullable_u64 as numeric(20)
-check (value >= 0);
+create domain nullable_u64 as numeric(21)
+check (value >= 0 and value <= 18446744073709551615);
 
 create domain u128 as numeric(40)
 default 0
-check (value >= 0)
+check (value >= 0 and value <= 340282366920938463463374607431768211455)
 not null;
-
 
 /* Esses aq eu n tenho ideia */
 
 create table if not exists launchpad_investors (
-    account_id account_id primary key,
+    account_id text primary key,
     staked_token u128,
     last_check timestamptz
 );
 
+create type listing_status as enum (
+    'unfunded',
+    'funded',
+    'sale_finalized',
+    'pool_created',
+    'pool_project_token_sent',
+    'pool_price_token_sent',
+    'liquidity_pool_finalized',
+    'cancelled'
+);
+
 create table if not exists listings (
     listing_id u64 primary key,
-    project_owner account_id references launchpad_investors (account_id),
-    project_token account_id,
-    price_token account_id, 
+    status listing_status not null,
+    project_owner text references launchpad_investors (account_id),
+    project_token text not null,
+    price_token text not null, 
 
     open_sale_1_timestamp timestamptz,
     open_sale_2_timestamp timestamptz,
@@ -49,12 +54,11 @@ create table if not exists listings (
     end_cliff_timestamp timestamptz,
     fee_price_tokens u128,
     fee_liquidity_tokens u128,
-    status ftext, -- TODO: mudar pra enum
     dex_id nullable_u64
 );
 
 create table if not exists allocations (
-    account_id account_id primary key,
+    account_id text primary key,
     listing_id u64 references listings (listing_id),
 
     quantity_withdrawn u128,
@@ -62,33 +66,19 @@ create table if not exists allocations (
     total_allocation u64
 );
 
-/* STATUS
-pub enum ListingStatus {
-  Unfunded,      // project has not yet deposited initial funds to start the offer
-  Funded,        // project has received all resources
-  SaleFinalized, // sale is finalized, either by selling off or selling over the minum threshold and
-  // the final_sale_2_timestamp arriving
-  PoolCreated,
-  PoolProjectTokenSent,
-  PoolPriceTokenSent,
-  LiquidityPoolFinalized, // liquidity pool has been sent to dex
-  Cancelled,              // either target not met or manual cancel, everyone can withdraw assets
-}
-*/
-
 /* Esses aqui eu tenho */
 
 create table if not exists nft_investors (
-    account_id account_id primary key,
+    account_id text primary key,
     storage_deposit u128,
     storage_used u128
 );
 
 create table if not exists staking_programs (
-    collection_id account_id primary key,
-    collection_owner_id account_id,
-    collection_treasury u128[] not null,
-    token_address account_id,
+    collection_id text primary key,
+    collection_owner_id text not null,
+    collection_treasury numeric(40)[] not null,
+    token_address text not null,
 
     min_staking_period u64,
     early_withdraw_penalty u128,
@@ -96,12 +86,12 @@ create table if not exists staking_programs (
 );
 
 create table if not exists staked_nfts (
-    nft_id ftext,
-    collection_id account_id references staking_programs (collection_id),
+    nft_id text not null,
+    collection_id text references staking_programs (collection_id),
     primary key (collection_id, nft_id),
 
-    owner_id account_id references nft_investors (account_id),
-    balance u128[],
+    owner_id text references nft_investors (account_id),
+    balance numeric(40)[],
 
     staked_timestamp timestamptz
 );
