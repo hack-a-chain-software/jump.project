@@ -57,6 +57,19 @@ create table if not exists listings (
     dex_id nullable_u64
 );
 
+create table if not exists listings_metadata (
+    key_column bigserial primary key,
+    listing_id u64 references listings (listing_id),
+    project_name text,
+    description_token text,
+    description_project text,
+    discord text,
+    twitter text,
+    telegram text,
+    website text,
+    whitepaper text
+);
+
 create table if not exists allocations (
     account_id text primary key,
     listing_id u64 references listings (listing_id),
