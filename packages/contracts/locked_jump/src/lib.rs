@@ -4,8 +4,8 @@ use near_sdk::json_types::{U64, U128};
 use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::serde_json;
 use near_sdk::{
-	env, near_bindgen, utils::assert_one_yocto, AccountId, BorshStorageKey, Gas,
-	PanicOnDefault, PromiseOrValue, Promise,
+	env, near_bindgen, utils::assert_one_yocto, AccountId, BorshStorageKey, Gas, PanicOnDefault,
+	PromiseOrValue, Promise,
 };
 
 use near_contract_standards;
@@ -26,8 +26,10 @@ mod vesting;
 use vesting::{Vesting};
 use account::{Account};
 use errors::*;
+use ext_interface::{ext_token_contract, ext_self};
 
 const FRACTION_BASE: u128 = 10_000;
+// const AVAILABLE_GAS_FT_RECEIVER: Gas = Gas(270_000_000_000_000);
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -181,6 +183,28 @@ impl Contract {
 		let pass_fee = self.contract_config.get().unwrap().fast_pass_cost.0;
 		(vesting.locked_value.0 * pass_fee) / FRACTION_BASE
 	}
+
+	pub fn internal_transfer_call_x_token(&mut self, quantity: u128) -> Promise {
+		ext_token_contract::ext(self.contract_config.get().unwrap().base_token.clone())
+			.with_static_gas(Gas(250_000_000_000_000))
+			.with_attached_deposit(1)
+			.ft_transfer_call(
+				self
+					.contract_config
+					.get()
+					.unwrap()
+					.fast_pass_beneficiary
+					.to_string(),
+				U128(quantity),
+				Some("fast pass purchase".to_string()),
+				"deposit_profit".to_string(),
+			)
+			.then(
+				ext_self::ext(env::current_account_id())
+					.with_static_gas(Gas(15_000_000_000_000))
+					.callback_send_to_xtoken(U128(quantity)),
+			)
+	}
 }
 
 //implement necessary methods for standard implementation
@@ -214,162 +238,165 @@ impl Contract {
 
 #[cfg(test)]
 mod tests {
-  pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
-  pub use near_sdk::{VMConfig, RuntimeFeesConfig};
-  pub use near_sdk::test_utils::{get_logs, get_created_receipts};
-  pub use near_sdk::mock::{VmAction};
-  pub use near_sdk::serde_json::{json};
-  pub use near_sdk::collections::{LazyOption};
+	pub use near_sdk::{testing_env, Balance, MockedBlockchain, VMContext, Gas};
+	pub use near_sdk::{VMConfig, RuntimeFeesConfig};
+	pub use near_sdk::test_utils::{get_logs, get_created_receipts};
+	pub use near_sdk::mock::{VmAction};
+	pub use near_sdk::serde_json::{json};
+	pub use near_sdk::collections::{LazyOption};
 
-  pub use std::panic::{UnwindSafe, catch_unwind};
-  pub use std::collections::{HashMap};
-  pub use std::convert::{TryFrom, TryInto};
-  pub use std::str::{from_utf8};
+	pub use std::panic::{UnwindSafe, catch_unwind};
+	pub use std::collections::{HashMap};
+	pub use std::convert::{TryFrom, TryInto};
+	pub use std::str::{from_utf8};
 
-  pub use super::*;
+	pub use super::*;
 
-  pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
-  pub const TOKEN_ACCOUNT: &str = "token.testnet";
-  pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
-  pub const OWNER_ACCOUNT: &str = "owner.testnet";
-  pub const MINTER_ACCOUNT: &str = "minter.testnet";
-  pub const USER_ACCOUNT: &str = "user.testnet";
+	pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
+	pub const TOKEN_ACCOUNT: &str = "token.testnet";
+	pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
+	pub const OWNER_ACCOUNT: &str = "owner.testnet";
+	pub const MINTER_ACCOUNT: &str = "minter.testnet";
+	pub const USER_ACCOUNT: &str = "user.testnet";
 
-  pub const TO_NANO: u64 = 1_000_000_000;
+	pub const TO_NANO: u64 = 1_000_000_000;
 
-  /// This function can be used witha  higher order closure (that outputs
-  /// other closures) to iteratively test diffent cenarios for a call
-  pub fn run_test_case<F: FnOnce() -> R + UnwindSafe, R>(f: F, expected_panic_msg: Option<String>) {
-    match expected_panic_msg {
-      Some(expected) => match catch_unwind(f) {
-        Ok(_) => panic!("call did not panic at all"),
-        Err(e) => {
-          if let Ok(panic_msg) = e.downcast::<String>() {
-            assert!(
-              panic_msg.contains(&expected),
-              "panic messages did not match, found {}",
-              panic_msg
-            );
-          } else {
-            panic!("panic did not produce any msg");
-          }
-        }
-      },
-      None => {
-        f();
-      }
-    }
-  }
-
-  pub fn get_context(
-    input: Vec<u8>,
-    attached_deposit: u128,
-    account_balance: u128,
-    signer_id: AccountId,
-    block_timestamp: u64,
-    prepaid_gas: Gas,
-  ) -> VMContext {
-    VMContext {
-      current_account_id: CONTRACT_ACCOUNT.parse().unwrap(),
-      signer_account_id: signer_id.clone(),
-      signer_account_pk: vec![0; 33].try_into().unwrap(),
-      predecessor_account_id: signer_id.clone(),
-      input,
-      block_index: 0,
-      block_timestamp,
-      account_balance,
-      account_locked_balance: 0,
-      storage_usage: 0,
-      attached_deposit,
-      prepaid_gas,
-      random_seed: [0; 32],
-      view_config: None,
-      output_data_receivers: vec![],
-      epoch_height: 19,
-    }
-  }
-
-  pub fn init_contract(seed: u128) -> Contract {
-    let hash1 = env::keccak256(&seed.to_be_bytes());
-    let hash2 = env::keccak256(&hash1[..]);
-    let hash3 = env::keccak256(&hash2[..]);
-    let hash4 = env::keccak256(&hash3[..]);
-	let hash5 = env::keccak256(&hash4[..]);
-	let hash6 = env::keccak256(&hash5[..]);
-
-	let mut contract = Contract {
-		ft_functionality: FungibleToken::new(hash1),
-		locked_token_metadata: LazyOption::new(
-			hash2,
-			Some(&FungibleTokenMetadata {
-				spec: FT_METADATA_SPEC.to_string(),
-				name: "test".to_string(),
-				symbol: "locked_token_symbol".to_string(),
-				icon: Some("locked_token_icon".to_string()),
-				reference: None,
-				reference_hash: None,
-				decimals: 8,
-			}),
-		),
-		contract_config: LazyOption::new(hash3, Some(&sample_config())),
-		minters: UnorderedSet::new(hash4),
-		vesting_schedules: LookupMap::new(hash5),
-		users: LookupMap::new(hash6),
-		fast_pass_receivals: U128(0),
-	};
-	contract.minters.insert(&MINTER_ACCOUNT.parse().unwrap());
-    contract
-  }
-
-  pub fn sample_config() -> ContractConfig {
-	ContractConfig {
-		owner_id: OWNER_ACCOUNT.parse().unwrap(),
-		base_token: TOKEN_ACCOUNT.parse().unwrap(),
-		vesting_duration: U64(60 * 60 * 24 * 7 * TO_NANO),
-		fast_pass_cost: U128(500),
-		fast_pass_acceleration: U64(2),
-		fast_pass_beneficiary: X_TOKEN_ACCOUNT.parse().unwrap(),
+	/// This function can be used witha  higher order closure (that outputs
+	/// other closures) to iteratively test diffent cenarios for a call
+	pub fn run_test_case<F: FnOnce() -> R + UnwindSafe, R>(f: F, expected_panic_msg: Option<String>) {
+		match expected_panic_msg {
+			Some(expected) => match catch_unwind(f) {
+				Ok(_) => panic!("call did not panic at all"),
+				Err(e) => {
+					if let Ok(panic_msg) = e.downcast::<String>() {
+						assert!(
+							panic_msg.contains(&expected),
+							"panic messages did not match, found {}",
+							panic_msg
+						);
+					} else {
+						panic!("panic did not produce any msg");
+					}
+				}
+			},
+			None => {
+				f();
+			}
+		}
 	}
-  }
 
-  #[test]
-  fn test_new() {
-    let context = get_context(
-      vec![],
-      0,
-      1_000_000_000_000_000_000_000_000,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(
-      context,
-      VMConfig::test(),
-      RuntimeFeesConfig::test(),
-      HashMap::default(),
-      Vec::default()
-    );
+	pub fn get_context(
+		input: Vec<u8>,
+		attached_deposit: u128,
+		account_balance: u128,
+		signer_id: AccountId,
+		block_timestamp: u64,
+		prepaid_gas: Gas,
+	) -> VMContext {
+		VMContext {
+			current_account_id: CONTRACT_ACCOUNT.parse().unwrap(),
+			signer_account_id: signer_id.clone(),
+			signer_account_pk: vec![0; 33].try_into().unwrap(),
+			predecessor_account_id: signer_id.clone(),
+			input,
+			block_index: 0,
+			block_timestamp,
+			account_balance,
+			account_locked_balance: 0,
+			storage_usage: 0,
+			attached_deposit,
+			prepaid_gas,
+			random_seed: [0; 32],
+			view_config: None,
+			output_data_receivers: vec![],
+			epoch_height: 19,
+		}
+	}
 
-    let contract = Contract::new("test".to_string(),
-	"locked_token_symbol".to_string(),
-	"locked_token_icon".to_string(), 8, sample_config());
+	pub fn init_contract(seed: u128) -> Contract {
+		let hash1 = env::keccak256(&seed.to_be_bytes());
+		let hash2 = env::keccak256(&hash1[..]);
+		let hash3 = env::keccak256(&hash2[..]);
+		let hash4 = env::keccak256(&hash3[..]);
+		let hash5 = env::keccak256(&hash4[..]);
+		let hash6 = env::keccak256(&hash5[..]);
 
-    assert_eq!(contract.contract_config.get().unwrap(), sample_config());
-  }
+		let mut contract = Contract {
+			ft_functionality: FungibleToken::new(hash1),
+			locked_token_metadata: LazyOption::new(
+				hash2,
+				Some(&FungibleTokenMetadata {
+					spec: FT_METADATA_SPEC.to_string(),
+					name: "test".to_string(),
+					symbol: "locked_token_symbol".to_string(),
+					icon: Some("locked_token_icon".to_string()),
+					reference: None,
+					reference_hash: None,
+					decimals: 8,
+				}),
+			),
+			contract_config: LazyOption::new(hash3, Some(&sample_config())),
+			minters: UnorderedSet::new(hash4),
+			vesting_schedules: LookupMap::new(hash5),
+			users: LookupMap::new(hash6),
+			fast_pass_receivals: U128(0),
+		};
+		contract.minters.insert(&MINTER_ACCOUNT.parse().unwrap());
+		contract
+	}
 
-  #[test]
-  #[should_panic(expected = "The contract is not initialized")]
-  fn test_default() {
-    let context = get_context(
-      vec![],
-      0,
-      0,
-      OWNER_ACCOUNT.parse().unwrap(),
-      0,
-      Gas(300u64 * 10u64.pow(12)),
-    );
-    testing_env!(context);
-    let _contract = Contract::default();
-  }
+	pub fn sample_config() -> ContractConfig {
+		ContractConfig {
+			owner_id: OWNER_ACCOUNT.parse().unwrap(),
+			base_token: TOKEN_ACCOUNT.parse().unwrap(),
+			vesting_duration: U64(60 * 60 * 24 * 7 * TO_NANO),
+			fast_pass_cost: U128(500),
+			fast_pass_acceleration: U64(2),
+			fast_pass_beneficiary: X_TOKEN_ACCOUNT.parse().unwrap(),
+		}
+	}
 
+	#[test]
+	fn test_new() {
+		let context = get_context(
+			vec![],
+			0,
+			1_000_000_000_000_000_000_000_000,
+			OWNER_ACCOUNT.parse().unwrap(),
+			0,
+			Gas(300u64 * 10u64.pow(12)),
+		);
+		testing_env!(
+			context,
+			VMConfig::test(),
+			RuntimeFeesConfig::test(),
+			HashMap::default(),
+			Vec::default()
+		);
+
+		let contract = Contract::new(
+			"test".to_string(),
+			"locked_token_symbol".to_string(),
+			"locked_token_icon".to_string(),
+			8,
+			sample_config(),
+		);
+
+		assert_eq!(contract.contract_config.get().unwrap(), sample_config());
+	}
+
+	#[test]
+	#[should_panic(expected = "The contract is not initialized")]
+	fn test_default() {
+		let context = get_context(
+			vec![],
+			0,
+			0,
+			OWNER_ACCOUNT.parse().unwrap(),
+			0,
+			Gas(300u64 * 10u64.pow(12)),
+		);
+		testing_env!(context);
+		let _contract = Contract::default();
+	}
 }

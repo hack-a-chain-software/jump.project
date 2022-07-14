@@ -14,7 +14,6 @@ impl FungibleTokenCore for Contract {
     self.internal_add_vesting(&receiver_id, amount.0);
     account.track_storage_usage(initial_storage);
     self.internal_update_account(&receiver_id, &account);
-    
   }
 
   #[payable]
@@ -132,7 +131,10 @@ mod tests {
             .internal_register_account(&receiver);
           contract.ft_functionality.internal_deposit(&receiver, 0);
           contract.users.insert(&receiver, &user);
-          contract.vesting_schedules.insert(&receiver, &Vector::new(env::keccak256(&(seed + 937).to_be_bytes())));
+          contract.vesting_schedules.insert(
+            &receiver,
+            &Vector::new(env::keccak256(&(seed + 937).to_be_bytes())),
+          );
 
           match contract.vesting_schedules.get(&receiver).unwrap().get(0) {
             Some(_) => panic!("should not be init"),
@@ -189,12 +191,37 @@ mod tests {
       // 5. Transfer tokens to receiver
       // 6. Create new vesting schedule for receiver
       // 7. Emit ft_transfer event
-      (true, true, true, 1000000000000000000000, 1000, 50, None),
+      (true, true, true, 10000000000000000000000, 90, 50, None),
+      (true, true, true, 10000000000000000000000, 1000, 800, None),
+      (true, true, true, 10000000000000000000000, 97000, 10, None),
+      (true, true, true, 10000000000000000000000, 1000, 170, None),
+      (true, true, true, 10000000000000000000000, 550, 470, None),
+      (
+        true,
+        true,
+        true,
+        10000000000000000000000,
+        1000,
+        1010,
+        Some("The account doesn't have enough balance".to_string()),
+      ),
+      (
+        true,
+        true,
+        true,
+        10000000000000000000000,
+        1000,
+        0,
+        Some("The amount should be a positive number".to_string()),
+      ),
     ];
 
     let mut counter = 0;
     IntoIterator::into_iter(test_cases).for_each(|v| {
-      run_test_case(closure_generator(v.0, v.1, v.2, v.3, v.4, v.5, counter), v.6);
+      run_test_case(
+        closure_generator(v.0, v.1, v.2, v.3, v.4, v.5, counter),
+        v.6,
+      );
       counter += 1;
       println!("counter: {}", counter);
     });

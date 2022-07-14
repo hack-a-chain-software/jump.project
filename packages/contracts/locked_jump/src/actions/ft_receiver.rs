@@ -1,5 +1,4 @@
 use crate::*;
-use crate::ext_interface::{ext_token_contract, ext_self};
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde", tag = "type")]
@@ -60,20 +59,7 @@ impl Contract {
     vesting.buy_fastpass(env::block_timestamp(), config.fast_pass_acceleration.0);
     vesting_vector.replace(vesting_index, &vesting);
 
-    ext_token_contract::ext(config.base_token.clone())
-      .with_static_gas(Gas(1))
-      .with_attached_deposit(1)
-      .ft_transfer_call(
-        config.fast_pass_beneficiary.to_string(),
-        U128(pass_cost),
-        Some("fast pass purchase".to_string()),
-        "deposit_profit".to_string(),
-      )
-      .then(
-        ext_self::ext(env::current_account_id())
-          .with_static_gas(Gas(1))
-          .callback_send_to_xtoken(U128(pass_cost)),
-      );
+    self.internal_transfer_call_x_token(pass_cost);
 
     U128(amount - pass_cost)
   }
