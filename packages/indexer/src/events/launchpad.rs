@@ -7,19 +7,6 @@ use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct FtMintLog {
-    user_id: AccountId,
-    amount: U128,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct FtTransferLog {
-    old_owner_id: AccountId,
-    new_owner_id: AccountId,
-    amount: U128,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct AddGuardianLog {
     new_guardian: AccountId,
 }
@@ -99,10 +86,6 @@ pub struct InvestorUnstakeMembershipLog {
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum LaunchpadEvent {
-    // era de testes
-    FtMint([FtMintLog; 1]),
-    FtTransfer([FtTransferLog; 1]),
-
     AddGuardian([AddGuardianLog; 1]),
     RemoveGuardian([RemoveGuardianLog; 1]),
     RetrieveTreasuryFunds([RetrieveTreasuryFundsLog; 1]),
@@ -129,8 +112,6 @@ impl LaunchpadEvent {
     //                                      TODO: change this dummy return value
     pub async fn sql_query(&self, conn: &mut PgPooledConnection) -> Option<u8> {
         match &self {
-            &Self::FtMint([_]) | &Self::FtTransfer([_]) => todo!(),
-
             &Self::CreateListing([CreateListingLog { listing_data }]) => {
                 conn.execute(
                     "
