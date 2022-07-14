@@ -10,6 +10,7 @@ use std::vec::Vec;
 mod actions;
 mod constants;
 mod errors;
+mod events;
 mod ext_interfaces;
 mod farm;
 mod investor;
@@ -42,12 +43,6 @@ enum StorageKey {
   FarmField {
     collection: NFTCollection,
     counter: u8,
-  },
-  NFTsRPS(NonFungibleTokenID),
-  StakedNFT(NonFungibleTokenID),
-  StakerBalance {
-    collection: NFTCollection,
-    owner_id: AccountId,
   },
   NFTsByOwner {
     collection: NFTCollection,

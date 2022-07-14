@@ -156,10 +156,10 @@ impl Farm {
   }
 
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
-    let mut balance = UnorderedMap::new(StorageKey::NFTsRPS(nft_id.clone()));
+    let mut balance = HashMap::new();
 
     for (ft_id, dist) in self.distributions.to_vec() {
-      balance.insert(&ft_id, &dist.rps);
+      balance.insert(ft_id, dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
@@ -188,14 +188,14 @@ impl Farm {
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.to_vec() {
-      let rps = token_rps.get(&k).unwrap_or(0);
+      let rps = *token_rps.get(&k).unwrap_or(&0);
 
       let (dist, claimed) = prev_dist.claim(rps);
 
+      token_rps.insert(k.clone(), dist.rps);
       self.distributions.insert(&k, &dist);
 
-      token_rps.insert(&k, &dist.rps);
-      rewards_map.insert(k.clone(), claimed);
+      rewards_map.insert(k, claimed);
     }
 
     self.nfts_rps.insert(token_id, &token_rps);
