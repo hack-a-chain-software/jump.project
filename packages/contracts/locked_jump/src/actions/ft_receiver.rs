@@ -262,7 +262,7 @@ mod tests {
             .unwrap()
             .fast_pass_acceleration
             .0)
-          + vesting.vesting_duration.0 - time_elapsed;
+          + time_elapsed;
         assert_eq!(vesting_after.vesting_duration.0, expected_duration);
 
         let receipts = get_created_receipts();
@@ -324,11 +324,17 @@ mod tests {
       (true, true, true, true, false, 0, Some(ERR_103.to_string())),
       // 6. Assert still time to elapse
       (true, true, true, true, true, 102, Some(ERR_104.to_string())),
+      (true, true, true, true, true, 100, Some(ERR_104.to_string())),
       // 7. Slash remaining vesting duration according to config
       // 8. Promise to send transfer tokens to xtoken, if fails
       //    increment fast_pass_receivals contract var
       // 9. Return excess tokens sent by user
-      (true, true, true, true, true, 50, None),
+      (true, true, true, true, true, 10, None),
+      (true, true, true, true, true, 37, None),
+      (true, true, true, true, true, 89, None),
+      (true, true, true, true, true, 43, None),
+      (true, true, true, true, true, 71, None),
+      (true, true, true, true, true, 0, None),
     ];
 
     let mut counter = 0;

@@ -35,6 +35,7 @@ pub struct Investor {
   pub last_check: u64,
 
   // listing allocations treasury
+  // tuple first value is allocations purchased, second value is tokens withdrawn
   #[serde(skip)]
   pub allocation_count: UnorderedMap<u64, (u64, u128)>,
 }

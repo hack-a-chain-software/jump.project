@@ -50,6 +50,7 @@ impl Account {
 
   pub fn track_storage_usage(&mut self, initial_storage: u64) {
     let final_storage = env::storage_usage();
+    println!("final storage: {}", final_storage);
     let storage_used = self.storage_used.0;
     if final_storage > initial_storage {
       self.storage_used = U64(storage_used + final_storage - initial_storage);
