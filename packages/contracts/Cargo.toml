@@ -10,7 +10,7 @@ members = [
   "./mintable_token_contract",
   "./token_contract",
   "./x_token",
-  "./locked_jump",
+  "./locked_token",
   "./launchpad"
 ]
 

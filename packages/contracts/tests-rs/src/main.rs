@@ -5,12 +5,13 @@ use std::vec::Vec;
 use std::io::Error;
 use serde_json::json;
 use std::collections::HashMap;
-// use futures::future::{join_all};
 use near_units::parse_near;
+use futures::future::{try_join_all};
 
 mod methods;
 mod tests_launchpad;
 mod tests_x_token;
+mod tests_locked_jump;
 
 pub use methods::*;
 

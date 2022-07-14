@@ -128,16 +128,16 @@ impl Contract {
 		match self.internal_get_account(account_id) {
 			Some(mut account) => {
 				account.deposit_storage_funds(deposit_amount);
+				state = account
+			}
+			None => {
+				let account = Account::new(account_id.clone(), deposit_amount);
 				self.vesting_schedules.insert(
 					account_id,
 					&Vector::new(StorageKey::VestingVector {
 						account_id: account_id.clone(),
 					}),
 				);
-				state = account
-			}
-			None => {
-				let account = Account::new(account_id.clone(), deposit_amount);
 				state = account;
 			}
 		}
@@ -186,7 +186,7 @@ impl Contract {
 
 	pub fn internal_transfer_call_x_token(&mut self, quantity: u128) -> Promise {
 		ext_token_contract::ext(self.contract_config.get().unwrap().base_token.clone())
-			.with_static_gas(Gas(250_000_000_000_000))
+			.with_static_gas(Gas(200_000_000_000_000))
 			.with_attached_deposit(1)
 			.ft_transfer_call(
 				self
