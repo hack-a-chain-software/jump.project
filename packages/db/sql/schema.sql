@@ -42,7 +42,7 @@ create table if not exists listings (
     final_sale_2_timestamp timestamptz,
     liquidity_pool_timestamp timestamptz,
     
-    total_ammount_sale_project_tokens u128,
+    total_amount_sale_project_tokens u128,
     token_allocation_size u128,
     token_allocation_price u128,
     allocations_sold u64,
