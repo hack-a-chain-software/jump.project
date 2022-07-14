@@ -43,6 +43,8 @@ pub struct Contract {
 	pub vesting_schedules: LookupMap<AccountId, Vector<Vesting>>,
 	// keep track of users storage deposits
 	pub users: LookupMap<AccountId, Account>,
+	// keep track of failed transfers to xTokenPool
+	pub fast_pass_receivals: U128,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
@@ -70,6 +72,8 @@ pub struct ContractConfig {
 	pub fast_pass_cost: U128,
 	// how much does the fastpass accelerate the schedule - divides vesting_duration by it
 	pub fast_pass_acceleration: U64,
+	// who receives tokens paid for fast pass
+	pub fast_pass_beneficiary: AccountId,
 }
 
 #[allow(dead_code)]
@@ -102,6 +106,7 @@ impl Contract {
 			minters: UnorderedSet::new(StorageKey::Minters),
 			vesting_schedules: LookupMap::new(StorageKey::VestingSchedules),
 			users: LookupMap::new(StorageKey::Users),
+			fast_pass_receivals: U128(0),
 		}
 	}
 }
@@ -225,6 +230,7 @@ mod tests {
 
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
   pub const TOKEN_ACCOUNT: &str = "token.testnet";
+  pub const X_TOKEN_ACCOUNT: &str = "xtoken.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
   pub const MINTER_ACCOUNT: &str = "minter.testnet";
   pub const USER_ACCOUNT: &str = "user.testnet";
@@ -309,7 +315,9 @@ mod tests {
 		minters: UnorderedSet::new(hash4),
 		vesting_schedules: LookupMap::new(hash5),
 		users: LookupMap::new(hash6),
+		fast_pass_receivals: U128(0),
 	};
+	contract.minters.insert(&MINTER_ACCOUNT.parse().unwrap());
     contract
   }
 
@@ -320,6 +328,7 @@ mod tests {
 		vesting_duration: U64(60 * 60 * 24 * 7 * TO_NANO),
 		fast_pass_cost: U128(500),
 		fast_pass_acceleration: U64(2),
+		fast_pass_beneficiary: X_TOKEN_ACCOUNT.parse().unwrap(),
 	}
   }
 

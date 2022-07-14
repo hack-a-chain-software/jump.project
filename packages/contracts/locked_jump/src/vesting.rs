@@ -3,6 +3,8 @@ use near_sdk::serde::{Serialize, Deserialize};
 use near_sdk::json_types::{U128, U64};
 use near_sdk::{AccountId};
 
+use crate::errors::*;
+
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Vesting {
@@ -76,12 +78,13 @@ impl Vesting {
     let duration = self.vesting_duration.0;
     let start_timestamp = self.start_timestamp.0;
 
-    assert!(!self.fast_pass);
-    assert!(start_timestamp + duration < current_timestamp);
+    assert!(!self.fast_pass, "{}", ERR_103);
+    assert!(start_timestamp + duration > current_timestamp, "{}", ERR_104);
 
     let elapsed_duration = current_timestamp - start_timestamp;
     let remaining_duration = duration - elapsed_duration;
     let new_remaining_duration = remaining_duration / fast_pass_acceleration;
     self.vesting_duration = U64(elapsed_duration + new_remaining_duration);
+    self.fast_pass = true;
   }
 }

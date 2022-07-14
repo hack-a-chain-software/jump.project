@@ -9,6 +9,8 @@ pub const ERR_006: &str = "ERR_006: Msg could not be parsed";
 /// vesting functions
 pub const ERR_101: &str = "ERR_101: Vesting id does not exist";
 pub const ERR_102: &str = "ERR_102: Deposited tokens not enough to cover fast pass cost";
+pub const ERR_103: &str = "ERR_103: Can only buy fast pass once for each vesting schedule";
+pub const ERR_104: &str = "ERR_104: Vesting schedule already finalized";
 
 /// storage functions
 pub const ERR_201: &str = "ERR_201: Insuficient storage deposit";
