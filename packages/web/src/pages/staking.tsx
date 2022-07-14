@@ -1,4 +1,5 @@
 import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { toast } from "react-hot-toast";
 import { WalletIcon } from "../assets/svg";
 import { ArrowRightIcon } from "../assets/svg/arrow-right";
 import {
@@ -10,8 +11,9 @@ import {
   TopCard,
   Card,
 } from "../components";
-import { GradientButton } from "../components/shared/gradient-button";
 import { useTheme } from "../hooks/theme";
+import { StakeModal } from "../modals";
+import { WithdrawModal } from "../modals/staking/withdraw";
 
 /**
  * @name Staking
@@ -20,7 +22,10 @@ import { useTheme } from "../hooks/theme";
  */
 export const Staking = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { gradientBoxTopCard, jumpGradient, glassyWhiteOpaque } = useTheme();
+  const stakingDisclosure = useDisclosure();
+  const withdrawDisclosure = useDisclosure();
+
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
   return (
     <PageContainer>
       <Grid gap={4} templateColumns="1fr 1fr">
@@ -113,6 +118,7 @@ export const Staking = () => {
                 border="1px solid white"
                 bg="transparent"
                 justifyContent="space-between"
+                onClick={() => toast.success("Your assets have been withdrawn")}
               >
                 Claim your Rewards <WalletIcon />
               </Button>
@@ -121,6 +127,7 @@ export const Staking = () => {
                 border="1px solid white"
                 bg="transparent"
                 justifyContent="space-between"
+                onClick={withdrawDisclosure.onOpen}
               >
                 Unstake <WalletIcon />
               </Button>
@@ -129,6 +136,7 @@ export const Staking = () => {
                 border="1px solid white"
                 bg="white"
                 justifyContent="space-between"
+                onClick={stakingDisclosure.onOpen}
               >
                 Stake <WalletIcon />
               </Button>
@@ -182,6 +190,16 @@ export const Staking = () => {
           tokens more rewards you get! Still Confused?
         </Text>
       </ModalImageDialog>
+      <StakeModal
+        isOpen={stakingDisclosure.isOpen}
+        onClose={stakingDisclosure.onClose}
+        onSubmit={() => {}}
+      />
+      <WithdrawModal
+        isOpen={withdrawDisclosure.isOpen}
+        onClose={withdrawDisclosure.onClose}
+        onSubmit={() => {}}
+      />
     </PageContainer>
   );
 };
