@@ -1,4 +1,5 @@
 import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
+import { JumpBigWhite } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
 
 type Props = {
@@ -6,6 +7,8 @@ type Props = {
   bigText: string;
   bottomDescription: string;
   renderAsset?: JSX.Element;
+  jumpLogo?: boolean;
+  py?: boolean;
 };
 
 const collectionsImages = [
@@ -20,39 +23,33 @@ export const TopCard = ({
   bigText,
   bottomDescription,
   renderAsset,
+  jumpLogo = false,
+  py = false,
 }: Props) => {
-  const { gradientBoxTopCard, jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhite } = useTheme();
   return (
-    <Box p="3px" background={jumpGradient} borderRadius="26px">
+    <Box borderRadius={25} bg={useColorModeValue(jumpGradient, "transparent")}>
       <Box
+        overflow="hidden"
         display="flex"
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
         w="100%"
-        p="60px"
+        py={py ? "60px" : undefined}
+        color="white"
+        px="60px"
         borderRadius="24px"
-        bg={gradientBoxTopCard}
+        bg={glassyWhite}
       >
         <Flex direction="column">
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
-                color="white"
+                fontSize={24}
+                mb="-15px"
                 fontWeight="800"
-                fontFamily="Inter"
-                letterSpacing="-0.05em"
-                fontSize="28px"
-                mb="-20px"
-                as="h1"
-                background={jumpGradient}
-                style={
-                  {
-                    "-webkit-background-clip": "text",
-                    "-webkit-text-fill-color": "transparent",
-                    "text-fill-color": "transparent",
-                  } as any
-                }
+                letterSpacing="-0.03em"
               >
                 {gradientText}
               </Text>
@@ -81,6 +78,9 @@ export const TopCard = ({
           >
             {bottomDescription}
           </Text>
+        </Flex>
+        <Flex position="relative" right="-60px" bottom="-60px">
+          {jumpLogo && <JumpBigWhite />}
         </Flex>
       </Box>
     </Box>

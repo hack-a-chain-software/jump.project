@@ -11,3 +11,4 @@ export * from "./top-card";
 export * from "./gradient-box";
 export * from "./gradient-text";
 export * from "./gradient-button";
+export * from "./card";
