@@ -1,3 +1,4 @@
+use crate::events;
 use crate::farm::Farm;
 use crate::staking::StakingProgram;
 use crate::treasury;
@@ -6,6 +7,7 @@ use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId};
+use serde_json::json;
 use std::collections::HashMap;
 
 impl Contract {
@@ -34,7 +36,7 @@ impl Contract {
   }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CreateStakingProgramPayload {
   pub collection_address: AccountId,
   pub collection_owner: AccountId,
@@ -49,6 +51,8 @@ pub struct CreateStakingProgramPayload {
 impl Contract {
   #[payable]
   pub fn create_staking_program(&mut self, payload: CreateStakingProgramPayload) {
+    let event_payload = payload.clone();
+
     self.only_guardians(env::predecessor_account_id());
     self.only_non_contract_tokens(&payload.token_address);
     assert_one_yocto();
@@ -73,6 +77,8 @@ impl Contract {
     );
 
     self.staking_programs.insert(&collection, &staking_program);
+
+    events::create_staking_program(event_payload);
   }
 
   #[payable]
@@ -84,6 +90,8 @@ impl Contract {
 
     staking_program.early_withdraw_penalty = new_penalty.0;
     self.staking_programs.insert(&collection, &staking_program);
+
+    events::update_staking_program(json!({ "early_withdraw_penalty": new_penalty.0 }));
   }
 
   #[payable]
@@ -95,6 +103,8 @@ impl Contract {
 
     staking_program.min_staking_period = new_period;
     self.staking_programs.insert(&collection, &staking_program);
+
+    events::update_staking_program(json!({ "min_staking_period": new_period }));
   }
 
   #[payable]
@@ -110,7 +120,7 @@ impl Contract {
 
     self.realocate_treasury(
       &collection,
-      &token_id,
+      token_id,
       treasury::Operation::ContractToCollection,
       amount.0,
     );
@@ -129,7 +139,7 @@ impl Contract {
 
     self.realocate_treasury(
       &collection,
-      &token_id,
+      token_id,
       treasury::Operation::CollectionToContract,
       amount.0,
     );

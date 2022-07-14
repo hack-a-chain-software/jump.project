@@ -106,6 +106,7 @@ impl Contract {
       current_sale_phase,
       U64(allocations_bought),
       U64(listing.allocations_sold),
+      U128(listing.token_allocation_size * (allocations_bought as u128)),
     );
     self.internal_update_listing(listing_id, listing);
     let new_allocation_balance = (
