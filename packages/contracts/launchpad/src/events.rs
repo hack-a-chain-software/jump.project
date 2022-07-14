@@ -20,7 +20,7 @@ fn log_event<T: Serialize>(event: &str, data: T) {
 /// Owner actions events
 pub fn add_guardian(new_guardian: &AccountId) {
   let data = json!({ "new_guardian": new_guardian });
-  log_event("create_guardian", data);
+  log_event("add_guardian", data);
 }
 
 pub fn remove_guardian(old_guardian: &AccountId) {
@@ -51,7 +51,7 @@ pub fn project_fund_listing(listing_id: U64, tokens_sale: U128, tokens_liquidity
       "tokens_sale": tokens_sale,
       "tokens_liquidity": tokens_liquidity
   });
-  log_event("fund_listing", data.to_string());
+  log_event("project_fund_listing", data.to_string());
 }
 
 pub fn project_withdraw_listing(
@@ -66,13 +66,14 @@ pub fn project_withdraw_listing(
       "price_tokens_withdraw": price_tokens_withdraw,
       "project_status": project_status
   });
-  log_event("project_withdraw", data.to_string());
+  log_event("project_withdraw_listing", data.to_string());
 }
 
 /// Investor action events
-pub fn investor_buy_allocation(
+pub fn investor_buy_allocations(
   investor_id: &AccountId,
   listing_id: U64,
+  project_status: &ListingStatus,
   sale_phase: SalePhase,
   allocations_purchased: U64,
   total_allocations_sold: U64,
@@ -80,15 +81,16 @@ pub fn investor_buy_allocation(
   let data = json!({
       "investor_id": investor_id,
       "listing_id": listing_id,
+      "project_status": project_status,
       "sale_phase": sale_phase,
       "allocations_purchased": allocations_purchased,
       "total_allocations_sold": total_allocations_sold,
   });
-  log_event("investor_buy_allocation", data.to_string());
+  log_event("investor_buy_allocations", data.to_string());
 }
 
 pub fn investor_withdraw_allocations(
-  investor_id: &AccountId
+  investor_id: &AccountId,
   listing_id: U64,
   project_tokens_withdrawn: U128,
   price_tokens_withdrawn: U128,
@@ -101,7 +103,7 @@ pub fn investor_withdraw_allocations(
       "price_tokens_withdrawn": price_tokens_withdrawn,
       "project_status": project_status
   });
-  log_event("investor_withdraw", data.to_string());
+  log_event("investor_withdraw_allocations", data.to_string());
 }
 
 pub fn investor_stake_membership(
@@ -114,7 +116,7 @@ pub fn investor_stake_membership(
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
-  log_event("stake_membership", data.to_string());
+  log_event("investor_stake_membership", data.to_string());
 }
 
 pub fn investor_unstake_membership(
@@ -127,5 +129,5 @@ pub fn investor_unstake_membership(
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
-  log_event("unstake_membership", data.to_string());
+  log_event("investor_unstake_membership", data.to_string());
 }

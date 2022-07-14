@@ -64,7 +64,7 @@ describe("NFT Staking Contract Integration Tests", () => {
       initialBalance: "100000000000000000000000000000000",
     });
     root = worker.rootAccount;
-    console.log("Worker Initialized.");
+    console.log("Worker Initialized. Root Account ID: ", root.accountId);
 
     [ownerAccount, guardianAccount, collectionOwnerAccount, stakerAccount] =
       await Promise.all(

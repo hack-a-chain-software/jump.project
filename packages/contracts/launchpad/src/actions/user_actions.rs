@@ -99,9 +99,10 @@ impl Contract {
     let (allocations_bought, leftover) =
       listing.buy_allocation(price_tokens_sent, investor_allocations);
 
-    events::investor_buy_allocation(
+    events::investor_buy_allocations(
       &account_id,
       U64(listing_id),
+      &listing.status,
       current_sale_phase,
       U64(allocations_bought),
       U64(listing.allocations_sold),
