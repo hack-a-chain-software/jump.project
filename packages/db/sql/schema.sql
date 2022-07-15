@@ -81,12 +81,6 @@ create table if not exists allocations (
 
 /* Esses aqui eu tenho */
 
-create table if not exists nft_investors (
-    account_id text primary key,
-    storage_deposit u128,
-    storage_used u128
-);
-
 create table if not exists staking_programs (
     collection_id text primary key,
     collection_owner_id text not null,
