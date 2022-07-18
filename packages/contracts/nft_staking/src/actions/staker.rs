@@ -2,7 +2,7 @@ use crate::actions::transfer::NFTRoutePayload;
 use crate::constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS};
 use crate::ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self};
 use crate::staking::{StakedNFT, StakingProgram};
-use crate::types::*;
+use crate::{events, types::*};
 use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
 use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise, PromiseResult};
@@ -29,10 +29,12 @@ impl Contract {
     let collection = payload.collection;
 
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
-    staking_program.stake_nft(token_id, owner_id.clone());
+    let staked_nft = staking_program.stake_nft(token_id, owner_id.clone());
     self.staking_programs.insert(&collection, &staking_program);
 
     self.track_storage_usage(&owner_id, initial_storage);
+
+    events::stake_nft(&staked_nft);
   }
 }
 
@@ -44,18 +46,19 @@ impl Contract {
     token_id: NonFungibleTokenID,
     owner_id: AccountId,
     staked_timestamp: u64,
+    balance: FungibleTokenBalance,
   ) {
     assert_eq!(env::predecessor_account_id(), env::current_account_id()); // idk if this is redundant with private
 
     match env::promise_result(0) {
       PromiseResult::NotReady => env::abort(),
-      PromiseResult::Successful(_) => {}
+      PromiseResult::Successful(_) => events::unstake_nft(&token_id, balance),
       PromiseResult::Failed => {
         let collection = token_id.0.clone();
 
         let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp);
         let mut staking_program = self.staking_programs.get(&collection).unwrap();
-        staking_program.insert_staked_nft(staked_nft);
+        staking_program.insert_staked_nft(&staked_nft);
         self.staking_programs.insert(&collection, &staking_program);
       }
     }
@@ -71,7 +74,7 @@ impl Contract {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
     staking_program.assert_is_token_owner(&caller_id, &token_id);
 
-    staking_program.inner_withdraw(&token_id);
+    let balance = staking_program.inner_withdraw(&token_id);
 
     let staked_nft = staking_program.unstake_nft(&token_id, &caller_id);
     self.staking_programs.insert(&collection, &staking_program);
@@ -90,6 +93,7 @@ impl Contract {
               staked_nft.token_id,
               staked_nft.owner_id,
               staked_nft.staked_timestamp,
+              balance,
             ),
         ),
     }
@@ -108,7 +112,7 @@ impl Contract {
     let caller_id = env::predecessor_account_id();
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
-    let available = staking_program.outer_withdraw(&caller_id, &token_id);
+    let available = staking_program.outer_withdraw(&caller_id, token_id.clone());
     let amount = amount.map(|x| x.0).unwrap_or(available);
     assert!(amount <= available, "");
 

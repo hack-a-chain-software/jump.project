@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::constants::DENOM;
 use crate::farm::Farm;
 use crate::types::*;
@@ -13,18 +15,19 @@ pub enum FundsOperation {
   DistributionToTreasury,
 }
 
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(Serialize, BorshSerialize, BorshDeserialize)]
 pub struct StakedNFT {
   pub token_id: NonFungibleTokenID,
   pub owner_id: AccountId,
   pub staked_timestamp: u64,
 
+  #[serde(skip)]
   pub balance: FungibleTokenBalance,
 }
 
 impl StakedNFT {
   pub fn new(token_id: NonFungibleTokenID, owner_id: AccountId, staked_timestamp: u64) -> Self {
-    let balance = UnorderedMap::new(StorageKey::StakedNFT(token_id.clone()));
+    let balance = HashMap::new();
 
     StakedNFT {
       token_id,
@@ -77,7 +80,7 @@ impl StakingProgram {
     StakingProgram {
       collection,
       collection_owner,
-      collection_treasury: UnorderedMap::new(get_key()),
+      collection_treasury: HashMap::new(),
       farm,
       token_address,
       min_staking_period,
@@ -89,7 +92,7 @@ impl StakingProgram {
     }
   }
 
-  pub fn insert_staked_nft(&mut self, staked_nft: StakedNFT) {
+  pub fn insert_staked_nft(&mut self, staked_nft: &StakedNFT) {
     let token_id = &staked_nft.token_id;
     let owner_id = &staked_nft.owner_id;
 
@@ -107,10 +110,12 @@ impl StakingProgram {
     self.farm.add_nft(token_id);
   }
 
-  pub fn stake_nft(&mut self, token_id: NonFungibleTokenID, owner_id: AccountId) {
+  pub fn stake_nft(&mut self, token_id: NonFungibleTokenID, owner_id: AccountId) -> StakedNFT {
     let staked_nft = StakedNFT::new(token_id, owner_id, env::block_timestamp());
 
-    self.insert_staked_nft(staked_nft);
+    self.insert_staked_nft(&staked_nft);
+
+    staked_nft
   }
 
   pub fn unstake_nft(&mut self, token_id: &NonFungibleTokenID, owner_id: &AccountId) -> StakedNFT {
@@ -127,10 +132,12 @@ impl StakingProgram {
     let rewards = self.farm.claim(token_id);
 
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
-    for (k, v) in rewards {
-      let amount = staked_nft.balance.get(&k).unwrap_or(0);
-      staked_nft.balance.insert(&k, &(amount + v));
-    }
+    staked_nft.balance = staked_nft
+      .balance
+      .iter()
+      .map(|(k, v)| (k.clone(), v + *rewards.get(k).unwrap_or(&0)))
+      .collect();
+
     self.staked_nfts.insert(token_id, &staked_nft);
 
     staked_nft
@@ -149,15 +156,15 @@ impl StakingProgram {
       1
     };
 
-    let mut balance = self.stakers_balances.get(&owner_id).unwrap_or_else(|| {
-      UnorderedMap::new(StorageKey::StakerBalance {
-        collection: self.collection.clone(),
-        owner_id: owner_id.clone(),
-      })
-    });
-    for (k, amount) in staked_nft.balance.to_vec() {
-      balance.insert(&k, &(amount * withdraw_rate));
-      staked_nft.balance.insert(&k, &0);
+    let mut balance = self
+      .stakers_balances
+      .get(&owner_id)
+      .unwrap_or_else(|| HashMap::new());
+
+    let staked_nft_balance = staked_nft.balance.clone();
+    for (k, amount) in staked_nft_balance {
+      staked_nft.balance.insert(k.clone(), 0);
+      balance.insert(k.clone(), amount * withdraw_rate);
     }
 
     self.stakers_balances.insert(&owner_id, &balance);
@@ -166,11 +173,10 @@ impl StakingProgram {
     balance
   }
 
-  pub fn outer_withdraw(&mut self, staker_id: &AccountId, token_id: &FungibleTokenID) -> u128 {
+  pub fn outer_withdraw(&mut self, staker_id: &AccountId, token_id: FungibleTokenID) -> u128 {
     let mut balance = self.stakers_balances.get(staker_id).unwrap();
-    let amount = balance.get(token_id).unwrap_or(0);
+    let amount = balance.insert(token_id, 0).unwrap_or(0);
 
-    balance.insert(token_id, &0);
     self.stakers_balances.insert(staker_id, &balance);
 
     amount
@@ -180,30 +186,24 @@ impl StakingProgram {
     self.farm.deposit_distribution_funds(token_id, amount);
   }
 
-  pub fn withdraw_collection_treasury(&mut self, token_id: &FungibleTokenID) -> u128 {
-    let amount = self.collection_treasury.get(&token_id).unwrap();
-
-    self.collection_treasury.insert(&token_id, &0);
-
-    amount
+  pub fn withdraw_collection_treasury(&mut self, token_id: FungibleTokenID) -> u128 {
+    self.collection_treasury.insert(token_id, 0).unwrap()
   }
 
-  pub fn move_funds(&mut self, token_id: &FungibleTokenID, op: FundsOperation) {
-    let balance = self.collection_treasury.get(token_id).unwrap_or(0);
+  pub fn move_funds(&mut self, token_id: FungibleTokenID, op: FundsOperation) {
+    let balance = *self.collection_treasury.get(&token_id).unwrap_or(&0);
     match op {
       FundsOperation::TreasuryToDistribution { amount } => {
         assert!(balance > amount, "Insufficent funds in treasury.");
         self
           .collection_treasury
-          .insert(token_id, &(balance - amount));
-        self.farm.deposit_distribution_funds(token_id, amount);
+          .insert(token_id.clone(), balance - amount);
+        self.farm.deposit_distribution_funds(&token_id, amount);
       }
 
       FundsOperation::DistributionToTreasury => {
-        let amount = self.farm.withdraw_beneficiary(token_id);
-        self
-          .collection_treasury
-          .insert(token_id, &(balance + amount));
+        let amount = self.farm.withdraw_beneficiary(&token_id);
+        self.collection_treasury.insert(token_id, balance + amount);
       }
     }
   }
