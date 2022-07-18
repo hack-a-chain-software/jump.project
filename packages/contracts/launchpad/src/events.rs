@@ -77,6 +77,7 @@ pub fn investor_buy_allocations(
   sale_phase: SalePhase,
   allocations_purchased: U64,
   total_allocations_sold: U64,
+  tokens_purchased: U128,
 ) {
   let data = json!({
       "investor_id": investor_id,
@@ -84,6 +85,7 @@ pub fn investor_buy_allocations(
       "project_status": project_status,
       "sale_phase": sale_phase,
       "allocations_purchased": allocations_purchased,
+      "tokens_purchased": tokens_purchased,
       "total_allocations_sold": total_allocations_sold,
   });
   log_event("investor_buy_allocations", data.to_string());
