@@ -1,6 +1,4 @@
-use near_sdk::{
-  env, near_bindgen, AccountId, PanicOnDefault, Promise, PromiseOrValue,
-};
+use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Promise, PromiseOrValue};
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};

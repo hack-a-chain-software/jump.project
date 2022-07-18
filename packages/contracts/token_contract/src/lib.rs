@@ -98,9 +98,7 @@ mod tests {
   use super::*;
   use std::convert::TryFrom;
 
-  use modified_contract_standards::fungible_token::metadata::{
-    FT_METADATA_SPEC
-  };
+  use modified_contract_standards::fungible_token::metadata::{FT_METADATA_SPEC};
 
   pub const TOTAL_SUPPLY: Balance = 1_000;
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";

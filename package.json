@@ -4,8 +4,10 @@
   "description": "Near Contract and React Monorepo",
   "private": true,
   "scripts": {
-    "start": "yarn workspace @near/web dev",
-    "prestart": "yarn workspace @near/contracts prestart",
+    "gql:dev": "yarn workspace @near/graphql dev:testnet",
+    "gql:dev:mainnet": "yarn workspace @near/graphql dev:mainnet",
+    "gql:start:mainnet": "yarn workspace @near/graphql start:mainnet",
+    "gql:start:testnet": "yarn workspace @near/graphql start:testnet",
     "web:dev": "yarn workspace @near/web dev",
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",
@@ -59,6 +61,8 @@
     "husky": "^8.0.1",
     "lint-staged": "^12.4.1",
     "nodemon": "^2.0.15",
-    "prettier": "^2.6.2"
+    "prettier": "^2.6.2",
+    "sequelize": "^6.21.2",
+    "@types/sequelize": "^4.28.13"
   }
 }
