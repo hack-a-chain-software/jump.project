@@ -1,6 +1,7 @@
 use crate::pool::{build_pool, get_connection, PgPooledConnection};
 use config::contracts::get_contracts_config;
 use events::launchpad::LaunchpadEvent;
+use events::nft_staking::NftStakingEvent;
 use near_indexer::StreamerMessage;
 use tokio::sync::mpsc::Receiver;
 
@@ -41,6 +42,17 @@ async fn process_block_stream(mut stream: Receiver<StreamerMessage>, mut conn: P
                             let event_json_string = &log[JSON_EVENT_PREFIX.len()..];
 
                             let event: LaunchpadEvent =
+                                serde_json::from_str(event_json_string).unwrap();
+
+                            event.sql_query(&mut conn).await;
+                        }
+                    }
+                } else if executor_id.as_str() == contracts_config.nft_staking_contract_account_id {
+                    for log in tx_res.execution_outcome.outcome.logs {
+                        if log.starts_with(JSON_EVENT_PREFIX) {
+                            let event_json_string = &log[JSON_EVENT_PREFIX.len()..];
+
+                            let event: NftStakingEvent =
                                 serde_json::from_str(event_json_string).unwrap();
 
                             event.sql_query(&mut conn).await;

@@ -4,8 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# near-indexer = { git = "https://github.com/near/nearcore", rev = "ac2a43e26065a354c1b0f896d4259967e4757d38" }
-near-indexer = { path = "../nearcore/chain/indexer" }
+near-indexer = { git = "https://github.com/near/nearcore", rev = "ac2a43e26065a354c1b0f896d4259967e4757d38" }
 
 once_cell = "1.13.0"
 
