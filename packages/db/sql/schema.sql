@@ -71,8 +71,9 @@ create table if not exists listings_metadata (
 );
 
 create table if not exists allocations (
-    account_id text primary key,
+    account_id text not null,
     listing_id u64 references listings (listing_id),
+    primary key (account_id, listing_id),
 
     quantity_withdrawn u128,
     total_quantity u128,
