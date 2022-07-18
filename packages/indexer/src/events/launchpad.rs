@@ -55,6 +55,7 @@ pub struct InvestorBuyAllocationsLog {
     project_status: ListingStatus,
     sale_phase: SalePhase,
     allocations_purchased: U64,
+    tokens_purchased: U128,
     total_allocations_sold: U64,
 }
 
@@ -62,9 +63,9 @@ pub struct InvestorBuyAllocationsLog {
 pub struct InvestorWithdrawAllocationsLog {
     investor_id: AccountId,
     listing_id: U64,
+    project_status: ListingStatus,
     project_tokens_withdrawn: U128,
     price_tokens_withdrawn: U128,
-    project_status: ListingStatus,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -236,16 +237,19 @@ impl LaunchpadEvent {
                     project_status,
                     sale_phase,
                     allocations_purchased,
+                    tokens_purchased,
                     total_allocations_sold,
                 }],
             ) => {
                 conn.execute(
-                    "select investor_buy_allocations($1, $2, $3, $4)",
+                    "select investor_buy_allocations($1, $2, $3, $4, $5, $6)",
                     &[
                         investor_id,
                         &Decimal::from_u64(listing_id.0).unwrap(),
                         project_status,
                         &Decimal::from_u64(allocations_purchased.0).unwrap(),
+                        &Decimal::from_u128(tokens_purchased.0).unwrap(),
+                        &Decimal::from_u64(total_allocations_sold.0).unwrap(),
                     ],
                 )
                 .await
@@ -269,6 +273,8 @@ impl LaunchpadEvent {
                         investor_id,
                         &Decimal::from_u64(listing_id.0).unwrap(),
                         project_status,
+                        &Decimal::from_u128(project_tokens_withdrawn.0).unwrap(),
+                        &Decimal::from_u128(price_tokens_withdrawn.0).unwrap(),
                     ],
                 )
                 .await
