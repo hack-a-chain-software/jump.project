@@ -8,8 +8,9 @@ pub type FungibleTokenBalance = HashMap<FungibleTokenId, U128>;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
 pub enum NftCollection {
-    NftContract { account_id: AccountId },
+    NFTContract { account_id: AccountId },
 }
 
 pub type NonFungibleTokenId = (NftCollection, String);
@@ -18,7 +19,7 @@ pub fn split_ids(token_id: &NonFungibleTokenId) -> (&AccountId, &String) {
     let (collection, nft_id) = token_id;
 
     let collection_id = match collection {
-        NftCollection::NftContract { account_id } => account_id,
+        NftCollection::NFTContract { account_id } => account_id,
     };
 
     (collection_id, nft_id)

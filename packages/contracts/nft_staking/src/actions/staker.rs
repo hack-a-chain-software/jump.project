@@ -52,7 +52,9 @@ impl Contract {
 
     match env::promise_result(0) {
       PromiseResult::NotReady => env::abort(),
-      PromiseResult::Successful(_) => events::unstake_nft(&token_id, balance),
+      PromiseResult::Successful(_) => {
+        events::unstake_nft(&token_id, balance)
+      },
       PromiseResult::Failed => {
         let collection = token_id.0.clone();
 
@@ -139,27 +141,4 @@ impl Contract {
     self.track_storage_usage(&caller_id, initial_storage);
   }
 
-  pub fn view_staked(
-    &self,
-    collection: NFTCollection,
-    account_id: Option<AccountId>,
-  ) -> Vec<String> {
-    let staking_program = self.staking_programs.get(&collection).unwrap();
-
-    match account_id {
-      None => staking_program
-        .staked_nfts
-        .iter()
-        .map(|((_, id), _)| id)
-        .collect(),
-
-      Some(owner_id) => staking_program
-        .nfts_by_owner
-        .get(&owner_id)
-        .unwrap()
-        .iter()
-        .map(|(_, id)| id)
-        .collect(),
-    }
-  }
 }
