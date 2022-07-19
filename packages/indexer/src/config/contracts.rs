@@ -2,6 +2,7 @@ use once_cell::sync::Lazy;
 
 use super::get_required_var;
 
+#[derive(Debug)]
 pub struct ContractsConfig {
     pub launchpad_contract_account_id: String,
     pub nft_staking_contract_account_id: String,
