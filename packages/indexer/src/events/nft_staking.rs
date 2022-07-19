@@ -1,7 +1,9 @@
+use super::Event;
 use crate::pool::PgPooledConnection;
 use crate::types::json_types::{U128, U64};
 use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
 use crate::types::AccountId;
+use async_trait::async_trait;
 use chrono::{TimeZone, Utc};
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
@@ -49,8 +51,9 @@ pub enum NftStakingEvent {
     UnstakeNft([UnstakeNftLog; 1]),
 }
 
-impl NftStakingEvent {
-    pub async fn sql_query(&self, conn: &mut PgPooledConnection) {
+#[async_trait]
+impl Event for NftStakingEvent {
+    async fn sql_query(&self, conn: &mut PgPooledConnection) {
         match &self {
             Self::CreateStakingProgram(
                 [CreateStakingProgramLog {

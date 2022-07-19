@@ -2,9 +2,12 @@ use crate::pool::PgPooledConnection;
 use crate::types::json_types::{U128, U64};
 use crate::types::listing::{Listing, ListingStatus, SalePhase};
 use crate::types::AccountId;
-use chrono::{TimeZone, Utc};
+use async_trait::async_trait;
+use chrono::{DateTime, TimeZone, Utc};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
+
+use super::Event;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddGuardianLog {
@@ -109,11 +112,29 @@ pub enum LaunchpadEvent {
 //     quantity,
 // }] => None,
 
-impl LaunchpadEvent {
-    //                                      TODO: change this dummy return value
-    pub async fn sql_query(&self, conn: &mut PgPooledConnection) -> Option<u8> {
+fn U64toUTC(nano: U64) -> DateTime<Utc> {
+    let seconds = nano.0 / 1_000_000_000;
+
+    Utc.timestamp(seconds.try_into().unwrap(), 0)
+}
+
+fn U64toDecimal(num: U64) -> Decimal {
+    Decimal::from_u64(num.0).unwrap()
+}
+
+fn U128toDecimal(num: U128) -> Decimal {
+    Decimal::from_u128(num.0).unwrap()
+}
+
+#[async_trait]
+impl Event for LaunchpadEvent {
+    async fn sql_query(&self, conn: &mut PgPooledConnection) {
         match &self {
             &Self::CreateListing([CreateListingLog { listing_data }]) => {
+                let listing_data = match listing_data {
+                    Listing::V1(listing) => listing,
+                };
+
                 conn.execute(
                     "
                     insert into listings (
@@ -143,41 +164,37 @@ impl LaunchpadEvent {
                         dex_id
                     )
                     values (
-                        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-                        $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+                        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+                        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
                     )
                 ",
                     &[
-                        &Decimal::from_u64(listing_data.listing_id).unwrap(),
+                        &U64toDecimal(listing_data.listing_id),
                         &listing_data.status,
                         &listing_data.project_owner,
-                        &listing_data.project_token,
-                        &listing_data.price_token,
-                        &Utc.timestamp(listing_data.open_sale_1_timestamp.try_into().unwrap(), 0),
-                        &Utc.timestamp(listing_data.open_sale_2_timestamp.try_into().unwrap(), 0),
-                        &Utc.timestamp(listing_data.final_sale_2_timestamp.try_into().unwrap(), 0),
-                        &Utc.timestamp(
-                            listing_data.liquidity_pool_timestamp.try_into().unwrap(),
-                            0,
-                        ),
-                        &Decimal::from_u128(listing_data.total_amount_sale_project_tokens).unwrap(),
-                        &Decimal::from_u128(listing_data.token_allocation_size).unwrap(),
-                        &Decimal::from_u128(listing_data.token_allocation_price).unwrap(),
-                        &Decimal::from_u64(listing_data.allocations_sold).unwrap(),
-                        &Decimal::from_u128(listing_data.liquidity_pool_project_tokens).unwrap(),
-                        &Decimal::from_u128(listing_data.liquidity_pool_price_tokens).unwrap(),
-                        &Decimal::from_u128(listing_data.fraction_instant_release).unwrap(),
-                        &Decimal::from_u128(listing_data.fraction_cliff_release).unwrap(),
-                        &Utc.timestamp(listing_data.cliff_timestamp.try_into().unwrap(), 0),
-                        &Utc.timestamp(listing_data.end_cliff_timestamp.try_into().unwrap(), 0),
-                        &Decimal::from_u128(listing_data.fee_price_tokens).unwrap(),
-                        &Decimal::from_u128(listing_data.fee_liquidity_tokens).unwrap(),
+                        &listing_data.project_token.to_string(),
+                        &listing_data.price_token.to_string(),
+                        &U64toUTC(listing_data.open_sale_1_timestamp),
+                        &U64toUTC(listing_data.open_sale_2_timestamp),
+                        &U64toUTC(listing_data.final_sale_2_timestamp),
+                        &U64toUTC(listing_data.liquidity_pool_timestamp),
+                        &U128toDecimal(listing_data.total_amount_sale_project_tokens),
+                        &U128toDecimal(listing_data.token_allocation_size),
+                        &U128toDecimal(listing_data.token_allocation_price),
+                        &U64toDecimal(listing_data.allocations_sold),
+                        &U128toDecimal(listing_data.liquidity_pool_project_tokens),
+                        &U128toDecimal(listing_data.liquidity_pool_price_tokens),
+                        &U128toDecimal(listing_data.fraction_instant_release),
+                        &U128toDecimal(listing_data.fraction_cliff_release),
+                        &U64toUTC(listing_data.cliff_timestamp),
+                        &U64toUTC(listing_data.end_cliff_timestamp),
+                        &U128toDecimal(listing_data.fee_price_tokens),
+                        &U128toDecimal(listing_data.fee_liquidity_tokens),
                         &listing_data.dex_id.map(|v| Decimal::from_u64(v)),
                     ],
                 )
                 .await
                 .unwrap();
-                None
             }
 
             // ListingStatus::Cancelled
@@ -188,8 +205,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::ProjectFundListing(
@@ -205,8 +220,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::ProjectWithdrawListing(
@@ -226,8 +239,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::InvestorBuyAllocations(
@@ -254,8 +265,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::InvestorWithdrawAllocations(
@@ -279,8 +288,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::InvestorStakeMembership(
@@ -302,8 +309,6 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
             &Self::InvestorUnstakeMembership(
@@ -322,11 +327,11 @@ impl LaunchpadEvent {
                 )
                 .await
                 .unwrap();
-
-                None
             }
 
-            _ => unimplemented!(),
+            _ => {
+                unimplemented!();
+            }
         }
     }
 }

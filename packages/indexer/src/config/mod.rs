@@ -3,7 +3,7 @@ use std::env;
 use std::sync::Mutex;
 
 pub mod contracts;
-pub mod near_indexer;
+pub mod lake_framework;
 pub mod postgres;
 
 static MISSING_VARS: Lazy<Mutex<Box<Vec<&str>>>> = Lazy::new(|| Mutex::new(Box::new(vec![])));
@@ -28,10 +28,11 @@ fn get_optional_var(var_name: &str) -> Option<String> {
         .and_then(|value| if value.len() > 0 { Some(value) } else { None })
 }
 
-pub fn initialize_run_config() {
+pub fn initialize() {
     dotenv::dotenv().unwrap();
     contracts::get_contracts_config();
     postgres::get_postgres_config();
+    lake_framework::get_lake_framework_config();
 
     assert!(
         Lazy::force(&MISSING_VARS).lock().unwrap().len() == 0,
