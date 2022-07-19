@@ -35,12 +35,12 @@ pub fn retrieve_treasury_funds(token_type: &TokenType, quantity: U128) {
 
 /// Guardian actions events
 pub fn create_listing(listing_data: VListing) {
-  let data = json!({ "listing_data": listing_data }).to_string();
+  let data = json!({ "listing_data": listing_data });
   log_event("create_listing", data);
 }
 
 pub fn cancel_listing(listing_id: U64) {
-  let data = json!({ "listing_id": listing_id }).to_string();
+  let data = json!({ "listing_id": listing_id });
   log_event("cancel_listing", data);
 }
 
@@ -51,7 +51,7 @@ pub fn project_fund_listing(listing_id: U64, tokens_sale: U128, tokens_liquidity
       "tokens_sale": tokens_sale,
       "tokens_liquidity": tokens_liquidity
   });
-  log_event("fund_listing", data.to_string());
+  log_event("fund_listing", data);
 }
 
 pub fn project_withdraw_listing(
@@ -66,7 +66,7 @@ pub fn project_withdraw_listing(
       "price_tokens_withdraw": price_tokens_withdraw,
       "project_status": project_status
   });
-  log_event("project_withdraw", data.to_string());
+  log_event("project_withdraw", data);
 }
 
 /// Investor action events
@@ -84,7 +84,7 @@ pub fn investor_buy_allocation(
       "allocations_purchased": allocations_purchased,
       "total_allocations_sold": total_allocations_sold,
   });
-  log_event("investor_buy_allocation", data.to_string());
+  log_event("investor_buy_allocation", data);
 }
 
 pub fn investor_withdraw_allocations(
@@ -99,7 +99,7 @@ pub fn investor_withdraw_allocations(
       "price_tokens_withdrew": price_tokens_withdrew,
       "project_status": project_status
   });
-  log_event("investor_withdraw", data.to_string());
+  log_event("investor_withdraw", data);
 }
 
 pub fn investor_stake_membership(
@@ -112,7 +112,7 @@ pub fn investor_stake_membership(
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
-  log_event("stake_membership", data.to_string());
+  log_event("stake_membership", data);
 }
 
 pub fn investor_unstake_membership(
@@ -125,5 +125,5 @@ pub fn investor_unstake_membership(
       "token_quantity": token_quantity,
       "new_membership_level": new_membership_level
   });
-  log_event("unstake_membership", data.to_string());
+  log_event("unstake_membership", data);
 }

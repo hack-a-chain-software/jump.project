@@ -8,12 +8,14 @@ impl FungibleTokenCore for Contract {
     println!("initial storage: {}", initial_storage);
     self.only_minter(&env::predecessor_account_id());
     let mut account = self.internal_get_account(&receiver_id).expect(ERR_001);
+    if !self.minters.contains(&receiver_id.clone()) {
+      self.internal_add_vesting(&receiver_id, amount.0);
+      account.track_storage_usage(initial_storage);
+      self.internal_update_account(&receiver_id, &account);
+    }
     self
       .ft_functionality
       .ft_transfer(receiver_id.clone(), amount, memo);
-    self.internal_add_vesting(&receiver_id, amount.0);
-    account.track_storage_usage(initial_storage);
-    self.internal_update_account(&receiver_id, &account);
   }
 
   #[payable]
@@ -26,10 +28,12 @@ impl FungibleTokenCore for Contract {
   ) -> PromiseOrValue<U128> {
     let initial_storage = env::storage_usage();
     self.only_minter(&env::predecessor_account_id());
+    if !self.minters.contains(&receiver_id.clone()) {
     let mut account = self.internal_get_account(&receiver_id).expect(ERR_001);
     self.internal_add_vesting(&receiver_id, amount.0);
     account.track_storage_usage(initial_storage);
     self.internal_update_account(&receiver_id, &account);
+    }
     self
       .ft_functionality
       .ft_transfer_call(receiver_id, amount, memo, msg)

@@ -170,6 +170,7 @@ impl VListing {
 
     // assert dex launch price >= launchpad price
     assert!(
+      (liquidity_pool_price_tokens == 0 && liquidity_pool_project_tokens == 0) ||
       if token_allocation_price >= token_allocation_size {
         (token_allocation_price / token_allocation_size)
           <= (liquidity_pool_price_tokens / liquidity_pool_project_tokens)

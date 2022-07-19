@@ -37,10 +37,12 @@ impl Contract {
   pub fn nft_mint(&mut self) -> Token {
     let account_id = env::predecessor_account_id();
 
+    let token_id = self.get_next_id();
+
     let metadata = TokenMetadata {
       title: Some("Generic NFT".to_string()),
       description: None,
-      media: None,
+      media: Some(format!("{}/{}", self.metadata.get().unwrap().base_uri.unwrap().clone(), token_id)),
       media_hash: None,
       copies: Some(self.counter),
       issued_at: None,
@@ -51,8 +53,6 @@ impl Contract {
       reference: None,
       reference_hash: None,
     };
-
-    let token_id = self.get_next_id();
 
     let token = self
       .tokens

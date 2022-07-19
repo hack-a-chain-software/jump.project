@@ -1,6 +1,6 @@
 use crate::*;
 use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, PromiseOrValue};
+use near_sdk::{PromiseOrValue};
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -34,14 +34,12 @@ pub struct NFTRoutePayload<'a> {
 
 #[near_bindgen]
 impl Contract {
-  #[payable]
   pub fn ft_on_transfer(
     &mut self,
     sender_id: AccountId,
     amount: U128,
     msg: String,
   ) -> PromiseOrValue<U128> {
-    assert_one_yocto();
     let token_id = env::predecessor_account_id();
     assert!(
       self.contract_treasury.contains_key(&token_id),
@@ -72,7 +70,6 @@ impl Contract {
     }
   }
 
-  #[payable]
   pub fn nft_on_transfer(
     &mut self,
     sender_id: AccountId,
@@ -80,7 +77,6 @@ impl Contract {
     token_id: String,
     msg: String,
   ) -> bool {
-    assert_one_yocto();
     let collection = NFTCollection::NFTContract {
       account_id: env::predecessor_account_id(),
     };

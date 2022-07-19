@@ -4,6 +4,7 @@ use crate::StorageKey;
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{env, Timestamp};
+use near_sdk::json_types::{U128};
 use std::collections::HashMap;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
@@ -107,14 +108,14 @@ fn get_key_closure(collection: NFTCollection) -> impl FnMut() -> StorageKey {
 impl Farm {
   pub fn new(
     collection: NFTCollection,
-    collection_round_reward: HashMap<FungibleTokenID, u128>,
+    collection_round_reward: HashMap<FungibleTokenID, U128>,
     round_interval: u32,
   ) -> Self {
     let mut get_key = get_key_closure(collection);
-
+    
     let mut distributions = UnorderedMap::new(get_key());
     for (token_id, &rewards) in collection_round_reward.iter() {
-      distributions.insert(token_id, &RewardsDistribution::new(0, rewards));
+      distributions.insert(token_id, &RewardsDistribution::new(0, rewards.0));
     }
 
     Farm {
@@ -156,10 +157,10 @@ impl Farm {
   }
 
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
-    let mut balance = UnorderedMap::new(StorageKey::NFTsRPS(nft_id.clone()));
+    let mut balance = HashMap::new();
 
     for (ft_id, dist) in self.distributions.to_vec() {
-      balance.insert(&ft_id, &dist.rps);
+      balance.insert(ft_id, dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
@@ -188,14 +189,14 @@ impl Farm {
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.to_vec() {
-      let rps = token_rps.get(&k).unwrap_or(0);
+      let rps = *token_rps.get(&k).unwrap_or(&0);
 
       let (dist, claimed) = prev_dist.claim(rps);
 
+      token_rps.insert(k.clone(), dist.rps);
       self.distributions.insert(&k, &dist);
 
-      token_rps.insert(&k, &dist.rps);
-      rewards_map.insert(k.clone(), claimed);
+      rewards_map.insert(k, claimed);
     }
 
     self.nfts_rps.insert(token_id, &token_rps);
