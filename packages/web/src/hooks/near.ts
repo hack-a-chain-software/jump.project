@@ -44,12 +44,12 @@ export const executeMultipleTransactions = async (
   connection: WalletConnection
 ) => {
   const nearTransactions = await Promise.all(
-    transactions.map((t, i) => {
+    transactions.map(({ receiverId, functionCalls }, index) => {
       return getTransaction(
         connection,
-        t.receiverId,
-        i + 1,
-        t.functionCalls.map(({ methodName, args, gas, amount }) =>
+        receiverId,
+        index + 1,
+        functionCalls.map(({ methodName, args, gas, amount }) =>
           functionCall(methodName, args, getGas(gas), getAmount(amount))
         )
       );
