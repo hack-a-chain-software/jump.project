@@ -1,1 +1,1 @@
-export const contractName = "dev-1652055476064-95220052886384";
+export const contractName = "jump_nft_staking.testnet";

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Box, Flex, Grid, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Grid, Stack, Text, Button } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { WalletIcon } from "../assets/svg";
 import {
@@ -13,11 +14,37 @@ import {
 import { BackButton } from "../components/shared/back-button";
 import { useTheme } from "../hooks/theme";
 
+import { contractName } from "../env/contract";
+import { WalletConnection } from "near-api-js";
+import { useNftStaking } from "../stores/nft-staking";
+import { useCollection } from "../stores/collection";
+import { useNearWallet, useNearUser } from "react-near";
+
+import { ModalImageDialog } from "../components";
+
 type Props = {};
 
 export function NFTStakingProject(params: Props) {
   const navigate = useNavigate();
-  const { jumpGradient, gradientBoxTopCard, darkPurple } = useTheme();
+  const { jumpGradient, darkPurple } = useTheme();
+
+  const [show, setShow] = useState(false);
+
+  const wallet = useNearWallet();
+  const user = useNearUser(contractName);
+
+  const { init, stake, unstake, unstakeAll, claimRewards } = useNftStaking();
+
+  const { getTokens, contract } = useCollection();
+
+  useEffect(() => {
+    if (user.isConnected) {
+      init(wallet as WalletConnection);
+
+      getTokens(wallet as WalletConnection);
+    }
+  }, [user.isConnected]);
+
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/nft-staking")} />
@@ -97,13 +124,32 @@ export function NFTStakingProject(params: Props) {
                 Investor
               </Text>
               <Stack mt="50px" gap={1}>
-                <GradientButton bg={darkPurple} justifyContent="space-between">
-                  Unstake All NFTs <WalletIcon />
-                </GradientButton>
-                <GradientButton bg={darkPurple} justifyContent="space-between">
+                <GradientButton
+                  onClick={() => stake(wallet, contract)}
+                  bg={darkPurple}
+                  justifyContent="space-between"
+                >
                   Stake NFT <WalletIcon />
                 </GradientButton>
-                <GradientButton bg={darkPurple} justifyContent="space-between">
+                <GradientButton
+                  onClick={() => unstake()}
+                  bg={darkPurple}
+                  justifyContent="space-between"
+                >
+                  Unstake NFT <WalletIcon />
+                </GradientButton>
+                <GradientButton
+                  onClick={() => unstakeAll()}
+                  bg={darkPurple}
+                  justifyContent="space-between"
+                >
+                  Unstake All NFTs <WalletIcon />
+                </GradientButton>
+                <GradientButton
+                  onClick={() => claimRewards()}
+                  bg={darkPurple}
+                  justifyContent="space-between"
+                >
                   Claim Pool Rewards <WalletIcon />
                 </GradientButton>
               </Stack>
@@ -111,6 +157,29 @@ export function NFTStakingProject(params: Props) {
           </Box>
         </Flex>
       </Flex>
+
+      <ModalImageDialog
+        image="https://images.unsplash.com/photo-1523568114750-b593de7df18f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
+        isOpen={show}
+        title="Understanding Staking"
+        onClose={() => {
+          setShow(false);
+        }}
+        footer={
+          <Button bg="white" color="black" w="100%">
+            Read More on Docs
+          </Button>
+        }
+        shouldBlurBackdrop
+      >
+        {}
+        <Text color="white" fontSize={16}>
+          Staking is a way to earn rewards in crypto currencies. You lock your
+          tokens on our Staking Pool, for earning JUMP Tokens and getting access
+          to tickets and invest inside the launchpad, the longer you lock your
+          tokens more rewards you get! Still Confused?
+        </Text>
+      </ModalImageDialog>
     </PageContainer>
   );
 }
