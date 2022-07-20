@@ -2,7 +2,11 @@ import BN from "bn.js";
 import React from "react";
 import { baseDecode } from "borsh";
 import { ConnectConfig, utils, WalletConnection } from "near-api-js";
-import { functionCall, createTransaction } from "near-api-js/lib/transaction";
+import {
+  functionCall,
+  createTransaction,
+  Action,
+} from "near-api-js/lib/transaction";
 import { NearEnvironment, NearProvider } from "react-near";
 
 const { PublicKey } = utils;
@@ -37,8 +41,7 @@ export const getAmount = (amount?: string): BN => {
 
 export const executeMultipleTransactions = async (
   transactions: Transaction[],
-  connection: any,
-  callbackUrl?: string
+  connection: WalletConnection
 ) => {
   const nearTransactions = await Promise.all(
     transactions.map((t, i) => {
@@ -46,26 +49,21 @@ export const executeMultipleTransactions = async (
         connection,
         t.receiverId,
         i + 1,
-        t.functionCalls.map((fc) =>
-          functionCall(
-            fc.methodName,
-            fc.args,
-            getGas(fc.gas),
-            getAmount(fc.amount)
-          )
+        t.functionCalls.map(({ methodName, args, gas, amount }) =>
+          functionCall(methodName, args, getGas(gas), getAmount(amount))
         )
       );
     })
   );
 
-  return connection.requestSignTransactions(nearTransactions, callbackUrl);
+  return connection.requestSignTransactions(nearTransactions);
 };
 
 export const getTransaction = async (
   connection: WalletConnection,
   receiverId: string,
   nonceOffset: string | number,
-  actions: any
+  actions: Action[]
 ) => {
   const account = connection.account();
 
