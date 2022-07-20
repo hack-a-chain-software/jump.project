@@ -15,7 +15,7 @@ import { BackButton } from "../components/shared/back-button";
 import { useTheme } from "../hooks/theme";
 
 import { contractName } from "../env/contract";
-import { WalletConnection } from "near-api-js";
+import { Contract, WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
 import { useCollection } from "../stores/collection";
 import { useNearWallet, useNearUser } from "react-near";

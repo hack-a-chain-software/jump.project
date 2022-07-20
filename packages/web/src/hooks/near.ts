@@ -25,7 +25,7 @@ export interface TransactionFunctionCallOptions {
   args: object;
 }
 
-interface Transaction {
+export interface Transaction {
   receiverId: string;
   functionCalls: TransactionFunctionCallOptions[];
 }

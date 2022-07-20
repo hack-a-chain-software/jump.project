@@ -2,15 +2,19 @@ import BN from "bn.js";
 import create from "zustand";
 import { connect, Contract, WalletConnection } from "near-api-js";
 
-import { getAmount, executeMultipleTransactions } from "../hooks/near";
+import {
+  Transaction,
+  getAmount,
+  executeMultipleTransactions,
+} from "../hooks/near";
 
 import { contractName } from "../env/contract";
 
 export const useNftStaking = create<{
   contract: any;
-  init: (walletConnection: WalletConnection) => Promise<void>;
+  init: (connection: WalletConnection) => Promise<void>;
   stake: (
-    walletConnection: WalletConnection,
+    connection: WalletConnection,
     collection: any,
     tokenId: string
   ) => Promise<void>;
@@ -21,12 +25,12 @@ export const useNftStaking = create<{
 }>((set, get) => ({
   contract: null,
 
-  init: async (walletConnection: WalletConnection) => {
+  init: async (connection: WalletConnection) => {
     if (get().contract) {
       return;
     }
 
-    const account = await walletConnection.account();
+    const account = await connection.account();
 
     console.log(getAmount("1"));
 
@@ -59,8 +63,12 @@ export const useNftStaking = create<{
     });
   },
 
-  stake: async (connection: WalletConnection, collection: any) => {
-    const transactions = [];
+  stake: async (
+    connection: WalletConnection,
+    collection: any,
+    tokenId: string
+  ) => {
+    const transactions: Transaction[] = [];
 
     try {
       const stakingStorage = await get().contract?.storage_balance_of({
@@ -93,7 +101,7 @@ export const useNftStaking = create<{
           methodName: "nft_transfer_call",
           args: {
             receiver_id: contractName,
-            token_id: "11",
+            token_id: tokenId,
             approval_id: null,
             memo: null,
             msg: JSON.stringify({

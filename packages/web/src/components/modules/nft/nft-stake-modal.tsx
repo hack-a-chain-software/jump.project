@@ -16,9 +16,12 @@ import { useEffect, useState } from "react";
 import { useNearWallet, useNearUser } from "react-near";
 
 import { Button } from "@jump/src/components";
+
 import { CloseIcon, CheckIcon, InfoIcon } from "@jump/src/assets/svg";
+
 import { useTheme } from "@jump/src/hooks/theme";
 
+import { useNftStaking } from "@jump/src/stores/nft-staking";
 import { useCollection } from "@jump/src/stores/collection";
 import { contractName } from "@jump/src/env/contract";
 
@@ -27,13 +30,11 @@ const modalRadius = 20;
 interface DialogParams extends Partial<ModalContentProps> {
   isOpen: boolean;
   onClose: () => void;
-  stakeNFT: () => void;
 }
 
 export function NFTStakeModal({
   isOpen = false,
   onClose = () => {},
-  stakeNFT = () => {},
   ...modalContentProps
 }: Partial<DialogParams>) {
   const { jumpGradient } = useTheme();
@@ -41,9 +42,11 @@ export function NFTStakeModal({
   const wallet = useNearWallet();
   const user = useNearUser(contractName);
 
-  const { tokens, loading, fetchTokens } = useCollection();
+  const { stake, init } = useNftStaking();
 
-  const [selected, setSelected] = useState(null);
+  const { contract, tokens, loading, fetchTokens } = useCollection();
+
+  const [selected, setSelected] = useState("");
 
   useEffect(() => {
     if (user.isConnected) {
@@ -52,6 +55,10 @@ export function NFTStakeModal({
       })();
     }
   }, [user.isConnected]);
+
+  const stakeNFT = async () => {
+    stake(wallet, contract, selected);
+  };
 
   return (
     <Modal
@@ -175,7 +182,12 @@ export function NFTStakeModal({
               </Grid>
 
               <Flex marginX="auto" marginTop="24px">
-                <Button px="50px" onClick={() => {}} bg="white" color="black">
+                <Button
+                  px="50px"
+                  onClick={() => stakeNFT()}
+                  bg="white"
+                  color="black"
+                >
                   Stake Now!
                 </Button>
               </Flex>
