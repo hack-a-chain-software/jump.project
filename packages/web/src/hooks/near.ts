@@ -33,10 +33,10 @@ interface Transaction {
 export const getGas = (gas?: string): BN =>
   gas ? new BN(gas) : new BN("100000000000000");
 
-export const getAmount = (amount?: string): BN => {
+export const getAmount = (amount?: string | undefined): BN => {
   const value = amount ? utils.format.parseNearAmount(amount) : "1";
 
-  return new BN(value);
+  return new BN(String(value));
 };
 
 export const executeMultipleTransactions = async (
