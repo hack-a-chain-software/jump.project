@@ -95,6 +95,8 @@ export function NFTStakeModal({
                 templateColumns="repeat(3, 300px)"
                 gap="34px"
                 width="max-content"
+                maxHeight="650px"
+                overflow="auto"
               >
                 {tokens.map(({ metadata, token_id }, i) => (
                   <Flex
@@ -172,7 +174,7 @@ export function NFTStakeModal({
                 ))}
               </Grid>
 
-              <Flex marginX="auto" marginTop="48px">
+              <Flex marginX="auto" marginTop="24px">
                 <Button px="50px" onClick={() => {}} bg="white" color="black">
                   Stake Now!
                 </Button>
