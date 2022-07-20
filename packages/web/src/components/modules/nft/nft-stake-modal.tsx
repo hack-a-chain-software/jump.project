@@ -92,8 +92,8 @@ export function NFTStakeModal({
               </Text>
 
               <Grid
-                templateColumns="repeat(3, 300px)"
-                gap="34px"
+                templateColumns="repeat(3, 270px)"
+                gap="24px"
                 width="max-content"
                 maxHeight="650px"
                 overflow="auto"
@@ -103,8 +103,8 @@ export function NFTStakeModal({
                     key={"nft-stake-token" + i}
                     borderRadius="20px"
                     cursor="pointer"
-                    width="309px"
-                    height="309px"
+                    width="270px"
+                    height="270px"
                     position="relative"
                     onClick={() => setSelected(token_id)}
                   >
