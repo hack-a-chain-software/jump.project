@@ -20,7 +20,7 @@ import { useNftStaking } from "../stores/nft-staking";
 import { useCollection } from "../stores/collection";
 import { useNearWallet, useNearUser } from "react-near";
 
-import { ModalImageDialog } from "../components";
+import { NFTStakeModal } from "../components";
 
 type Props = {};
 
@@ -35,13 +35,9 @@ export function NFTStakingProject(params: Props) {
 
   const { init, stake, unstake, unstakeAll, claimRewards } = useNftStaking();
 
-  const { getTokens, contract } = useCollection();
-
   useEffect(() => {
     if (user.isConnected) {
       init(wallet as WalletConnection);
-
-      getTokens(wallet as WalletConnection);
     }
   }, [user.isConnected]);
 
@@ -125,7 +121,7 @@ export function NFTStakingProject(params: Props) {
               </Text>
               <Stack mt="50px" gap={1}>
                 <GradientButton
-                  onClick={() => stake(wallet, contract)}
+                  onClick={() => setShow(!show)}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -158,28 +154,12 @@ export function NFTStakingProject(params: Props) {
         </Flex>
       </Flex>
 
-      <ModalImageDialog
-        image="https://images.unsplash.com/photo-1523568114750-b593de7df18f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
+      <NFTStakeModal
         isOpen={show}
-        title="Understanding Staking"
         onClose={() => {
-          setShow(false);
+          setShow(!show);
         }}
-        footer={
-          <Button bg="white" color="black" w="100%">
-            Read More on Docs
-          </Button>
-        }
-        shouldBlurBackdrop
-      >
-        {}
-        <Text color="white" fontSize={16}>
-          Staking is a way to earn rewards in crypto currencies. You lock your
-          tokens on our Staking Pool, for earning JUMP Tokens and getting access
-          to tickets and invest inside the launchpad, the longer you lock your
-          tokens more rewards you get! Still Confused?
-        </Text>
-      </ModalImageDialog>
+      />
     </PageContainer>
   );
 }

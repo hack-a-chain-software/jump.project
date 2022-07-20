@@ -3,20 +3,24 @@ import { Contract, WalletConnection } from "near-api-js";
 
 export const useCollection = create<{
   contract: any;
-  init: (
-    walletConnection: WalletConnection,
+  tokens: Array<any>;
+  loading: boolean;
+  init: (connection: WalletConnection, collectionId: string) => Promise<void>;
+  fetchTokens: (
+    connection: WalletConnection,
     collectionId: string
-  ) => Promise<void>;
-  getTokens: (walletConnection: WalletConnection) => Promise<any>;
+  ) => Promise<any>;
 }>((set, get) => ({
   contract: null,
+  tokens: [],
+  loading: true,
 
-  init: async (walletConnection: WalletConnection, collectionId: string) => {
-    if (get().contract && get().contract.contractId === collectionId) {
+  init: async (connection: WalletConnection, collectionId: string) => {
+    if (get().contract && get().contract?.contractId === collectionId) {
       return;
     }
 
-    const account = await walletConnection.account();
+    const account = await connection.account();
 
     const contract = new Contract(account, collectionId, {
       viewMethods: ["nft_tokens_for_owner"],
@@ -32,22 +36,24 @@ export const useCollection = create<{
     }
   },
 
-  getTokens: async (
-    walletConnection: WalletConnection,
-    collectionId: string = "negentra_base_nft.testnet"
-  ) => {
-    if (!get().contract) {
-      await get().init(walletConnection, collectionId);
-    }
+  fetchTokens: async (connection: WalletConnection, collectionId: string) => {
+    await get().init(connection, collectionId);
 
-    const account = await walletConnection.account();
-
-    const nfts = await get().contract?.nft_tokens_for_owner({
-      account_id: account.accountId,
+    const tokens = await get().contract?.nft_tokens_for_owner({
+      account_id: connection.getAccountId(),
     });
 
-    console.log(nfts);
+    console.log(tokens);
 
-    return nfts;
+    try {
+      set({
+        tokens,
+        loading: false,
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+
+    return tokens;
   },
 }));
