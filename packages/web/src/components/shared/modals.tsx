@@ -25,6 +25,8 @@ export function ModalImageDialog({
   isOpen = false,
   onClose = () => {},
   title = "",
+  minW = "700px",
+  minH = "400px",
   footer = null,
   children = null,
   color = "white",
@@ -56,12 +58,18 @@ export function ModalImageDialog({
         id="content"
         flexDirection="row"
         bg="transparent"
-        minW="700px"
-        minH="400px"
+        minW={minW}
+        minH={minH}
         borderRadius={modalRadius}
         {...modalContentProps}
       >
-        <Box bg={jumpGradient} p="6px" display="flex" borderRadius={25}>
+        <Box
+          bg={jumpGradient}
+          p="6px"
+          display="flex"
+          w="100%"
+          borderRadius={25}
+        >
           <ModalBody
             p="30px"
             pl="40px"
