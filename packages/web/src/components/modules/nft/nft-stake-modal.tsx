@@ -89,15 +89,14 @@ export function NFTStakeModal({
         </Text>
 
         {loading ? (
-          <Flex height="355px" alignItems="center" justifyContent="center">
+          <Flex height="370px" alignItems="center" justifyContent="center">
             <Spinner size="xl" />
           </Flex>
         ) : (
           <Grid
             templateColumns="repeat(1, 1fr)"
-            gap="12px"
             rowGap="12px"
-            maxHeight="355px"
+            maxHeight="370px"
             padding="2px"
             overflow="auto"
           >
