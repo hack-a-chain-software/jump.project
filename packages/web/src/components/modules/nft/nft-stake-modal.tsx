@@ -9,6 +9,7 @@ import {
   Box,
   Grid,
   Image,
+  Spinner,
 } from "@chakra-ui/react";
 
 import { useEffect, useState } from "react";
@@ -49,12 +50,12 @@ export function NFTStakeModal({
   const [selected, setSelected] = useState("");
 
   useEffect(() => {
-    if (user.isConnected) {
+    if (user.isConnected && isOpen) {
       (async () => {
         await fetchTokens(wallet, "negentra_base_nft.testnet");
       })();
     }
-  }, [user.isConnected]);
+  }, [user.isConnected, isOpen]);
 
   const stakeNFT = async () => {
     stake(wallet, contract, selected);
@@ -98,99 +99,112 @@ export function NFTStakeModal({
                 Stake NFT
               </Text>
 
-              <Grid
-                templateColumns="repeat(3, 270px)"
-                gap="24px"
-                width="max-content"
-                maxHeight="650px"
-                overflow="auto"
-              >
-                {tokens.map(({ metadata, token_id }, i) => (
-                  <Flex
-                    key={"nft-stake-token" + i}
-                    borderRadius="20px"
-                    cursor="pointer"
-                    width="270px"
-                    height="270px"
-                    position="relative"
-                    onClick={() => setSelected(token_id)}
-                  >
-                    <Image
-                      width="100%"
-                      height="100%"
+              {loading ? (
+                <Flex
+                  width="858px"
+                  height="270px"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Spinner size="xl" />
+                </Flex>
+              ) : (
+                <Grid
+                  templateColumns="repeat(3, 270px)"
+                  gap="24px"
+                  width="max-content"
+                  maxHeight="650px"
+                  overflow="auto"
+                >
+                  {tokens.map(({ metadata, token_id }, i) => (
+                    <Flex
+                      key={"nft-stake-token" + i}
                       borderRadius="20px"
-                      src={metadata.media}
-                    />
-
-                    <Flex
-                      top="22px"
-                      right="22px"
-                      width="40px"
-                      height="40px"
-                      borderRadius="5px"
-                      position="absolute"
-                      alignItems="center"
-                      justifyContent="center"
-                      backgroundColor={
-                        selected === token_id ? "#FDCA68" : "#BDBDBD"
-                      }
+                      cursor="pointer"
+                      width="270px"
+                      height="270px"
+                      position="relative"
+                      onClick={() => setSelected(token_id)}
                     >
-                      {selected === token_id && <CheckIcon />}
-                    </Flex>
+                      <Image
+                        width="100%"
+                        height="100%"
+                        borderRadius="20px"
+                        src={metadata.media}
+                      />
 
-                    <Flex
-                      position="absolute"
-                      bottom="22px"
-                      left="22px"
-                      right="22px"
-                      height="76px"
-                      borderRadius="10px"
-                      background="#c4c4c466"
-                      backdropFilter="blur(100px)"
-                      padding="21px 18px"
-                      flexDirection="row"
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <Flex flexDirection="column" marginRight="12px">
-                        <Text
-                          color="#000000"
-                          lineHeight="15px"
-                          fontSize="12px"
-                          fontWeight="400"
-                          fontFamily="Inter"
-                          marginBottom="-3px"
-                        >
-                          {metadata.title}
-                        </Text>
-
-                        <Text
-                          color="#000000"
-                          lineHeight="19px"
-                          fontSize="16px"
-                          fontWeight="500"
-                          fontFamily="Inter"
-                        >
-                          {metadata.description}
-                        </Text>
+                      <Flex
+                        top="22px"
+                        right="22px"
+                        width="40px"
+                        height="40px"
+                        borderRadius="5px"
+                        position="absolute"
+                        alignItems="center"
+                        justifyContent="center"
+                        backgroundColor={
+                          selected === token_id ? "#FDCA68" : "#BDBDBD"
+                        }
+                      >
+                        {selected === token_id && <CheckIcon />}
                       </Flex>
 
-                      <InfoIcon width="24px" height="24px" />
-                    </Flex>
-                  </Flex>
-                ))}
-              </Grid>
+                      <Flex
+                        position="absolute"
+                        bottom="22px"
+                        left="22px"
+                        right="22px"
+                        height="76px"
+                        borderRadius="10px"
+                        background="#c4c4c466"
+                        backdropFilter="blur(100px)"
+                        padding="21px 18px"
+                        flexDirection="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Flex flexDirection="column" marginRight="12px">
+                          <Text
+                            color="#000000"
+                            lineHeight="15px"
+                            fontSize="12px"
+                            fontWeight="400"
+                            fontFamily="Inter"
+                            marginBottom="-3px"
+                          >
+                            {metadata.title}
+                          </Text>
 
-              <Flex marginX="auto" marginTop="24px">
-                <Button
-                  px="50px"
-                  onClick={() => stakeNFT()}
-                  bg="white"
-                  color="black"
-                >
-                  Stake Now!
-                </Button>
-              </Flex>
+                          <Text
+                            color="#000000"
+                            lineHeight="19px"
+                            fontSize="16px"
+                            fontWeight="500"
+                            fontFamily="Inter"
+                          >
+                            {metadata.description}
+                          </Text>
+                        </Flex>
+
+                        <InfoIcon width="24px" height="24px" />
+                      </Flex>
+                    </Flex>
+                  ))}
+                </Grid>
+              )}
+
+              {!loading && (
+                <Flex marginX="auto" marginTop="24px">
+                  <Button
+                    px="50px"
+                    onClick={() => stakeNFT()}
+                    bg="white"
+                    color="black"
+                  >
+                    Stake Now!
+                  </Button>
+                </Flex>
+              )}
             </Flex>
           </ModalBody>
         </Box>

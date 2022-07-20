@@ -37,6 +37,10 @@ export const useCollection = create<{
   },
 
   fetchTokens: async (connection: WalletConnection, collectionId: string) => {
+    set({
+      loading: true,
+    });
+
     await get().init(connection, collectionId);
 
     const tokens = await get().contract?.nft_tokens_for_owner({
@@ -46,10 +50,12 @@ export const useCollection = create<{
     console.log(tokens);
 
     try {
-      set({
-        tokens,
-        loading: false,
-      });
+      setTimeout(() => {
+        set({
+          tokens,
+          loading: false,
+        });
+      }, 120);
     } catch (e) {
       console.warn(e);
     }
