@@ -54,7 +54,10 @@ export function StakeModal({ isOpen = false, onClose = () => {} }: Props) {
       title="Stake NFT"
       minH="max-content"
       minW="800px"
-      onClose={onClose}
+      onClose={() => {
+        setSelected("");
+        onClose();
+      }}
       footer={
         <Button onClick={() => stakeNFT()} bg="white" color="black" w="100%">
           Stake Now!
