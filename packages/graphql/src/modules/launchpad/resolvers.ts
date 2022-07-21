@@ -5,11 +5,13 @@ import {
   LaunchpadFilters,
   LaunchpadListing,
   NFTInvestor,
+  ProjectIdQuery,
 } from "@/types";
 import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
+import { ApolloError } from "apollo-server";
 
 export default {
   LaunchpadListing: {
@@ -55,6 +57,22 @@ export default {
         'select * from "launchpad_investors" where "account_id" = $1',
         {
           bind: [account_id],
+          type: QueryTypes.SELECT,
+        }
+      );
+
+      return result[0] || null;
+    },
+
+    async launchpad_project(
+      _root: unknown,
+      filters: ProjectIdQuery,
+      { sequelize }: GraphQLContext
+    ) {
+      const result = await sequelize.query<NFTInvestor>(
+        'select * from "listings" where "listing_id" = $1',
+        {
+          bind: [filters.project_id],
           type: QueryTypes.SELECT,
         }
       );

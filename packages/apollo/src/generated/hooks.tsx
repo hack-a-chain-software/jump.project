@@ -1,0 +1,846 @@
+import { gql } from "@apollo/client";
+import * as Apollo from "@apollo/client";
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
+const defaultOptions = {} as const;
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
+};
+
+export enum CacheControlScope {
+  Private = "PRIVATE",
+  Public = "PUBLIC",
+}
+
+export type CollectionMeta = {
+  __typename?: "CollectionMeta";
+  image?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+};
+
+export type InvestorAllocation = {
+  __typename?: "InvestorAllocation";
+  account_id: Scalars["ID"];
+  listing_id: Scalars["ID"];
+  quantity_withdrawn?: Maybe<Scalars["String"]>;
+  total_allocation?: Maybe<Scalars["String"]>;
+  total_quantity?: Maybe<Scalars["String"]>;
+};
+
+export type LaunchpadInvestor = {
+  __typename?: "LaunchpadInvestor";
+  account_id: Scalars["ID"];
+  allocation_count?: Maybe<Scalars["String"]>;
+  last_check?: Maybe<Scalars["String"]>;
+  staked_token: Scalars["ID"];
+};
+
+export type LaunchpadListing = {
+  __typename?: "LaunchpadListing";
+  allocation?: Maybe<InvestorAllocation>;
+  allocations_sold?: Maybe<Scalars["String"]>;
+  cliff_timestamp?: Maybe<Scalars["String"]>;
+  dex_id?: Maybe<Scalars["String"]>;
+  end_cliff_timestamp?: Maybe<Scalars["String"]>;
+  fee_liquidity_tokens?: Maybe<Scalars["String"]>;
+  fee_price_tokens?: Maybe<Scalars["String"]>;
+  final_sale_2_timestamp?: Maybe<Scalars["String"]>;
+  fraction_cliff_release?: Maybe<Scalars["String"]>;
+  fraction_instant_release?: Maybe<Scalars["String"]>;
+  liquidity_pool_price_tokens?: Maybe<Scalars["String"]>;
+  liquidity_pool_project_tokens?: Maybe<Scalars["String"]>;
+  liquidity_pool_timestamp?: Maybe<Scalars["String"]>;
+  listing_id: Scalars["ID"];
+  open_sale_1_timestamp?: Maybe<Scalars["String"]>;
+  open_sale_2_timestamp?: Maybe<Scalars["String"]>;
+  price_token?: Maybe<Scalars["String"]>;
+  price_token_info?: Maybe<ProjectTokenInfo>;
+  project_owner: Scalars["ID"];
+  project_token: Scalars["ID"];
+  project_token_info?: Maybe<ProjectTokenInfo>;
+  status?: Maybe<Scalars["String"]>;
+  token_allocation_price?: Maybe<Scalars["String"]>;
+  token_allocation_size?: Maybe<Scalars["String"]>;
+  total_amount_sale_project_tokens?: Maybe<Scalars["String"]>;
+};
+
+export type LaunchpadListingAllocationArgs = {
+  account_id: Scalars["ID"];
+};
+
+export type LaunchpadPage = {
+  __typename?: "LaunchpadPage";
+  data?: Maybe<Array<Maybe<LaunchpadListing>>>;
+  hasNextPage?: Maybe<Scalars["Boolean"]>;
+  itemsPerPage?: Maybe<Scalars["Int"]>;
+  pageSize?: Maybe<Scalars["Int"]>;
+  totalCount?: Maybe<Scalars["Int"]>;
+};
+
+export type MessageOutput = {
+  __typename?: "MessageOutput";
+  message: Scalars["String"];
+};
+
+export type NftInvestor = {
+  __typename?: "NFTInvestor";
+  account_id?: Maybe<Scalars["ID"]>;
+  storage_deposit?: Maybe<Scalars["String"]>;
+  storage_used?: Maybe<Scalars["String"]>;
+};
+
+export type NftPage = {
+  __typename?: "NFTPage";
+  data?: Maybe<Array<Maybe<NftStaking>>>;
+  hasNextPage?: Maybe<Scalars["Boolean"]>;
+  itemsPerPage?: Maybe<Scalars["Int"]>;
+  pageSize?: Maybe<Scalars["Int"]>;
+  totalCount?: Maybe<Scalars["Int"]>;
+};
+
+export type NftStaking = {
+  __typename?: "NFTStaking";
+  collection: Scalars["ID"];
+  collection_meta?: Maybe<CollectionMeta>;
+  collection_owner: Scalars["String"];
+  collection_treasury: Scalars["String"];
+  early_withdraw_penalty?: Maybe<Scalars["String"]>;
+  farm: Scalars["ID"];
+  min_staking_period?: Maybe<Scalars["String"]>;
+  staked_nfts_by_owner?: Maybe<Array<Maybe<StakedNft>>>;
+  storage_used: NftInvestor;
+  token_address: Scalars["ID"];
+  total_rewards?: Maybe<NftStakingTotalRewards>;
+};
+
+export type NftStakingStakedNftsByOwnerArgs = {
+  account_id?: InputMaybe<Scalars["ID"]>;
+};
+
+export type NftStakingStorageUsedArgs = {
+  account_id?: InputMaybe<Scalars["ID"]>;
+};
+
+export type NftStakingTotalRewardsArgs = {
+  account_id?: InputMaybe<Scalars["ID"]>;
+};
+
+export type NftStakingTotalRewards = {
+  __typename?: "NFTStakingTotalRewards";
+  rewards_acova?: Maybe<Scalars["String"]>;
+  rewards_jump?: Maybe<Scalars["String"]>;
+  rewards_project_token?: Maybe<Scalars["String"]>;
+};
+
+export type ProjectTokenInfo = {
+  __typename?: "ProjectTokenInfo";
+  image?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  symbol?: Maybe<Scalars["String"]>;
+};
+
+export type Query = {
+  __typename?: "Query";
+  health?: Maybe<MessageOutput>;
+  investor_info?: Maybe<LaunchpadInvestor>;
+  launchpad_project?: Maybe<LaunchpadListing>;
+  launchpad_projects: LaunchpadPage;
+  nft_staking_projects: NftPage;
+  staking?: Maybe<NftStaking>;
+};
+
+export type QueryInvestorInfoArgs = {
+  account_id: Scalars["ID"];
+};
+
+export type QueryLaunchpadProjectArgs = {
+  project_id: Scalars["ID"];
+};
+
+export type QueryLaunchpadProjectsArgs = {
+  limit?: InputMaybe<Scalars["Int"]>;
+  offset?: InputMaybe<Scalars["Int"]>;
+  search?: InputMaybe<Scalars["String"]>;
+  showMineOnly?: InputMaybe<Scalars["String"]>;
+  status?: InputMaybe<StatusEnum>;
+  visibility?: InputMaybe<VisibilityEnum>;
+};
+
+export type QueryNftStakingProjectsArgs = {
+  limit?: InputMaybe<Scalars["Int"]>;
+  offset?: InputMaybe<Scalars["Int"]>;
+  search?: InputMaybe<Scalars["String"]>;
+};
+
+export type QueryStakingArgs = {
+  collection: Scalars["ID"];
+};
+
+export type StakedNft = {
+  __typename?: "StakedNFT";
+  collection?: Maybe<Scalars["ID"]>;
+  non_fungible_token_id?: Maybe<Scalars["ID"]>;
+  owner_id?: Maybe<Scalars["ID"]>;
+  rewards_acova?: Maybe<Scalars["String"]>;
+  rewards_jump?: Maybe<Scalars["String"]>;
+  rewards_project_token?: Maybe<Scalars["String"]>;
+  staked_timestamp?: Maybe<Scalars["String"]>;
+};
+
+export enum StatusEnum {
+  All = "All",
+  Ended = "Ended",
+  Open = "Open",
+  Waiting = "Waiting",
+}
+
+export enum VisibilityEnum {
+  All = "All",
+  Private = "Private",
+  Public = "Public",
+}
+
+export type InvestorInfoQueryVariables = Exact<{
+  accountId: Scalars["ID"];
+}>;
+
+export type InvestorInfoQuery = {
+  __typename?: "Query";
+  investor_info?: {
+    __typename?: "LaunchpadInvestor";
+    account_id: string;
+    staked_token: string;
+    last_check?: string | null;
+    allocation_count?: string | null;
+  } | null;
+};
+
+export type LaunchpadConenctionQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars["Int"]>;
+  offset?: InputMaybe<Scalars["Int"]>;
+  status?: InputMaybe<StatusEnum>;
+  visibility?: InputMaybe<VisibilityEnum>;
+  showMineOnly?: InputMaybe<Scalars["String"]>;
+}>;
+
+export type LaunchpadConenctionQuery = {
+  __typename?: "Query";
+  launchpad_projects: {
+    __typename?: "LaunchpadPage";
+    pageSize?: number | null;
+    totalCount?: number | null;
+    itemsPerPage?: number | null;
+    hasNextPage?: boolean | null;
+    data?: Array<{
+      __typename?: "LaunchpadListing";
+      listing_id: string;
+      project_owner: string;
+      project_token: string;
+      price_token?: string | null;
+      open_sale_2_timestamp?: string | null;
+      open_sale_1_timestamp?: string | null;
+      final_sale_2_timestamp?: string | null;
+      liquidity_pool_timestamp?: string | null;
+      total_amount_sale_project_tokens?: string | null;
+      token_allocation_size?: string | null;
+      token_allocation_price?: string | null;
+      liquidity_pool_project_tokens?: string | null;
+      allocations_sold?: string | null;
+      status?: string | null;
+      fee_liquidity_tokens?: string | null;
+      fee_price_tokens?: string | null;
+      end_cliff_timestamp?: string | null;
+      cliff_timestamp?: string | null;
+      fraction_cliff_release?: string | null;
+      fraction_instant_release?: string | null;
+      liquidity_pool_price_tokens?: string | null;
+      dex_id?: string | null;
+      project_token_info?: {
+        __typename?: "ProjectTokenInfo";
+        image?: string | null;
+        name?: string | null;
+        symbol?: string | null;
+      } | null;
+      price_token_info?: {
+        __typename?: "ProjectTokenInfo";
+        image?: string | null;
+        name?: string | null;
+        symbol?: string | null;
+      } | null;
+    } | null> | null;
+  };
+};
+
+export type LaunchPadProjectQueryVariables = Exact<{
+  projectId: Scalars["ID"];
+  accountId: Scalars["ID"];
+}>;
+
+export type LaunchPadProjectQuery = {
+  __typename?: "Query";
+  launchpad_project?: {
+    __typename?: "LaunchpadListing";
+    listing_id: string;
+    project_owner: string;
+    project_token: string;
+    price_token?: string | null;
+    open_sale_1_timestamp?: string | null;
+    open_sale_2_timestamp?: string | null;
+    final_sale_2_timestamp?: string | null;
+    liquidity_pool_timestamp?: string | null;
+    total_amount_sale_project_tokens?: string | null;
+    token_allocation_size?: string | null;
+    token_allocation_price?: string | null;
+    allocations_sold?: string | null;
+    liquidity_pool_project_tokens?: string | null;
+    liquidity_pool_price_tokens?: string | null;
+    fraction_instant_release?: string | null;
+    fraction_cliff_release?: string | null;
+    cliff_timestamp?: string | null;
+    end_cliff_timestamp?: string | null;
+    fee_price_tokens?: string | null;
+    fee_liquidity_tokens?: string | null;
+    status?: string | null;
+    dex_id?: string | null;
+    project_token_info?: {
+      __typename?: "ProjectTokenInfo";
+      name?: string | null;
+      image?: string | null;
+      symbol?: string | null;
+    } | null;
+    price_token_info?: {
+      __typename?: "ProjectTokenInfo";
+      image?: string | null;
+      name?: string | null;
+      symbol?: string | null;
+    } | null;
+    allocation?: {
+      __typename?: "InvestorAllocation";
+      account_id: string;
+      listing_id: string;
+      quantity_withdrawn?: string | null;
+      total_quantity?: string | null;
+      total_allocation?: string | null;
+    } | null;
+  } | null;
+};
+
+export type NftStakingProjectsConnectionQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars["Int"]>;
+  offset?: InputMaybe<Scalars["Int"]>;
+}>;
+
+export type NftStakingProjectsConnectionQuery = {
+  __typename?: "Query";
+  nft_staking_projects: {
+    __typename?: "NFTPage";
+    pageSize?: number | null;
+    totalCount?: number | null;
+    itemsPerPage?: number | null;
+    hasNextPage?: boolean | null;
+    data?: Array<{
+      __typename?: "NFTStaking";
+      collection: string;
+      collection_owner: string;
+      collection_treasury: string;
+      token_address: string;
+      farm: string;
+      collection_meta?: {
+        __typename?: "CollectionMeta";
+        image?: string | null;
+        name?: string | null;
+      } | null;
+    } | null> | null;
+  };
+};
+
+export type StakingProjectQueryVariables = Exact<{
+  collection: Scalars["ID"];
+  accountId?: InputMaybe<Scalars["ID"]>;
+}>;
+
+export type StakingProjectQuery = {
+  __typename?: "Query";
+  staking?: {
+    __typename?: "NFTStaking";
+    collection: string;
+    collection_owner: string;
+    collection_treasury: string;
+    token_address: string;
+    farm: string;
+    min_staking_period?: string | null;
+    early_withdraw_penalty?: string | null;
+    collection_meta?: {
+      __typename?: "CollectionMeta";
+      image?: string | null;
+      name?: string | null;
+    } | null;
+    storage_used: {
+      __typename?: "NFTInvestor";
+      account_id?: string | null;
+      storage_deposit?: string | null;
+      storage_used?: string | null;
+    };
+    total_rewards?: {
+      __typename?: "NFTStakingTotalRewards";
+      rewards_jump?: string | null;
+      rewards_acova?: string | null;
+      rewards_project_token?: string | null;
+    } | null;
+    staked_nfts_by_owner?: Array<{
+      __typename?: "StakedNFT";
+      non_fungible_token_id?: string | null;
+      collection?: string | null;
+      owner_id?: string | null;
+      staked_timestamp?: string | null;
+      rewards_jump?: string | null;
+      rewards_acova?: string | null;
+      rewards_project_token?: string | null;
+    } | null> | null;
+  } | null;
+};
+
+export const InvestorInfoDocument = gql`
+  query InvestorInfo($accountId: ID!) {
+    investor_info(account_id: $accountId) {
+      account_id
+      staked_token
+      last_check
+      allocation_count
+    }
+  }
+`;
+
+/**
+ * __useInvestorInfoQuery__
+ *
+ * To run a query within a React component, call `useInvestorInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInvestorInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInvestorInfoQuery({
+ *   variables: {
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useInvestorInfoQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    InvestorInfoQuery,
+    InvestorInfoQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<InvestorInfoQuery, InvestorInfoQueryVariables>(
+    InvestorInfoDocument,
+    options
+  );
+}
+export function useInvestorInfoLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    InvestorInfoQuery,
+    InvestorInfoQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<InvestorInfoQuery, InvestorInfoQueryVariables>(
+    InvestorInfoDocument,
+    options
+  );
+}
+export type InvestorInfoQueryHookResult = ReturnType<
+  typeof useInvestorInfoQuery
+>;
+export type InvestorInfoLazyQueryHookResult = ReturnType<
+  typeof useInvestorInfoLazyQuery
+>;
+export type InvestorInfoQueryResult = Apollo.QueryResult<
+  InvestorInfoQuery,
+  InvestorInfoQueryVariables
+>;
+export const LaunchpadConenctionDocument = gql`
+  query LaunchpadConenction(
+    $limit: Int
+    $offset: Int
+    $status: StatusEnum
+    $visibility: VisibilityEnum
+    $showMineOnly: String
+  ) {
+    launchpad_projects(
+      limit: $limit
+      offset: $offset
+      status: $status
+      visibility: $visibility
+      showMineOnly: $showMineOnly
+    ) {
+      pageSize
+      totalCount
+      itemsPerPage
+      hasNextPage
+      data {
+        listing_id
+        project_owner
+        project_token
+        price_token
+        open_sale_2_timestamp
+        open_sale_1_timestamp
+        final_sale_2_timestamp
+        liquidity_pool_timestamp
+        total_amount_sale_project_tokens
+        token_allocation_size
+        token_allocation_price
+        liquidity_pool_project_tokens
+        allocations_sold
+        project_token_info {
+          image
+          name
+          symbol
+        }
+        price_token_info {
+          image
+          name
+          symbol
+        }
+        status
+        fee_liquidity_tokens
+        fee_price_tokens
+        end_cliff_timestamp
+        cliff_timestamp
+        fraction_cliff_release
+        fraction_instant_release
+        liquidity_pool_price_tokens
+        dex_id
+      }
+    }
+  }
+`;
+
+/**
+ * __useLaunchpadConenctionQuery__
+ *
+ * To run a query within a React component, call `useLaunchpadConenctionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLaunchpadConenctionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLaunchpadConenctionQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *      status: // value for 'status'
+ *      visibility: // value for 'visibility'
+ *      showMineOnly: // value for 'showMineOnly'
+ *   },
+ * });
+ */
+export function useLaunchpadConenctionQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    LaunchpadConenctionQuery,
+    LaunchpadConenctionQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<
+    LaunchpadConenctionQuery,
+    LaunchpadConenctionQueryVariables
+  >(LaunchpadConenctionDocument, options);
+}
+export function useLaunchpadConenctionLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    LaunchpadConenctionQuery,
+    LaunchpadConenctionQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    LaunchpadConenctionQuery,
+    LaunchpadConenctionQueryVariables
+  >(LaunchpadConenctionDocument, options);
+}
+export type LaunchpadConenctionQueryHookResult = ReturnType<
+  typeof useLaunchpadConenctionQuery
+>;
+export type LaunchpadConenctionLazyQueryHookResult = ReturnType<
+  typeof useLaunchpadConenctionLazyQuery
+>;
+export type LaunchpadConenctionQueryResult = Apollo.QueryResult<
+  LaunchpadConenctionQuery,
+  LaunchpadConenctionQueryVariables
+>;
+export const LaunchPadProjectDocument = gql`
+  query LaunchPadProject($projectId: ID!, $accountId: ID!) {
+    launchpad_project(project_id: $projectId) {
+      listing_id
+      project_owner
+      project_token
+      price_token
+      open_sale_1_timestamp
+      open_sale_2_timestamp
+      final_sale_2_timestamp
+      liquidity_pool_timestamp
+      total_amount_sale_project_tokens
+      token_allocation_size
+      token_allocation_price
+      allocations_sold
+      liquidity_pool_project_tokens
+      liquidity_pool_price_tokens
+      fraction_instant_release
+      fraction_cliff_release
+      cliff_timestamp
+      end_cliff_timestamp
+      fee_price_tokens
+      fee_liquidity_tokens
+      status
+      project_token_info {
+        name
+        image
+        symbol
+      }
+      dex_id
+      price_token_info {
+        image
+        name
+        symbol
+      }
+      allocation(account_id: $accountId) {
+        account_id
+        listing_id
+        quantity_withdrawn
+        total_quantity
+        total_allocation
+      }
+    }
+  }
+`;
+
+/**
+ * __useLaunchPadProjectQuery__
+ *
+ * To run a query within a React component, call `useLaunchPadProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLaunchPadProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLaunchPadProjectQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useLaunchPadProjectQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    LaunchPadProjectQuery,
+    LaunchPadProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<LaunchPadProjectQuery, LaunchPadProjectQueryVariables>(
+    LaunchPadProjectDocument,
+    options
+  );
+}
+export function useLaunchPadProjectLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    LaunchPadProjectQuery,
+    LaunchPadProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    LaunchPadProjectQuery,
+    LaunchPadProjectQueryVariables
+  >(LaunchPadProjectDocument, options);
+}
+export type LaunchPadProjectQueryHookResult = ReturnType<
+  typeof useLaunchPadProjectQuery
+>;
+export type LaunchPadProjectLazyQueryHookResult = ReturnType<
+  typeof useLaunchPadProjectLazyQuery
+>;
+export type LaunchPadProjectQueryResult = Apollo.QueryResult<
+  LaunchPadProjectQuery,
+  LaunchPadProjectQueryVariables
+>;
+export const NftStakingProjectsConnectionDocument = gql`
+  query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
+    nft_staking_projects(limit: $limit, offset: $offset) {
+      pageSize
+      totalCount
+      itemsPerPage
+      hasNextPage
+      data {
+        collection
+        collection_meta {
+          image
+          name
+        }
+        collection_owner
+        collection_treasury
+        token_address
+        farm
+      }
+    }
+  }
+`;
+
+/**
+ * __useNftStakingProjectsConnectionQuery__
+ *
+ * To run a query within a React component, call `useNftStakingProjectsConnectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNftStakingProjectsConnectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNftStakingProjectsConnectionQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useNftStakingProjectsConnectionQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    NftStakingProjectsConnectionQuery,
+    NftStakingProjectsConnectionQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<
+    NftStakingProjectsConnectionQuery,
+    NftStakingProjectsConnectionQueryVariables
+  >(NftStakingProjectsConnectionDocument, options);
+}
+export function useNftStakingProjectsConnectionLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    NftStakingProjectsConnectionQuery,
+    NftStakingProjectsConnectionQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    NftStakingProjectsConnectionQuery,
+    NftStakingProjectsConnectionQueryVariables
+  >(NftStakingProjectsConnectionDocument, options);
+}
+export type NftStakingProjectsConnectionQueryHookResult = ReturnType<
+  typeof useNftStakingProjectsConnectionQuery
+>;
+export type NftStakingProjectsConnectionLazyQueryHookResult = ReturnType<
+  typeof useNftStakingProjectsConnectionLazyQuery
+>;
+export type NftStakingProjectsConnectionQueryResult = Apollo.QueryResult<
+  NftStakingProjectsConnectionQuery,
+  NftStakingProjectsConnectionQueryVariables
+>;
+export const StakingProjectDocument = gql`
+  query StakingProject($collection: ID!, $accountId: ID) {
+    staking(collection: $collection) {
+      collection
+      collection_meta {
+        image
+        name
+      }
+      collection_owner
+      collection_treasury
+      token_address
+      farm
+      min_staking_period
+      early_withdraw_penalty
+      storage_used(account_id: $accountId) {
+        account_id
+        storage_deposit
+        storage_used
+      }
+      total_rewards(account_id: $accountId) {
+        rewards_jump
+        rewards_acova
+        rewards_project_token
+      }
+      staked_nfts_by_owner(account_id: $accountId) {
+        non_fungible_token_id
+        collection
+        owner_id
+        staked_timestamp
+        rewards_jump
+        rewards_acova
+        rewards_project_token
+      }
+    }
+  }
+`;
+
+/**
+ * __useStakingProjectQuery__
+ *
+ * To run a query within a React component, call `useStakingProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStakingProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStakingProjectQuery({
+ *   variables: {
+ *      collection: // value for 'collection'
+ *      accountId: // value for 'accountId'
+ *   },
+ * });
+ */
+export function useStakingProjectQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    StakingProjectQuery,
+    StakingProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<StakingProjectQuery, StakingProjectQueryVariables>(
+    StakingProjectDocument,
+    options
+  );
+}
+export function useStakingProjectLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    StakingProjectQuery,
+    StakingProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<StakingProjectQuery, StakingProjectQueryVariables>(
+    StakingProjectDocument,
+    options
+  );
+}
+export type StakingProjectQueryHookResult = ReturnType<
+  typeof useStakingProjectQuery
+>;
+export type StakingProjectLazyQueryHookResult = ReturnType<
+  typeof useStakingProjectLazyQuery
+>;
+export type StakingProjectQueryResult = Apollo.QueryResult<
+  StakingProjectQuery,
+  StakingProjectQueryVariables
+>;

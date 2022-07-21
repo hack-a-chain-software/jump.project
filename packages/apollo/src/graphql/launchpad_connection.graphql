@@ -1,0 +1,54 @@
+query LaunchpadConenction(
+  $limit: Int
+  $offset: Int
+  $status: StatusEnum
+  $visibility: VisibilityEnum
+  $showMineOnly: String
+) {
+  launchpad_projects(
+    limit: $limit
+    offset: $offset
+    status: $status
+    visibility: $visibility
+    showMineOnly: $showMineOnly
+  ) {
+    pageSize
+    totalCount
+    itemsPerPage
+    hasNextPage
+    data {
+      listing_id
+      project_owner
+      project_token
+      price_token
+      open_sale_2_timestamp
+      open_sale_1_timestamp
+      final_sale_2_timestamp
+      liquidity_pool_timestamp
+      total_amount_sale_project_tokens
+      token_allocation_size
+      token_allocation_price
+      liquidity_pool_project_tokens
+      allocations_sold
+      project_token_info {
+        image
+        name
+        symbol
+      }
+      price_token_info {
+        image
+        name
+        symbol
+      }
+      status
+      fee_liquidity_tokens
+      fee_price_tokens
+      end_cliff_timestamp
+      cliff_timestamp
+      fraction_cliff_release
+      fraction_instant_release
+      liquidity_pool_price_tokens
+      dex_id
+    }
+  }
+}

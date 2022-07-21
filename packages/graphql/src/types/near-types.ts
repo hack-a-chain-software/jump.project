@@ -13,3 +13,7 @@ export type NearQuery = {
 export type AccountIdQuery = {
   account_id: ID;
 };
+
+export type ProjectIdQuery = {
+  project_id: ID;
+};

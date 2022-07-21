@@ -87,5 +87,6 @@ export default gql`
       offset: Int
     ): LaunchpadPage!
     investor_info(account_id: ID!): LaunchpadInvestor
+    launchpad_project(project_id: ID!): LaunchpadListing
   }
 `;
