@@ -1,11 +1,4 @@
-import {
-  Flex,
-  Text,
-  ModalContentProps,
-  Grid,
-  Image,
-  Spinner,
-} from "@chakra-ui/react";
+import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
 
 import { useEffect, useState } from "react";
 
