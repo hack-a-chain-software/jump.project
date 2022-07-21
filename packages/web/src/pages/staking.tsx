@@ -1,5 +1,6 @@
 import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import { toast } from "react-hot-toast";
+import { useNearUser } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import { ArrowRightIcon } from "../assets/svg/arrow-right";
 import {
@@ -8,7 +9,6 @@ import {
   ModalImageDialog,
   PageContainer,
   ValueBox,
-  TopCard,
   Card,
 } from "../components";
 import { useTheme } from "../hooks/theme";
@@ -21,11 +21,31 @@ import { WithdrawModal } from "../modals/staking/withdraw";
  * @description - This is the staking JUMP page where user can stake and unstake Jump
  */
 export const Staking = () => {
+  const { balance, account, connect, isConnected } = useNearUser(
+    "jump_x_token.testnet"
+  );
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
   const withdrawDisclosure = useDisclosure();
 
   const { jumpGradient, glassyWhiteOpaque } = useTheme();
+
+  const stake = (value: number) => {
+    console.log(isConnected);
+
+    if (!isConnected) return toast("Connect your Wallet First");
+    console.log(account);
+
+    account;
+  };
+
+  const withdraw = (value: number) => {
+    console.log(isConnected);
+
+    if (!isConnected) return toast("Connect your wallet First");
+  };
+
   return (
     <PageContainer>
       <Grid gap={4} templateColumns="1fr 1fr">
@@ -193,7 +213,7 @@ export const Staking = () => {
       <StakeModal
         isOpen={stakingDisclosure.isOpen}
         onClose={stakingDisclosure.onClose}
-        onSubmit={() => {}}
+        onSubmit={() => stake(1)}
       />
       <WithdrawModal
         isOpen={withdrawDisclosure.isOpen}

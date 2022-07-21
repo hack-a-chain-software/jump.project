@@ -26,6 +26,8 @@ export const WithdrawModal = ({ onSubmit, ...rest }: IWithdrawModalProps) => {
       footer={
         <Button
           justifyContent="space-between"
+          bg="white"
+          color="black"
           w="100%"
           onClick={() => handleSubmit()}
         >
