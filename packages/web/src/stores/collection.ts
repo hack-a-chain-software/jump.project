@@ -1,31 +1,29 @@
 import create from "zustand";
-import { Contract, WalletConnection } from "near-api-js";
+import {
+  Contract,
+  WalletConnection,
+  ConnectedWalletAccount,
+} from "near-api-js";
 
 export const useCollection = create<{
   contract: any;
   tokens: Array<any>;
   loading: boolean;
-  init: (
-    connection: WalletConnection | null,
-    collectionId: string
+  initContract: (
+    account: ConnectedWalletAccount,
+    collection: string
   ) => Promise<void>;
   fetchTokens: (
-    connection: WalletConnection | null,
-    collectionId: string
-  ) => Promise<any>;
+    connection: WalletConnection,
+    collection: string
+  ) => Promise<void>;
 }>((set, get) => ({
   tokens: [],
   loading: true,
   contract: null,
 
-  init: async (connection: WalletConnection | null, collectionId: string) => {
-    if (!connection || get().contract?.contractId === collectionId) {
-      return;
-    }
-
-    const account = await connection.account();
-
-    const contract = new Contract(account, collectionId, {
+  initContract: async (account: ConnectedWalletAccount, collection: string) => {
+    const contract = new Contract(account, collection, {
       viewMethods: ["nft_tokens_for_owner"],
       changeMethods: ["nft_transfer_call"],
     });
@@ -39,37 +37,28 @@ export const useCollection = create<{
     }
   },
 
-  fetchTokens: async (
-    connection: WalletConnection | null,
-    collectionId: string
-  ) => {
-    if (!connection) {
-      return;
-    }
-
+  fetchTokens: async (connection: WalletConnection, collection: string) => {
     set({
       loading: true,
     });
 
-    await get().init(connection, collectionId);
+    const account = await connection.account();
+
+    if (!get().contract) {
+      await get().initContract(account, collection);
+    }
 
     const tokens = await get().contract?.nft_tokens_for_owner({
-      account_id: connection.getAccountId(),
+      account_id: account.accountId,
     });
 
-    console.log(tokens);
-
     try {
-      setTimeout(() => {
-        set({
-          tokens,
-          loading: false,
-        });
-      }, 120);
+      set({
+        tokens,
+        loading: false,
+      });
     } catch (e) {
       console.warn(e);
     }
-
-    return tokens;
   },
 }));

@@ -27,10 +27,10 @@ export function StakeModal({ isOpen = false, onClose = () => {} }: Props) {
   const [selected, setSelected] = useState("");
 
   useEffect(() => {
-    if (user.isConnected && isOpen) {
+    if (user.isConnected && wallet && isOpen) {
       fetchTokens(wallet, "negentra_base_nft.testnet");
     }
-  }, [user.isConnected, isOpen]);
+  }, [user.isConnected, wallet, isOpen]);
 
   const stakeNFT = async () => {
     if (!selected) {
