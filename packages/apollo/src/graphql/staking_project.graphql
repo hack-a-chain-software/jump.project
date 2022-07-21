@@ -1,14 +1,13 @@
 query StakingProject($collection: ID!, $accountId: ID) {
   staking(collection: $collection) {
-    collection
+    collection_id
     collection_meta {
       image
       name
     }
-    collection_owner
+    collection_owner_id
     collection_treasury
     token_address
-    farm
     min_staking_period
     early_withdraw_penalty
     storage_used(account_id: $accountId) {
@@ -23,7 +22,7 @@ query StakingProject($collection: ID!, $accountId: ID) {
     }
     staked_nfts_by_owner(account_id: $accountId) {
       non_fungible_token_id
-      collection
+      collection_id
       owner_id
       staked_timestamp
       rewards_jump

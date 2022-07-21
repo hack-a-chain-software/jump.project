@@ -5,15 +5,14 @@ query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
     itemsPerPage
     hasNextPage
     data {
-      collection
+      collection_id
       collection_meta {
         image
         name
       }
-      collection_owner
+      collection_owner_id
       collection_treasury
       token_address
-      farm
     }
   }
 }
