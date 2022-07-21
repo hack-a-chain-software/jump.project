@@ -128,7 +128,7 @@ export function NFTStakingProject(params: Props) {
   };
 
   return (
-    <PageContainer>
+    <PageContainer marginBottom="300px">
       <StakeModal
         isOpen={show}
         onClose={() => {
