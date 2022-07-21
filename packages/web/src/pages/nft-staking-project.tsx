@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { WalletIcon } from "../assets/svg";
 import isEqual from "lodash/isEqual";
-
 import { AnimatePresence, motion } from "framer-motion";
-
 import {
   GradientButton,
   GradientText,
@@ -15,19 +13,13 @@ import {
   ValueBox,
   StakeModal,
   TokenCard,
+  BackButton,
   TokenAccordion,
 } from "@jump/src/components";
-
-import { BackButton } from "@jump/src/components/shared/back-button";
-
 import { useTheme } from "../hooks/theme";
-
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
-
 import { getNear } from "@jump/src/hooks/near";
-
-type Props = {};
 
 const tokens = [
   {
@@ -98,24 +90,29 @@ const tokens = [
   },
 ];
 
-export function NFTStakingProject(params: Props) {
+type Token = {
+  token_id: string;
+  metadata: object;
+};
+
+export function NFTStakingProject(params: {}) {
   const navigate = useNavigate();
+
   const { jumpGradient, darkPurple } = useTheme();
 
   const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState<Token | null>(null);
 
   const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
-
-  const { init, stake, unstake, unstakeAll, claimRewards } = useNftStaking();
-
-  const [selected, setSelected] = useState([]);
-  const [focused, setFocused] = useState<object | null>(null);
+  const { init, unstake, claimRewards } = useNftStaking();
 
   useEffect(() => {
     if (user.isConnected) {
       init(wallet as WalletConnection);
     }
   }, [user.isConnected]);
+
+  const [selected, setSelected] = useState<Array<string>>([]);
 
   const select = (tokenId) => {
     if (selected.includes(tokenId)) {
@@ -228,7 +225,7 @@ export function NFTStakingProject(params: Props) {
                   Unstake NFT <WalletIcon />
                 </GradientButton> */}
                 <GradientButton
-                  onClick={() => unstakeAll()}
+                  onClick={() => unstake(tokens)}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -263,7 +260,7 @@ export function NFTStakingProject(params: Props) {
             color="black"
             display="flex"
             alignItems="center"
-            onClick={() => {}}
+            onClick={() => unstake(selected)}
           >
             <Text marginRight="16px">Unstake Selected NFTs!</Text>
 

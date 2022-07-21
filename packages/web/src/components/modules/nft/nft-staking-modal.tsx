@@ -1,41 +1,38 @@
-import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
-
 import { useEffect, useState } from "react";
-
-import { CheckIcon } from "@jump/src/assets/svg";
-import { ArrowRightIcon } from "@jump/src/assets/svg/arrow-right";
-
 import { getNear } from "@jump/src/hooks/near";
+import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "@jump/src/stores/nft-staking";
 import { useCollection } from "@jump/src/stores/collection";
+import { CheckIcon, ArrowRightIcon } from "@jump/src/assets/svg";
 import { ModalImageDialog, Button } from "@jump/src/components";
+import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
 
-type Props = {
+export function StakeModal({
+  isOpen = false,
+  onClose = () => {},
+}: {
   isOpen: boolean;
   onClose: () => void;
-};
+}) {
+  const [selected, setSelected] = useState("");
 
-export function StakeModal({ isOpen = false, onClose = () => {} }: Props) {
   const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
 
   const { stake } = useNftStaking();
-
-  const { contract, tokens, loading, fetchTokens } = useCollection();
-
-  const [selected, setSelected] = useState("");
+  const { tokens, loading, fetchTokens } = useCollection();
 
   useEffect(() => {
-    if (user.isConnected && wallet && isOpen) {
-      fetchTokens(wallet, "negentra_base_nft.testnet");
+    if (user.isConnected && isOpen) {
+      fetchTokens(wallet as WalletConnection, "negentra_base_nft.testnet");
     }
-  }, [user.isConnected, wallet, isOpen]);
+  }, [user.isConnected, isOpen]);
 
   const stakeNFT = async () => {
     if (!selected) {
       return;
     }
 
-    stake(wallet, contract, selected);
+    stake("negentra_base_nft.testnet", selected);
   };
 
   return (

@@ -1,27 +1,20 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
-
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
+
 export const useNftStaking = create<{
   contract: any;
-  init: (connection: WalletConnection | null) => Promise<void>;
-  stake: (
-    connection: WalletConnection | null,
-    collection: any,
-    tokenId: string
-  ) => Promise<void>;
-  unstakeAll: () => Promise<void>;
-  unstake: () => Promise<void>;
+  connection: WalletConnection | null;
+  init: (connection: WalletConnection) => Promise<void>;
+  stake: (collection: any, tokenId: string) => Promise<void>;
+  unstake: (tokens: Array<string>) => Promise<void>;
   claimRewards: () => Promise<void>;
   viewStaked: () => Promise<any>;
 }>((set, get) => ({
   contract: null,
+  connection: null,
 
-  init: async (connection: WalletConnection | null) => {
-    if (get().contract || !connection) {
-      return;
-    }
-
+  init: async (connection: WalletConnection) => {
     const account = await connection.account();
 
     const contract = new Contract(
@@ -41,36 +34,19 @@ export const useNftStaking = create<{
     try {
       set({
         contract,
+        connection,
       });
     } catch (e) {
       console.warn(e);
     }
   },
 
-  viewStaked: async () => {
-    return await get().contract?.view_staked({
-      account_id: "mateussantana.testnet",
-      collection: {
-        type: "NFTContract",
-        account_id: "negentra_base_nft",
-      },
-    });
-  },
-
-  stake: async (
-    connection: WalletConnection | null,
-    collection: any,
-    tokenId: string
-  ) => {
-    if (!connection) {
-      return;
-    }
-
+  stake: async (collection: string, tokenId: string) => {
     const transactions: Transaction[] = [];
 
     try {
       const stakingStorage = await get().contract?.storage_balance_of({
-        account_id: collection.contractId,
+        account_id: collection,
       });
 
       if (!stakingStorage || stakingStorage.total < "0.10") {
@@ -80,7 +56,7 @@ export const useNftStaking = create<{
             {
               methodName: "storage_deposit",
               args: {
-                account_id: collection.contractId,
+                account_id: collection,
                 registration_only: false,
               },
               amount: "0.25",
@@ -93,7 +69,7 @@ export const useNftStaking = create<{
     }
 
     transactions.push({
-      receiverId: collection.contractId,
+      receiverId: collection,
       functionCalls: [
         {
           methodName: "nft_transfer_call",
@@ -110,18 +86,33 @@ export const useNftStaking = create<{
       ],
     });
 
-    executeMultipleTransactions(transactions, connection);
+    executeMultipleTransactions(
+      transactions,
+      get().connection as WalletConnection
+    );
   },
 
-  unstake: async () => {
-    //
-  },
-
-  unstakeAll: async () => {
+  unstake: async (tokens: Array<string>) => {
     //
   },
 
   claimRewards: async () => {
     //
+  },
+
+  viewStaked: async () => {
+    try {
+      return await get().contract?.view_staked({
+        account_id: "mateussantana.testnet",
+        collection: {
+          type: "NFTContract",
+          account_id: "negentra_base_nft",
+        },
+      });
+    } catch (e) {
+      console.log(e);
+
+      return;
+    }
   },
 }));
