@@ -4,6 +4,7 @@
   "description": "Near Contract and React Monorepo",
   "private": true,
   "scripts": {
+    "apollo:generate": "yarn workspace @near/apollo generate",
     "gql:dev": "yarn workspace @near/graphql dev:testnet",
     "gql:dev:mainnet": "yarn workspace @near/graphql dev:mainnet",
     "gql:start:mainnet": "yarn workspace @near/graphql start:mainnet",
