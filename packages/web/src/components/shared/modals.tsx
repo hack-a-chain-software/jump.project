@@ -46,6 +46,7 @@ export function ModalImageDialog({
     <Modal
       closeOnEsc={!closeLocked}
       closeOnOverlayClick={!closeLocked}
+      blockScrollOnMount={false}
       isCentered
       isOpen={isOpen}
       onClose={onClose}

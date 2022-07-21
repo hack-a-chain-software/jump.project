@@ -6,6 +6,7 @@ import { WalletIcon } from "../assets/svg";
 import isEqual from "lodash/isEqual";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  If,
   GradientButton,
   GradientText,
   NFTStakingCard,
@@ -211,7 +212,15 @@ export function NFTStakingProject(params: {}) {
               </Text>
               <Stack mt="50px" gap={1}>
                 <GradientButton
-                  onClick={() => setShow(!show)}
+                  onClick={() => {
+                    if (!user.isConnected) {
+                      user.connect();
+
+                      return;
+                    }
+
+                    setShow(!show);
+                  }}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -225,14 +234,30 @@ export function NFTStakingProject(params: {}) {
                   Unstake NFT <WalletIcon />
                 </GradientButton> */}
                 <GradientButton
-                  onClick={() => unstake(tokens)}
+                  onClick={() => {
+                    if (!user.isConnected) {
+                      user.connect();
+
+                      return;
+                    }
+
+                    unstake(tokens.map((token) => token.token_id));
+                  }}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
                 <GradientButton
-                  onClick={() => claimRewards()}
+                  onClick={() => {
+                    if (!user.isConnected) {
+                      user.connect();
+
+                      return;
+                    }
+
+                    claimRewards();
+                  }}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -244,80 +269,88 @@ export function NFTStakingProject(params: {}) {
         </Flex>
       </Flex>
 
-      <Flex marginTop="42px" alignItems="center" justifyContent="space-between">
-        <Flex>
-          <Text fontSize="24px" fontWeight="700">
-            Your Staked NFTS:
-          </Text>
-        </Flex>
-
-        <Flex>
-          <Button
-            bg="white"
-            borderRadius="15px"
-            height="60px"
-            w="307px"
-            color="black"
-            display="flex"
-            alignItems="center"
-            onClick={() => unstake(selected)}
-          >
-            <Text marginRight="16px">Unstake Selected NFTs!</Text>
-
-            <WalletIcon />
-          </Button>
-        </Flex>
-      </Flex>
-
-      <AnimatePresence initial={false}>
-        {focused && (
-          <motion.section
-            initial="collapsed"
-            animate="open"
-            exit="collapsed"
-            variants={{
-              open: { opacity: 1, height: "auto" },
-              collapsed: { opacity: 0, height: 0, overflow: "hidden" },
-            }}
-            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-          >
-            <TokenAccordion
-              token={focused}
-              select={select}
-              selected={selected && selected.includes(focused?.token_id)}
-            />
-          </motion.section>
-        )}
-      </AnimatePresence>
-
-      <Flex>
-        <Grid
-          columnGap="8px"
-          rowGap="37px"
-          width="100%"
+      <If condition={user.isConnected}>
+        <Flex
+          marginTop="42px"
+          alignItems="center"
           justifyContent="space-between"
-          gridTemplateColumns="repeat(auto-fill, 309px)"
         >
-          {tokens.map((token, index) => (
-            <Flex
-              onClick={() => setFocused(isEqual(token, focused) ? null : token)}
-              borderRadius="20px"
-              border={
-                isEqual(token, focused)
-                  ? "solid 1px #761BA0"
-                  : "solid 1px transparent"
-              }
+          <Flex>
+            <Text fontSize="24px" fontWeight="700">
+              Your Staked NFTS:
+            </Text>
+          </Flex>
+
+          <Flex>
+            <Button
+              bg="white"
+              borderRadius="15px"
+              height="60px"
+              w="307px"
+              color="black"
+              display="flex"
+              alignItems="center"
+              onClick={() => unstake(selected)}
             >
-              <TokenCard
-                {...token}
+              <Text marginRight="16px">Unstake Selected NFTs!</Text>
+
+              <WalletIcon />
+            </Button>
+          </Flex>
+        </Flex>
+
+        <AnimatePresence initial={false}>
+          {focused && (
+            <motion.section
+              initial="collapsed"
+              animate="open"
+              exit="collapsed"
+              variants={{
+                open: { opacity: 1, height: "auto" },
+                collapsed: { opacity: 0, height: 0, overflow: "hidden" },
+              }}
+              transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+            >
+              <TokenAccordion
+                token={focused}
                 select={select}
-                key={"nft-staking-collection-token" + index}
-                selected={selected && selected.includes(token.token_id)}
+                selected={selected && selected.includes(focused?.token_id)}
               />
-            </Flex>
-          ))}
-        </Grid>
-      </Flex>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        <Flex>
+          <Grid
+            columnGap="8px"
+            rowGap="37px"
+            width="100%"
+            justifyContent="space-between"
+            gridTemplateColumns="repeat(auto-fill, 309px)"
+          >
+            {tokens.map((token, index) => (
+              <Flex
+                onClick={() =>
+                  setFocused(isEqual(token, focused) ? null : token)
+                }
+                borderRadius="20px"
+                border={
+                  isEqual(token, focused)
+                    ? "solid 1px #761BA0"
+                    : "solid 1px transparent"
+                }
+              >
+                <TokenCard
+                  {...token}
+                  select={select}
+                  key={"nft-staking-collection-token" + index}
+                  selected={selected && selected.includes(token.token_id)}
+                />
+              </Flex>
+            ))}
+          </Grid>
+        </Flex>
+      </If>
     </PageContainer>
   );
 }
