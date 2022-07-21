@@ -83,7 +83,6 @@ export default gql`
       status: StatusEnum
       visibility: VisibilityEnum
       showMineOnly: String
-      search: String
       limit: Int
       offset: Int
     ): LaunchpadPage!

@@ -33,11 +33,7 @@ export function ValueBox({
       <Text fontSize="14px" fontWeight="bold">
         {title}
       </Text>
-      <Text
-        fontSize="28px"
-        color={useColorModeValue("black", "white")}
-        fontWeight="bold"
-      >
+      <Text fontSize="28px" fontWeight="bold">
         {value}
       </Text>
       <If condition={!!bottomText}>
