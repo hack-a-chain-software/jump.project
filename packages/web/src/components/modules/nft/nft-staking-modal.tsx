@@ -1,12 +1,7 @@
 import {
   Flex,
-  Modal,
-  ModalBody,
-  ModalOverlay,
-  ModalContent,
   Text,
   ModalContentProps,
-  Box,
   Grid,
   Image,
   Spinner,
@@ -25,7 +20,6 @@ import { useTheme } from "@jump/src/hooks/theme";
 
 import { useNftStaking } from "@jump/src/stores/nft-staking";
 import { useCollection } from "@jump/src/stores/collection";
-import { contractName } from "@jump/src/env/contract";
 import { ModalImageDialog } from "@jump/src/components";
 
 const modalRadius = 20;
@@ -35,7 +29,7 @@ interface DialogParams extends Partial<ModalContentProps> {
   onClose: () => void;
 }
 
-export function NFTStakeModal({
+export function StakeModal({
   isOpen = false,
   onClose = () => {},
   ...modalContentProps
@@ -43,7 +37,7 @@ export function NFTStakeModal({
   const { jumpGradient } = useTheme();
 
   const wallet = useNearWallet();
-  const user = useNearUser(contractName);
+  const user = useNearUser(import.meta.env.VITE_STAKING_CONTRACT);
 
   const { stake } = useNftStaking();
 

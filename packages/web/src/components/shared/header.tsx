@@ -2,12 +2,11 @@ import { Flex, useColorMode } from "@chakra-ui/react";
 import { useNearUser } from "react-near";
 import { MoonIcon, WalletIcon } from "../../assets/svg";
 import { JumpTextIcon } from "../../assets/svg/jump-text";
-import { contractName } from "../../env/contract";
 import { Button } from "./button";
 import { If } from "./if";
 
 export function Header() {
-  const user = useNearUser(contractName);
+  const user = useNearUser(import.meta.env.VITE_STAKING_CONTRACT);
   const { toggleColorMode } = useColorMode();
 
   return (

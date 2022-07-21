@@ -1,14 +1,11 @@
-import BN from "bn.js";
 import create from "zustand";
-import { connect, Contract, WalletConnection } from "near-api-js";
+import { Contract, WalletConnection } from "near-api-js";
 
 import {
-  Transaction,
   getAmount,
+  Transaction,
   executeMultipleTransactions,
 } from "../hooks/near";
-
-import { contractName } from "../env/contract";
 
 export const useNftStaking = create<{
   contract: any;
@@ -32,17 +29,19 @@ export const useNftStaking = create<{
 
     const account = await connection.account();
 
-    console.log(getAmount("1"));
-
-    const contract = new Contract(account, contractName, {
-      viewMethods: ["view_staked", "storage_balance_of"],
-      changeMethods: [
-        "unstake",
-        "claim_rewards",
-        "storage_deposit",
-        "withdraw_reward",
-      ],
-    });
+    const contract = new Contract(
+      account,
+      import.meta.env.VITE_STAKING_CONTRACT,
+      {
+        viewMethods: ["view_staked", "storage_balance_of"],
+        changeMethods: [
+          "unstake",
+          "claim_rewards",
+          "storage_deposit",
+          "withdraw_reward",
+        ],
+      }
+    );
 
     try {
       set({
@@ -77,7 +76,7 @@ export const useNftStaking = create<{
 
       if (!stakingStorage || stakingStorage.total < "0.10") {
         transactions.push({
-          receiverId: contractName,
+          receiverId: import.meta.env.VITE_STAKING_CONTRACT,
           functionCalls: [
             {
               methodName: "storage_deposit",
@@ -100,7 +99,7 @@ export const useNftStaking = create<{
         {
           methodName: "nft_transfer_call",
           args: {
-            receiver_id: contractName,
+            receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
             token_id: tokenId,
             approval_id: null,
             memo: null,
