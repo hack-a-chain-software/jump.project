@@ -10,8 +10,8 @@ import {
 
 export default {
   NFTStaking: {
-    async collection_meta({ collection }: NFTStaking) {
-      const { name, icon } = await findCollectionMetadata(collection);
+    async collection_meta({ collection_id }: NFTStaking) {
+      const { name, icon } = await findCollectionMetadata(collection_id);
       return {
         name,
         image: icon,
@@ -35,15 +35,15 @@ export default {
       return result[0];
     },
     async total_rewards(
-      { collection }: NFTStaking,
+      { collection_id }: NFTStaking,
       { account_id }: AccountIdQuery,
       { sequelize }: GraphQLContext
     ) {
       return (
         await sequelize.query<StakedNFT>(
-          'select * from "staked_nfts" where "owner_id" = $1 and "collection" = $2',
+          'select * from "staked_nfts" where "owner_id" = $1 and "collection_id" = $2',
           {
-            bind: [account_id, collection],
+            bind: [account_id, collection_id],
             type: QueryTypes.SELECT,
           }
         )
@@ -64,14 +64,14 @@ export default {
       );
     },
     async staked_nfts_by_owner(
-      { collection }: NFTStaking,
+      { collection_id }: NFTStaking,
       { account_id }: AccountIdQuery,
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query(
-        'select * from "staked_nfts" where "owner_id" = $1 and "collection" = $2',
+        'select * from "staked_nfts" where "owner_id" = $1 and "collection_id" = $2',
         {
-          bind: [account_id, collection],
+          bind: [account_id, collection_id],
           type: QueryTypes.SELECT,
         }
       );
@@ -82,13 +82,13 @@ export default {
   Query: {
     async staking(
       _root: unknown,
-      { collection }: { collection: string },
+      { collection_id }: { collection_id: string },
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query<NFTStaking>(
-        'select * from "staking_programs" where "collection" = $1 limit 1;',
+        'select * from "staking_programs" where "collection_id" = $1 limit 1;',
         {
-          bind: [collection],
+          bind: [collection_id],
           type: QueryTypes.SELECT,
         }
       );

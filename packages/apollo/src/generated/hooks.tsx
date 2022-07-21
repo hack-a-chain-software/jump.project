@@ -114,12 +114,11 @@ export type NftPage = {
 
 export type NftStaking = {
   __typename?: "NFTStaking";
-  collection: Scalars["ID"];
+  collection_id: Scalars["ID"];
   collection_meta?: Maybe<CollectionMeta>;
-  collection_owner: Scalars["String"];
-  collection_treasury: Scalars["String"];
+  collection_owner_id: Scalars["String"];
+  collection_treasury: Array<Maybe<Scalars["String"]>>;
   early_withdraw_penalty?: Maybe<Scalars["String"]>;
-  farm: Scalars["ID"];
   min_staking_period?: Maybe<Scalars["String"]>;
   staked_nfts_by_owner?: Maybe<Array<Maybe<StakedNft>>>;
   storage_used: NftInvestor;
@@ -174,7 +173,6 @@ export type QueryLaunchpadProjectArgs = {
 export type QueryLaunchpadProjectsArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
-  search?: InputMaybe<Scalars["String"]>;
   showMineOnly?: InputMaybe<Scalars["String"]>;
   status?: InputMaybe<StatusEnum>;
   visibility?: InputMaybe<VisibilityEnum>;
@@ -192,7 +190,7 @@ export type QueryStakingArgs = {
 
 export type StakedNft = {
   __typename?: "StakedNFT";
-  collection?: Maybe<Scalars["ID"]>;
+  collection_id?: Maybe<Scalars["ID"]>;
   non_fungible_token_id?: Maybe<Scalars["ID"]>;
   owner_id?: Maybe<Scalars["ID"]>;
   rewards_acova?: Maybe<Scalars["String"]>;
@@ -354,11 +352,10 @@ export type NftStakingProjectsConnectionQuery = {
     hasNextPage?: boolean | null;
     data?: Array<{
       __typename?: "NFTStaking";
-      collection: string;
-      collection_owner: string;
-      collection_treasury: string;
+      collection_id: string;
+      collection_owner_id: string;
+      collection_treasury: Array<string | null>;
       token_address: string;
-      farm: string;
       collection_meta?: {
         __typename?: "CollectionMeta";
         image?: string | null;
@@ -377,11 +374,10 @@ export type StakingProjectQuery = {
   __typename?: "Query";
   staking?: {
     __typename?: "NFTStaking";
-    collection: string;
-    collection_owner: string;
-    collection_treasury: string;
+    collection_id: string;
+    collection_owner_id: string;
+    collection_treasury: Array<string | null>;
     token_address: string;
-    farm: string;
     min_staking_period?: string | null;
     early_withdraw_penalty?: string | null;
     collection_meta?: {
@@ -404,7 +400,7 @@ export type StakingProjectQuery = {
     staked_nfts_by_owner?: Array<{
       __typename?: "StakedNFT";
       non_fungible_token_id?: string | null;
-      collection?: string | null;
+      collection_id?: string | null;
       owner_id?: string | null;
       staked_timestamp?: string | null;
       rewards_jump?: string | null;
@@ -691,15 +687,14 @@ export const NftStakingProjectsConnectionDocument = gql`
       itemsPerPage
       hasNextPage
       data {
-        collection
+        collection_id
         collection_meta {
           image
           name
         }
-        collection_owner
+        collection_owner_id
         collection_treasury
         token_address
-        farm
       }
     }
   }
@@ -759,15 +754,14 @@ export type NftStakingProjectsConnectionQueryResult = Apollo.QueryResult<
 export const StakingProjectDocument = gql`
   query StakingProject($collection: ID!, $accountId: ID) {
     staking(collection: $collection) {
-      collection
+      collection_id
       collection_meta {
         image
         name
       }
-      collection_owner
+      collection_owner_id
       collection_treasury
       token_address
-      farm
       min_staking_period
       early_withdraw_penalty
       storage_used(account_id: $accountId) {
@@ -782,7 +776,7 @@ export const StakingProjectDocument = gql`
       }
       staked_nfts_by_owner(account_id: $accountId) {
         non_fungible_token_id
-        collection
+        collection_id
         owner_id
         staked_timestamp
         rewards_jump

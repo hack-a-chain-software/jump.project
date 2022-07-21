@@ -145,12 +145,11 @@ export type NFTPageFieldPolicy = {
   totalCount?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type NFTStakingKeySpecifier = (
-  | "collection"
+  | "collection_id"
   | "collection_meta"
-  | "collection_owner"
+  | "collection_owner_id"
   | "collection_treasury"
   | "early_withdraw_penalty"
-  | "farm"
   | "min_staking_period"
   | "staked_nfts_by_owner"
   | "storage_used"
@@ -159,12 +158,11 @@ export type NFTStakingKeySpecifier = (
   | NFTStakingKeySpecifier
 )[];
 export type NFTStakingFieldPolicy = {
-  collection?: FieldPolicy<any> | FieldReadFunction<any>;
+  collection_id?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_meta?: FieldPolicy<any> | FieldReadFunction<any>;
-  collection_owner?: FieldPolicy<any> | FieldReadFunction<any>;
+  collection_owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_treasury?: FieldPolicy<any> | FieldReadFunction<any>;
   early_withdraw_penalty?: FieldPolicy<any> | FieldReadFunction<any>;
-  farm?: FieldPolicy<any> | FieldReadFunction<any>;
   min_staking_period?: FieldPolicy<any> | FieldReadFunction<any>;
   staked_nfts_by_owner?: FieldPolicy<any> | FieldReadFunction<any>;
   storage_used?: FieldPolicy<any> | FieldReadFunction<any>;
@@ -211,7 +209,7 @@ export type QueryFieldPolicy = {
   staking?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type StakedNFTKeySpecifier = (
-  | "collection"
+  | "collection_id"
   | "non_fungible_token_id"
   | "owner_id"
   | "rewards_acova"
@@ -221,7 +219,7 @@ export type StakedNFTKeySpecifier = (
   | StakedNFTKeySpecifier
 )[];
 export type StakedNFTFieldPolicy = {
-  collection?: FieldPolicy<any> | FieldReadFunction<any>;
+  collection_id?: FieldPolicy<any> | FieldReadFunction<any>;
   non_fungible_token_id?: FieldPolicy<any> | FieldReadFunction<any>;
   owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards_acova?: FieldPolicy<any> | FieldReadFunction<any>;

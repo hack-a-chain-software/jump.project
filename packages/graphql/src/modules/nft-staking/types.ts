@@ -9,12 +9,11 @@ export default gql`
 
   type NFTStaking {
     # SQL + Blockchain Data
-    collection: ID!
+    collection_id: ID!
     collection_meta: CollectionMeta # On Chain Data
-    collection_owner: String!
-    collection_treasury: String!
+    collection_owner_id: String!
+    collection_treasury: [String]!
     token_address: ID!
-    farm: ID!
     min_staking_period: String
     early_withdraw_penalty: String
 
@@ -38,7 +37,7 @@ export default gql`
 
   type StakedNFT {
     non_fungible_token_id: ID
-    collection: ID
+    collection_id: ID
     owner_id: ID
     staked_timestamp: String
     rewards_jump: String
