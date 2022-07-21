@@ -5,18 +5,21 @@ export const useCollection = create<{
   contract: any;
   tokens: Array<any>;
   loading: boolean;
-  init: (connection: WalletConnection, collectionId: string) => Promise<void>;
+  init: (
+    connection: WalletConnection | null,
+    collectionId: string
+  ) => Promise<void>;
   fetchTokens: (
-    connection: WalletConnection,
+    connection: WalletConnection | null,
     collectionId: string
   ) => Promise<any>;
 }>((set, get) => ({
-  contract: null,
   tokens: [],
   loading: true,
+  contract: null,
 
-  init: async (connection: WalletConnection, collectionId: string) => {
-    if (get().contract && get().contract?.contractId === collectionId) {
+  init: async (connection: WalletConnection | null, collectionId: string) => {
+    if (!connection || get().contract?.contractId === collectionId) {
       return;
     }
 
@@ -36,7 +39,14 @@ export const useCollection = create<{
     }
   },
 
-  fetchTokens: async (connection: WalletConnection, collectionId: string) => {
+  fetchTokens: async (
+    connection: WalletConnection | null,
+    collectionId: string
+  ) => {
+    if (!connection) {
+      return;
+    }
+
     set({
       loading: true,
     });

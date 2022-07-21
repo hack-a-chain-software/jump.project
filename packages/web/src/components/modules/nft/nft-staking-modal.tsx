@@ -9,35 +9,23 @@ import {
 
 import { useEffect, useState } from "react";
 
-import { useNearWallet, useNearUser } from "react-near";
-
 import { Button } from "@jump/src/components";
 
 import { CheckIcon } from "@jump/src/assets/svg";
 import { ArrowRightIcon } from "@jump/src/assets/svg/arrow-right";
 
-import { useTheme } from "@jump/src/hooks/theme";
-
+import { getNear } from "@jump/src/hooks/near";
 import { useNftStaking } from "@jump/src/stores/nft-staking";
 import { useCollection } from "@jump/src/stores/collection";
 import { ModalImageDialog } from "@jump/src/components";
 
-const modalRadius = 20;
-
-interface DialogParams extends Partial<ModalContentProps> {
+type Props = {
   isOpen: boolean;
   onClose: () => void;
-}
+};
 
-export function StakeModal({
-  isOpen = false,
-  onClose = () => {},
-  ...modalContentProps
-}: Partial<DialogParams>) {
-  const { jumpGradient } = useTheme();
-
-  const wallet = useNearWallet();
-  const user = useNearUser(import.meta.env.VITE_STAKING_CONTRACT);
+export function StakeModal({ isOpen = false, onClose = () => {} }: Props) {
+  const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
 
   const { stake } = useNftStaking();
 
@@ -47,9 +35,7 @@ export function StakeModal({
 
   useEffect(() => {
     if (user.isConnected && isOpen) {
-      (async () => {
-        await fetchTokens(wallet, "negentra_base_nft.testnet");
-      })();
+      fetchTokens(wallet, "negentra_base_nft.testnet");
     }
   }, [user.isConnected, isOpen]);
 
@@ -91,7 +77,6 @@ export function StakeModal({
             templateColumns="repeat(1, 1fr)"
             rowGap="12px"
             maxHeight="370px"
-            padding="2px"
             overflow="auto"
           >
             {tokens.map(({ metadata, token_id }, i) => (
@@ -101,10 +86,12 @@ export function StakeModal({
                 cursor="pointer"
                 width="100%"
                 height="auto"
+                padding="3px"
                 position="relative"
                 onClick={() =>
                   setSelected(selected === token_id ? "" : token_id)
                 }
+                background={selected === token_id ? "#761BA0" : "transparent"}
               >
                 <Image
                   width="100%"
@@ -116,17 +103,18 @@ export function StakeModal({
 
                 {selected === token_id && (
                   <Flex
-                    position="absolute"
                     top="0"
                     left="0"
                     right="0"
                     bottom="0"
                     borderRadius="20px"
                     alignItems="center"
+                    position="absolute"
                     justifyContent="center"
-                    background="rgba(0, 0, 0, .3)"
+                    backdropFilter="blur(3px)"
+                    background="rgba(0, 0, 0, .1)"
                   >
-                    <CheckIcon height="48px" width="48px" />
+                    <CheckIcon color="#761BA0" height="48px" width="48px" />
                   </Flex>
                 )}
               </Flex>

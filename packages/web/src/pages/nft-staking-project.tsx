@@ -24,7 +24,8 @@ import { useTheme } from "../hooks/theme";
 
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
-import { useNearWallet, useNearUser } from "react-near";
+
+import { getNear } from "@jump/src/hooks/near";
 
 type Props = {};
 
@@ -103,8 +104,7 @@ export function NFTStakingProject(params: Props) {
 
   const [show, setShow] = useState(false);
 
-  const wallet = useNearWallet();
-  const user = useNearUser(import.meta.env.VITE_STAKING_CONTRACT);
+  const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
 
   const { init, stake, unstake, unstakeAll, claimRewards } = useNftStaking();
 

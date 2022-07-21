@@ -1,17 +1,12 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
 
-import {
-  getAmount,
-  Transaction,
-  executeMultipleTransactions,
-} from "../hooks/near";
-
+import { Transaction, executeMultipleTransactions } from "../hooks/near";
 export const useNftStaking = create<{
   contract: any;
-  init: (connection: WalletConnection) => Promise<void>;
+  init: (connection: WalletConnection | null) => Promise<void>;
   stake: (
-    connection: WalletConnection,
+    connection: WalletConnection | null,
     collection: any,
     tokenId: string
   ) => Promise<void>;
@@ -22,8 +17,8 @@ export const useNftStaking = create<{
 }>((set, get) => ({
   contract: null,
 
-  init: async (connection: WalletConnection) => {
-    if (get().contract) {
+  init: async (connection: WalletConnection | null) => {
+    if (get().contract || !connection) {
       return;
     }
 
@@ -63,10 +58,14 @@ export const useNftStaking = create<{
   },
 
   stake: async (
-    connection: WalletConnection,
+    connection: WalletConnection | null,
     collection: any,
     tokenId: string
   ) => {
+    if (!connection) {
+      return;
+    }
+
     const transactions: Transaction[] = [];
 
     try {
