@@ -1,7 +1,7 @@
 overwrite: true
 schema:
-  - http://localhost:4000/graphql
-documents: './src/documents/*.graphql'
+  - http://localhost:4000
+documents: "./src/graphql/*.graphql"
 hooks:
   afterOneFileWrite:
     - prettier --write
@@ -9,13 +9,13 @@ hooks:
 generates:
   ./src/generated/hooks.tsx:
     plugins:
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
     config:
       namingConvention:
         transformUnderscore: true
 
   ./src/generated/helpers.ts:
     plugins:
-      - 'typescript-apollo-client-helpers'
+      - "typescript-apollo-client-helpers"

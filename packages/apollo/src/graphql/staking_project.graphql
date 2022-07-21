@@ -1,0 +1,34 @@
+query StakingProject($collection: ID!, $accountId: ID) {
+  staking(collection: $collection) {
+    collection
+    collection_meta {
+      image
+      name
+    }
+    collection_owner
+    collection_treasury
+    token_address
+    farm
+    min_staking_period
+    early_withdraw_penalty
+    storage_used(account_id: $accountId) {
+      account_id
+      storage_deposit
+      storage_used
+    }
+    total_rewards(account_id: $accountId) {
+      rewards_jump
+      rewards_acova
+      rewards_project_token
+    }
+    staked_nfts_by_owner(account_id: $accountId) {
+      non_fungible_token_id
+      collection
+      owner_id
+      staked_timestamp
+      rewards_jump
+      rewards_acova
+      rewards_project_token
+    }
+  }
+}
