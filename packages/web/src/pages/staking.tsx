@@ -1,4 +1,6 @@
-import { Box, Flex, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { toast } from "react-hot-toast";
+import { useNearUser } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import { ArrowRightIcon } from "../assets/svg/arrow-right";
 import {
@@ -7,9 +9,11 @@ import {
   ModalImageDialog,
   PageContainer,
   ValueBox,
+  Card,
 } from "../components";
-import { GradientButton } from "../components/shared/gradient-button";
 import { useTheme } from "../hooks/theme";
+import { StakeModal } from "../modals";
+import { WithdrawModal } from "../modals/staking/withdraw";
 
 /**
  * @name Staking
@@ -17,22 +21,35 @@ import { useTheme } from "../hooks/theme";
  * @description - This is the staking JUMP page where user can stake and unstake Jump
  */
 export const Staking = () => {
+  const { balance, account, connect, isConnected } = useNearUser(
+    "jump_x_token.testnet"
+  );
+
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { gradientBoxTopCard, jumpGradient } = useTheme();
+  const stakingDisclosure = useDisclosure();
+  const withdrawDisclosure = useDisclosure();
+
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
+
+  const stake = (value: number) => {
+    console.log(isConnected);
+
+    if (!isConnected) return toast("Connect your Wallet First");
+    console.log(account);
+
+    account;
+  };
+
+  const withdraw = (value: number) => {
+    console.log(isConnected);
+
+    if (!isConnected) return toast("Connect your wallet First");
+  };
+
   return (
     <PageContainer>
-      <Box p="3px" background={jumpGradient} borderRadius="26px">
-        <Box
-          maxW="100%"
-          display="flex"
-          flexDirection="row"
-          justifyContent="space-between"
-          w="100%"
-          p="30px"
-          minH="399px"
-          borderRadius="24px"
-          bg={gradientBoxTopCard}
-        >
+      <Grid gap={4} templateColumns="1fr 1fr">
+        <Card p="3px" background={jumpGradient} borderRadius="26px">
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -61,6 +78,7 @@ export const Staking = () => {
                 </Text>
               </Flex>
               <ValueBox
+                borderColor={glassyWhiteOpaque}
                 h="144px"
                 w="100%"
                 flex={1}
@@ -72,6 +90,7 @@ export const Staking = () => {
             </Flex>
             <Flex flex={1} pt={2} gap={3} mt={2}>
               <ValueBox
+                borderColor={glassyWhiteOpaque}
                 h="144px"
                 w="100%"
                 mt={2}
@@ -80,6 +99,7 @@ export const Staking = () => {
                 bottomText="Per Week"
               />
               <ValueBox
+                borderColor={glassyWhiteOpaque}
                 h="144px"
                 mt={2}
                 w="100%"
@@ -88,6 +108,7 @@ export const Staking = () => {
                 bottomText="Your Staked JUMP"
               />
               <ValueBox
+                borderColor={glassyWhiteOpaque}
                 h="144px"
                 mt={2}
                 w="100%"
@@ -97,7 +118,9 @@ export const Staking = () => {
               />
             </Flex>
           </Flex>
-          <Flex direction="column" ml="80px" flex={1}>
+        </Card>
+        <Card>
+          <Flex direction="column" flex={1}>
             <GradientText
               fontSize={24}
               fontWeight="800"
@@ -110,20 +133,37 @@ export const Staking = () => {
               to earn passive income as an investor.
             </Text>
             <Stack gap={1}>
-              <GradientButton justifyContent="space-between">
+              <Button
+                color="white"
+                border="1px solid white"
+                bg="transparent"
+                justifyContent="space-between"
+                onClick={() => toast.success("Your assets have been withdrawn")}
+              >
                 Claim your Rewards <WalletIcon />
-              </GradientButton>
-              <GradientButton justifyContent="space-between">
-                Withdraw <WalletIcon />
-              </GradientButton>
-              <GradientButton justifyContent="space-between">
+              </Button>
+              <Button
+                color="white"
+                border="1px solid white"
+                bg="transparent"
+                justifyContent="space-between"
+                onClick={withdrawDisclosure.onOpen}
+              >
+                Unstake <WalletIcon />
+              </Button>
+              <Button
+                color="black"
+                border="1px solid white"
+                bg="white"
+                justifyContent="space-between"
+                onClick={stakingDisclosure.onOpen}
+              >
                 Stake <WalletIcon />
-              </GradientButton>
+              </Button>
             </Stack>
           </Flex>
-        </Box>
-      </Box>
-
+        </Card>
+      </Grid>
       <Box
         bg={jumpGradient}
         p="30px"
@@ -170,6 +210,16 @@ export const Staking = () => {
           tokens more rewards you get! Still Confused?
         </Text>
       </ModalImageDialog>
+      <StakeModal
+        isOpen={stakingDisclosure.isOpen}
+        onClose={stakingDisclosure.onClose}
+        onSubmit={() => stake(1)}
+      />
+      <WithdrawModal
+        isOpen={withdrawDisclosure.isOpen}
+        onClose={withdrawDisclosure.onClose}
+        onSubmit={() => {}}
+      />
     </PageContainer>
   );
 };

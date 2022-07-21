@@ -1,5 +1,12 @@
 import * as R from "ramda";
-import { Box, BoxProps, Flex, Image, Text } from "@chakra-ui/react";
+import {
+  Box,
+  BoxProps,
+  Flex,
+  Image,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { useMemo } from "react";
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
@@ -15,7 +22,8 @@ type Props = {
 };
 
 export function NFTStakingCard(props: Props & BoxProps) {
-  const { jumpGradient, gradientBoxTopCard } = useTheme();
+  const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
+    useTheme();
 
   const bottomText = useMemo(() => {
     switch (props.frequency) {
@@ -32,9 +40,10 @@ export function NFTStakingCard(props: Props & BoxProps) {
 
   return (
     <Box
+      color="white"
       cursor="pointer"
       p="3px"
-      background={jumpGradient}
+      background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
       {...(R.omit(
         ["collectionName", "collectionLogo", "tokens", "frequency"],
@@ -42,45 +51,52 @@ export function NFTStakingCard(props: Props & BoxProps) {
       ) as Record<string, string>)}
     >
       <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
         w="100%"
-        p="60px"
+        bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
         borderRadius="24px"
-        bg={gradientBoxTopCard}
       >
-        <Flex userSelect="none" direction="column">
-          <Image
-            src={props.collectionLogo}
-            w="60px"
-            h="60px"
-            borderRadius={30}
-          />
-          <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
-            {props.collectionName}
-          </Text>
-          <Text
-            w="500px"
-            fontSize={18}
-            fontWeight="600"
-            letterSpacing="-0.03em"
-          >
-            Earn {props.tokens.map((e) => `${e.name}, `)} as rewards by staking
-            on {props.collectionName} staking pool
-          </Text>
-        </Flex>
-        <Flex gap={5}>
-          {props.tokens.map((token, i) => (
-            <ValueBox
-              title={token.name + " Rewards"}
-              value={token.ammount + " " + token.name}
-              bottomText={bottomText}
-              key={i}
+        <Box
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          w="100%"
+          p="40px"
+          borderRadius="24px"
+          bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+        >
+          <Flex userSelect="none" direction="column">
+            <Image
+              src={props.collectionLogo}
+              w="60px"
+              h="60px"
+              borderRadius={30}
             />
-          ))}
-        </Flex>
+            <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
+              {props.collectionName}
+            </Text>
+            <Text
+              w="500px"
+              fontSize={18}
+              fontWeight="600"
+              letterSpacing="-0.03em"
+            >
+              Earn {props.tokens.map((e) => `${e.name}, `)} as rewards by
+              staking on {props.collectionName} staking pool
+            </Text>
+          </Flex>
+          <Flex gap={5}>
+            {props.tokens.map((token, i) => (
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title={token.name + " Rewards"}
+                value={token.ammount + " " + token.name}
+                bottomText={bottomText}
+                key={i}
+              />
+            ))}
+          </Flex>
+        </Box>
       </Box>
     </Box>
   );

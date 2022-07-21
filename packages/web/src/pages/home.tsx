@@ -30,6 +30,7 @@ export function Home() {
         gradientText="Launchpad"
         bigText="Stake. Help. Earn."
         bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
+        jumpLogo
       />
 
       <Flex justifyContent="space-between">
