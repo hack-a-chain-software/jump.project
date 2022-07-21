@@ -7,6 +7,12 @@ import {
   ValueBox,
 } from "../components";
 
+import { useQuery } from "@apollo/client";
+import {
+  NftStakingProjectsConnectionDocument,
+  LaunchpadConenctionDocument,
+} from "@near/apollo";
+
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
   "https://paras-cdn.imgix.net/bafkreie4ohxbaz4ocr6eddrfmfivfb3d67uymefuy4ubuh2qijodtrpgee?w=300&auto=format,compress",
@@ -16,6 +22,11 @@ const collectionImages = [
 
 export const NFTStaking = () => {
   const navigate = useNavigate();
+
+  const { data, loading, error } = useQuery(LaunchpadConenctionDocument);
+
+  console.log(data, error);
+
   return (
     <PageContainer>
       <TopCard
