@@ -22,6 +22,7 @@ export const NFTStaking = () => {
         gradientText="NFT"
         bigText="Staking"
         bottomDescription="Stake your NFT assets in order to get rewards from the collection owners and also from JUMP and Partners!"
+        py
         renderAsset={
           <>
             {collectionImages.map((imagesrc, i) => (

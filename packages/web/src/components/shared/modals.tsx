@@ -13,7 +13,7 @@ import { useTheme } from "../../hooks/theme";
 
 const modalRadius = 20;
 
-interface DialogParams extends Partial<ModalContentProps> {
+export interface DialogParams extends Partial<ModalContentProps> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -65,16 +65,16 @@ export function ModalImageDialog({
         {...modalContentProps}
       >
         <Box
+          w="100%"
           bg={jumpGradient}
           p="6px"
           display="flex"
-          w="100%"
           borderRadius={25}
         >
           <ModalBody
             p="30px"
             pl="40px"
-            bg={bg || "rgba(0,0,0,0.8)"}
+            bg={bg || jumpGradient}
             overflowY="scroll"
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
