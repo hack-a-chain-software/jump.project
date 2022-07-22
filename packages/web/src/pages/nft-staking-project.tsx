@@ -102,7 +102,7 @@ type Token = {
 export function NFTStakingProject(params: {}) {
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { id = "" } = useParams();
 
   const { jumpGradient, darkPurple } = useTheme();
 
@@ -130,17 +130,22 @@ export function NFTStakingProject(params: {}) {
     setSelected([...selected, tokenId]);
   };
 
-  // const { data, loading, error } = useQuery(
-  //   StakingProjectDocument, {
-  //     variables: {
-  //       collection: atob(id),
-  //       accountId: user.address,
-  //     },
-  //   }
-  // );
+  console.log(user.address);
+
+  const { data, loading } = useQuery(StakingProjectDocument, {
+    variables: {
+      collection: window.atob(id),
+      accountId: "mateussantana.testnet",
+    },
+  });
+
+  const page = data?.staking;
+
+  console.log(page);
+  console.log(page?.staked_nfts_by_owner);
 
   return (
-    <PageContainer marginBottom="300px">
+    <PageContainer loading={loading}>
       <StakeModal
         isOpen={show}
         onClose={() => {
@@ -150,8 +155,8 @@ export function NFTStakingProject(params: {}) {
 
       <BackButton onClick={() => navigate("/nft-staking")} />
       <NFTStakingCard
-        collectionLogo="https://d1fdloi71mui9q.cloudfront.net/7gfrOO2CQ7OSk7s9Bpiv_roo-king.png"
-        collectionName="Classy Kangaroos"
+        collectionLogo={page?.collection_meta?.image}
+        collectionName={page?.collection_meta?.name}
         tokens={[
           {
             name: "JUMP",
@@ -174,21 +179,24 @@ export function NFTStakingProject(params: {}) {
           </Text>
           <Grid gap={3} gridTemplateColumns="1fr 1fr">
             <ValueBox
+              height="139px"
               title="Your JUMP Rewards"
-              value="400 JUMP"
-              bottomText="Your Total JUMP Rewards"
+              value={user.isConnected ? "400 JUMP" : "Connect Wallet"}
+              bottomText={user.isConnected && "Your Total JUMP Rewards"}
             />
             <ValueBox
+              height="139px"
               title="Your ACOVA Rewards"
-              value="80 ACOVA"
-              bottomText="Your Total ACOVA Rewards"
+              value={user.isConnected ? "80 ACOVA" : "Connect Wallet"}
+              bottomText={user.isConnected && "Your Total ACOVA Rewards"}
             />
           </Grid>
           <ValueBox
             mt={3}
+            height="139px"
             title="Your ACOVA Rewards"
-            value="80 ACOVA"
-            bottomText="Your Total ACOVA Rewards"
+            value={user.isConnected ? "80 ACOVA" : "Connect Wallet"}
+            bottomText={user.isConnected && "Your Total ACOVA Rewards"}
           />
         </Flex>
         <Flex flex={1}>
@@ -334,7 +342,7 @@ export function NFTStakingProject(params: {}) {
           )}
         </AnimatePresence>
 
-        <Flex>
+        <Flex marginBottom="300px">
           <Grid
             columnGap="8px"
             rowGap="37px"

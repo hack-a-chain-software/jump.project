@@ -1,15 +1,9 @@
 import { Image, Stack, Flex, Spinner, Text } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
 import { If, TopCard, NFTStakingCard, PageContainer } from "../components";
-
 import isEmpty from "lodash/isEmpty";
-
 import { useQuery } from "@apollo/client";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
-
-import { motion } from "framer-motion";
-
-const rewards = ["JUMP", "ACOVA", "CGK"];
 
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
@@ -21,14 +15,12 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const { data, loading, error } = useQuery(
-    NftStakingProjectsConnectionDocument
-  );
+  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
   const items = data?.nft_staking_projects?.data;
 
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <TopCard
         gradientText="NFT"
         bigText="Staking"
@@ -57,33 +49,24 @@ export const NFTStaking = () => {
       </If>
 
       <If condition={!loading && !isEmpty(items)}>
-        {items &&
-          items.map(
-            (
-              { collection_meta, collection_treasury, collection_id },
-              index
-            ) => (
-              <motion.div
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                transition={{ duration: 0.55 }}
-              >
-                <Stack key={"nft-staking-collection" + index}>
-                  <NFTStakingCard
-                    onClick={() =>
-                      navigate(`/nft-staking/${btoa(collection_id)}`)
-                    }
-                    collectionLogo={collection_meta.image}
-                    collectionName={collection_meta.name}
-                    tokens={collection_treasury.map((item, index) => ({
-                      name: rewards[index],
-                      ammount: item,
-                    }))}
-                  />
-                </Stack>
-              </motion.div>
-            )
-          )}
+        {items && (
+          <Stack>
+            {items.map(({ collection_meta, collection_id }, index) => (
+              <NFTStakingCard
+                key={"nft-staking-collection" + index}
+                onClick={() =>
+                  navigate(`/nft-staking/${window.btoa(collection_id)}`)
+                }
+                collectionLogo={collection_meta.image}
+                collectionName={collection_meta.name}
+                // tokens={collection_treasury.map((item, index) => ({
+                //   name: rewards[index],
+                //   ammount: item,
+                // }))}
+              />
+            ))}
+          </Stack>
+        )}
       </If>
 
       <If condition={!loading && isEmpty(items)}>

@@ -21,6 +21,8 @@ type Props = {
   frequency?: "weekly" | "daily" | "monthly";
 };
 
+const rewards = ["JUMP", "ACOVA", "CGK"];
+
 export function NFTStakingCard(props: Props & BoxProps) {
   const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
     useTheme();
@@ -81,16 +83,16 @@ export function NFTStakingCard(props: Props & BoxProps) {
               fontWeight="600"
               letterSpacing="-0.03em"
             >
-              Earn {props.tokens.map((e) => `${e.name}, `)} as rewards by
-              staking on {props.collectionName} staking pool
+              Earn JUMP, ACOVA, CGK as rewards by staking on{" "}
+              {props.collectionName} staking pool
             </Text>
           </Flex>
           <Flex gap={5}>
-            {props.tokens.map((token, i) => (
+            {rewards.map((token, i) => (
               <ValueBox
                 borderColor={glassyWhiteOpaque}
-                title={token.name + " Rewards"}
-                value={token.ammount + " " + token.name}
+                title={token + " Rewards"}
+                value={10 + " " + token}
                 bottomText={bottomText}
                 key={i}
               />

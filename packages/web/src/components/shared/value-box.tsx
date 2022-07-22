@@ -5,7 +5,7 @@ import { If } from "./if";
 type Props = {
   title: string | JSX.Element;
   value: string | JSX.Element;
-  bottomText?: string | JSX.Element;
+  bottomText?: string | JSX.Element | false;
 };
 
 export function ValueBox({
@@ -33,7 +33,7 @@ export function ValueBox({
       <Text fontSize="14px" fontWeight="bold">
         {title}
       </Text>
-      <Text fontSize="28px" fontWeight="bold">
+      <Text mt="auto" fontSize="28px" fontWeight="bold">
         {value}
       </Text>
       <If condition={!!bottomText}>
