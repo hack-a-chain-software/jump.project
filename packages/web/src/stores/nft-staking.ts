@@ -93,7 +93,33 @@ export const useNftStaking = create<{
   },
 
   unstake: async (tokens: Array<string>) => {
-    //
+    const transactions: any = [];
+
+    tokens.forEach((item) => {
+      transactions.push({
+        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
+        functionCalls: [
+          {
+            methodName: "unstake",
+            args: {
+              token_id: [
+                {
+                  type: "n_f_t_contract",
+                  account_id: "negentra_base_nft.testnet",
+                },
+                item,
+              ],
+            },
+            gas: "300000000000000",
+          },
+        ],
+      });
+    });
+
+    executeMultipleTransactions(
+      transactions,
+      get().connection as WalletConnection
+    );
   },
 
   claimRewards: async () => {

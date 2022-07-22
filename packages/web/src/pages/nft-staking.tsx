@@ -27,8 +27,6 @@ export const NFTStaking = () => {
 
   const items = data?.nft_staking_projects?.data;
 
-  console.log(items, loading, error);
-
   return (
     <PageContainer>
       <TopCard
@@ -89,7 +87,7 @@ export const NFTStaking = () => {
       </If>
 
       <If condition={!loading && isEmpty(items)}>
-        <Flex width="100%" justifyContent="center">
+        <Flex width="100%" justifyContent="center" marginTop="120px">
           <Text
             color="#EB5757"
             fontSize="20px"
@@ -97,7 +95,7 @@ export const NFTStaking = () => {
             lineHeight="24px"
             marginLeft="16px"
           >
-            Opps! No collectiona available
+            Oops! No collections available
           </Text>
         </Flex>
       </If>

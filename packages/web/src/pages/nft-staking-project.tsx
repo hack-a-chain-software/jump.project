@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Box, Flex, Grid, Stack, Text, Button } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { WalletIcon } from "../assets/svg";
 import isEqual from "lodash/isEqual";
 import { AnimatePresence, motion } from "framer-motion";
@@ -21,8 +21,9 @@ import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
 import { getNear } from "@jump/src/hooks/near";
+
 import { useQuery } from "@apollo/client";
-import { NftStakingProjectsConnectionDocument } from "@near/apollo";
+import { StakingProjectDocument } from "@near/apollo";
 
 const tokens = [
   {
@@ -101,6 +102,8 @@ type Token = {
 export function NFTStakingProject(params: {}) {
   const navigate = useNavigate();
 
+  const { id } = useParams();
+
   const { jumpGradient, darkPurple } = useTheme();
 
   const [show, setShow] = useState(false);
@@ -126,6 +129,15 @@ export function NFTStakingProject(params: {}) {
 
     setSelected([...selected, tokenId]);
   };
+
+  // const { data, loading, error } = useQuery(
+  //   StakingProjectDocument, {
+  //     variables: {
+  //       collection: atob(id),
+  //       accountId: user.address,
+  //     },
+  //   }
+  // );
 
   return (
     <PageContainer marginBottom="300px">
@@ -332,6 +344,7 @@ export function NFTStakingProject(params: {}) {
           >
             {tokens.map((token, index) => (
               <Flex
+                key={"nft-staked-tokens-" + index}
                 onClick={() =>
                   setFocused(isEqual(token, focused) ? null : token)
                 }
