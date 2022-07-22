@@ -31,7 +31,7 @@ impl Contract {
             round_interval: staking_program.farm.round_interval,
             start_at: staking_program.farm.start_at,
             distributions
-          } 
+          };
         }
       };
     }

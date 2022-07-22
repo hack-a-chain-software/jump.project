@@ -333,7 +333,7 @@ impl Event for LaunchpadEvent {
             }
 
             _ => {
-                unimplemented!();
+                println!("unimplemented!()");
             }
         }
     }
