@@ -88,7 +88,7 @@ pub struct Farm {
   pub round_interval: u32,
   pub start_at: u32,
 
-  pub distributions: UnorderedMap<FungibleTokenID, RewardsDistribution>,
+  pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
   pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
 }
 
