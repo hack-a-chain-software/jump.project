@@ -112,7 +112,7 @@ impl Farm {
   ) -> Self {
     let mut get_key = get_key_closure(collection);
 
-    let mut distributions = UnorderedMap::new(get_key());
+    let mut distributions = HashMap::new();
     for (token_id, &rewards) in collection_round_reward.iter() {
       distributions.insert(token_id, &RewardsDistribution::new(0, rewards));
     }
@@ -132,7 +132,7 @@ impl Farm {
       .unwrap()
       .deposit_distribution_funds(amount);
 
-    self.distributions.insert(token_id, &dist);
+    self.distributions.insert(token_id.clone(), dist);
   }
 
   pub fn withdraw_beneficiary(&mut self, token_id: &FungibleTokenID) -> u128 {
@@ -142,7 +142,7 @@ impl Farm {
       .unwrap()
       .withdraw_beneficiary();
 
-    self.distributions.insert(token_id, &dist);
+    self.distributions.insert(token_id.clone(), dist);
 
     amount
   }
