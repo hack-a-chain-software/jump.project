@@ -46,7 +46,7 @@ export const useNftStaking = create<{
 
     try {
       const stakingStorage = await get().contract?.storage_balance_of({
-        account_id: collection,
+        account_id: get().connection?.getAccountId(),
       });
 
       if (!stakingStorage || stakingStorage.total < "0.10") {
@@ -56,7 +56,7 @@ export const useNftStaking = create<{
             {
               methodName: "storage_deposit",
               args: {
-                account_id: collection,
+                account_id: get().connection?.getAccountId(),
                 registration_only: false,
               },
               amount: "0.25",
@@ -105,8 +105,8 @@ export const useNftStaking = create<{
       return await get().contract?.view_staked({
         account_id: "mateussantana.testnet",
         collection: {
-          type: "NFTContract",
-          account_id: "negentra_base_nft",
+          type: "n_f_t_contract",
+          account_id: "negentra_base_nft.testnet",
         },
       });
     } catch (e) {

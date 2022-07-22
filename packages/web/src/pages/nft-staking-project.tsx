@@ -21,6 +21,8 @@ import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
 import { getNear } from "@jump/src/hooks/near";
+import { useQuery } from "@apollo/client";
+import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 const tokens = [
   {
