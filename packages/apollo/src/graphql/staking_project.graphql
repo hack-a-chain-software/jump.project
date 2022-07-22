@@ -15,7 +15,7 @@ query StakingProject($collection: ID!, $accountId: ID) {
       rewards_project_token
     }
     staked_nfts_by_owner(account_id: $accountId) {
-      non_fungible_token_id
+      nft_id
       collection_id
       owner_id
       staked_timestamp

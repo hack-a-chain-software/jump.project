@@ -195,7 +195,7 @@ export type QueryFieldPolicy = {
 };
 export type StakedNFTKeySpecifier = (
   | "collection_id"
-  | "non_fungible_token_id"
+  | "nft_id"
   | "owner_id"
   | "rewards_acova"
   | "rewards_jump"
@@ -205,7 +205,7 @@ export type StakedNFTKeySpecifier = (
 )[];
 export type StakedNFTFieldPolicy = {
   collection_id?: FieldPolicy<any> | FieldReadFunction<any>;
-  non_fungible_token_id?: FieldPolicy<any> | FieldReadFunction<any>;
+  nft_id?: FieldPolicy<any> | FieldReadFunction<any>;
   owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards_acova?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards_jump?: FieldPolicy<any> | FieldReadFunction<any>;

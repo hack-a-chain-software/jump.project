@@ -11,7 +11,7 @@ export type NFTStaking = {
 };
 
 export type StakedNFT = {
-  non_fungible_token_id: ID;
+  nft_id: ID;
   collection: ID;
   owner_id: ID;
   staked_timestamp: string;

@@ -172,13 +172,13 @@ export type QueryNftStakingProjectsArgs = {
 };
 
 export type QueryStakingArgs = {
-  collection: Scalars["ID"];
+  collection_id: Scalars["ID"];
 };
 
 export type StakedNft = {
   __typename?: "StakedNFT";
   collection_id?: Maybe<Scalars["ID"]>;
-  non_fungible_token_id?: Maybe<Scalars["ID"]>;
+  nft_id?: Maybe<Scalars["ID"]>;
   owner_id?: Maybe<Scalars["ID"]>;
   rewards_acova?: Maybe<Scalars["String"]>;
   rewards_jump?: Maybe<Scalars["String"]>;
@@ -378,7 +378,7 @@ export type StakingProjectQuery = {
     } | null;
     staked_nfts_by_owner?: Array<{
       __typename?: "StakedNFT";
-      non_fungible_token_id?: string | null;
+      nft_id?: string | null;
       collection_id?: string | null;
       owner_id?: string | null;
       staked_timestamp?: string | null;
@@ -731,7 +731,7 @@ export type NftStakingProjectsConnectionQueryResult = Apollo.QueryResult<
 >;
 export const StakingProjectDocument = gql`
   query StakingProject($collection: ID!, $accountId: ID) {
-    staking(collection: $collection) {
+    staking(collection_id: $collection) {
       collection_id
       collection_meta {
         image
@@ -747,7 +747,7 @@ export const StakingProjectDocument = gql`
         rewards_project_token
       }
       staked_nfts_by_owner(account_id: $accountId) {
-        non_fungible_token_id
+        nft_id
         collection_id
         owner_id
         staked_timestamp

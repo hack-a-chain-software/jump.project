@@ -28,7 +28,7 @@ export default gql`
   }
 
   type StakedNFT {
-    non_fungible_token_id: ID
+    nft_id: ID
     collection_id: ID
     owner_id: ID
     staked_timestamp: String
