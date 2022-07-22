@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "dev-jdx.cpvy55ndfvji.us-east-1.rds.amazonaws.com",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "test_db",
+            "username": "postgres",
+            "database": "jdx_dev_db",
+            "password": "JDX-hcswdev15"
+        }
+    ]
+}
