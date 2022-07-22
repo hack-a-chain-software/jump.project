@@ -17,23 +17,23 @@ export default {
         image: icon,
       };
     },
-    async storage_used(
-      _root: NFTStaking,
-      { account_id }: AccountIdQuery,
-      { sequelize }: GraphQLContext
-    ) {
-      const result = await sequelize.query(
-        'select * from "nft_investors" where "account_id" = $1;',
-        {
-          bind: [account_id],
-          type: QueryTypes.SELECT,
-        }
-      );
+    // async storage_used(
+    //   _root: NFTStaking,
+    //   { account_id }: AccountIdQuery,
+    //   { sequelize }: GraphQLContext
+    // ) {
+    //   const result = await sequelize.query(
+    //     'select * from "nft_investors" where "account_id" = $1;',
+    //     {
+    //       bind: [account_id],
+    //       type: QueryTypes.SELECT,
+    //     }
+    //   );
 
-      if (!result[0]) throw new CommonErrors.NotFound();
+    //   if (!result[0]) throw new CommonErrors.NotFound();
 
-      return result[0];
-    },
+    //   return result[0];
+    // },
     async total_rewards(
       { collection_id }: NFTStaking,
       { account_id }: AccountIdQuery,
@@ -108,7 +108,8 @@ export default {
         {
           limit,
           offset,
-        }
+        },
+        []
       );
     },
   },

@@ -96,13 +96,6 @@ export type MessageOutput = {
   message: Scalars["String"];
 };
 
-export type NftInvestor = {
-  __typename?: "NFTInvestor";
-  account_id?: Maybe<Scalars["ID"]>;
-  storage_deposit?: Maybe<Scalars["String"]>;
-  storage_used?: Maybe<Scalars["String"]>;
-};
-
 export type NftPage = {
   __typename?: "NFTPage";
   data?: Maybe<Array<Maybe<NftStaking>>>;
@@ -117,20 +110,14 @@ export type NftStaking = {
   collection_id: Scalars["ID"];
   collection_meta?: Maybe<CollectionMeta>;
   collection_owner_id: Scalars["String"];
-  collection_treasury: Array<Maybe<Scalars["String"]>>;
   early_withdraw_penalty?: Maybe<Scalars["String"]>;
   min_staking_period?: Maybe<Scalars["String"]>;
   staked_nfts_by_owner?: Maybe<Array<Maybe<StakedNft>>>;
-  storage_used: NftInvestor;
   token_address: Scalars["ID"];
   total_rewards?: Maybe<NftStakingTotalRewards>;
 };
 
 export type NftStakingStakedNftsByOwnerArgs = {
-  account_id?: InputMaybe<Scalars["ID"]>;
-};
-
-export type NftStakingStorageUsedArgs = {
   account_id?: InputMaybe<Scalars["ID"]>;
 };
 
@@ -354,7 +341,6 @@ export type NftStakingProjectsConnectionQuery = {
       __typename?: "NFTStaking";
       collection_id: string;
       collection_owner_id: string;
-      collection_treasury: Array<string | null>;
       token_address: string;
       collection_meta?: {
         __typename?: "CollectionMeta";
@@ -376,7 +362,6 @@ export type StakingProjectQuery = {
     __typename?: "NFTStaking";
     collection_id: string;
     collection_owner_id: string;
-    collection_treasury: Array<string | null>;
     token_address: string;
     min_staking_period?: string | null;
     early_withdraw_penalty?: string | null;
@@ -385,12 +370,6 @@ export type StakingProjectQuery = {
       image?: string | null;
       name?: string | null;
     } | null;
-    storage_used: {
-      __typename?: "NFTInvestor";
-      account_id?: string | null;
-      storage_deposit?: string | null;
-      storage_used?: string | null;
-    };
     total_rewards?: {
       __typename?: "NFTStakingTotalRewards";
       rewards_jump?: string | null;
@@ -693,7 +672,6 @@ export const NftStakingProjectsConnectionDocument = gql`
           name
         }
         collection_owner_id
-        collection_treasury
         token_address
       }
     }
@@ -760,15 +738,9 @@ export const StakingProjectDocument = gql`
         name
       }
       collection_owner_id
-      collection_treasury
       token_address
       min_staking_period
       early_withdraw_penalty
-      storage_used(account_id: $accountId) {
-        account_id
-        storage_deposit
-        storage_used
-      }
       total_rewards(account_id: $accountId) {
         rewards_jump
         rewards_acova

@@ -118,17 +118,6 @@ export type MessageOutputKeySpecifier = (
 export type MessageOutputFieldPolicy = {
   message?: FieldPolicy<any> | FieldReadFunction<any>;
 };
-export type NFTInvestorKeySpecifier = (
-  | "account_id"
-  | "storage_deposit"
-  | "storage_used"
-  | NFTInvestorKeySpecifier
-)[];
-export type NFTInvestorFieldPolicy = {
-  account_id?: FieldPolicy<any> | FieldReadFunction<any>;
-  storage_deposit?: FieldPolicy<any> | FieldReadFunction<any>;
-  storage_used?: FieldPolicy<any> | FieldReadFunction<any>;
-};
 export type NFTPageKeySpecifier = (
   | "data"
   | "hasNextPage"
@@ -148,11 +137,9 @@ export type NFTStakingKeySpecifier = (
   | "collection_id"
   | "collection_meta"
   | "collection_owner_id"
-  | "collection_treasury"
   | "early_withdraw_penalty"
   | "min_staking_period"
   | "staked_nfts_by_owner"
-  | "storage_used"
   | "token_address"
   | "total_rewards"
   | NFTStakingKeySpecifier
@@ -161,11 +148,9 @@ export type NFTStakingFieldPolicy = {
   collection_id?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_meta?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
-  collection_treasury?: FieldPolicy<any> | FieldReadFunction<any>;
   early_withdraw_penalty?: FieldPolicy<any> | FieldReadFunction<any>;
   min_staking_period?: FieldPolicy<any> | FieldReadFunction<any>;
   staked_nfts_by_owner?: FieldPolicy<any> | FieldReadFunction<any>;
-  storage_used?: FieldPolicy<any> | FieldReadFunction<any>;
   token_address?: FieldPolicy<any> | FieldReadFunction<any>;
   total_rewards?: FieldPolicy<any> | FieldReadFunction<any>;
 };
@@ -269,13 +254,6 @@ export type StrictTypedTypePolicies = {
       | MessageOutputKeySpecifier
       | (() => undefined | MessageOutputKeySpecifier);
     fields?: MessageOutputFieldPolicy;
-  };
-  NFTInvestor?: Omit<TypePolicy, "fields" | "keyFields"> & {
-    keyFields?:
-      | false
-      | NFTInvestorKeySpecifier
-      | (() => undefined | NFTInvestorKeySpecifier);
-    fields?: NFTInvestorFieldPolicy;
   };
   NFTPage?: Omit<TypePolicy, "fields" | "keyFields"> & {
     keyFields?:

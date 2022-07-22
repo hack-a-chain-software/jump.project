@@ -3,7 +3,7 @@ import { ID } from "./graphql-types";
 export type NFTStaking = {
   collection_id: ID;
   collection_owner_id: ID;
-  collection_treasury: ID[];
+  // collection_treasury: ID[];
   token_address: ID;
   // farm: ID;
   min_staking_period: string;
