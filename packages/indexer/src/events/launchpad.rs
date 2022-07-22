@@ -112,16 +112,19 @@ pub enum LaunchpadEvent {
 //     quantity,
 // }] => None,
 
+#[allow(non_snake_case)]
 pub fn U64toUTC(nano: U64) -> DateTime<Utc> {
     let seconds = nano.0 / 1_000_000_000;
 
     Utc.timestamp(seconds.try_into().unwrap(), 0)
 }
 
+#[allow(non_snake_case)]
 fn U64toDecimal(num: U64) -> Decimal {
     Decimal::from_u64(num.0).unwrap()
 }
 
+#[allow(non_snake_case)]
 fn U128toDecimal(num: U128) -> Decimal {
     Decimal::from_u128(num.0).unwrap()
 }

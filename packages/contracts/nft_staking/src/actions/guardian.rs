@@ -61,6 +61,8 @@ impl Contract {
       account_id: payload.collection_address.clone(),
     };
 
+    assert!(!self.staking_programs.contains_key(&collection), "collection already");
+
     let farm = Farm::new(
       collection.clone(),
       payload.collection_rps,

@@ -1,7 +1,7 @@
 use crate::config::contracts::get_contracts_config;
 use crate::config::lake_framework::get_lake_framework_config;
 use crate::pool::{build_pool, get_connection, PgPooledConnection};
-use near_indexer_primitives::views::ExecutionOutcomeView;
+use near_indexer_primitives::views::{ExecutionOutcomeView, ExecutionStatusView};
 use near_lake_framework::near_indexer_primitives;
 use near_lake_framework::LakeConfig;
 use tokio::sync::mpsc;
@@ -34,11 +34,18 @@ async fn listen_blocks(
 ) {
     eprintln!("listen_blocks");
 
+    let mut block_count: u128 = 0;
     while let Some(streamer_message) = stream.recv().await {
-        eprintln!("Block height: {}", streamer_message.block.header.height);
+        block_count += 1;
+        if block_count % 100 == 0 {
+            eprintln!("Block height: {}", streamer_message.block.header.height);
+        }
         for shard in streamer_message.shards {
             for execution_outcome in shard.receipt_execution_outcomes {
-                process_transaction(execution_outcome.execution_outcome.outcome, &mut conn).await;
+                match execution_outcome.execution_outcome.outcome.status {
+                    ExecutionStatusView::Failure(_) => (),
+                    _ => process_transaction(execution_outcome.execution_outcome.outcome, &mut conn).await,
+                };
             }
         }
     }
