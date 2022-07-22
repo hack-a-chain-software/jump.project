@@ -35,6 +35,7 @@ async fn listen_blocks(
     eprintln!("listen_blocks");
 
     while let Some(streamer_message) = stream.recv().await {
+        eprintln!("Block height: {}", streamer_message.block.header.height);
         for shard in streamer_message.shards {
             for execution_outcome in shard.receipt_execution_outcomes {
                 process_transaction(execution_outcome.execution_outcome.outcome, &mut conn).await;

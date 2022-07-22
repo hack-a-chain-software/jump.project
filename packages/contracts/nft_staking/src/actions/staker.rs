@@ -52,7 +52,9 @@ impl Contract {
 
     match env::promise_result(0) {
       PromiseResult::NotReady => env::abort(),
-      PromiseResult::Successful(_) => events::unstake_nft(&token_id, balance),
+      PromiseResult::Successful(_) => {
+        events::unstake_nft(&token_id, balance)
+      },
       PromiseResult::Failed => {
         let collection = token_id.0.clone();
 

@@ -112,7 +112,7 @@ pub enum LaunchpadEvent {
 //     quantity,
 // }] => None,
 
-fn U64toUTC(nano: U64) -> DateTime<Utc> {
+pub fn U64toUTC(nano: U64) -> DateTime<Utc> {
     let seconds = nano.0 / 1_000_000_000;
 
     Utc.timestamp(seconds.try_into().unwrap(), 0)

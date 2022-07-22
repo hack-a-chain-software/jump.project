@@ -3,11 +3,14 @@ use crate::pool::PgPooledConnection;
 use crate::types::json_types::{U128, U64};
 use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
 use crate::types::AccountId;
+use crate::events::launchpad::{U64toUTC};
 use async_trait::async_trait;
 use chrono::{TimeZone, Utc};
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use serde_json::{json};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateStakingProgramLog {
@@ -37,7 +40,7 @@ pub struct StakeNftLog {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UnstakeNftLog {
     pub token_id: NonFungibleTokenId,
-    pub withdrawn_balance: U128,
+    pub withdrawn_balance: HashMap<String, U128>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -70,13 +73,13 @@ impl Event for NftStakingEvent {
                     "
                     insert into staking_programs (
                         collection_id,
-                        collection_owner,
+                        collection_owner_id,
                         token_address,
                         min_staking_period,
                         early_withdraw_penalty,
                         round_interval
                     )
-                    values ($1, $2, $3, $4, $5, $6, $7)
+                    values ($1, $2, $3, $4, $5, $6)
                 ",
                     &[
                         collection_address,
@@ -84,7 +87,7 @@ impl Event for NftStakingEvent {
                         token_address,
                         &Decimal::from_u64(min_staking_period.0).unwrap(),
                         &Decimal::from_u128(early_withdraw_penalty.0).unwrap(),
-                        round_interval,
+                        &Decimal::from_u32(*round_interval).unwrap(),
                     ],
                 )
                 .await
@@ -132,13 +135,13 @@ impl Event for NftStakingEvent {
                         owner_id,
                         staked_timestamp
                     )
-                    values ($1, $2, $3, $4, $5)
+                    values ($1, $2, $3, $4)
                 ",
                     &[
                         nft_id,
                         collection_id,
                         owner_id,
-                        &Utc.timestamp(*staked_timestamp as i64, 0),
+                        &U64toUTC(U64(*staked_timestamp)),
                     ],
                 )
                 .await
