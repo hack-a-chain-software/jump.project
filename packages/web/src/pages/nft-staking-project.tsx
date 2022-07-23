@@ -73,6 +73,16 @@ export function NFTStakingProject(params: {}) {
   const page = data?.staking;
   const tokens = page?.staked_nfts_by_owner;
 
+  const claim = () => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    claimRewards();
+  };
+
   const toggleStakeModal = () => {
     if (!user.isConnected) {
       user.connect();
@@ -218,15 +228,7 @@ export function NFTStakingProject(params: {}) {
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
                 <GradientButton
-                  onClick={() => {
-                    if (!user.isConnected) {
-                      user.connect();
-
-                      return;
-                    }
-
-                    claimRewards();
-                  }}
+                  onClick={() => claim()}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
