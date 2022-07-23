@@ -24,6 +24,8 @@ import { getNear } from "@jump/src/hooks/near";
 
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
+import isEmpty from "lodash/isEmpty";
+import toast from "react-hot-toast";
 
 type Token = {
   nft_id: string;
@@ -71,7 +73,37 @@ export function NFTStakingProject(params: {}) {
   const page = data?.staking;
   const tokens = page?.staked_nfts_by_owner;
 
-  console.log(tokens);
+  const toggleStakeModal = () => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    setShow(!show);
+  };
+
+  const unstakeTokens = (items) => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    if (isEmpty(tokens)) {
+      toast("You don't have Tokens to unstake");
+
+      return;
+    }
+
+    if (isEmpty(items)) {
+      toast("Select Tokens to unstake");
+
+      return;
+    }
+
+    unstake(items);
+  };
 
   return (
     <PageContainer loading={loading}>
@@ -110,13 +142,13 @@ export function NFTStakingProject(params: {}) {
             <ValueBox
               height="139px"
               title="Your JUMP Rewards"
-              value={user.isConnected ? "400 JUMP" : "Connect Wallet"}
+              value={user.isConnected ? "0 JUMP" : "Connect Wallet"}
               bottomText={user.isConnected && "Your Total JUMP Rewards"}
             />
             <ValueBox
               height="139px"
               title="Your ACOVA Rewards"
-              value={user.isConnected ? "80 ACOVA" : "Connect Wallet"}
+              value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
               bottomText={user.isConnected && "Your Total ACOVA Rewards"}
             />
           </Grid>
@@ -124,7 +156,7 @@ export function NFTStakingProject(params: {}) {
             mt={3}
             height="139px"
             title="Your ACOVA Rewards"
-            value={user.isConnected ? "80 ACOVA" : "Connect Wallet"}
+            value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
             bottomText={user.isConnected && "Your Total ACOVA Rewards"}
           />
         </Flex>
@@ -163,15 +195,7 @@ export function NFTStakingProject(params: {}) {
               </Text>
               <Stack mt="50px" gap={1}>
                 <GradientButton
-                  onClick={() => {
-                    if (!user.isConnected) {
-                      user.connect();
-
-                      return;
-                    }
-
-                    setShow(!show);
-                  }}
+                  onClick={() => toggleStakeModal()}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -185,15 +209,9 @@ export function NFTStakingProject(params: {}) {
                   Unstake NFT <WalletIcon />
                 </GradientButton> */}
                 <GradientButton
-                  onClick={() => {
-                    if (!user.isConnected) {
-                      user.connect();
-
-                      return;
-                    }
-
-                    unstake(tokens.map(({ nft_id }) => nft_id));
-                  }}
+                  onClick={() =>
+                    unstakeTokens(tokens.map(({ nft_id }) => nft_id))
+                  }
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -220,9 +238,47 @@ export function NFTStakingProject(params: {}) {
         </Flex>
       </Flex>
 
-      <If condition={user.isConnected}>
+      <If
+        fallback={
+          user.isConnected && (
+            <Flex
+              pt="20px"
+              marginX="auto"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+            >
+              <Text
+                fontWeight="800"
+                fontSize={30}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                You don't have a staked NFT
+              </Text>
+
+              <Text
+                _hover={{
+                  opacity: 0.8,
+                }}
+                onClick={() => toggleStakeModal()}
+                marginTop="-12px"
+                cursor="pointer"
+                color="#761BA0"
+                fontWeight="800"
+                fontSize={34}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                Stake Now!
+              </Text>
+            </Flex>
+          )
+        }
+        condition={user.isConnected && tokens?.length > 0}
+      >
         <Flex
-          marginTop="42px"
+          paddingTop="66px"
           alignItems="center"
           justifyContent="space-between"
         >
@@ -241,7 +297,7 @@ export function NFTStakingProject(params: {}) {
               color="black"
               display="flex"
               alignItems="center"
-              onClick={() => unstake(selected)}
+              onClick={() => unstakeTokens(selected)}
             >
               <Text marginRight="16px">Unstake Selected NFTs!</Text>
 
@@ -271,7 +327,7 @@ export function NFTStakingProject(params: {}) {
           )}
         </AnimatePresence>
 
-        <Flex marginBottom="300px">
+        <Flex paddingBottom="300px">
           <Grid
             columnGap="8px"
             rowGap="37px"
