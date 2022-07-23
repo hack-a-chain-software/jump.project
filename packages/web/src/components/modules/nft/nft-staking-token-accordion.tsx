@@ -8,8 +8,8 @@ type Props = {
   select: Function;
   selected: boolean;
   token: {
-    token_id: string;
-    metadata: {
+    nft_id: string;
+    staked_meta: {
       media: string;
       title?: string;
       description?: string;
@@ -20,7 +20,7 @@ type Props = {
   };
 };
 
-export function TokenAccordion({ token, select, selected }: Props) {
+export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
   const { jumpGradient, gradientBoxTopCard } = useTheme();
 
   return (
@@ -28,7 +28,7 @@ export function TokenAccordion({ token, select, selected }: Props) {
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       transition={{ duration: 0.55 }}
-      key={"nft-staking-token-accordion" + token.token_id}
+      key={"nft-staking-token-accordion" + nft_id}
     >
       <Flex width="100%" flexDirection="column">
         <Flex width="100%">
@@ -42,7 +42,7 @@ export function TokenAccordion({ token, select, selected }: Props) {
               width="100%"
               height="100%"
               borderRadius="20px"
-              src={token.metadata.media}
+              src={staked_meta.media}
             />
           </Flex>
 
@@ -69,7 +69,7 @@ export function TokenAccordion({ token, select, selected }: Props) {
                   fontWeight="700"
                   letterSpacing="-0.03em"
                 >
-                  {token.metadata.description}
+                  {staked_meta.description}
                 </Text>
 
                 <Text
@@ -78,7 +78,7 @@ export function TokenAccordion({ token, select, selected }: Props) {
                   fontWeight="600"
                   lineHeight="29px"
                 >
-                  {token.metadata.title}
+                  {staked_meta.title}
                 </Text>
               </Flex>
 

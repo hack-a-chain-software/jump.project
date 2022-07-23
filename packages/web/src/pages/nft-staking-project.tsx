@@ -25,78 +25,9 @@ import { getNear } from "@jump/src/hooks/near";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
 
-const tokens = [
-  {
-    token_id: "1",
-    metadata: {
-      title: "Trash Panda #1000",
-      media: "/mock.png",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-  {
-    token_id: "2",
-    metadata: {
-      media: "/mock2.png",
-      title: "Trash Panda #2000",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-  {
-    token_id: "3",
-    metadata: {
-      title: "Trash Panda #3000",
-      media: "/mock.png",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-  {
-    token_id: "4",
-    metadata: {
-      media: "/mock2.png",
-      title: "Trash Panda #1016",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-  {
-    token_id: "5",
-    metadata: {
-      title: "Trash Panda #4000",
-      media: "/mock.png",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-  {
-    token_id: "6",
-    metadata: {
-      title: "Trash Panda #5000",
-      media: "/mock2.png",
-      description: "Degenerate Trash Pandas",
-    },
-    jumpRewards: "100",
-    acovaRewards: "10",
-    trpRewards: "30",
-  },
-];
-
 type Token = {
-  token_id: string;
-  metadata: object;
+  nft_id: string;
+  staked_meta: object;
 };
 
 export function NFTStakingProject(params: {}) {
@@ -130,19 +61,17 @@ export function NFTStakingProject(params: {}) {
     setSelected([...selected, tokenId]);
   };
 
-  console.log(user.address);
-
   const { data, loading } = useQuery(StakingProjectDocument, {
     variables: {
       collection: window.atob(id),
-      accountId: "mateussantana.testnet",
+      accountId: user.address || "",
     },
   });
 
   const page = data?.staking;
+  const tokens = page?.staked_nfts_by_owner;
 
-  console.log(page);
-  console.log(page?.staked_nfts_by_owner);
+  console.log(tokens);
 
   return (
     <PageContainer loading={loading}>
@@ -263,7 +192,7 @@ export function NFTStakingProject(params: {}) {
                       return;
                     }
 
-                    unstake(tokens.map((token) => token.token_id));
+                    unstake(tokens.map(({ nft_id }) => nft_id));
                   }}
                   bg={darkPurple}
                   justifyContent="space-between"
@@ -336,7 +265,7 @@ export function NFTStakingProject(params: {}) {
               <TokenAccordion
                 token={focused}
                 select={select}
-                selected={selected && selected.includes(focused?.token_id)}
+                selected={selected && selected.includes(focused?.nft_id)}
               />
             </motion.section>
           )}
@@ -350,27 +279,28 @@ export function NFTStakingProject(params: {}) {
             justifyContent="space-between"
             gridTemplateColumns="repeat(auto-fill, 309px)"
           >
-            {tokens.map((token, index) => (
-              <Flex
-                key={"nft-staked-tokens-" + index}
-                onClick={() =>
-                  setFocused(isEqual(token, focused) ? null : token)
-                }
-                borderRadius="20px"
-                border={
-                  isEqual(token, focused)
-                    ? "solid 1px #761BA0"
-                    : "solid 1px transparent"
-                }
-              >
-                <TokenCard
-                  {...token}
-                  select={select}
-                  key={"nft-staking-collection-token" + index}
-                  selected={selected && selected.includes(token.token_id)}
-                />
-              </Flex>
-            ))}
+            {tokens &&
+              tokens.map((token, index) => (
+                <Flex
+                  key={"nft-staked-tokens-" + index}
+                  onClick={() =>
+                    setFocused(isEqual(token, focused) ? null : token)
+                  }
+                  borderRadius="20px"
+                  border={
+                    isEqual(token, focused)
+                      ? "solid 1px #761BA0"
+                      : "solid 1px transparent"
+                  }
+                >
+                  <TokenCard
+                    {...token}
+                    select={select}
+                    key={"nft-staking-collection-token" + index}
+                    selected={selected && selected.includes(token.nft_id)}
+                  />
+                </Flex>
+              ))}
           </Grid>
         </Flex>
       </If>

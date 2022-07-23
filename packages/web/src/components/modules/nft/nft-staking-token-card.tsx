@@ -4,19 +4,19 @@ import { InfoIcon, CheckIcon } from "@jump/src/assets/svg";
 import { useTheme } from "@jump/src/hooks/theme";
 
 type Props = {
-  metadata: {
+  staked_meta: {
     media: string;
     title?: string;
     description?: string;
   };
   select: Function;
-  token_id: string;
+  nft_id: string;
   selected?: boolean;
 };
 
 export function TokenCard({
-  metadata,
-  token_id,
+  staked_meta: { media, title, description },
+  nft_id,
   select = () => {},
   selected = false,
 }: Props) {
@@ -30,12 +30,7 @@ export function TokenCard({
       height="298px"
       position="relative"
     >
-      <Image
-        width="100%"
-        height="100%"
-        borderRadius="20px"
-        src={metadata.media}
-      />
+      <Image width="100%" height="100%" borderRadius="20px" src={media} />
 
       <Flex
         top="22px"
@@ -50,7 +45,7 @@ export function TokenCard({
         onClick={(e) => {
           e.stopPropagation();
 
-          select(token_id);
+          select(nft_id);
         }}
       >
         {selected && <CheckIcon />}
@@ -79,7 +74,7 @@ export function TokenCard({
             fontFamily="Inter"
             marginBottom="-3px"
           >
-            {metadata.description}
+            {description}
           </Text>
 
           <Text
@@ -89,7 +84,7 @@ export function TokenCard({
             fontWeight="500"
             fontFamily="Inter"
           >
-            {metadata.title}
+            {title}
           </Text>
         </Flex>
 

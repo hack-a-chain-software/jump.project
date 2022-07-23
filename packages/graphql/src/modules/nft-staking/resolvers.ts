@@ -2,7 +2,7 @@ import { CommonErrors } from "@/errors";
 import { AccountIdQuery, GraphQLContext } from "@/types";
 import { NFTStaking, StakedNFT } from "@/types/nft-staking";
 import { QueryTypes } from "sequelize";
-import { findCollectionMetadata } from "../tools";
+import { findCollectionMetadata, findStakedMetadata } from "../tools";
 import {
   createPageableQuery,
   PaginationFilters,
@@ -50,10 +50,9 @@ export default {
       ).reduce(
         (prev, cur): any => {
           return {
-            rewards_jump: prev.rewards_jump + Number(cur.balances[0] || 0),
-            rewards_acova: prev.rewards_jump + Number(cur.balances[1] || 0),
-            rewards_project_token:
-              prev.rewards_jump + Number(cur.balances[1] || 0),
+            rewards_jump: prev.rewards_jump + Number(0),
+            rewards_acova: prev.rewards_jump + Number(0),
+            rewards_project_token: prev.rewards_jump + Number(0),
           };
         },
         {
@@ -77,6 +76,20 @@ export default {
       );
 
       return result;
+    },
+  },
+  StakedNFT: {
+    async staked_meta({ collection_id, nft_id }: StakedNFT) {
+      const { title, description, media } = await findStakedMetadata(
+        collection_id,
+        nft_id
+      );
+
+      return {
+        title,
+        media,
+        description,
+      };
     },
   },
   Query: {

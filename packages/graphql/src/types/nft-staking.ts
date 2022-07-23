@@ -12,7 +12,7 @@ export type NFTStaking = {
 
 export type StakedNFT = {
   nft_id: ID;
-  collection: ID;
+  collection_id: ID;
   owner_id: ID;
   staked_timestamp: string;
   balances: string[];
