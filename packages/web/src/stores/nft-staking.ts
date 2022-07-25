@@ -93,8 +93,6 @@ export const useNftStaking = create<{
   },
 
   unstake: async (tokens: Array<string>, collection: string) => {
-    console.log(tokens, get().connection);
-
     const transactions: any = [];
 
     tokens.forEach((item) => {

@@ -8,7 +8,7 @@ export default gql`
   }
 
   # Blockchain Data
-  type StakedMeta {
+  type StakedMeta @cacheControl(maxAge: 120, scope: PUBLIC) {
     title: String
     media: String
     description: String
