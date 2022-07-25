@@ -44,7 +44,7 @@ export const useCollection = create<{
 
     const account = await connection.account();
 
-    if (!get().contract) {
+    if (!get().contract || get().contract.account_id !== collection) {
       await get().initContract(account, collection);
     }
 

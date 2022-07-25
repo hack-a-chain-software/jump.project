@@ -36,6 +36,7 @@ export function NFTStakingProject(params: {}) {
   const navigate = useNavigate();
 
   const { id = "" } = useParams();
+  const collection = window.atob(id);
 
   const { jumpGradient, darkPurple } = useTheme();
 
@@ -65,7 +66,7 @@ export function NFTStakingProject(params: {}) {
 
   const { data, loading } = useQuery(StakingProjectDocument, {
     variables: {
-      collection: window.atob(id),
+      collection,
       accountId: user.address || "",
     },
   });
@@ -76,6 +77,12 @@ export function NFTStakingProject(params: {}) {
   const claim = () => {
     if (!user.isConnected) {
       user.connect();
+
+      return;
+    }
+
+    if (true) {
+      toast("You don't have rewards available");
 
       return;
     }
@@ -112,13 +119,14 @@ export function NFTStakingProject(params: {}) {
       return;
     }
 
-    unstake(items);
+    unstake(items, collection);
   };
 
   return (
     <PageContainer loading={loading}>
       <StakeModal
         isOpen={show}
+        collection={collection}
         onClose={() => {
           setShow(!show);
         }}

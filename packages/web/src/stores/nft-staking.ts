@@ -7,7 +7,7 @@ export const useNftStaking = create<{
   connection: WalletConnection | null;
   init: (connection: WalletConnection) => Promise<void>;
   stake: (collection: any, tokenId: string) => Promise<void>;
-  unstake: (tokens: Array<string>) => Promise<void>;
+  unstake: (tokens: Array<string>, collection: string) => Promise<void>;
   claimRewards: () => Promise<void>;
   viewStaked: () => Promise<any>;
 }>((set, get) => ({
@@ -92,7 +92,9 @@ export const useNftStaking = create<{
     );
   },
 
-  unstake: async (tokens: Array<string>) => {
+  unstake: async (tokens: Array<string>, collection: string) => {
+    console.log(tokens, get().connection);
+
     const transactions: any = [];
 
     tokens.forEach((item) => {
@@ -105,7 +107,7 @@ export const useNftStaking = create<{
               token_id: [
                 {
                   type: "n_f_t_contract",
-                  account_id: "negentra_base_nft.testnet",
+                  account_id: collection,
                 },
                 item,
               ],
