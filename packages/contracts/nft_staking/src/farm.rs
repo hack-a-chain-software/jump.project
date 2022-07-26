@@ -4,9 +4,10 @@ use crate::StorageKey;
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{env, Timestamp};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug)]
 pub struct RewardsDistribution {
   pub undistributed: u128,
   pub unclaimed: u128,
@@ -83,12 +84,14 @@ impl RewardsDistribution {
   }
 }
 
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize)]
 pub struct Farm {
   pub round_interval: u32,
   pub start_at: u32,
 
   pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
+
+  #[serde(skip)]
   pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
 }
 
@@ -114,7 +117,7 @@ impl Farm {
 
     let mut distributions = HashMap::new();
     for (token_id, &rewards) in collection_round_reward.iter() {
-      distributions.insert(token_id, &RewardsDistribution::new(0, rewards));
+      distributions.insert(token_id.clone(), RewardsDistribution::new(0, rewards));
     }
 
     Farm {
@@ -158,8 +161,8 @@ impl Farm {
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
     let mut balance = HashMap::new();
 
-    for (ft_id, dist) in self.distributions.to_vec() {
-      balance.insert(ft_id, dist.rps);
+    for (ft_id, dist) in self.distributions.iter() {
+      balance.insert(ft_id.clone(), dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
@@ -175,32 +178,44 @@ impl Farm {
 
     let total_seeds = self.nfts_rps.len();
 
-    for (k, prev_dist) in self.distributions.to_vec() {
+    for (k, prev_dist) in self.distributions.clone().iter() {
       let dist = prev_dist.distribute(total_seeds, round);
-      self.distributions.insert(&k, &dist);
+      self.distributions.insert(k.clone(), dist);
     }
   }
 
-  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> HashMap<FungibleTokenID, u128> {
+  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     self.distribute();
 
     let mut token_rps = self.nfts_rps.get(token_id).unwrap();
     let mut rewards_map = HashMap::new();
 
-    for (k, prev_dist) in self.distributions.to_vec() {
-      let rps = *token_rps.get(&k).unwrap_or(&0);
+    for (k, prev_dist) in self.distributions.clone().iter() {
+      let rps = *token_rps.get(k).unwrap_or(&0);
 
       let (dist, claimed) = prev_dist.claim(rps);
 
       token_rps.insert(k.clone(), dist.rps);
-      self.distributions.insert(&k, &dist);
+      self.distributions.insert(k.clone(), dist);
 
-      rewards_map.insert(k, claimed);
+      rewards_map.insert(k.clone(), claimed);
     }
 
     self.nfts_rps.insert(token_id, &token_rps);
 
     rewards_map
+  }
+
+  pub fn unclaimed_token_balance(&self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
+    let token_rps = self.nfts_rps.get(token_id).unwrap();
+    let mut unclaimed_map = HashMap::new();
+
+    for (k, dist) in self.distributions.iter() {
+      let rps = token_rps.get(&k).unwrap();
+      unclaimed_map.insert(k.clone(), dist.rps - rps);
+    }
+
+    unclaimed_map
   }
 }
 
@@ -247,9 +262,9 @@ mod tests {
   }
 
   fn get_farm() -> Farm {
-    let mut distributions = UnorderedMap::new(b'c');
+    let mut distributions = HashMap::new();
     for (k, v) in get_distributions() {
-      distributions.insert(&k, &v);
+      distributions.insert(k, v);
     }
 
     Farm {
