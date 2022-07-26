@@ -48,7 +48,7 @@ export function TokenCard({
           select(nft_id);
         }}
       >
-        {selected && <CheckIcon />}
+        {selected && <CheckIcon color="white" />}
       </Flex>
 
       <Flex

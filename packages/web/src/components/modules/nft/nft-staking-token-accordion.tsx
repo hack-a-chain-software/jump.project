@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@jump/src/assets/svg";
 import { ValueBox } from "@jump/src/components";
 import { useTheme } from "@jump/src/hooks/theme";
-import { Flex, Text, Grid, Image } from "@chakra-ui/react";
+import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
 
 type Props = {
   select: Function;
@@ -21,7 +21,7 @@ type Props = {
 };
 
 export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
-  const { jumpGradient, gradientBoxTopCard } = useTheme();
+  const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
   return (
     <motion.div
@@ -52,59 +52,72 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
             marginLeft="20px"
             padding="3px"
             borderRadius="25px"
-            background={jumpGradient}
+            background={useColorModeValue("transparent", jumpGradient)}
           >
             <Flex
               flexGrow="1"
               borderRadius="25px"
               boxSize="border-box"
-              background={gradientBoxTopCard}
-              padding="35px 39px 35px 39px"
-              flexDirection="column"
+              bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
             >
-              <Flex marginBottom="25px" flexDirection="column">
-                <Text
-                  color="white"
-                  fontSize="20px"
-                  fontWeight="700"
-                  letterSpacing="-0.03em"
-                >
-                  {staked_meta.description}
-                </Text>
-
-                <Text
-                  color="white"
-                  fontSize="24px"
-                  fontWeight="600"
-                  lineHeight="29px"
-                >
-                  {staked_meta.title}
-                </Text>
-              </Flex>
-
-              <Grid
-                gap="15px"
-                width="100%"
-                gridTemplateColumns="repeat(auto-fill, 200px)"
+              <Flex
+                flexGrow="1"
+                borderRadius="25px"
+                boxSize="border-box"
+                flexDirection="column"
+                padding="35px 39px 35px 39px"
+                bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
               >
-                <ValueBox
-                  title="JUMP Rewards"
-                  value="400 JUMP"
-                  bottomText="Per Week"
-                />
+                <Flex marginBottom="25px" flexDirection="column">
+                  <Text
+                    color="white"
+                    fontSize="20px"
+                    fontWeight="700"
+                    letterSpacing="-0.03em"
+                  >
+                    {staked_meta.description}
+                  </Text>
 
-                <ValueBox
-                  title="ACOVA Rewards"
-                  value="80 ACOVA"
-                  bottomText="Per Week"
-                />
+                  <Text
+                    color="white"
+                    fontSize="24px"
+                    fontWeight="600"
+                    lineHeight="29px"
+                  >
+                    {staked_meta.title}
+                  </Text>
+                </Flex>
 
-                <ValueBox
-                  title="TRP Rewards"
-                  value="80 TRP"
-                  bottomText="Per Week"
-                />
-              </Grid>
+                <Grid
+                  gap="15px"
+                  width="100%"
+                  gridTemplateColumns="repeat(auto-fill, 200px)"
+                >
+                  <ValueBox
+                    color="white"
+                    value="400 JUMP"
+                    title="JUMP Rewards"
+                    bottomText="Per Week"
+                    borderColor={glassyWhiteOpaque}
+                  />
+
+                  <ValueBox
+                    color="white"
+                    value="80 ACOVA"
+                    title="ACOVA Rewards"
+                    bottomText="Per Week"
+                    borderColor={glassyWhiteOpaque}
+                  />
+
+                  <ValueBox
+                    color="white"
+                    value="80 TRP"
+                    title="TRP Rewards"
+                    bottomText="Per Week"
+                    borderColor={glassyWhiteOpaque}
+                  />
+                </Grid>
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
