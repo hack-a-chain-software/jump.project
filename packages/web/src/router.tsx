@@ -40,11 +40,7 @@ function Router() {
         </Grid>
       </BrowserRouter>
 
-      <Toaster position="bottom-left">
-        {(t) => {
-          return <Toast type={t.type}>{resolveValue(t.message, t)}</Toast>;
-        }}
-      </Toaster>
+      <Toaster position="bottom-left" />
     </Flex>
   );
 }

@@ -13,7 +13,7 @@ export type NearMutableContractCall<Params extends Record<string, any>> = (
   params: Params,
   gas: string,
   deposit: string
-) => Promise<void>;
+) => Promise<any>;
 
 export type NearContractViewCall<
   Params extends Record<string, any>,

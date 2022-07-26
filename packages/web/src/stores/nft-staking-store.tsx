@@ -2,6 +2,7 @@ import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
 import { NearMutableContractCall } from "@near/ts";
+import { NearConstants } from "@jump/src/constants";
 
 interface NFTStakingContract extends Contract {
   storage_balance_of: NearMutableContractCall<{ account_id: string }>;
@@ -39,8 +40,6 @@ export const useNftStaking = create<{
   },
 
   stake: async (collection: string, tokenId: string) => {
-    const transactions: Transaction[] = [];
-
     const { contract, connection } = get();
 
     if (!connection || !contract) {
@@ -49,10 +48,16 @@ export const useNftStaking = create<{
       return;
     }
 
+    const transactions: Transaction[] = [];
+
     try {
-      const stakingStorage = await contract.storage_balance_of({
-        account_id: connection.getAccountId(),
-      });
+      const stakingStorage = await contract.storage_balance_of(
+        {
+          account_id: connection.getAccountId(),
+        },
+        NearConstants.AttachedGas,
+        NearConstants.OneYOctoNear
+      );
 
       if (!stakingStorage || stakingStorage.total < "0.10") {
         transactions.push({
@@ -112,7 +117,8 @@ export const useNftStaking = create<{
                 item,
               ],
             },
-            gas: "300000000000000",
+            gas: NearConstants.AttachedGas,
+            amount: NearConstants.OneYOctoNear,
           },
         ],
       });
