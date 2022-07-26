@@ -19,7 +19,7 @@ import {
 } from "@jump/src/components";
 import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
-import { useNftStaking } from "../stores/nft-staking";
+import { useNftStaking } from "../stores/nft-staking-store";
 import { getNear } from "@jump/src/hooks/near";
 
 import { useQuery } from "@apollo/client";

@@ -17,8 +17,7 @@ import { addDays, subDays } from "date-fns";
 export const Vesting = () => {
   const navigate = useNavigate();
 
-  const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
-    useTheme();
+  const { glassyWhiteOpaque } = useTheme();
 
   const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 

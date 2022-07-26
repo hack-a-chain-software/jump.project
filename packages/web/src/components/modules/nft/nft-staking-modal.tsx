@@ -2,7 +2,7 @@ import isEmpty from "lodash/isEmpty";
 import { useEffect, useState } from "react";
 import { getNear } from "@jump/src/hooks/near";
 import { WalletConnection } from "near-api-js";
-import { useNftStaking } from "@jump/src/stores/nft-staking";
+import { useNftStaking } from "@jump/src/stores/nft-staking-store";
 import { useCollection } from "@jump/src/stores/collection";
 import { CheckIcon, ArrowRightIcon } from "@jump/src/assets/svg";
 import { ModalImageDialog, Button, If } from "@jump/src/components";
