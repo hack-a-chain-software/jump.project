@@ -125,7 +125,6 @@ export const useNftStaking = create<{
               ],
             },
             gas: NearConstants.AttachedGas,
-            amount: NearConstants.OneYOctoNear,
           },
         ],
       });
