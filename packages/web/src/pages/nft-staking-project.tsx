@@ -21,18 +21,15 @@ import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking-store";
 import { getNear } from "@jump/src/hooks/near";
-
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
-import isEmpty from "lodash/isEmpty";
-import toast from "react-hot-toast";
 
 type Token = {
   nft_id: string;
   staked_meta: object;
 };
 
-export function NFTStakingProject(params: {}) {
+export function NFTStakingProject() {
   const navigate = useNavigate();
 
   const { id = "" } = useParams();
@@ -64,32 +61,6 @@ export function NFTStakingProject(params: {}) {
     setSelected([...selected, tokenId]);
   };
 
-  const { data, loading } = useQuery(StakingProjectDocument, {
-    variables: {
-      collection,
-      accountId: user.address || "",
-    },
-  });
-
-  const page = data?.staking;
-  const tokens = page?.staked_nfts_by_owner;
-
-  const claim = () => {
-    if (!user.isConnected) {
-      user.connect();
-
-      return;
-    }
-
-    if (true) {
-      toast("You don't have rewards available");
-
-      return;
-    }
-
-    claimRewards();
-  };
-
   const toggleStakeModal = () => {
     if (!user.isConnected) {
       user.connect();
@@ -100,27 +71,14 @@ export function NFTStakingProject(params: {}) {
     setShow(!show);
   };
 
-  const unstakeTokens = (items) => {
-    if (!user.isConnected) {
-      user.connect();
+  const { data: { staking } = {}, loading } = useQuery(StakingProjectDocument, {
+    variables: {
+      collection,
+      accountId: user.address || "",
+    },
+  });
 
-      return;
-    }
-
-    if (isEmpty(tokens)) {
-      toast("You don't have Tokens to unstake");
-
-      return;
-    }
-
-    if (isEmpty(items)) {
-      toast("Select Tokens to unstake");
-
-      return;
-    }
-
-    unstake(items, collection);
-  };
+  const tokens = staking?.staked_nfts_by_owner;
 
   return (
     <PageContainer loading={loading}>
@@ -134,8 +92,8 @@ export function NFTStakingProject(params: {}) {
 
       <BackButton onClick={() => navigate("/nft-staking")} />
       <NFTStakingCard
-        collectionLogo={page?.collection_meta?.image}
-        collectionName={page?.collection_meta?.name}
+        collectionLogo={staking?.collection_meta?.image}
+        collectionName={staking?.collection_meta?.name}
         tokens={[
           {
             name: "JUMP",
@@ -228,7 +186,10 @@ export function NFTStakingProject(params: {}) {
                 </GradientButton> */}
                 <GradientButton
                   onClick={() =>
-                    unstakeTokens(tokens.map(({ nft_id }) => nft_id))
+                    unstake(
+                      tokens.map(({ nft_id }) => nft_id),
+                      collection
+                    )
                   }
                   bg={darkPurple}
                   justifyContent="space-between"
@@ -236,7 +197,7 @@ export function NFTStakingProject(params: {}) {
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
                 <GradientButton
-                  onClick={() => claim()}
+                  onClick={() => claimRewards([])}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -307,7 +268,7 @@ export function NFTStakingProject(params: {}) {
               color="black"
               display="flex"
               alignItems="center"
-              onClick={() => unstakeTokens(selected)}
+              onClick={() => unstake(selected, collection)}
             >
               <Text marginRight="16px">Unstake Selected NFTs!</Text>
 

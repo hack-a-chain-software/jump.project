@@ -1,4 +1,6 @@
 import create from "zustand";
+import toast from "react-hot-toast";
+import isEmpty from "lodash/isEmpty";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
 import { NearMutableContractCall } from "@near/ts";
@@ -11,10 +13,11 @@ interface NFTStakingContract extends Contract {
 export const useNftStaking = create<{
   contract: NFTStakingContract | null;
   connection: WalletConnection | null;
+  validate: (tokens: Array<string>, message?: string) => void;
   init: (connection: WalletConnection) => Promise<void>;
   stake: (collection: any, tokenId: string) => Promise<void>;
   unstake: (tokens: Array<string>, collection: string) => Promise<void>;
-  claimRewards: () => Promise<void>;
+  claimRewards: (tokens: Array<string>) => Promise<void>;
 }>((set, get) => ({
   contract: null,
   connection: null,
@@ -42,18 +45,12 @@ export const useNftStaking = create<{
   stake: async (collection: string, tokenId: string) => {
     const { contract, connection } = get();
 
-    if (!connection || !contract) {
-      console.warn("Connect Wallet");
-
-      return;
-    }
-
     const transactions: Transaction[] = [];
 
     try {
-      const stakingStorage = await contract.storage_balance_of(
+      const stakingStorage = await contract?.storage_balance_of(
         {
-          account_id: connection.getAccountId(),
+          account_id: connection?.getAccountId(),
         },
         NearConstants.AttachedGas,
         NearConstants.OneYOctoNear
@@ -66,7 +63,7 @@ export const useNftStaking = create<{
             {
               methodName: "storage_deposit",
               args: {
-                account_id: connection.getAccountId(),
+                account_id: connection?.getAccountId(),
                 registration_only: false,
               },
               amount: "0.25",
@@ -100,6 +97,16 @@ export const useNftStaking = create<{
   },
 
   unstake: async (tokens: Array<string>, collection: string) => {
+    const { validate, connection } = get();
+
+    try {
+      validate(tokens);
+    } catch (e) {
+      console.warn(e);
+
+      return;
+    }
+
     const transactions: any = [];
 
     tokens.forEach((item) => {
@@ -124,13 +131,34 @@ export const useNftStaking = create<{
       });
     });
 
-    executeMultipleTransactions(
-      transactions,
-      get().connection as WalletConnection
-    );
+    executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  claimRewards: async () => {
+  claimRewards: async (tokens: Array<string>) => {
     //
+    const { validate } = get();
+
+    try {
+      validate(tokens, "You don't have rewards available");
+    } catch (e) {
+      console.warn(e);
+
+      return;
+    }
+  },
+
+  validate: (
+    tokens: Array<string>,
+    message = "Ooops! Select tokens to continue"
+  ) => {
+    const { connection, contract } = get();
+
+    if (!connection || !contract) {
+      throw toast("connect wallet pls");
+    }
+
+    if (isEmpty(tokens)) {
+      throw toast(message);
+    }
   },
 }));
