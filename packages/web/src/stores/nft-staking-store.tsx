@@ -1,10 +1,15 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
+import { NearMutableContractCall } from "@near/ts";
+
+interface NFTStakingContract extends Contract {
+  storage_balance_of: NearMutableContractCall<{ account_id: string }>;
+}
 
 export const useNftStaking = create<{
-  contract: any;
-  connection: WalletConnection;
+  contract: NFTStakingContract | null;
+  connection: WalletConnection | null;
   init: (connection: WalletConnection) => Promise<void>;
   stake: (collection: any, tokenId: string) => Promise<void>;
   unstake: (tokens: Array<string>, collection: string) => Promise<void>;
@@ -21,15 +26,12 @@ export const useNftStaking = create<{
           connection.account(),
           import.meta.env.VITE_STAKING_CONTRACT,
           {
-            viewMethods: ["view_staked", "storage_balance_of"],
+            viewMethods: ["storage_balance_of"],
             changeMethods: [
-              "unstake",
-              "claim_rewards",
-              "storage_deposit",
-              "withdraw_reward",
+              //
             ],
           }
-        ),
+        ) as NFTStakingContract,
       });
     } catch (e) {
       console.warn(e);
@@ -40,6 +42,12 @@ export const useNftStaking = create<{
     const transactions: Transaction[] = [];
 
     const { contract, connection } = get();
+
+    if (!connection || !contract) {
+      console.warn("Connect Wallet");
+
+      return;
+    }
 
     try {
       const stakingStorage = await contract.storage_balance_of({
