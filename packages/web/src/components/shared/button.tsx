@@ -11,8 +11,8 @@ interface IButtonProps extends ButtonProps {}
  * @description - Chakra custom button component
  */
 export function Button({
-  bg = useColorModeValue("black", "white"),
-  color = useColorModeValue("white", "black"),
+  bg = "white",
+  color = "black",
   ...props
 }: IButtonProps) {
   return (
