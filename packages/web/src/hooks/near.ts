@@ -1,14 +1,18 @@
 import BN from "bn.js";
 import React from "react";
 import { baseDecode } from "borsh";
-import { useNearWallet, useNearUser } from "react-near";
+import {
+  useNearWallet,
+  useNearUser,
+  NearEnvironment,
+  NearProvider,
+} from "react-near";
 import { ConnectConfig, utils, WalletConnection } from "near-api-js";
 import {
   functionCall,
   createTransaction,
   Action,
 } from "near-api-js/lib/transaction";
-import { NearEnvironment, NearProvider } from "react-near";
 
 const { PublicKey } = utils;
 
