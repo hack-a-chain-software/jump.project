@@ -35,6 +35,7 @@ export function StakeModal({
     variables: {
       account_id: user.address || "",
     },
+    skip: !user.isConnected,
   });
 
   return (
