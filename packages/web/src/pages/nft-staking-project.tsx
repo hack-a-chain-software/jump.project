@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Box, Flex, Grid, Stack, Text, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Grid,
+  Stack,
+  Text,
+  Button,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { WalletIcon } from "../assets/svg";
@@ -35,7 +43,8 @@ export function NFTStakingProject() {
   const { id = "" } = useParams();
   const collection = window.atob(id);
 
-  const { jumpGradient, darkPurple } = useTheme();
+  const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
+    useTheme();
 
   const [show, setShow] = useState(false);
   const [focused, setFocused] = useState<Token | null>(null);
@@ -136,13 +145,14 @@ export function NFTStakingProject() {
             bottomText={user.isConnected && "Your Total ACOVA Rewards"}
           />
         </Flex>
+
         <Flex flex={1}>
           <Box
             ml="20px"
             display="flex"
             p="3px"
             w="100%"
-            background={jumpGradient}
+            background={useColorModeValue("transparent", jumpGradient)}
             borderRadius="26px"
           >
             <Box
@@ -150,60 +160,70 @@ export function NFTStakingProject() {
               flexDirection="column"
               w="100%"
               h="100%"
-              p="40px"
               borderRadius="24px"
-              bg={darkPurple}
+              bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
             >
-              <GradientText mb="-5px" fontWeight="800" fontSize={16}>
-                User Area
-              </GradientText>
-              <Text
-                fontWeight="800"
-                fontSize={30}
-                letterSpacing="-0.03em"
-                mb={3}
+              <Box
+                p="40px"
+                bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
               >
-                Interact with Your Position
-              </Text>
-              <Text mt="-10px" fontWeight="semibold">
-                This is the area wher you can interact with the Staking as a
-                Investor
-              </Text>
-              <Stack mt="50px" gap={1}>
-                <GradientButton
-                  onClick={() => toggleStakeModal()}
-                  bg={darkPurple}
-                  justifyContent="space-between"
+                <GradientText
+                  mb="-5px"
+                  fontWeight="800"
+                  fontSize={16}
+                  color="white"
                 >
-                  Stake NFT <WalletIcon />
-                </GradientButton>
-                {/* <GradientButton
-                  onClick={() => unstake()}
-                  bg={darkPurple}
-                  justifyContent="space-between"
+                  User Area
+                </GradientText>
+                <Text
+                  fontWeight="800"
+                  fontSize={30}
+                  letterSpacing="-0.03em"
+                  mb={3}
+                  color="white"
                 >
-                  Unstake NFT <WalletIcon />
-                </GradientButton> */}
-                <GradientButton
-                  onClick={() =>
-                    unstake(
-                      tokens.map(({ nft_id }) => nft_id),
-                      collection
-                    )
-                  }
-                  bg={darkPurple}
-                  justifyContent="space-between"
-                >
-                  Unstake All NFTs <WalletIcon />
-                </GradientButton>
-                <GradientButton
-                  onClick={() => claimRewards([])}
-                  bg={darkPurple}
-                  justifyContent="space-between"
-                >
-                  Claim Pool Rewards <WalletIcon />
-                </GradientButton>
-              </Stack>
+                  Interact with Your Position
+                </Text>
+                <Text mt="-10px" fontWeight="semibold" color="white">
+                  This is the area wher you can interact with the Staking as a
+                  Investor
+                </Text>
+                <Stack mt="50px" gap={1}>
+                  <GradientButton
+                    onClick={() => toggleStakeModal()}
+                    bg={useColorModeValue("white", darkPurple)}
+                    justifyContent="space-between"
+                  >
+                    Stake NFT <WalletIcon />
+                  </GradientButton>
+                  {/* <GradientButton
+                    onClick={() => unstake()}
+                    bg={darkPurple}
+                    justifyContent="space-between"
+                  >
+                    Unstake NFT <WalletIcon />
+                  </GradientButton> */}
+                  <GradientButton
+                    onClick={() =>
+                      unstake(
+                        tokens.map(({ nft_id }) => nft_id),
+                        collection
+                      )
+                    }
+                    bg={useColorModeValue("white", darkPurple)}
+                    justifyContent="space-between"
+                  >
+                    Unstake All NFTs <WalletIcon />
+                  </GradientButton>
+                  <GradientButton
+                    onClick={() => claimRewards([])}
+                    bg={useColorModeValue("white", darkPurple)}
+                    justifyContent="space-between"
+                  >
+                    Claim Pool Rewards <WalletIcon />
+                  </GradientButton>
+                </Stack>
+              </Box>
             </Box>
           </Box>
         </Flex>
