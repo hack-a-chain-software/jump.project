@@ -98,7 +98,7 @@ mod tests {
 
         assert_eq!(serde_blob["standard"], "jump_launchpad");
         assert_eq!(serde_blob["version"], "1.0.0");
-        assert_eq!(serde_blob["event"], "create_guardian");
+        assert_eq!(serde_blob["event"], "add_guardian");
         assert_eq!(
           serde_blob["data"][0]["new_guardian"],
           guardian_account.to_string()
