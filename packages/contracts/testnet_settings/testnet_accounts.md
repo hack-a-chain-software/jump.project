@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-### Owner accounts
-The owner account was used to initialize all contracts.  
-Therefore this account is used as source for tokens and to alter
-contract owner restricted configurations.
-=======
 # Set testnet application
 
 To setup the entire application suite in testnet, run the testnet_sample_interactions.js script.  
@@ -28,7 +22,6 @@ The credentials for the created accounts will be stored in .near-credentials in 
 "launchpad": launchpad application
 
 ### Testing applications
->>>>>>> main
 
 To test nft staking functionalities, it is necessary to first mint NFTs in the sample contracts using the mint call:
 ```
