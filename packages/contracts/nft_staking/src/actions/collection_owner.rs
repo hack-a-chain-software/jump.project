@@ -56,7 +56,7 @@ impl Contract {
     staking_program.only_collection_owner(&account_id);
     staking_program.only_program_token(&token_id);
 
-    staking_program.move_funds(&token_id, op);
+    staking_program.move_funds(token_id, op);
   }
 
   #[payable]
@@ -72,7 +72,7 @@ impl Contract {
     staking_program.only_collection_owner(&account_id);
     staking_program.only_program_token(&token_id);
 
-    let amount = staking_program.withdraw_collection_treasury(&token_id);
+    let amount = staking_program.withdraw_collection_treasury(token_id.clone());
 
     ext_fungible_token::ext(token_id)
       .with_static_gas(FT_TRANSFER_GAS)
