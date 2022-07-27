@@ -9,25 +9,16 @@ export default gql`
 
   type NFTStaking {
     # SQL + Blockchain Data
-    collection: ID!
+    collection_id: ID!
     collection_meta: CollectionMeta # On Chain Data
-    collection_owner: String!
-    collection_treasury: String!
+    collection_owner_id: String!
     token_address: ID!
-    farm: ID!
     min_staking_period: String
     early_withdraw_penalty: String
 
     # Queries
-    storage_used(account_id: ID): NFTInvestor!
     total_rewards(account_id: ID): NFTStakingTotalRewards
     staked_nfts_by_owner(account_id: ID): [StakedNFT]
-  }
-
-  type NFTInvestor {
-    account_id: ID
-    storage_deposit: String
-    storage_used: String
   }
 
   type NFTStakingTotalRewards {
@@ -37,8 +28,8 @@ export default gql`
   }
 
   type StakedNFT {
-    non_fungible_token_id: ID
-    collection: ID
+    nft_id: ID
+    collection_id: ID
     owner_id: ID
     staked_timestamp: String
     rewards_jump: String
@@ -56,6 +47,6 @@ export default gql`
 
   type Query {
     nft_staking_projects(limit: Int, offset: Int, search: String): NFTPage!
-    staking(collection: ID!): NFTStaking
+    staking(collection_id: ID!): NFTStaking
   }
 `;

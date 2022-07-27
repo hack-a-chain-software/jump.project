@@ -1,7 +1,7 @@
 use near_sdk::json_types::U128;
 use near_sdk::{ext_contract, AccountId};
 
-use crate::types::NonFungibleTokenID;
+use crate::types::{FungibleTokenBalance, NonFungibleTokenID};
 
 #[ext_contract(ext_fungible_token)]
 pub trait FungibleToken {
@@ -29,5 +29,6 @@ pub trait ThisContract {
     token_id: NonFungibleTokenID,
     owner_id: AccountId,
     staked_timestamp: u64,
+    balance: FungibleTokenBalance,
   );
 }
