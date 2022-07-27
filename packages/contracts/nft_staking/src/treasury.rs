@@ -20,7 +20,7 @@ impl Contract {
   pub fn realocate_treasury(
     &mut self,
     collection: &NFTCollection,
-    token_id: FungibleTokenID,
+    token_id: &FungibleTokenID,
     operation: Operation,
     amount: u128,
   ) {
@@ -29,10 +29,10 @@ impl Contract {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
     staking_program.only_non_program_tokens(&token_id); // TODO: maybe refactor where this assertion is made. Otherwise, test it.
 
-    let mut collection_treasury = *staking_program
+    let mut collection_treasury = staking_program
       .collection_treasury
       .get(&token_id)
-      .unwrap_or(&0);
+      .unwrap_or(0);
 
     match operation {
       Operation::CollectionToContract => {
@@ -55,7 +55,7 @@ impl Contract {
 
     staking_program
       .collection_treasury
-      .insert(token_id.clone(), collection_treasury);
+      .insert(&token_id, &collection_treasury);
     self.staking_programs.insert(&collection, &staking_program);
 
     self.contract_treasury.insert(&token_id, &contract_treasury);

@@ -88,7 +88,7 @@ pub struct Farm {
   pub round_interval: u32,
   pub start_at: u32,
 
-  pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
+  pub distributions: UnorderedMap<FungibleTokenID, RewardsDistribution>,
   pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
 }
 
@@ -112,7 +112,7 @@ impl Farm {
   ) -> Self {
     let mut get_key = get_key_closure(collection);
 
-    let mut distributions = HashMap::new();
+    let mut distributions = UnorderedMap::new(get_key());
     for (token_id, &rewards) in collection_round_reward.iter() {
       distributions.insert(token_id, &RewardsDistribution::new(0, rewards));
     }
@@ -132,7 +132,7 @@ impl Farm {
       .unwrap()
       .deposit_distribution_funds(amount);
 
-    self.distributions.insert(token_id.clone(), dist);
+    self.distributions.insert(token_id, &dist);
   }
 
   pub fn withdraw_beneficiary(&mut self, token_id: &FungibleTokenID) -> u128 {
@@ -142,7 +142,7 @@ impl Farm {
       .unwrap()
       .withdraw_beneficiary();
 
-    self.distributions.insert(token_id.clone(), dist);
+    self.distributions.insert(token_id, &dist);
 
     amount
   }
@@ -156,10 +156,10 @@ impl Farm {
   }
 
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
-    let mut balance = HashMap::new();
+    let mut balance = UnorderedMap::new(StorageKey::NFTsRPS(nft_id.clone()));
 
     for (ft_id, dist) in self.distributions.to_vec() {
-      balance.insert(ft_id, dist.rps);
+      balance.insert(&ft_id, &dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
@@ -188,14 +188,14 @@ impl Farm {
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.to_vec() {
-      let rps = *token_rps.get(&k).unwrap_or(&0);
+      let rps = token_rps.get(&k).unwrap_or(0);
 
       let (dist, claimed) = prev_dist.claim(rps);
 
-      token_rps.insert(k.clone(), dist.rps);
       self.distributions.insert(&k, &dist);
 
-      rewards_map.insert(k, claimed);
+      token_rps.insert(&k, &dist.rps);
+      rewards_map.insert(k.clone(), claimed);
     }
 
     self.nfts_rps.insert(token_id, &token_rps);
