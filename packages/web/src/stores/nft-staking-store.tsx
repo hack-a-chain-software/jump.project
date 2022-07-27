@@ -31,9 +31,7 @@ export const useNftStaking = create<{
           import.meta.env.VITE_STAKING_CONTRACT,
           {
             viewMethods: ["storage_balance_of"],
-            changeMethods: [
-              //
-            ],
+            changeMethods: ["storage_deposit"],
           }
         ) as NFTStakingContract,
       });

@@ -1,5 +1,4 @@
 import { Stack, Flex, Text } from "@chakra-ui/react";
-import { useNavigate } from "react-router";
 import {
   If,
   TopCard,
@@ -8,22 +7,36 @@ import {
   ValueBox,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
-import { useQuery } from "@apollo/client";
+import { useNearQuery } from "react-near";
 import { useTheme } from "@jump/src/hooks/theme";
-import { NftStakingProjectsConnectionDocument } from "@near/apollo";
+import { getNear } from "@jump/src/hooks/near";
 
-import { addDays, subDays } from "date-fns";
+import { addDays, addMilliseconds } from "date-fns";
 
 export const Vesting = () => {
-  const navigate = useNavigate();
-
   const { glassyWhiteOpaque } = useTheme();
 
-  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
-
-  const items = data?.nft_staking_projects?.data;
-
   const rewards = ["JUMP", "ACOVA", "CGK"];
+
+  const { user } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+
+  const { data: items, loading } = useNearQuery("view_vesting_paginated", {
+    contract: import.meta.env.VITE_LOCKED_CONTRACT,
+    variables: {
+      account_id: user.address,
+      initial_id: "0",
+      size: "30",
+    },
+    skip: !user.isConnected,
+  });
+
+  const { data: token } = useNearQuery("ft_metadata", {
+    contract: "jump_token.testnet",
+    skip: !user.isConnected,
+  });
+
+  console.log("token info", token);
+  console.log("vesting paginated", items);
 
   return (
     <PageContainer loading={loading}>
@@ -50,16 +63,31 @@ export const Vesting = () => {
       <If condition={!loading && !isEmpty(items)}>
         {items && (
           <Stack spacing="32px">
-            {items.map((_, index) => (
-              <VestingCard
-                totalAmount={100}
-                endsAt={addDays(new Date(), 2)}
-                createdAt={subDays(new Date(), 2)}
-                withdraw={() => {}}
-                buyPass={() => {}}
-                key={"vesting-" + index}
-              />
-            ))}
+            {items.map(
+              (
+                {
+                  locked_value,
+                  start_timestamp,
+                  vesting_duration,
+                  withdrawn_tokens,
+                },
+                index
+              ) => (
+                <VestingCard
+                  token={token}
+                  withdraw={() => {}}
+                  buyPass={() => {}}
+                  totalAmount={locked_value}
+                  key={"vesting-" + index}
+                  withdrawnTokens={withdrawn_tokens}
+                  createdAt={new Date(start_timestamp / 1000000)}
+                  endsAt={addMilliseconds(
+                    new Date(start_timestamp / 1000000),
+                    vesting_duration / 1000000
+                  )}
+                />
+              )
+            )}
           </Stack>
         )}
       </If>

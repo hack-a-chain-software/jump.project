@@ -31,6 +31,7 @@ import { useNftStaking } from "../stores/nft-staking-store";
 import { getNear } from "@jump/src/hooks/near";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
+import { useNearQuery } from "react-near";
 
 type Token = {
   nft_id: string;
@@ -87,7 +88,19 @@ export function NFTStakingProject() {
     },
   });
 
-  const tokens = staking?.staked_nfts_by_owner;
+  const { data: abc, error } = useNearQuery("view_staked", {
+    contract: import.meta.env.VITE_STAKING_CONTRACT,
+    variables: {
+      account_id: user.address || "",
+      collection: {
+        type: "n_f_t_contract",
+        account_id: collection,
+      },
+    },
+    skip: !user.isConnected,
+  });
+
+  const tokens = [];
 
   return (
     <PageContainer loading={loading}>

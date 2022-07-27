@@ -6,14 +6,16 @@ import { Button, ValueBox } from "@jump/src/components";
 import { WalletIcon } from "@jump/src/assets/svg";
 
 import { useTheme } from "../../../hooks/theme";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 type Props = {
   endsAt: Date;
+  token: object;
   createdAt: Date;
   buyPass: Function;
   withdraw: Function;
   totalAmount: string | number;
+  withdrawnTokens: string | number;
 };
 
 export function VestingCard(props: Props & BoxProps) {
@@ -24,12 +26,17 @@ export function VestingCard(props: Props & BoxProps) {
     const ends = props.endsAt || new Date();
     const start = props.createdAt || new Date();
     const today = new Date();
-
     const base = differenceInMilliseconds(ends, start);
     const current = differenceInMilliseconds(today, start) * 100;
 
     return Math.round(current / base);
   }, [props.endsAt, props.createdAt]);
+
+  const total = useCallback(() => {
+    return new Intl.NumberFormat("en", {
+      minimumFractionDigits: props.token.decimals,
+    }).format(props.totalAmount);
+  }, [props.totalAmount]);
 
   return (
     <Box
@@ -39,7 +46,15 @@ export function VestingCard(props: Props & BoxProps) {
       background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
       {...(R.omit(
-        ["totalAmount", "createdAt", "endsAt", "withdraw", "buyPass"],
+        [
+          "totalAmount",
+          "createdAt",
+          "endsAt",
+          "withdraw",
+          "buyPass",
+          "withdrawnTokens",
+          "token",
+        ],
         props
       ) as Record<string, string>)}
     >
@@ -66,7 +81,7 @@ export function VestingCard(props: Props & BoxProps) {
               width="max-content"
             >
               <Text color="black" fontSize="14px" fontWeight="700">
-                {`Total amount - ${props.totalAmount} JUMP`}
+                {`Total amount - ${total} JUMP`}
               </Text>
             </Flex>
 
@@ -111,7 +126,7 @@ export function VestingCard(props: Props & BoxProps) {
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Claimed Amount"
-              value="20 JUMP"
+              value={`${props.withdrawnTokens} ${props.token.symbol}`}
               bottomText="Withdrawn amount"
             />
 
