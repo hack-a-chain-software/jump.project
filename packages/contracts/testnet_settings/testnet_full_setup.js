@@ -640,10 +640,10 @@ async function testnetSetup() {
   collection_rps2[auroraTokenAccount.accountId] = "1000";
   collection_rps2[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload2 = {
-    collection_address: nftCollection1Account.accountId,
+    collection_address: nftCollection2Account.accountId,
     collection_owner: ownerAccount.accountId,
     token_address: usdtTokenAccount.accountId,
-    collection_rps2,
+    collection_rps: collection_rps2,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
     round_interval: 200,
@@ -710,10 +710,10 @@ async function testnetSetup() {
   collection_rps3[auroraTokenAccount.accountId] = "1000";
   collection_rps3[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload3 = {
-    collection_address: nftCollection1Account.accountId,
+    collection_address: nftCollection3Account.accountId,
     collection_owner: ownerAccount.accountId,
     token_address: usdtTokenAccount.accountId,
-    collection_rps3,
+    collection_rps: collection_rps3,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
     round_interval: 200,
