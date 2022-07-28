@@ -47,9 +47,7 @@
       "**/postcss",
       "**/postcss/**",
       "**/autoprefixer",
-      "**/autoprefixer/**",
-      "**/@apollo/client",
-      "**/@apollo/client/**"
+      "**/autoprefixer/**"
     ]
   },
   "license": "MIT",

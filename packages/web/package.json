@@ -8,15 +8,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.9",
     "@chakra-ui/react": "^2.2.1",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@near/apollo": "*",
     "@near/contracts": "*",
+    "@near/ts": "*",
     "@types/ramda": "^0.28.14",
     "@types/yup": "^0.29.14",
     "@xstate/react": "^3.0.0",
-    "@apollo/client": "^3.6.9",
     "autoprefixer": "^10.4.7",
     "buffer": "^6.0.3",
     "formik": "^2.2.9",
@@ -35,8 +37,6 @@
     "typed-assert": "^1.0.9",
     "use-mediaquery": "^1.0.1",
     "xstate": "^4.32.0",
-    "@near/apollo": "*",
-    "@near/ts": "*",
     "yup": "^0.32.11",
     "zustand": "^4.0.0-rc.1"
   },
