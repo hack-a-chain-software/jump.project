@@ -1,5 +1,4 @@
 import {
-  Box,
   Flex,
   Image,
   Input,
@@ -7,14 +6,12 @@ import {
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { CardEndWithJumpLogo } from "../assets/svg/cardEnd";
 import { Select, TopCard } from "../components";
 
 /**
@@ -41,7 +38,6 @@ export function Home() {
         </Select>
         <Flex maxW="330px" w="100%">
           <Input
-            // borderColor={useColorModeValue("black", "grey.600")}
             borderWidth="2px"
             h="60px"
             maxW="330px"
@@ -51,7 +47,6 @@ export function Home() {
             _placeholder={{
               color: useColorModeValue("black", "white"),
             }}
-            // borderColor="transparent"
             outline="none"
             px="20px"
           />
