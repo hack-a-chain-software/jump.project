@@ -1,6 +1,5 @@
 import create from "zustand";
 import { WalletConnection } from "near-api-js";
-import { getAmount } from "../hooks/near";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
 
 export const useVestingStore = create<{
