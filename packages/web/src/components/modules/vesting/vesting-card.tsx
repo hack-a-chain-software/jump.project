@@ -185,6 +185,9 @@ export function VestingCard(props: Props & BoxProps) {
               </Button>
 
               <Button
+                disabled={
+                  props.availableWidthdraw <= Math.pow(10, props.token.decimals)
+                }
                 onClick={() =>
                   withdraw("0", storage, wallet as WalletConnection)
                 }
