@@ -2,12 +2,9 @@ import { Flex, FlexProps, Spinner } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 import { motion } from "framer-motion";
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-interface Props extends PropsWithChildren<FlexProps> {
-  loading: boolean;
-}
-
-export const PageContainer = (props: Partial<Props>) => {
+export const PageContainer = (
+  props: PropsWithChildren<FlexProps> & { loading: boolean }
+) => {
   return (
     <Flex
       direction="column"
