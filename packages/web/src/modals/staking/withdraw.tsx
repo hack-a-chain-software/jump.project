@@ -1,18 +1,53 @@
 import { Flex, Input, Text } from "@chakra-ui/react";
+import { X_JUMP_TOKEN } from "@/env/contract";
+import { useNearContractsAndWallet } from "@/context/near";
 import { useFormik } from "formik";
+import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
 
 interface IWithdrawModalProps
   extends Omit<DialogParams, "children" | "title" | "footer"> {
-  onSubmit: () => void;
+  _onSubmit: (values: typeof initialValues) => void | Promise<void>;
 }
 
-export const WithdrawModal = ({ onSubmit, ...rest }: IWithdrawModalProps) => {
-  const { values, setFieldValue, handleSubmit } = useFormik({
-    onSubmit: () => {
-      onSubmit();
+export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+
+  const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
+    "ft_balance_of",
+    {
+      contract: X_JUMP_TOKEN,
+      variables: {
+        account_id: wallet?.getAccountId(),
+      },
+      poolInterval: 1000 * 60,
+      skip: !isFullyConnected,
+      debug: true,
+    }
+  );
+
+  const { data: jumpMetadata, loading } = useNearQuery<
+    {
+      decimals: number;
+    },
+    { account_id: string }
+  >("ft_metadata", {
+    contract: X_JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    debug: true,
+  });
+
+  const { values, setFieldValue, handleSubmit, isSubmitting } = useFormik({
+    onSubmit: async (values) => {
+      try {
+        await _onSubmit(values);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        rest.onClose();
+      }
     },
     initialValues: initialValues,
     validationSchema: validationSchema,
@@ -28,6 +63,8 @@ export const WithdrawModal = ({ onSubmit, ...rest }: IWithdrawModalProps) => {
           justifyContent="space-between"
           bg="white"
           color="black"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
           w="100%"
           onClick={() => handleSubmit()}
         >
@@ -68,7 +105,8 @@ export const WithdrawModal = ({ onSubmit, ...rest }: IWithdrawModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance: 1000 Jump
+          Balance: {Number(balance) * 10 ** -(jumpMetadata?.decimals || 0)}{" "}
+          xJUMP
         </Text>
       </Flex>
     </ModalImageDialog>

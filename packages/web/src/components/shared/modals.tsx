@@ -25,6 +25,8 @@ export function ModalImageDialog({
   isOpen = false,
   onClose = () => {},
   title = "",
+  minW = "700px",
+  minH = "400px",
   footer = null,
   children = null,
   color = "white",
@@ -44,6 +46,7 @@ export function ModalImageDialog({
     <Modal
       closeOnEsc={!closeLocked}
       closeOnOverlayClick={!closeLocked}
+      blockScrollOnMount={false}
       isCentered
       isOpen={isOpen}
       onClose={onClose}
@@ -56,8 +59,8 @@ export function ModalImageDialog({
         id="content"
         flexDirection="row"
         bg="transparent"
-        minW="700px"
-        minH="400px"
+        minW={minW}
+        minH={minH}
         borderRadius={modalRadius}
         {...modalContentProps}
       >

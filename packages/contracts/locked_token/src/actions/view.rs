@@ -33,16 +33,16 @@ impl Contract {
         .skip(initial_id.0 as usize)
         .take(size.0 as usize)
         .map(|vesting| {
-            let available = vesting.calculate_available_withdraw(env::block_timestamp());
-            VestingSerializable {
-              beneficiary: vesting.beneficiary,
-              locked_value: vesting.locked_value,
-              start_timestamp: vesting.start_timestamp,
-              vesting_duration: vesting.vesting_duration,
-              fast_pass: vesting.fast_pass,
-              withdrawn_tokens: vesting.withdrawn_tokens,
-              available_to_withdraw: U128(available),
-            }
+          let available = vesting.calculate_available_withdraw(env::block_timestamp());
+          VestingSerializable {
+            beneficiary: vesting.beneficiary,
+            locked_value: vesting.locked_value,
+            start_timestamp: vesting.start_timestamp,
+            vesting_duration: vesting.vesting_duration,
+            fast_pass: vesting.fast_pass,
+            withdrawn_tokens: vesting.withdrawn_tokens,
+            available_to_withdraw: U128(available),
+          }
         })
         .collect(),
       None => Vec::new(),

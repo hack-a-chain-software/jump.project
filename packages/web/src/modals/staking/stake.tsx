@@ -1,18 +1,54 @@
 import { Flex, Input, Text } from "@chakra-ui/react";
+import { JUMP_TOKEN } from "@/env/contract";
+import { useNearContractsAndWallet } from "@/context/near";
 import { useFormik } from "formik";
+import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
 
 interface IStakeModalProps
   extends Omit<DialogParams, "children" | "footer" | "title"> {
-  onSubmit: () => void;
+  _onSubmit: (values: typeof initialValues) => void | Promise<void>;
 }
 
-export const StakeModal = ({ onSubmit, ...rest }: IStakeModalProps) => {
-  const { values, setFieldValue, handleSubmit } = useFormik({
-    onSubmit: () => {
-      onSubmit();
+export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
+  const { wallet, contracts } = useNearContractsAndWallet();
+
+  const { data: balanceJump = "0" } = useNearQuery<
+    string,
+    { account_id: string }
+  >("ft_balance_of", {
+    contract: JUMP_TOKEN,
+    variables: {
+      account_id: wallet?.getAccountId(),
+    },
+    poolInterval: 1000 * 60,
+    skip: !contracts?.staking.isConnected,
+    debug: true,
+  });
+
+  const { data: jumpMetadata } = useNearQuery<
+    {
+      decimals: number;
+    },
+    { account_id: string }
+  >("ft_metadata", {
+    contract: JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    skip: !contracts?.staking.isConnected,
+    debug: true,
+  });
+
+  const { values, setFieldValue, handleSubmit, isSubmitting } = useFormik({
+    onSubmit: async (values) => {
+      try {
+        await _onSubmit(values);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        rest.onClose();
+      }
     },
     initialValues: initialValues,
     validationSchema: validationSchema,
@@ -27,7 +63,10 @@ export const StakeModal = ({ onSubmit, ...rest }: IStakeModalProps) => {
         <Button
           justifyContent="space-between"
           bg="white"
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
           color="black"
+          onClick={() => handleSubmit()}
           w="100%"
         >
           Stake
@@ -68,7 +107,8 @@ export const StakeModal = ({ onSubmit, ...rest }: IStakeModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance: 1000 Jump
+          Balance: {Number(balanceJump) * 10 ** -(jumpMetadata?.decimals || 0)}{" "}
+          JUMP
         </Text>
       </Flex>
     </ModalImageDialog>

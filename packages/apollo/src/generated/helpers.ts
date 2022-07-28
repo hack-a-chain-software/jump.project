@@ -193,6 +193,17 @@ export type QueryFieldPolicy = {
   nft_staking_projects?: FieldPolicy<any> | FieldReadFunction<any>;
   staking?: FieldPolicy<any> | FieldReadFunction<any>;
 };
+export type StakedMetaKeySpecifier = (
+  | "description"
+  | "media"
+  | "title"
+  | StakedMetaKeySpecifier
+)[];
+export type StakedMetaFieldPolicy = {
+  description?: FieldPolicy<any> | FieldReadFunction<any>;
+  media?: FieldPolicy<any> | FieldReadFunction<any>;
+  title?: FieldPolicy<any> | FieldReadFunction<any>;
+};
 export type StakedNFTKeySpecifier = (
   | "collection_id"
   | "nft_id"
@@ -200,6 +211,7 @@ export type StakedNFTKeySpecifier = (
   | "rewards_acova"
   | "rewards_jump"
   | "rewards_project_token"
+  | "staked_meta"
   | "staked_timestamp"
   | StakedNFTKeySpecifier
 )[];
@@ -210,6 +222,7 @@ export type StakedNFTFieldPolicy = {
   rewards_acova?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards_jump?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards_project_token?: FieldPolicy<any> | FieldReadFunction<any>;
+  staked_meta?: FieldPolicy<any> | FieldReadFunction<any>;
   staked_timestamp?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type StrictTypedTypePolicies = {
@@ -289,6 +302,13 @@ export type StrictTypedTypePolicies = {
       | QueryKeySpecifier
       | (() => undefined | QueryKeySpecifier);
     fields?: QueryFieldPolicy;
+  };
+  StakedMeta?: Omit<TypePolicy, "fields" | "keyFields"> & {
+    keyFields?:
+      | false
+      | StakedMetaKeySpecifier
+      | (() => undefined | StakedMetaKeySpecifier);
+    fields?: StakedMetaFieldPolicy;
   };
   StakedNFT?: Omit<TypePolicy, "fields" | "keyFields"> & {
     keyFields?:

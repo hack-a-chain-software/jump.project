@@ -15,4 +15,5 @@ pub const ERR_104: &str = "ERR_104: Vesting schedule already finalized";
 /// storage functions
 pub const ERR_201: &str = "ERR_201: Insuficient storage deposit";
 pub const ERR_202: &str = "ERR_202: Must deposit at least the minimum amount to register";
-pub const ERR_203: &str = "ERR_203: Must withdraw all pending vestings to cancel or use force option";
+pub const ERR_203: &str =
+  "ERR_203: Must withdraw all pending vestings to cancel or use force option";

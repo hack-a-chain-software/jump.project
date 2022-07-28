@@ -42,7 +42,11 @@ impl Contract {
     let metadata = TokenMetadata {
       title: Some("Generic NFT".to_string()),
       description: None,
-      media: Some(format!("{}/{}", self.metadata.get().unwrap().base_uri.unwrap().clone(), token_id)),
+      media: Some(format!(
+        "{}/{}",
+        self.metadata.get().unwrap().base_uri.unwrap().clone(),
+        token_id
+      )),
       media_hash: None,
       copies: Some(self.counter),
       issued_at: None,

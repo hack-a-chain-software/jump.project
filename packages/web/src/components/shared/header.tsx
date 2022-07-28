@@ -1,13 +1,13 @@
 import { Flex, useColorMode } from "@chakra-ui/react";
-import { useNearUser } from "react-near";
 import { MoonIcon, WalletIcon } from "../../assets/svg";
 import { JumpTextIcon } from "../../assets/svg/jump-text";
-import { contractName } from "../../env/contract";
 import { Button } from "./button";
 import { If } from "./if";
+import { useNearContractsAndWallet } from "@/context/near";
 
 export function Header() {
-  const user = useNearUser(contractName);
+  const { connectWallet, disconnectWallet, isFullyConnected } =
+    useNearContractsAndWallet();
   const { toggleColorMode } = useColorMode();
 
   return (
@@ -21,15 +21,15 @@ export function Header() {
             <MoonIcon />
           </Button>
           <If
-            condition={!!user.isConnected}
+            condition={!!isFullyConnected}
             fallback={
-              <Button onClick={() => user.connect()}>
+              <Button onClick={() => connectWallet()}>
                 Connect Wallet
                 <WalletIcon />
               </Button>
             }
           >
-            <Button onClick={user.disconnect}>
+            <Button onClick={disconnectWallet}>
               Disconnect Wallet
               <WalletIcon />
             </Button>
