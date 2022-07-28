@@ -83,16 +83,16 @@ export function NFTStakingCard(props: Props & BoxProps) {
               fontWeight="600"
               letterSpacing="-0.03em"
             >
-              Earn JUMP, ACOVA, CGK as rewards by staking on{" "}
-              {props.collectionName} staking pool
+              Earn {props.tokens.map((e) => `${e.name}, `)} as rewards by
+              staking on {props.collectionName} staking pool
             </Text>
           </Flex>
           <Flex gap={5}>
-            {rewards.map((token, i) => (
+            {props.tokens.map((token, i) => (
               <ValueBox
                 borderColor={glassyWhiteOpaque}
-                title={token + " Rewards"}
-                value={10 + " " + token}
+                title={token.name + " Rewards"}
+                value={token.ammount + " " + token.name}
                 bottomText={bottomText}
                 key={i}
               />

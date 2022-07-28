@@ -79,7 +79,11 @@ impl Vesting {
     let start_timestamp = self.start_timestamp.0;
 
     assert!(!self.fast_pass, "{}", ERR_103);
-    assert!(start_timestamp + duration > current_timestamp, "{}", ERR_104);
+    assert!(
+      start_timestamp + duration > current_timestamp,
+      "{}",
+      ERR_104
+    );
 
     let elapsed_duration = current_timestamp - start_timestamp;
     let remaining_duration = duration - elapsed_duration;

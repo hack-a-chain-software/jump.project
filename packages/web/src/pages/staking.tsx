@@ -1,6 +1,5 @@
-import BN from "bn.js";
 import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import { ArrowRightIcon } from "../assets/svg/arrow-right";

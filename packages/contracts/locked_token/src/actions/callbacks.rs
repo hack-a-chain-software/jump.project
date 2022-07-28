@@ -31,10 +31,7 @@ impl Contract {
   }
 
   #[private]
-  pub fn callback_send_to_xtoken(
-    &mut self,
-    quantity: U128
-  ) {
+  pub fn callback_send_to_xtoken(&mut self, quantity: U128) {
     if !is_promise_success() {
       self.fast_pass_receivals = U128(self.fast_pass_receivals.0 + quantity.0)
     }

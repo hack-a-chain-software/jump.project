@@ -91,7 +91,7 @@ impl StorageManagement for Contract {
         .is_some());
       self.vesting_schedules.remove(&account_id);
       self.users.remove(&account_id);
-      // ft_functionality already does a deposit worth 
+      // ft_functionality already does a deposit worth
       // self.ft_functionality.storage_balance_bounds().min.0 + 1,
       // so we reduce it from the promise
       Promise::new(account_id.clone()).transfer(
