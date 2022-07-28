@@ -130,7 +130,7 @@ describe("NFT Staking Contract Integration Tests", () => {
         name: "collection",
         symbol: "CLT",
         icon: null,
-        base_uri: null,
+        base_uri: "null",
         reference: null,
         reference_hash: null,
       },
@@ -162,7 +162,10 @@ describe("NFT Staking Contract Integration Tests", () => {
 
   it("guardians should be able to create a staking program", async () => {
     const collectionRps = Object.fromEntries(
-      tokenContractAccounts.map((account) => [account.accountId, 10])
+      tokenContractAccounts.map((account) => [
+        account.accountId,
+        (10).toString(),
+      ])
     );
 
     await guardianAccount.call(
@@ -174,8 +177,8 @@ describe("NFT Staking Contract Integration Tests", () => {
           collection_owner: collectionOwnerAccount.accountId,
           token_address: tokenContractAccounts[2].accountId,
           collection_rps: collectionRps,
-          min_staking_period: 86400, // day in seconds
-          early_withdraw_penalty: DENOM / 20, // 5%
+          min_staking_period: (86400).toString(), // day in seconds
+          early_withdraw_penalty: (DENOM / 20).toString(), // 5%
           round_interval: 1,
         },
       },
@@ -243,27 +246,13 @@ describe("NFT Staking Contract Integration Tests", () => {
 
     /*
             this isn't working in test env for reasons (it's a cross-contract call)
-
-            const undo = await stakerAccount.call(
-                nftContractAccount,
-                "nft_transfer_call",
-                {
-                    receiver_id: stakingContractAccount.accountId,
-                    token_id: token.token_id,
-                    msg: JSON.stringify({
-                        type: 'Stake'
-                    })
-                },
-                { ...DEPOSIT_ONE_YOCTO, gas: GAS_LIMIT }
-            );
         */
 
-    const undo = await nftContractAccount.call(
-      stakingContractAccount,
-      "nft_on_transfer",
+    const undo = await stakerAccount.call(
+      nftContractAccount,
+      "nft_transfer_call",
       {
-        sender_id: stakerAccount.accountId,
-        previous_owner_id: stakerAccount.accountId,
+        receiver_id: stakingContractAccount.accountId,
         token_id: token.token_id,
         msg: JSON.stringify({
           type: "Stake",
@@ -271,7 +260,20 @@ describe("NFT Staking Contract Integration Tests", () => {
       },
       { ...DEPOSIT_ONE_YOCTO, gas: GAS_LIMIT }
     );
-    expect(undo).toBe(false);
+
+    // const undo = await nftContractAccount.call(
+    //   stakingContractAccount,
+    //   "nft_on_transfer",
+    //   {
+    //     sender_id: stakerAccount.accountId,
+    //     previous_owner_id: stakerAccount.accountId,
+    //     token_id: token.token_id,
+    //     msg: JSON.stringify({
+    //       type: "Stake",
+    //     }),
+    //   },
+    //   { ...DEPOSIT_ONE_YOCTO, gas: GAS_LIMIT }
+    // );
 
     /*
             now this doesn't work because the library sucks
