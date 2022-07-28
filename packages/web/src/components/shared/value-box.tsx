@@ -34,7 +34,7 @@ export function ValueBox({
       <Text fontSize="14px" letterSpacing="-0.03em" fontWeight="bold">
         {title}
       </Text>
-      <Text mt="auto" lineHeight="28px" fontSize="28px" fontWeight="bold">
+      <Text lineHeight="28px" fontSize="28px" fontWeight="bold">
         {value}
       </Text>
       <If condition={!!bottomText}>
