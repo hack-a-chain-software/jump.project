@@ -10,7 +10,7 @@ create table if not exists x_token_ratios (
 
 create table if not exists launchpad_investors (
     account_id text primary key,
-    staked_token numeric(40),s
+    staked_token numeric(40),
     last_check timestamptz
 );
 

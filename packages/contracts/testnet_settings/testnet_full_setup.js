@@ -593,7 +593,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection1Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -606,7 +606,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection1Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -625,7 +625,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection1Account.accountId,
         },
       }),
@@ -663,7 +663,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection2Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -676,7 +676,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection2Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -695,7 +695,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection2Account.accountId,
         },
       }),
@@ -733,7 +733,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection3Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -746,7 +746,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection3Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -765,7 +765,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection3Account.accountId,
         },
       }),
