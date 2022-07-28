@@ -61,7 +61,7 @@ impl Event for NftStakingEvent {
                     collection_address,
                     collection_owner,
                     token_address,
-                    collection_rps,
+                    collection_rps: _,
                     min_staking_period,
                     early_withdraw_penalty,
                     round_interval,
@@ -149,7 +149,7 @@ impl Event for NftStakingEvent {
             Self::UnstakeNft(
                 [UnstakeNftLog {
                     token_id,
-                    withdrawn_balance,
+                    withdrawn_balance: _,
                 }],
             ) => {
                 let (collection_id, nft_id) = split_ids(token_id);

@@ -1,4 +1,12 @@
-/* Esses aq eu n tenho ideia */
+/* X token */
+create table if not exists x_token_ratios (
+    key_column bigserial primary key,
+    time_event timestamptz,
+    base_token_amount numeric(40),
+    x_token_amount numeric(40)
+);
+
+/* Launchpad */
 
 create table if not exists launchpad_investors (
     account_id text primary key,
@@ -67,7 +75,7 @@ create table if not exists allocations (
     total_allocation numeric(21)
 );
 
-/* Esses aqui eu tenho */
+/* NFT STaking */
 
 create table if not exists staking_programs (
     collection_id text primary key,

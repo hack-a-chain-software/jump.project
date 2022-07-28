@@ -1,6 +1,6 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
-use near_sdk::json_types::U128;
+use near_sdk::json_types::{U128, U64};
 use near_sdk::serde_json::json;
 use near_sdk::{
   env, log, near_bindgen, utils::assert_one_yocto, AccountId, Balance, BorshStorageKey, Gas,
@@ -93,7 +93,8 @@ impl Contract {
       "type": "mint_x_token",
       "normal_token_deposit": U128(quantity_deposited),
       "base_token_treasury_after_deposit": U128(self.base_token_treasury),
-      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
+      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply),
+      "timestamp": U64(env::block_timestamp())
     })
     .to_string();
     FtMint {
@@ -119,7 +120,8 @@ impl Contract {
     let memo_string = &json!({
       "normal_token_withdraw": U128(normal_token_withdraw),
       "base_token_treasury_after_deposit": U128(self.base_token_treasury),
-      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
+      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply),
+      "timestamp": U64(env::block_timestamp())
     })
     .to_string();
     FtBurn {
@@ -149,7 +151,8 @@ impl Contract {
       "type": "revert_burn_x_token",
       "normal_token_deposit": U128(normal_tokens_released),
       "base_token_treasury_after_deposit": U128(self.base_token_treasury),
-      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
+      "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply),
+      "timestamp": U64(env::block_timestamp())
     })
     .to_string();
     FtMint {
@@ -169,11 +172,12 @@ impl Contract {
         "standard": "HacXtoken",
         "version": "1.0.0",
         "event": "profit_deposit",
-        "data": {
+        "data": [{
           "quantity_deposited": U128(quantity_deposited),
           "base_token_treasury_after_deposit": U128(self.base_token_treasury),
-          "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply)
-        }
+          "x_token_supply_after_deposit": U128(self.ft_functionality.total_supply),
+          "timestamp": U64(env::block_timestamp())
+        }]
       })
       .to_string()
     )

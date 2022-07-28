@@ -213,8 +213,8 @@ impl Event for LaunchpadEvent {
             &Self::ProjectFundListing(
                 [ProjectFundListingLog {
                     listing_id,
-                    tokens_sale,
-                    tokens_liquidity,
+                    tokens_sale: _,
+                    tokens_liquidity: _,
                 }],
             ) => {
                 conn.execute(
@@ -228,8 +228,8 @@ impl Event for LaunchpadEvent {
             &Self::ProjectWithdrawListing(
                 [ProjectWithdrawListingLog {
                     listing_id,
-                    project_tokens_withdraw,
-                    price_tokens_withdraw,
+                    project_tokens_withdraw: _,
+                    price_tokens_withdraw: _,
                     project_status,
                 }],
             ) => {
@@ -249,7 +249,7 @@ impl Event for LaunchpadEvent {
                     investor_id,
                     listing_id,
                     project_status,
-                    sale_phase,
+                    sale_phase: _,
                     allocations_purchased,
                     tokens_purchased,
                     total_allocations_sold,
@@ -318,7 +318,7 @@ impl Event for LaunchpadEvent {
                 [InvestorUnstakeMembershipLog {
                     investor_id,
                     token_quantity,
-                    new_membership_level,
+                    new_membership_level: _,
                 }],
             ) => {
                 conn.execute(
