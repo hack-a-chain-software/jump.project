@@ -295,13 +295,23 @@ export const useLaunchpadStore = create<{
         });
       }
 
+      const { tiers_minimum_tokens } = await contract.view_contract_settings();
+
+      const { staked_token } = await contract.view_investor({
+        account_id: connection.getAccountId(),
+      });
+
+      const minTokens = tiers_minimum_tokens[desiredLevel - 1];
+
       transactions.push({
         receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
         functionCalls: [
           {
             methodName: "decrease_membership_tier",
             args: {
-              desired_level: desiredLevel,
+              withdraw_amount: new bn(staked_token)
+                .sub(new bn(minTokens))
+                .toString(),
             },
             gas: NearConstants.AttachedGas,
           },
