@@ -12,10 +12,8 @@ import { useTheme } from "@jump/src/hooks/theme";
 import { getNear } from "@jump/src/hooks/near";
 
 import { addMilliseconds } from "date-fns";
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { formatNumber } from "@near/ts";
-import { WalletConnection } from "near-api-js";
-import { useVestingStore } from "@jump/src/stores/vesting-store";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque } = useTheme();
