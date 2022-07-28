@@ -1,0 +1,17 @@
+query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
+  nft_staking_projects(limit: $limit, offset: $offset) {
+    pageSize
+    totalCount
+    itemsPerPage
+    hasNextPage
+    data {
+      collection_id
+      collection_meta {
+        image
+        name
+      }
+      collection_owner_id
+      token_address
+    }
+  }
+}

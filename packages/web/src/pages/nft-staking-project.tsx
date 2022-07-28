@@ -1,56 +1,141 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Box, Flex, Grid, Stack, Text, Button } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { WalletIcon } from "../assets/svg";
+import isEqual from "lodash/isEqual";
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  If,
   GradientButton,
   GradientText,
   NFTStakingCard,
   PageContainer,
-  TopCard,
   ValueBox,
-} from "../components";
-import { BackButton } from "../components/shared/back-button";
+  StakeModal,
+  TokenCard,
+  BackButton,
+  TokenAccordion,
+} from "@jump/src/components";
 import { useTheme } from "../hooks/theme";
-
-import { contractName } from "../env/contract";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
-import { useCollection } from "../stores/collection";
-import { useNearWallet, useNearUser } from "react-near";
+import { getNear } from "@jump/src/hooks/near";
 
-import { ModalImageDialog } from "../components";
+import { useQuery } from "@apollo/client";
+import { StakingProjectDocument } from "@near/apollo";
+import isEmpty from "lodash/isEmpty";
+import toast from "react-hot-toast";
 
-type Props = {};
+type Token = {
+  nft_id: string;
+  staked_meta: object;
+};
 
-export function NFTStakingProject(params: Props) {
+export function NFTStakingProject(params: {}) {
   const navigate = useNavigate();
+
+  const { id = "" } = useParams();
+  const collection = window.atob(id);
+
   const { jumpGradient, darkPurple } = useTheme();
 
   const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState<Token | null>(null);
 
-  const wallet = useNearWallet();
-  const user = useNearUser(contractName);
-
-  const { init, stake, unstake, unstakeAll, claimRewards } = useNftStaking();
-
-  const { getTokens, contract } = useCollection();
+  const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
+  const { init, unstake, claimRewards } = useNftStaking();
 
   useEffect(() => {
     if (user.isConnected) {
       init(wallet as WalletConnection);
-
-      getTokens(wallet as WalletConnection);
     }
   }, [user.isConnected]);
 
+  const [selected, setSelected] = useState<Array<string>>([]);
+
+  const select = (tokenId) => {
+    if (selected.includes(tokenId)) {
+      setSelected([...selected.filter((token) => token !== tokenId)]);
+
+      return;
+    }
+
+    setSelected([...selected, tokenId]);
+  };
+
+  const { data, loading } = useQuery(StakingProjectDocument, {
+    variables: {
+      collection,
+      accountId: user.address || "",
+    },
+  });
+
+  const page = data?.staking;
+  const tokens = page?.staked_nfts_by_owner;
+
+  const claim = () => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    if (true) {
+      toast("You don't have rewards available");
+
+      return;
+    }
+
+    claimRewards();
+  };
+
+  const toggleStakeModal = () => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    setShow(!show);
+  };
+
+  const unstakeTokens = (items) => {
+    if (!user.isConnected) {
+      user.connect();
+
+      return;
+    }
+
+    if (isEmpty(tokens)) {
+      toast("You don't have Tokens to unstake");
+
+      return;
+    }
+
+    if (isEmpty(items)) {
+      toast("Select Tokens to unstake");
+
+      return;
+    }
+
+    unstake(items, collection);
+  };
+
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
+      <StakeModal
+        isOpen={show}
+        collection={collection}
+        onClose={() => {
+          setShow(!show);
+        }}
+      />
+
       <BackButton onClick={() => navigate("/nft-staking")} />
       <NFTStakingCard
-        collectionLogo="https://d1fdloi71mui9q.cloudfront.net/7gfrOO2CQ7OSk7s9Bpiv_roo-king.png"
-        collectionName="Classy Kangaroos"
+        collectionLogo={page?.collection_meta?.image}
+        collectionName={page?.collection_meta?.name}
         tokens={[
           {
             name: "JUMP",
@@ -73,21 +158,24 @@ export function NFTStakingProject(params: Props) {
           </Text>
           <Grid gap={3} gridTemplateColumns="1fr 1fr">
             <ValueBox
+              height="139px"
               title="Your JUMP Rewards"
-              value="400 JUMP"
-              bottomText="Your Total JUMP Rewards"
+              value={user.isConnected ? "0 JUMP" : "Connect Wallet"}
+              bottomText={user.isConnected && "Your Total JUMP Rewards"}
             />
             <ValueBox
+              height="139px"
               title="Your ACOVA Rewards"
-              value="80 ACOVA"
-              bottomText="Your Total ACOVA Rewards"
+              value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
+              bottomText={user.isConnected && "Your Total ACOVA Rewards"}
             />
           </Grid>
           <ValueBox
             mt={3}
+            height="139px"
             title="Your ACOVA Rewards"
-            value="80 ACOVA"
-            bottomText="Your Total ACOVA Rewards"
+            value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
+            bottomText={user.isConnected && "Your Total ACOVA Rewards"}
           />
         </Flex>
         <Flex flex={1}>
@@ -125,28 +213,30 @@ export function NFTStakingProject(params: Props) {
               </Text>
               <Stack mt="50px" gap={1}>
                 <GradientButton
-                  onClick={() => stake(wallet, contract)}
+                  onClick={() => toggleStakeModal()}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
                   Stake NFT <WalletIcon />
                 </GradientButton>
-                <GradientButton
+                {/* <GradientButton
                   onClick={() => unstake()}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
                   Unstake NFT <WalletIcon />
-                </GradientButton>
+                </GradientButton> */}
                 <GradientButton
-                  onClick={() => unstakeAll()}
+                  onClick={() =>
+                    unstakeTokens(tokens.map(({ nft_id }) => nft_id))
+                  }
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
                 <GradientButton
-                  onClick={() => claimRewards()}
+                  onClick={() => claim()}
                   bg={darkPurple}
                   justifyContent="space-between"
                 >
@@ -158,28 +248,128 @@ export function NFTStakingProject(params: Props) {
         </Flex>
       </Flex>
 
-      <ModalImageDialog
-        image="https://images.unsplash.com/photo-1523568114750-b593de7df18f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
-        isOpen={show}
-        title="Understanding Staking"
-        onClose={() => {
-          setShow(false);
-        }}
-        footer={
-          <Button bg="white" color="black" w="100%">
-            Read More on Docs
-          </Button>
+      <If
+        fallback={
+          user.isConnected && (
+            <Flex
+              pt="20px"
+              marginX="auto"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+            >
+              <Text
+                fontWeight="800"
+                fontSize={30}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                You don't have a staked NFT
+              </Text>
+
+              <Text
+                _hover={{
+                  opacity: 0.8,
+                }}
+                onClick={() => toggleStakeModal()}
+                marginTop="-12px"
+                cursor="pointer"
+                color="#761BA0"
+                fontWeight="800"
+                fontSize={34}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                Stake Now!
+              </Text>
+            </Flex>
+          )
         }
-        shouldBlurBackdrop
+        condition={user.isConnected && tokens?.length > 0}
       >
-        {}
-        <Text color="white" fontSize={16}>
-          Staking is a way to earn rewards in crypto currencies. You lock your
-          tokens on our Staking Pool, for earning JUMP Tokens and getting access
-          to tickets and invest inside the launchpad, the longer you lock your
-          tokens more rewards you get! Still Confused?
-        </Text>
-      </ModalImageDialog>
+        <Flex
+          paddingTop="66px"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Flex>
+            <Text fontSize="24px" fontWeight="700">
+              Your Staked NFTS:
+            </Text>
+          </Flex>
+
+          <Flex>
+            <Button
+              bg="white"
+              borderRadius="15px"
+              height="60px"
+              w="307px"
+              color="black"
+              display="flex"
+              alignItems="center"
+              onClick={() => unstakeTokens(selected)}
+            >
+              <Text marginRight="16px">Unstake Selected NFTs!</Text>
+
+              <WalletIcon />
+            </Button>
+          </Flex>
+        </Flex>
+
+        <AnimatePresence initial={false}>
+          {focused && (
+            <motion.section
+              initial="collapsed"
+              animate="open"
+              exit="collapsed"
+              variants={{
+                open: { opacity: 1, height: "auto" },
+                collapsed: { opacity: 0, height: 0, overflow: "hidden" },
+              }}
+              transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+            >
+              <TokenAccordion
+                token={focused}
+                select={select}
+                selected={selected && selected.includes(focused?.nft_id)}
+              />
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        <Flex paddingBottom="300px">
+          <Grid
+            columnGap="8px"
+            rowGap="37px"
+            width="100%"
+            justifyContent="space-between"
+            gridTemplateColumns="repeat(auto-fill, 309px)"
+          >
+            {tokens &&
+              tokens.map((token, index) => (
+                <Flex
+                  key={"nft-staked-tokens-" + index}
+                  onClick={() =>
+                    setFocused(isEqual(token, focused) ? null : token)
+                  }
+                  borderRadius="20px"
+                  border={
+                    isEqual(token, focused)
+                      ? "solid 1px #761BA0"
+                      : "solid 1px transparent"
+                  }
+                >
+                  <TokenCard
+                    {...token}
+                    select={select}
+                    key={"nft-staking-collection-token" + index}
+                    selected={selected && selected.includes(token.nft_id)}
+                  />
+                </Flex>
+              ))}
+          </Grid>
+        </Flex>
+      </If>
     </PageContainer>
   );
 }

@@ -1,24 +1,29 @@
 import create from "zustand";
-import { Contract, WalletConnection } from "near-api-js";
+import {
+  Contract,
+  WalletConnection,
+  ConnectedWalletAccount,
+} from "near-api-js";
 
 export const useCollection = create<{
   contract: any;
-  init: (
-    walletConnection: WalletConnection,
-    collectionId: string
+  tokens: Array<any>;
+  loading: boolean;
+  initContract: (
+    account: ConnectedWalletAccount,
+    collection: string
   ) => Promise<void>;
-  getTokens: (walletConnection: WalletConnection) => Promise<any>;
+  fetchTokens: (
+    connection: WalletConnection,
+    collection: string
+  ) => Promise<void>;
 }>((set, get) => ({
+  tokens: [],
+  loading: true,
   contract: null,
 
-  init: async (walletConnection: WalletConnection, collectionId: string) => {
-    if (get().contract && get().contract.contractId === collectionId) {
-      return;
-    }
-
-    const account = await walletConnection.account();
-
-    const contract = new Contract(account, collectionId, {
+  initContract: async (account: ConnectedWalletAccount, collection: string) => {
+    const contract = new Contract(account, collection, {
       viewMethods: ["nft_tokens_for_owner"],
       changeMethods: ["nft_transfer_call"],
     });
@@ -32,22 +37,28 @@ export const useCollection = create<{
     }
   },
 
-  getTokens: async (
-    walletConnection: WalletConnection,
-    collectionId: string = "negentra_base_nft.testnet"
-  ) => {
-    if (!get().contract) {
-      await get().init(walletConnection, collectionId);
+  fetchTokens: async (connection: WalletConnection, collection: string) => {
+    set({
+      loading: true,
+    });
+
+    const account = await connection.account();
+
+    if (!get().contract || get().contract.account_id !== collection) {
+      await get().initContract(account, collection);
     }
 
-    const account = await walletConnection.account();
-
-    const nfts = await get().contract?.nft_tokens_for_owner({
+    const tokens = await get().contract?.nft_tokens_for_owner({
       account_id: account.accountId,
     });
 
-    console.log(nfts);
-
-    return nfts;
+    try {
+      set({
+        tokens,
+        loading: false,
+      });
+    } catch (e) {
+      console.warn(e);
+    }
   },
 }));

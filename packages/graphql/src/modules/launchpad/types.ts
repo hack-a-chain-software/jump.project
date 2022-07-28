@@ -83,10 +83,10 @@ export default gql`
       status: StatusEnum
       visibility: VisibilityEnum
       showMineOnly: String
-      search: String
       limit: Int
       offset: Int
     ): LaunchpadPage!
     investor_info(account_id: ID!): LaunchpadInvestor
+    launchpad_project(project_id: ID!): LaunchpadListing
   }
 `;

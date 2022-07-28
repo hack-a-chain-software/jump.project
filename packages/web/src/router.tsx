@@ -1,4 +1,6 @@
 import { Flex, Grid } from "@chakra-ui/react";
+import { Toast } from "@jump/src/components";
+import { Toaster, resolveValue } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
 import { useTheme } from "./hooks/theme";
@@ -35,6 +37,8 @@ function Router() {
           </Routes>
         </Grid>
       </BrowserRouter>
+
+      <Toaster position="top-center" />
     </Flex>
   );
 }
