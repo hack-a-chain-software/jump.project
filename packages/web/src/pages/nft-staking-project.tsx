@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/ban-types */
 import { Box, Flex, Grid, Stack, Text, Button } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -16,11 +17,11 @@ import {
   TokenCard,
   BackButton,
   TokenAccordion,
-} from "@jump/src/components";
+} from "@/components";
 import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking";
-import { getNear } from "@jump/src/hooks/near";
+import { getNear } from "@/hooks/near";
 
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
@@ -29,10 +30,17 @@ import toast from "react-hot-toast";
 
 type Token = {
   nft_id: string;
-  staked_meta: object;
+  staked_meta: {
+    media: string;
+    title?: string;
+    description?: string;
+  };
+  jumpRewards: string;
+  acovaRewards: string;
+  trpRewards: string;
 };
 
-export function NFTStakingProject(params: {}) {
+export function NFTStakingProject() {
   const navigate = useNavigate();
 
   const { id = "" } = useParams();
@@ -81,6 +89,7 @@ export function NFTStakingProject(params: {}) {
       return;
     }
 
+    // eslint-disable-next-line no-constant-condition
     if (true) {
       toast("You don't have rewards available");
 
@@ -219,13 +228,6 @@ export function NFTStakingProject(params: {}) {
                 >
                   Stake NFT <WalletIcon />
                 </GradientButton>
-                {/* <GradientButton
-                  onClick={() => unstake()}
-                  bg={darkPurple}
-                  justifyContent="space-between"
-                >
-                  Unstake NFT <WalletIcon />
-                </GradientButton> */}
                 <GradientButton
                   onClick={() =>
                     unstakeTokens(tokens.map(({ nft_id }) => nft_id))

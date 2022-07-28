@@ -15,14 +15,13 @@ export default defineConfig({
   ],
   esbuild: {},
   define: {
-    global: "window",
     "process.env": {},
   },
   resolve: {
     alias: {
       util: "util",
       process: "process/browser",
-      "@jump": resolve(__dirname, "."),
+      "@": resolve(__dirname, "./src"),
     },
   },
 });

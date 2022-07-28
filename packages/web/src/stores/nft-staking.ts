@@ -1,6 +1,6 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
-import { Transaction, executeMultipleTransactions } from "../hooks/near";
+import { Transaction, executeMultipleTransactions } from "@/tools";
 
 export const useNftStaking = create<{
   contract: any;

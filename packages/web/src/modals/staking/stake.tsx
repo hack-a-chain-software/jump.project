@@ -1,6 +1,6 @@
 import { Flex, Input, Text } from "@chakra-ui/react";
-import { JUMP_TOKEN } from "@jump/src/env/contract";
-import { useNearContractsAndWallet } from "@jump/src/hooks/near";
+import { JUMP_TOKEN } from "@/env/contract";
+import { useNearContractsAndWallet } from "@/context/near";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";

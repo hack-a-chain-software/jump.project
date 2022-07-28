@@ -3,7 +3,7 @@ import { MoonIcon, WalletIcon } from "../../assets/svg";
 import { JumpTextIcon } from "../../assets/svg/jump-text";
 import { Button } from "./button";
 import { If } from "./if";
-import { useNearContractsAndWallet } from "@jump/src/hooks/near";
+import { useNearContractsAndWallet } from "@/context/near";
 
 export function Header() {
   const { connectWallet, disconnectWallet, isFullyConnected } =
