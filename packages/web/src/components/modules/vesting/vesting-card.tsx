@@ -106,7 +106,7 @@ export function VestingCard(props: Props & BoxProps) {
               <Text color="black" fontSize="14px" fontWeight="700">
                 {`Total amount - ${formatNumber(
                   props.totalAmount,
-                  props.token.decimals
+                  props?.token?.decimals
                 )} JUMP`}
               </Text>
             </Flex>
@@ -147,8 +147,8 @@ export function VestingCard(props: Props & BoxProps) {
               title="Available to Claim"
               value={`${formatNumber(
                 props.availableWidthdraw,
-                props.token.decimals
-              )} ${props.token.symbol}`}
+                props.token?.decimals
+              )} ${props.token?.symbol}`}
               bottomText="Unlocked amount"
             />
 
@@ -157,8 +157,8 @@ export function VestingCard(props: Props & BoxProps) {
               title="Claimed Amount"
               value={`${formatNumber(
                 props.withdrawnTokens,
-                props.token.decimals
-              )} ${props.token.symbol}`}
+                props.token?.decimals
+              )} ${props.token?.symbol}`}
               bottomText="Withdrawn amount"
             />
 
@@ -184,7 +184,8 @@ export function VestingCard(props: Props & BoxProps) {
 
               <Button
                 disabled={
-                  props.availableWidthdraw <= Math.pow(10, props.token.decimals)
+                  props.availableWidthdraw <=
+                  Math.pow(10, props.token?.decimals)
                 }
                 onClick={() =>
                   withdraw("0", storage, wallet as WalletConnection)
@@ -211,7 +212,7 @@ export function VestingCard(props: Props & BoxProps) {
         token={props.token}
         vestingId={props.id}
         totalAmount={props.totalAmount}
-        acceleration={props.contract.fast_pass_acceleration}
+        acceleration={props?.contract?.fast_pass_acceleration}
       />
     </Box>
   );

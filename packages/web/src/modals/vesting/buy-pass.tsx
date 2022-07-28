@@ -66,8 +66,8 @@ export function BuyFastPass({
         </Text>
 
         <Text fontWeight="semibold" fontSize="16px">
-          Price: {formatNumber(totalAmount * 0.05, token.decimals)}{" "}
-          {token.symbol}
+          Price: {formatNumber(totalAmount * 0.05, token?.decimals)}{" "}
+          {token?.symbol}
         </Text>
       </Flex>
     </ModalImageDialog>
