@@ -13,9 +13,15 @@ export type NearMutableContractCall<Params extends Record<string, any>> = (
   params: Params,
   gas: string,
   deposit: string
-) => Promise<any>;
+) => Promise<void>;
 
 export type NearContractViewCall<
   Params extends Record<string, any>,
   Data extends Record<string, any>
 > = (params: Params) => Promise<Data>;
+
+export type FtOnTransfer = NearMutableContractCall<{
+  sender_id: string;
+  amount: U128;
+  msg: string;
+}>;

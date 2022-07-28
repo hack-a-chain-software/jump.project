@@ -299,11 +299,35 @@ mod tests {
 
     let test_cases = [
       // 1. Assert caller is token contract
-      (false, false, false, false, false, 0, Some(ERR_004.to_string())),
+      (
+        false,
+        false,
+        false,
+        false,
+        false,
+        0,
+        Some(ERR_004.to_string()),
+      ),
       // 2. Assert account benefited is registered
-      (true, false, false, false, false, 0, Some(ERR_001.to_string())),
+      (
+        true,
+        false,
+        false,
+        false,
+        false,
+        0,
+        Some(ERR_001.to_string()),
+      ),
       // 3. Assert vesting_id exists
-      (true, true, false, false, false, 0, Some(ERR_101.to_string())),
+      (
+        true,
+        true,
+        false,
+        false,
+        false,
+        0,
+        Some(ERR_101.to_string()),
+      ),
       // 4. Assert value transferred is enough to pay for fast pass
       (true, true, true, false, false, 0, Some(ERR_102.to_string())),
       // 5. Assert schedule has never bought fast pass before

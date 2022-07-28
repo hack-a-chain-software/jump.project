@@ -3,11 +3,11 @@ import { MoonIcon, WalletIcon } from "../../assets/svg";
 import { JumpTextIcon } from "../../assets/svg/jump-text";
 import { Button } from "./button";
 import { If } from "./if";
-import { getNear } from "@jump/src/hooks/near";
+import { useNearContractsAndWallet } from "@jump/src/hooks/near";
 
 export function Header() {
-  const { user } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
-
+  const { connectWallet, disconnectWallet, isFullyConnected } =
+    useNearContractsAndWallet();
   const { toggleColorMode } = useColorMode();
 
   return (
@@ -21,15 +21,15 @@ export function Header() {
             <MoonIcon />
           </Button>
           <If
-            condition={!!user.isConnected}
+            condition={!!isFullyConnected}
             fallback={
-              <Button onClick={() => user.connect()}>
+              <Button onClick={() => connectWallet()}>
                 Connect Wallet
                 <WalletIcon />
               </Button>
             }
           >
-            <Button onClick={user.disconnect}>
+            <Button onClick={disconnectWallet}>
               Disconnect Wallet
               <WalletIcon />
             </Button>

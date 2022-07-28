@@ -1,6 +1,6 @@
 import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
-import { toast } from "react-hot-toast";
-import { useNearUser } from "react-near";
+import { useCallback, useEffect, useMemo } from "react";
+import { useNearQuery } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import { ArrowRightIcon } from "../assets/svg/arrow-right";
 import {
@@ -11,9 +11,18 @@ import {
   ValueBox,
   Card,
 } from "../components";
+import { X_JUMP_TOKEN } from "../env/contract";
+import { useNearContractsAndWallet } from "../hooks/near";
 import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
+import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
+import toast from "react-hot-toast";
+
+interface TokenRatio {
+  x_token: string;
+  "jump_token.testnet": string;
+}
 
 /**
  * @name Staking
@@ -21,8 +30,31 @@ import { WithdrawModal } from "../modals/staking/withdraw";
  * @description - This is the staking JUMP page where user can stake and unstake Jump
  */
 export const Staking = () => {
-  const { balance, account, connect, isConnected } = useNearUser(
-    "jump_x_token.testnet"
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { init, stakeXToken, burnXToken } = useStaking();
+
+  const { data = { "jump_token.testnet": "1", x_token: "1" } } =
+    useNearQuery<TokenRatio>("view_token_ratio", {
+      contract: X_JUMP_TOKEN,
+      poolInterval: 1000 * 60,
+      debug: true,
+      onCompleted: (res) => console.log(res),
+      onError(err) {
+        console.log(err);
+      },
+    });
+
+  const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
+    "ft_balance_of",
+    {
+      contract: X_JUMP_TOKEN,
+      variables: {
+        account_id: wallet?.getAccountId(),
+      },
+      poolInterval: 1000 * 60,
+      skip: !isFullyConnected,
+      debug: true,
+    }
   );
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -31,25 +63,40 @@ export const Staking = () => {
 
   const { jumpGradient, glassyWhiteOpaque } = useTheme();
 
-  const stake = (value: number) => {
-    console.log(isConnected);
+  const balanceXToken = useMemo(() => balance || "0", [balance]);
 
-    if (!isConnected) return toast("Connect your Wallet First");
-    console.log(account);
+  const tokenRatio = useMemo(() => {
+    return Number(data["jump_token.testnet"]) / Number(data.x_token);
+  }, [data["jump_token.testnet"], data.x_token]);
 
-    account;
-  };
+  useEffect(() => {
+    if (wallet && isFullyConnected) {
+      init(wallet);
+    }
+  }, [wallet, isFullyConnected]);
 
-  const withdraw = (value: number) => {
-    console.log(isConnected);
+  const submitStaking = useCallback(async (amount: string) => {
+    try {
+      await stakeXToken(amount);
+      toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
-    if (!isConnected) return toast("Connect your wallet First");
-  };
+  const submitWithdraw = useCallback(async (amount: string) => {
+    try {
+      await burnXToken(amount);
+      toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   return (
     <PageContainer>
-      <Grid gap={4} templateColumns="1fr 1fr">
-        <Card p="3px" background={jumpGradient} borderRadius="26px">
+      <Grid gap={4} templateColumns="1fr 1fr" templateRows="400px">
+        <Card p="3px" borderRadius="26px">
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -77,16 +124,6 @@ export const Staking = () => {
                   Launchpad pools!
                 </Text>
               </Flex>
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                h="144px"
-                w="100%"
-                flex={1}
-                mt={2}
-                value={<GradientText>$34,145,999</GradientText>}
-                title="Total Staked"
-                bottomText="21,341,250 JUMP"
-              />
             </Flex>
             <Flex flex={1} pt={2} gap={3} mt={2}>
               <ValueBox
@@ -103,7 +140,7 @@ export const Staking = () => {
                 h="144px"
                 mt={2}
                 w="100%"
-                value="0 JUMP"
+                value={`${balanceXToken} JUMP`}
                 title="Staked"
                 bottomText="Your Staked JUMP"
               />
@@ -112,36 +149,34 @@ export const Staking = () => {
                 h="144px"
                 mt={2}
                 w="100%"
-                value="17,73%"
+                value={`${tokenRatio}%`}
                 title="APR"
                 bottomText="Earnings Per Year"
               />
             </Flex>
           </Flex>
         </Card>
-        <Card>
-          <Flex direction="column" flex={1}>
-            <GradientText
-              fontSize={24}
-              fontWeight="800"
-              letterSpacing="-0.03em"
-            >
-              User Area
-            </GradientText>
-            <Text mb="40px" w="500px" fontWeight="semibold" fontSize={16}>
-              This is the user area where you can interact with the Jump staking
-              to earn passive income as an investor.
-            </Text>
-            <Stack gap={1}>
-              <Button
-                color="white"
-                border="1px solid white"
-                bg="transparent"
-                justifyContent="space-between"
-                onClick={() => toast.success("Your assets have been withdrawn")}
+        <Card flex={1}>
+          <Flex
+            h="100%"
+            direction="column"
+            flex={1}
+            justifyContent="space-between"
+          >
+            <div>
+              <GradientText
+                fontSize={24}
+                fontWeight="800"
+                letterSpacing="-0.03em"
               >
-                Claim your Rewards <WalletIcon />
-              </Button>
+                User Area
+              </GradientText>
+              <Text mb="40px" w="500px" fontWeight="semibold" fontSize={16}>
+                This is the user area where you can interact with the Jump
+                staking to earn passive income as an investor.
+              </Text>
+            </div>
+            <Stack gap={1}>
               <Button
                 color="white"
                 border="1px solid white"
@@ -149,7 +184,7 @@ export const Staking = () => {
                 justifyContent="space-between"
                 onClick={withdrawDisclosure.onOpen}
               >
-                Unstake <WalletIcon />
+                Unstake and Claim Rewards <WalletIcon />
               </Button>
               <Button
                 color="black"
@@ -213,12 +248,12 @@ export const Staking = () => {
       <StakeModal
         isOpen={stakingDisclosure.isOpen}
         onClose={stakingDisclosure.onClose}
-        onSubmit={() => stake(1)}
+        _onSubmit={(v) => submitStaking(v.value)}
       />
       <WithdrawModal
         isOpen={withdrawDisclosure.isOpen}
         onClose={withdrawDisclosure.onClose}
-        onSubmit={() => {}}
+        _onSubmit={(v) => submitWithdraw(v.value)}
       />
     </PageContainer>
   );

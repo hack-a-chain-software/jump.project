@@ -9,15 +9,13 @@ trait FungibleToken {
     receiver_id: String,
     amount: U128,
     memo: Option<String>,
-    msg: String
- ) -> Promise;
+    msg: String,
+  ) -> Promise;
 }
 
 #[ext_contract(ext_self)]
 trait SelfTraits {
   fn callback_base_token_transfer(recipient: AccountId, quantity_withdrawn: U128, vesting_id: U64);
 
-  fn callback_send_to_xtoken(
-    quantity: U128
-  );
+  fn callback_send_to_xtoken(quantity: U128);
 }

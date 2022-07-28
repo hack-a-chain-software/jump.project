@@ -7,7 +7,7 @@ import ReactDOM from "react-dom/client";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import Router from "./router";
 import { NearEnvironment } from "react-near";
-import { ProviderNear } from "./hooks/near";
+import { NearContractsProvider, ProviderNear } from "./hooks/near";
 import { theme } from "./theme";
 
 // TODO: Find a better way to handle this buffer error
@@ -18,8 +18,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ApolloProvider client={client}>
       <ChakraProvider theme={theme}>
         <ProviderNear environment={NearEnvironment.TestNet}>
-          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-          <Router />
+          <NearContractsProvider>
+            <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+            <Router />
+          </NearContractsProvider>
         </ProviderNear>
       </ChakraProvider>
     </ApolloProvider>
