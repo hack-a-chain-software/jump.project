@@ -38,8 +38,16 @@ export const Vesting = () => {
     skip: !user.isConnected,
   });
 
+  const { data: contract, loading: contractLoading } = useNearQuery(
+    "view_contract_data",
+    {
+      skip: !user.isConnected,
+      contract: import.meta.env.VITE_LOCKED_CONTRACT,
+    }
+  );
+
   const data = useMemo(() => {
-    if (vestingLoading && tokenLoading) {
+    if (vestingLoading && tokenLoading && contractLoading) {
       return;
     }
 
@@ -58,16 +66,17 @@ export const Vesting = () => {
       },
       {
         token,
+        contract,
         items: [],
         totalLocked: 0,
         totalUnlocked: 0,
         totalWithdrawn: 0,
       }
     );
-  }, [vestingLoading, tokenLoading]);
+  }, [vestingLoading, tokenLoading, contractLoading]);
 
   return (
-    <PageContainer loading={vestingLoading || tokenLoading}>
+    <PageContainer loading={!data}>
       <TopCard
         gradientText="Locked Jump"
         bigText="Lock. Unlock. Withdraw."
@@ -181,7 +190,7 @@ export const Vesting = () => {
             </Flex>
           )
         }
-        condition={!vestingLoading && !tokenLoading && !isEmpty(items)}
+        condition={data && !isEmpty(items)}
       >
         {items && (
           <Stack spacing="32px">
@@ -200,6 +209,7 @@ export const Vesting = () => {
                 <VestingCard
                   id={String(index)}
                   token={token}
+                  contract={contract}
                   fast_pass={fast_pass}
                   totalAmount={locked_value}
                   key={"vesting-" + index}

@@ -6,12 +6,13 @@ import { Button, ValueBox } from "@jump/src/components";
 import { WalletIcon } from "@jump/src/assets/svg";
 
 import { useTheme } from "../../../hooks/theme";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
 import { getNear } from "@jump/src/hooks/near";
 import { useNearQuery } from "react-near";
 import { useVestingStore } from "@jump/src/stores/vesting-store";
 import { WalletConnection } from "near-api-js";
+import { BuyFastPass } from "@jump/src/modals";
 
 type Token = {
   decimals: number;
@@ -22,6 +23,7 @@ type Props = {
   id: String;
   endsAt: Date;
   token: Token;
+  contract: any;
   createdAt: Date;
   fast_pass: boolean;
   totalAmount: number;
@@ -55,6 +57,8 @@ export function VestingCard(props: Props & BoxProps) {
     skip: !user.isConnected,
   });
 
+  const [showFastPass, setShowFastPass] = useState(false);
+
   return (
     <Box
       color="white"
@@ -71,6 +75,7 @@ export function VestingCard(props: Props & BoxProps) {
           "withdrawnTokens",
           "token",
           "fast_pass",
+          "contract",
           "availableWidthdraw",
         ],
         props
@@ -165,14 +170,7 @@ export function VestingCard(props: Props & BoxProps) {
             >
               <Button
                 disabled={props.fast_pass}
-                onClick={() =>
-                  fastPass(
-                    props.id,
-                    storage,
-                    props?.totalAmount,
-                    wallet as WalletConnection
-                  )
-                }
+                onClick={() => setShowFastPass(true)}
               >
                 <Flex
                   width="100%"
@@ -205,6 +203,16 @@ export function VestingCard(props: Props & BoxProps) {
           </Flex>
         </Box>
       </Box>
+
+      <BuyFastPass
+        onClose={() => setShowFastPass(false)}
+        isOpen={showFastPass}
+        storage={storage}
+        token={props.token}
+        vestingId={props.id}
+        totalAmount={props.totalAmount}
+        acceleration={props.contract.fast_pass_acceleration}
+      />
     </Box>
   );
 }
