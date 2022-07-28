@@ -1,53 +1,101 @@
-import { Stack, Flex, Text } from "@chakra-ui/react";
+import { Stack, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import {
   If,
   TopCard,
   VestingCard,
   PageContainer,
   ValueBox,
+  Select,
+  GradientButton,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useNearQuery } from "react-near";
 import { useTheme } from "@/hooks/theme";
-import { getNear } from "@/hooks/near";
-
+import { useNearContractsAndWallet } from "@/context/near";
 import { addMilliseconds } from "date-fns";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
 
 export const Vesting = () => {
-  const { glassyWhiteOpaque } = useTheme();
+  const { glassyWhiteOpaque, darkPurple } = useTheme();
 
-  const { user } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
-  const { data: items = [], loading: vestingLoading } = useNearQuery(
-    "view_vesting_paginated",
+  const [vestingLoading, setVestingLoading] = useState(true);
+  const [items, setItems] = useState([]);
+
+  const getPages = (length) => {
+    const base = length / 10;
+
+    if (!base || base < 1) {
+      return 1;
+    }
+
+    if (base % 1 !== 0) {
+      return base + 1;
+    }
+
+    return base;
+  };
+
+  const { refetch } = useNearQuery("view_vesting_paginated", {
+    contract: import.meta.env.VITE_LOCKED_CONTRACT,
+    skip: true,
+  });
+
+  const { data: vestingLength, loading: loadingLeng } = useNearQuery(
+    "view_vesting_vector_len",
     {
       contract: import.meta.env.VITE_LOCKED_CONTRACT,
       variables: {
-        account_id: user.address,
-        initial_id: "0",
-        size: "1000",
+        account_id: wallet?.getAccountId(),
       },
-      skip: !user.isConnected,
+      skip: !isFullyConnected,
     }
   );
 
+  useEffect(() => {
+    (async () => {
+      if (!loadingLeng) {
+        return;
+      }
+
+      const pages = getPages(vestingLength);
+
+      console.log(pages);
+
+      const vestings = [];
+
+      for (let i = 0; i <= pages; i++) {
+        const page = await refetch({
+          account_id: wallet?.getAccountId(),
+          initial_id: String(i * 10),
+          size: "10",
+        });
+
+        vestings.push(...page);
+      }
+
+      setItems(vestings);
+      setVestingLoading(false);
+    })();
+  }, [loadingLeng, vestingLength]);
+
   const { data: token, loading: tokenLoading } = useNearQuery("ft_metadata", {
     contract: import.meta.env.VITE_BASE_TOKEN,
-    skip: !user.isConnected,
+    skip: !isFullyConnected,
   });
 
   const { data: contract, loading: contractLoading } = useNearQuery(
     "view_contract_data",
     {
-      skip: !user.isConnected,
+      skip: !isFullyConnected,
       contract: import.meta.env.VITE_LOCKED_CONTRACT,
     }
   );
 
   const data = useMemo(() => {
-    if (vestingLoading && tokenLoading && contractLoading) {
+    if (vestingLoading || tokenLoading || contractLoading || loadingLeng) {
       return;
     }
 
@@ -73,7 +121,7 @@ export const Vesting = () => {
         totalWithdrawn: 0,
       }
     );
-  }, [vestingLoading, tokenLoading, contractLoading]);
+  }, [vestingLoading, tokenLoading, contractLoading, loadingLeng]);
 
   return (
     <PageContainer loading={!data}>
@@ -88,7 +136,7 @@ export const Vesting = () => {
               borderColor={glassyWhiteOpaque}
               title="Total Locked"
               value={
-                user.isConnected
+                isFullyConnected
                   ? `${formatNumber(
                       data?.totalLocked,
                       data?.token?.decimals
@@ -102,7 +150,7 @@ export const Vesting = () => {
               borderColor={glassyWhiteOpaque}
               title="Total Unlocked"
               value={
-                user.isConnected
+                isFullyConnected
                   ? `${formatNumber(
                       data?.totalUnlocked,
                       data?.token?.decimals
@@ -116,7 +164,7 @@ export const Vesting = () => {
               borderColor={glassyWhiteOpaque}
               title="Total Withdrawn"
               value={
-                user.isConnected
+                isFullyConnected
                   ? `${formatNumber(
                       data?.totalWithdrawn,
                       data?.token?.decimals
@@ -131,7 +179,7 @@ export const Vesting = () => {
 
       <If
         fallback={
-          user.isConnected ? (
+          isFullyConnected ? (
             <Flex
               width="100%"
               height="100%"
@@ -192,39 +240,58 @@ export const Vesting = () => {
         }
         condition={data && !isEmpty(items)}
       >
-        {items && (
-          <Stack spacing="32px">
-            {items.map(
-              (
-                {
-                  fast_pass,
-                  locked_value,
-                  start_timestamp,
-                  vesting_duration,
-                  withdrawn_tokens,
-                  available_to_withdraw,
-                },
-                index
-              ) => (
-                <VestingCard
-                  id={String(index)}
-                  token={token}
-                  contract={contract}
-                  fast_pass={fast_pass}
-                  totalAmount={locked_value}
-                  key={"vesting-" + index}
-                  availableWidthdraw={available_to_withdraw}
-                  withdrawnTokens={withdrawn_tokens}
-                  createdAt={new Date(start_timestamp / 1000000)}
-                  endsAt={addMilliseconds(
-                    new Date(start_timestamp / 1000000),
-                    vesting_duration / 1000000
-                  )}
-                />
-              )
-            )}
-          </Stack>
-        )}
+        <>
+          <Flex justifyContent="space-between">
+            <Select placeholder="Filter">
+              <option value="option2">Completed</option>
+              <option value="option3">Runing</option>
+            </Select>
+
+            <Flex maxW="330px">
+              <GradientButton
+                width="150px"
+                onClick={() => {}}
+                justifyContent="center"
+                bg={useColorModeValue("white", darkPurple)}
+              >
+                Claim All
+              </GradientButton>
+            </Flex>
+          </Flex>
+          {items && (
+            <Stack spacing="32px">
+              {items.map(
+                (
+                  {
+                    fast_pass,
+                    locked_value,
+                    start_timestamp,
+                    vesting_duration,
+                    withdrawn_tokens,
+                    available_to_withdraw,
+                  },
+                  index
+                ) => (
+                  <VestingCard
+                    id={String(index)}
+                    token={token}
+                    contract={contract}
+                    fast_pass={fast_pass}
+                    totalAmount={locked_value}
+                    key={"vesting-" + index}
+                    availableWidthdraw={available_to_withdraw}
+                    withdrawnTokens={withdrawn_tokens}
+                    createdAt={new Date(start_timestamp / 1000000)}
+                    endsAt={addMilliseconds(
+                      new Date(start_timestamp / 1000000),
+                      vesting_duration / 1000000
+                    )}
+                  />
+                )
+              )}
+            </Stack>
+          )}
+        </>
       </If>
     </PageContainer>
   );
