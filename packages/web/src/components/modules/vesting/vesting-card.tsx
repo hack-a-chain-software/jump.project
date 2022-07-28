@@ -1,4 +1,5 @@
 import * as R from "ramda";
+import { NearConstants } from "@jump/src/constants";
 import { format, differenceInMilliseconds } from "date-fns";
 import { Box, BoxProps, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import { Button, ValueBox } from "@jump/src/components";
@@ -6,16 +7,24 @@ import { Button, ValueBox } from "@jump/src/components";
 import { WalletIcon } from "@jump/src/assets/svg";
 
 import { useTheme } from "../../../hooks/theme";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { formatNumber } from "@near/ts";
+import { getNear } from "@jump/src/hooks/near";
+import { useNearQuery } from "react-near";
+import { useVestingStore } from "@jump/src/stores/vesting-store";
+
+type Token = {
+  decimals: number;
+  symbol: string;
+};
 
 type Props = {
   endsAt: Date;
-  token: object;
+  token: Token;
   createdAt: Date;
-  buyPass: Function;
-  withdraw: Function;
-  totalAmount: string | number;
-  withdrawnTokens: string | number;
+  totalAmount: number;
+  withdrawnTokens: number;
+  availableWidthdraw: number;
 };
 
 export function VestingCard(props: Props & BoxProps) {
@@ -32,11 +41,17 @@ export function VestingCard(props: Props & BoxProps) {
     return Math.round(current / base);
   }, [props.endsAt, props.createdAt]);
 
-  const total = useCallback(() => {
-    return new Intl.NumberFormat("en", {
-      minimumFractionDigits: props.token.decimals,
-    }).format(props.totalAmount);
-  }, [props.totalAmount]);
+  const { user } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+
+  const { withdraw } = useVestingStore();
+
+  const { data: storage } = useNearQuery("storage_balance_of", {
+    contract: "jump_token.testnet",
+    variables: {
+      account_id: user.address,
+    },
+    skip: !user.isConnected,
+  });
 
   return (
     <Box
@@ -50,10 +65,9 @@ export function VestingCard(props: Props & BoxProps) {
           "totalAmount",
           "createdAt",
           "endsAt",
-          "withdraw",
-          "buyPass",
           "withdrawnTokens",
           "token",
+          "availableWidthdraw",
         ],
         props
       ) as Record<string, string>)}
@@ -81,7 +95,10 @@ export function VestingCard(props: Props & BoxProps) {
               width="max-content"
             >
               <Text color="black" fontSize="14px" fontWeight="700">
-                {`Total amount - ${total} JUMP`}
+                {`Total amount - ${formatNumber(
+                  props.totalAmount,
+                  props.token.decimals
+                )} JUMP`}
               </Text>
             </Flex>
 
@@ -119,14 +136,20 @@ export function VestingCard(props: Props & BoxProps) {
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Available to Claim"
-              value="20 JUMP"
+              value={`${formatNumber(
+                props.availableWidthdraw,
+                props.token.decimals
+              )} ${props.token.symbol}`}
               bottomText="Unlocked amount"
             />
 
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Claimed Amount"
-              value={`${props.withdrawnTokens} ${props.token.symbol}`}
+              value={`${formatNumber(
+                props.withdrawnTokens,
+                props.token.decimals
+              )} ${props.token.symbol}`}
               bottomText="Withdrawn amount"
             />
 
@@ -146,7 +169,7 @@ export function VestingCard(props: Props & BoxProps) {
                 </Flex>
               </Button>
 
-              <Button>
+              <Button onClick={() => withdraw("0", storage)}>
                 <Flex
                   width="100%"
                   alignItems="center"
