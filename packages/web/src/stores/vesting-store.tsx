@@ -59,7 +59,6 @@ export const useVestingStore = create<{
     amount: number,
     connection: WalletConnection
   ) => {
-    console.log();
     const transactions: Transaction[] = [];
 
     if (!storage || storage.total < "0.10") {
