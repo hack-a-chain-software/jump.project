@@ -21,6 +21,7 @@
     "@xstate/react": "^3.0.0",
     "autoprefixer": "^10.4.7",
     "buffer": "^6.0.3",
+    "date-fns": "^2.29.1",
     "formik": "^2.2.9",
     "framer-motion": "^6",
     "near-api-js": "^0.44.2",

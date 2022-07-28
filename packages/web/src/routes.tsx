@@ -4,12 +4,14 @@ import { FarmIcon } from "./assets/svg/farm";
 import { PoolsIcon } from "./assets/svg/pools";
 import { RocketIcon } from "./assets/svg/rocket";
 import { SwapIcon } from "./assets/svg/swap";
+import { LockIcon } from "./assets/svg/lock";
 
 export const routes = {
   home: "/launchpad",
   projectDetails: "/launchpad/:id",
   staking: "/coin-staking",
   nftStaking: "/nft-staking",
+  vesting: "/vesting",
   nftStakingProject: "/nft-staking/:id",
 };
 
@@ -31,6 +33,12 @@ export const navRoutes = [
     icon: <WalletIcon />,
     route: "/nft-staking",
     subroutePrefix: "nft-staking",
+  },
+  {
+    title: "Vesting",
+    icon: <LockIcon />,
+    route: "/vesting",
+    subroutePrefix: "vesting",
   },
   {
     title: "Swap",
