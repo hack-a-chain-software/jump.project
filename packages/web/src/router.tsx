@@ -36,7 +36,8 @@ function Router() {
           </Routes>
         </Grid>
       </BrowserRouter>
-      <Toaster />
+
+      <Toaster position="top-center" />
     </Flex>
   );
 }

@@ -1,11 +1,9 @@
-import { Flex, Grid, Image, Stack } from "@chakra-ui/react";
+import { Image, Stack, Flex, Spinner, Text } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import {
-  NFTStakingCard,
-  PageContainer,
-  TopCard,
-  ValueBox,
-} from "../components";
+import { If, TopCard, NFTStakingCard, PageContainer } from "../components";
+import isEmpty from "lodash/isEmpty";
+import { useQuery } from "@apollo/client";
+import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
@@ -16,8 +14,13 @@ const collectionImages = [
 
 export const NFTStaking = () => {
   const navigate = useNavigate();
+
+  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
+
+  const items = data?.nft_staking_projects?.data;
+
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <TopCard
         gradientText="NFT"
         bigText="Staking"
@@ -38,27 +41,47 @@ export const NFTStaking = () => {
           </>
         }
       />
-      <Stack>
-        <NFTStakingCard
-          onClick={() => navigate(`/nft-staking/${1}`)}
-          collectionLogo="https://d1fdloi71mui9q.cloudfront.net/7gfrOO2CQ7OSk7s9Bpiv_roo-king.png"
-          collectionName="Classy Kangaroos"
-          tokens={[
-            {
-              name: "JUMP",
-              ammount: "10",
-            },
-            {
-              name: "ACOVA",
-              ammount: "20",
-            },
-            {
-              name: "CGK",
-              ammount: "10",
-            },
-          ]}
-        />
-      </Stack>
+
+      <If condition={loading}>
+        <Flex height="370px" alignItems="center" justifyContent="center">
+          <Spinner size="xl" />
+        </Flex>
+      </If>
+
+      <If condition={!loading && !isEmpty(items)}>
+        {items && (
+          <Stack>
+            {items.map(({ collection_meta, collection_id }, index) => (
+              <NFTStakingCard
+                key={"nft-staking-collection" + index}
+                onClick={() =>
+                  navigate(`/nft-staking/${window.btoa(collection_id)}`)
+                }
+                collectionLogo={collection_meta.image}
+                collectionName={collection_meta.name}
+                // tokens={collection_treasury.map((item, index) => ({
+                //   name: rewards[index],
+                //   ammount: item,
+                // }))}
+              />
+            ))}
+          </Stack>
+        )}
+      </If>
+
+      <If condition={!loading && isEmpty(items)}>
+        <Flex width="100%" justifyContent="center" marginTop="120px">
+          <Text
+            color="#EB5757"
+            fontSize="20px"
+            fontWeight="400"
+            lineHeight="24px"
+            marginLeft="16px"
+          >
+            Oops! No collections available
+          </Text>
+        </Flex>
+      </If>
     </PageContainer>
   );
 };

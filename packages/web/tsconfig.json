@@ -14,9 +14,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "noImplicitAny": false,
+    "paths": {
+      "@jump/*": ["*"]
+    }
   },
-  "include": ["src"],
+  "include": ["./src"],
   "exclude": ["tailwind.config.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

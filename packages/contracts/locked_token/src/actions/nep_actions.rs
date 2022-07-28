@@ -29,10 +29,10 @@ impl FungibleTokenCore for Contract {
     let initial_storage = env::storage_usage();
     self.only_minter(&env::predecessor_account_id());
     if !self.minters.contains(&receiver_id.clone()) {
-    let mut account = self.internal_get_account(&receiver_id).expect(ERR_001);
-    self.internal_add_vesting(&receiver_id, amount.0);
-    account.track_storage_usage(initial_storage);
-    self.internal_update_account(&receiver_id, &account);
+      let mut account = self.internal_get_account(&receiver_id).expect(ERR_001);
+      self.internal_add_vesting(&receiver_id, amount.0);
+      account.track_storage_usage(initial_storage);
+      self.internal_update_account(&receiver_id, &account);
     }
     self
       .ft_functionality

@@ -175,6 +175,13 @@ export type QueryStakingArgs = {
   collection_id: Scalars["ID"];
 };
 
+export type StakedMeta = {
+  __typename?: "StakedMeta";
+  description?: Maybe<Scalars["String"]>;
+  media?: Maybe<Scalars["String"]>;
+  title?: Maybe<Scalars["String"]>;
+};
+
 export type StakedNft = {
   __typename?: "StakedNFT";
   collection_id?: Maybe<Scalars["ID"]>;
@@ -183,6 +190,7 @@ export type StakedNft = {
   rewards_acova?: Maybe<Scalars["String"]>;
   rewards_jump?: Maybe<Scalars["String"]>;
   rewards_project_token?: Maybe<Scalars["String"]>;
+  staked_meta?: Maybe<StakedMeta>;
   staked_timestamp?: Maybe<Scalars["String"]>;
 };
 
@@ -385,6 +393,12 @@ export type StakingProjectQuery = {
       rewards_jump?: string | null;
       rewards_acova?: string | null;
       rewards_project_token?: string | null;
+      staked_meta?: {
+        __typename?: "StakedMeta";
+        title?: string | null;
+        media?: string | null;
+        description?: string | null;
+      } | null;
     } | null> | null;
   } | null;
 };
@@ -754,6 +768,11 @@ export const StakingProjectDocument = gql`
         rewards_jump
         rewards_acova
         rewards_project_token
+        staked_meta {
+          title
+          media
+          description
+        }
       }
     }
   }

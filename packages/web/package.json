@@ -36,6 +36,7 @@
     "use-mediaquery": "^1.0.1",
     "xstate": "^4.32.0",
     "@near/apollo": "*",
+    "@near/ts": "*",
     "yup": "^0.32.11",
     "zustand": "^4.0.0-rc.1"
   },

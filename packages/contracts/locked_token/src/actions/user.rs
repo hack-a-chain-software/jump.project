@@ -85,28 +85,31 @@ mod tests {
         if vesting_exists {
           vec.push(&vesting);
         }
-        
-        let expected_withdraw =
-          (vesting_percent_elapsed_time as u128 * vesting_total_amount) / 100 - vesting.withdrawn_tokens.0;
-        let initial_locked_balance = vesting_total_amount - vesting_withdrawn_tokens;
 
+        let expected_withdraw = (vesting_percent_elapsed_time as u128 * vesting_total_amount) / 100
+          - vesting.withdrawn_tokens.0;
+        let initial_locked_balance = vesting_total_amount - vesting_withdrawn_tokens;
 
         let mut contract = init_contract(seed);
 
         contract.ft_functionality.internal_register_account(&user);
-        contract.ft_functionality.internal_deposit(&user, initial_locked_balance);
+        contract
+          .ft_functionality
+          .internal_deposit(&user, initial_locked_balance);
         contract.vesting_schedules.insert(&user, &vec);
 
         contract.withdraw_locked_tokens(U64(0));
         let vesting_after = vec.get(0).unwrap();
-
 
         let final_locked_balance = contract.ft_functionality.ft_balance_of(user.clone());
         assert_eq!(
           (vesting_percent_elapsed_time as u128 * vesting_total_amount) / 100,
           vesting_after.withdrawn_tokens.0
         );
-        assert_eq!(final_locked_balance, U128(((100 - vesting_percent_elapsed_time as u128) * vesting_total_amount) / 100));
+        assert_eq!(
+          final_locked_balance,
+          U128(((100 - vesting_percent_elapsed_time as u128) * vesting_total_amount) / 100)
+        );
 
         let receipts = get_created_receipts();
         assert_eq!(receipts.len(), 2);
@@ -128,10 +131,7 @@ mod tests {
             let json_args: serde_json::Value =
               serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
             assert_eq!(json_args["receiver_id"], user.to_string());
-            assert_eq!(
-              json_args["amount"],
-              expected_withdraw.to_string()
-            );
+            assert_eq!(json_args["amount"], expected_withdraw.to_string());
           }
           _ => panic!(),
         }
@@ -150,7 +150,10 @@ mod tests {
             let json_args: serde_json::Value =
               serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
             assert_eq!(json_args["recipient"], user.to_string());
-            assert_eq!(json_args["quantity_withdrawn"], expected_withdraw.to_string());
+            assert_eq!(
+              json_args["quantity_withdrawn"],
+              expected_withdraw.to_string()
+            );
             assert_eq!(json_args["vesting_id"], "0".to_string());
           }
           _ => panic!(),
@@ -159,19 +162,26 @@ mod tests {
     }
 
     let test_cases = [
-        // 1. Assert one yocto
-        (false, false, 1000, 500, 50, Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string())),
-        // 2. Find vesting scheduled given as arg
-        (true, false, 1000, 500, 50, Some(ERR_101.to_string())),
-        // 3. Calculate available withdraw amount
-        // 4. Update vesting in state to reflect withdrawn amount
-        // 5. Reduce user balance of locked_token according to
-        //    withdrawn amount
-        // 6. Send promises to transfer base token and call callback
-        (true, true, 1000, 0, 30, None),
-        (true, true, 1000, 0, 70, None),
-        (true, true, 1000, 500, 70, None),
-        (true, true, 1000, 900, 90, None),
+      // 1. Assert one yocto
+      (
+        false,
+        false,
+        1000,
+        500,
+        50,
+        Some("Requires attached deposit of exactly 1 yoctoNEAR".to_string()),
+      ),
+      // 2. Find vesting scheduled given as arg
+      (true, false, 1000, 500, 50, Some(ERR_101.to_string())),
+      // 3. Calculate available withdraw amount
+      // 4. Update vesting in state to reflect withdrawn amount
+      // 5. Reduce user balance of locked_token according to
+      //    withdrawn amount
+      // 6. Send promises to transfer base token and call callback
+      (true, true, 1000, 0, 30, None),
+      (true, true, 1000, 0, 70, None),
+      (true, true, 1000, 500, 70, None),
+      (true, true, 1000, 900, 90, None),
     ];
 
     let mut counter = 0;

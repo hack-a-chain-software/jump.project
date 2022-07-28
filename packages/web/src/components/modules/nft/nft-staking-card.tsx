@@ -21,6 +21,8 @@ type Props = {
   frequency?: "weekly" | "daily" | "monthly";
 };
 
+const rewards = ["JUMP", "ACOVA", "CGK"];
+
 export function NFTStakingCard(props: Props & BoxProps) {
   const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
     useTheme();
