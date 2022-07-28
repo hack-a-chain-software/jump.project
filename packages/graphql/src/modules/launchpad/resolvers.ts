@@ -70,7 +70,10 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query<NFTInvestor>(
-        'select * from "listings" where "listing_id" = $1',
+        `SELECT * FROM "listings" l
+            INNER JOIN "listings_metadata" m
+            ON(l.listing_id = m.listing_id)
+        where l.listing_id = $1`,
         {
           bind: [filters.project_id],
           type: QueryTypes.SELECT,
@@ -87,11 +90,15 @@ export default {
     ) {
       let sqlQuery = filters.showMineOnly
         ? `
-          SELECT l.* FROM "listings" l
+          SELECT * 
+          FROM "listings" as l
+          INNER JOIN "listings_metadata" as m ON(l.listing_id = m.listing_id)
           INNER JOIN "allocations" a ON(l.listing_id = a.listing_id)
           WHERE account_id = $1
         `
-        : `SELECT * FROM "listings"`;
+        : `SELECT * FROM "listings" as l
+        INNER JOIN "listings_metadata" as m
+        ON(l.listing_id = m.listing_id)`;
 
       if (
         filters.status &&
