@@ -6,6 +6,7 @@ use super::get_required_var;
 pub struct ContractsConfig {
     pub launchpad_contract_account_id: String,
     pub nft_staking_contract_account_id: String,
+    pub x_token_contract_account_id: String,
 }
 
 impl ContractsConfig {
@@ -13,6 +14,7 @@ impl ContractsConfig {
         Self {
             launchpad_contract_account_id: get_required_var("LAUNCHPAD_CONTRACT_ACCOUNT_ID"),
             nft_staking_contract_account_id: get_required_var("NFT_STAKING_CONTRACT_ACCOUNT_ID"),
+            x_token_contract_account_id: get_required_var("X_TOKEN_CONTRACT_ACCOUNT_ID"),
         }
     }
 }

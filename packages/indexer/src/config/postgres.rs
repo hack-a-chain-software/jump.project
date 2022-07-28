@@ -28,6 +28,7 @@ impl PostgresConfig {
         }
     }
 
+    #[allow(dead_code)]
     pub fn connection_string(&self) -> String {
         format!(
             "postgres:://{}{}@{}:{}{}",
