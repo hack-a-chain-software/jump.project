@@ -17,3 +17,7 @@ export type AccountIdQuery = {
 export type ProjectIdQuery = {
   project_id: ID;
 };
+
+export type TimestampQuery = {
+  timestamp: string;
+};
