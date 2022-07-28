@@ -132,7 +132,7 @@ export function VestingCard(props: Props & BoxProps) {
             </Flex>
           </Flex>
 
-          <Flex gap={5}>
+          <Flex gap={5} alignItems="center">
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Available to Claim"
@@ -155,6 +155,7 @@ export function VestingCard(props: Props & BoxProps) {
 
             <Flex
               width="300px"
+              height="133px"
               flexDirection="column"
               justifyContent="space-between"
             >
