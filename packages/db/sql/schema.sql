@@ -10,7 +10,7 @@ create table if not exists x_token_ratios (
 
 create table if not exists launchpad_investors (
     account_id text primary key,
-    staked_token numeric(40),
+    staked_token numeric(40),s
     last_check timestamptz
 );
 
@@ -64,6 +64,8 @@ create table if not exists listings_metadata (
     website text,
     whitepaper text
 );
+
+alter table listings_metadata add constraint single_listing_data unique (listing_id);
 
 create table if not exists allocations (
     account_id text not null,
