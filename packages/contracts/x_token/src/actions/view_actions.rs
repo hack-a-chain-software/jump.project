@@ -10,7 +10,7 @@ impl Contract {
       "x_token".to_string(),
       U128(self.ft_functionality.total_supply),
     );
-    return_value.insert(self.base_token.to_string(), U128(self.base_token_treasury));
+    return_value.insert("base_token".to_string(), U128(self.base_token_treasury));
     return_value
   }
 }
@@ -42,7 +42,7 @@ mod tests {
     let view_return: HashMap<String, U128> = contract.view_token_ratio();
 
     let x_token = String::from("x_token");
-    let deposited_token = String::from(BASE_TOKEN_ADDRESS);
+    let deposited_token = String::from("base_token");
     let x_token_ratio_return = view_return.get(&x_token).unwrap();
     let deposited_token_ratio_return = view_return.get(&deposited_token).unwrap();
 
