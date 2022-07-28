@@ -9,6 +9,7 @@ type Props = {
   renderAsset?: JSX.Element;
   jumpLogo?: boolean;
   py?: boolean;
+  content?: JSX.Element;
 };
 
 export const TopCard = ({
@@ -18,6 +19,7 @@ export const TopCard = ({
   renderAsset,
   jumpLogo = false,
   py = false,
+  content,
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();
   return (
@@ -31,7 +33,8 @@ export const TopCard = ({
         w="100%"
         py={py ? "60px" : undefined}
         color="white"
-        px="60px"
+        pl="60px"
+        pr="28px"
         borderRadius="24px"
         bg={glassyWhite}
       >
@@ -72,6 +75,18 @@ export const TopCard = ({
             {bottomDescription}
           </Text>
         </Flex>
+
+        {content && (
+          <Flex
+            flex="1"
+            marginLeft="120px"
+            justifyContent="flex-end"
+            className="space-x-[1.25rem]"
+          >
+            {content}
+          </Flex>
+        )}
+
         <Flex position="relative" right="-60px" bottom="-60px">
           {jumpLogo && <JumpBigWhite />}
         </Flex>

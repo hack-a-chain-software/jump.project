@@ -42,15 +42,9 @@ export const NFTStaking = () => {
         }
       />
 
-      <If condition={loading}>
-        <Flex height="370px" alignItems="center" justifyContent="center">
-          <Spinner size="xl" />
-        </Flex>
-      </If>
-
       <If condition={!loading && !isEmpty(items)}>
         {items && (
-          <Stack>
+          <Stack spacing="32px">
             {items.map(({ collection_meta, collection_id }, index) => (
               <NFTStakingCard
                 key={"nft-staking-collection" + index}
