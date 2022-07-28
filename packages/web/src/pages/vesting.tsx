@@ -27,26 +27,16 @@ export const Vesting = () => {
       variables: {
         account_id: user.address,
         initial_id: "0",
-        size: "30",
+        size: "1000",
       },
       skip: !user.isConnected,
     }
   );
 
   const { data: token, loading: tokenLoading } = useNearQuery("ft_metadata", {
-    contract: "jump_token.testnet",
+    contract: import.meta.env.VITE_BASE_TOKEN,
     skip: !user.isConnected,
   });
-
-  const { data: contract, loading: contractLoading } = useNearQuery(
-    "view_contract_data",
-    {
-      contract: import.meta.env.VITE_LOCKED_CONTRACT,
-      skip: !user.isConnected,
-    }
-  );
-
-  console.log(contract);
 
   const data = useMemo(() => {
     if (vestingLoading && tokenLoading) {
@@ -76,8 +66,6 @@ export const Vesting = () => {
     );
   }, [vestingLoading, tokenLoading]);
 
-  console.log(items);
-
   return (
     <PageContainer loading={vestingLoading || tokenLoading}>
       <TopCard
@@ -90,42 +78,117 @@ export const Vesting = () => {
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Total Locked"
-              value={`${formatNumber(
-                data?.totalLocked,
-                data?.token?.decimals
-              )} ${data?.token?.symbol}`}
+              value={
+                user.isConnected
+                  ? `${formatNumber(
+                      data?.totalLocked,
+                      data?.token?.decimals
+                    )} ${data?.token?.symbol}`
+                  : "Connect Wallet  "
+              }
               bottomText="All amount locked"
             />
 
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Total Unlocked"
-              value={`${formatNumber(
-                data?.totalUnlocked,
-                data?.token?.decimals
-              )} ${data?.token?.symbol}`}
+              value={
+                user.isConnected
+                  ? `${formatNumber(
+                      data?.totalUnlocked,
+                      data?.token?.decimals
+                    )} ${data?.token?.symbol}`
+                  : "Connect Wallet"
+              }
               bottomText="Unlocked amount"
             />
 
             <ValueBox
               borderColor={glassyWhiteOpaque}
               title="Total Withdrawn"
-              value={`${formatNumber(
-                data?.totalWithdrawn,
-                data?.token?.decimals
-              )} ${data?.token?.symbol}`}
+              value={
+                user.isConnected
+                  ? `${formatNumber(
+                      data?.totalWithdrawn,
+                      data?.token?.decimals
+                    )} ${data?.token?.symbol}`
+                  : "Connect Wallet"
+              }
               bottomText="Total quantity "
             />
           </>
         }
       />
 
-      <If condition={!vestingLoading && !tokenLoading && !isEmpty(items)}>
+      <If
+        fallback={
+          user.isConnected ? (
+            <Flex
+              width="100%"
+              height="100%"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Flex
+                marginX="auto"
+                height="100%"
+                alignItems="center"
+                justifyContent="center"
+                flexDirection="column"
+              >
+                <Text
+                  fontWeight="800"
+                  fontSize={30}
+                  letterSpacing="-0.03em"
+                  mb={3}
+                >
+                  Oops! No vestings available
+                </Text>
+              </Flex>
+            </Flex>
+          ) : (
+            <Flex
+              marginX="auto"
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+            >
+              <Text
+                fontWeight="800"
+                fontSize={30}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                You must be logged in to view all vestings
+              </Text>
+
+              <Text
+                _hover={{
+                  opacity: 0.8,
+                }}
+                // onClick={() => toggleStakeModal()}
+                marginTop="-12px"
+                cursor="pointer"
+                color="#761BA0"
+                fontWeight="800"
+                fontSize={34}
+                letterSpacing="-0.03em"
+                mb={3}
+              >
+                Connect Wallet!
+              </Text>
+            </Flex>
+          )
+        }
+        condition={!vestingLoading && !tokenLoading && !isEmpty(items)}
+      >
         {items && (
           <Stack spacing="32px">
             {items.map(
               (
                 {
+                  fast_pass,
                   locked_value,
                   start_timestamp,
                   vesting_duration,
@@ -135,8 +198,9 @@ export const Vesting = () => {
                 index
               ) => (
                 <VestingCard
-                  id={index}
+                  id={String(index)}
                   token={token}
+                  fast_pass={fast_pass}
                   totalAmount={locked_value}
                   key={"vesting-" + index}
                   availableWidthdraw={available_to_withdraw}
@@ -151,20 +215,6 @@ export const Vesting = () => {
             )}
           </Stack>
         )}
-      </If>
-
-      <If condition={!vestingLoading && !tokenLoading && isEmpty(items)}>
-        <Flex width="100%" justifyContent="center" marginTop="120px">
-          <Text
-            color="#EB5757"
-            fontSize="20px"
-            fontWeight="400"
-            lineHeight="24px"
-            marginLeft="16px"
-          >
-            Oops! No collections available
-          </Text>
-        </Flex>
       </If>
     </PageContainer>
   );

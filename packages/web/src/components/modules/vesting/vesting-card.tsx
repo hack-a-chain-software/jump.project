@@ -19,9 +19,11 @@ type Token = {
 };
 
 type Props = {
+  id: String;
   endsAt: Date;
   token: Token;
   createdAt: Date;
+  fast_pass: boolean;
   totalAmount: number;
   withdrawnTokens: number;
   availableWidthdraw: number;
@@ -62,11 +64,13 @@ export function VestingCard(props: Props & BoxProps) {
       borderRadius="26px"
       {...(R.omit(
         [
+          "id",
           "totalAmount",
           "createdAt",
           "endsAt",
           "withdrawnTokens",
           "token",
+          "fast_pass",
           "availableWidthdraw",
         ],
         props
@@ -160,8 +164,14 @@ export function VestingCard(props: Props & BoxProps) {
               justifyContent="space-between"
             >
               <Button
+                disabled={props.fast_pass}
                 onClick={() =>
-                  fastPass("0", storage, wallet as WalletConnection)
+                  fastPass(
+                    props.id,
+                    storage,
+                    props?.totalAmount,
+                    wallet as WalletConnection
+                  )
                 }
               >
                 <Flex

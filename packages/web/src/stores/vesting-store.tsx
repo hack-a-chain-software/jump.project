@@ -7,6 +7,7 @@ export const useVestingStore = create<{
   fastPass: (
     vesting: string,
     storage: any,
+    amount: number,
     connection: WalletConnection
   ) => Promise<void>;
   withdraw: (
@@ -56,8 +57,10 @@ export const useVestingStore = create<{
   fastPass: async (
     vesting: string,
     storage: any,
+    amount: number,
     connection: WalletConnection
   ) => {
+    console.log();
     const transactions: Transaction[] = [];
 
     if (!storage || storage.total < "0.10") {
@@ -82,7 +85,7 @@ export const useVestingStore = create<{
         {
           methodName: "ft_transfer_call",
           args: {
-            amount: "2500000000",
+            amount: String(amount * 0.05),
             receiver_id: import.meta.env.VITE_LOCKED_CONTRACT,
             memo: null,
             msg: JSON.stringify({
