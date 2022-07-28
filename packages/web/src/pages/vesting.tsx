@@ -38,7 +38,15 @@ export const Vesting = () => {
     skip: !user.isConnected,
   });
 
-  console.log(items);
+  const { data: contract, loading: contractLoading } = useNearQuery(
+    "view_contract_data",
+    {
+      contract: import.meta.env.VITE_LOCKED_CONTRACT,
+      skip: !user.isConnected,
+    }
+  );
+
+  console.log(contract);
 
   const data = useMemo(() => {
     if (vestingLoading && tokenLoading) {
@@ -49,7 +57,10 @@ export const Vesting = () => {
       (prev, token) => {
         prev.items.push(token);
 
-        prev.totalLocked += Number(token.locked_value);
+        prev.totalLocked +=
+          Number(token.locked_value) -
+          Number(token.available_to_withdraw) -
+          Number(token.withdrawn_tokens);
         prev.totalUnlocked += Number(token.available_to_withdraw);
         prev.totalWithdrawn += Number(token.withdrawn_tokens);
 
@@ -93,7 +104,7 @@ export const Vesting = () => {
                 data?.totalUnlocked,
                 data?.token?.decimals
               )} ${data?.token?.symbol}`}
-              bottomText="All amount locked"
+              bottomText="Unlocked amount"
             />
 
             <ValueBox
@@ -103,7 +114,7 @@ export const Vesting = () => {
                 data?.totalWithdrawn,
                 data?.token?.decimals
               )} ${data?.token?.symbol}`}
-              bottomText="All amount locked"
+              bottomText="Total quantity "
             />
           </>
         }

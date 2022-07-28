@@ -1,5 +1,4 @@
 import * as R from "ramda";
-import { NearConstants } from "@jump/src/constants";
 import { format, differenceInMilliseconds } from "date-fns";
 import { Box, BoxProps, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import { Button, ValueBox } from "@jump/src/components";
@@ -12,6 +11,7 @@ import { formatNumber } from "@near/ts";
 import { getNear } from "@jump/src/hooks/near";
 import { useNearQuery } from "react-near";
 import { useVestingStore } from "@jump/src/stores/vesting-store";
+import { WalletConnection } from "near-api-js";
 
 type Token = {
   decimals: number;
@@ -41,9 +41,9 @@ export function VestingCard(props: Props & BoxProps) {
     return Math.round(current / base);
   }, [props.endsAt, props.createdAt]);
 
-  const { user } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+  const { user, wallet } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
 
-  const { withdraw } = useVestingStore();
+  const { withdraw, fastPass } = useVestingStore();
 
   const { data: storage } = useNearQuery("storage_balance_of", {
     contract: "jump_token.testnet",
@@ -158,7 +158,11 @@ export function VestingCard(props: Props & BoxProps) {
               flexDirection="column"
               justifyContent="space-between"
             >
-              <Button>
+              <Button
+                onClick={() =>
+                  fastPass("0", storage, wallet as WalletConnection)
+                }
+              >
                 <Flex
                   width="100%"
                   alignItems="center"
@@ -169,7 +173,11 @@ export function VestingCard(props: Props & BoxProps) {
                 </Flex>
               </Button>
 
-              <Button onClick={() => withdraw("0", storage)}>
+              <Button
+                onClick={() =>
+                  withdraw("0", storage, wallet as WalletConnection)
+                }
+              >
                 <Flex
                   width="100%"
                   alignItems="center"

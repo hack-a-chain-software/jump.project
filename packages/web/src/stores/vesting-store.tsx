@@ -1,47 +1,25 @@
 import create from "zustand";
-import toast from "react-hot-toast";
-import isEmpty from "lodash/isEmpty";
-import { Contract, WalletConnection } from "near-api-js";
+import { WalletConnection } from "near-api-js";
+import { getAmount } from "../hooks/near";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
-import { NearMutableContractCall } from "@near/ts";
-import { NearConstants } from "@jump/src/constants";
-
-interface NFTStakingContract extends Contract {
-  storage_balance_of: NearMutableContractCall<{ account_id: string }>;
-}
 
 export const useVestingStore = create<{
-  contract: NFTStakingContract | null;
-  connection: WalletConnection | null;
-  validate: (tokens: Array<string>, message?: string) => void;
-  init: (connection: WalletConnection) => Promise<void>;
-  withdraw: (vesting: string, storage?: any) => Promise<void>;
-}>((set, get) => ({
-  token: null,
-  contract: null,
-  connection: null,
-
-  init: async (connection: WalletConnection) => {
-    try {
-      set({
-        connection: connection as WalletConnection,
-        contract: new Contract(
-          connection.account(),
-          import.meta.env.VITE_LOCKED_CONTRACT,
-          {
-            viewMethods: ["storage_balance_of"],
-            changeMethods: ["storage_deposit"],
-          }
-        ) as NFTStakingContract,
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-  },
-
-  withdraw: async (vesting: string, storage: any) => {
-    const { contract, connection } = get();
-
+  fastPass: (
+    vesting: string,
+    storage: any,
+    connection: WalletConnection
+  ) => Promise<void>;
+  withdraw: (
+    vesting: string,
+    storage: any,
+    connection: WalletConnection
+  ) => Promise<void>;
+}>(() => ({
+  withdraw: async (
+    vesting: string,
+    storage: any,
+    connection: WalletConnection
+  ) => {
     const transactions: Transaction[] = [];
 
     if (!storage || storage.total < "0.10") {
@@ -75,18 +53,47 @@ export const useVestingStore = create<{
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  validate: (
-    tokens: Array<string>,
-    message = "Ooops! Select tokens to continue"
+  fastPass: async (
+    vesting: string,
+    storage: any,
+    connection: WalletConnection
   ) => {
-    const { connection, contract } = get();
+    const transactions: Transaction[] = [];
 
-    if (!connection || !contract) {
-      throw toast("connect wallet pls");
-    }
+    // if (!storage || storage.total < "0.10") {
+    //   transactions.push({
+    //     receiverId: "jump_token.testnet",
+    //     functionCalls: [
+    //       {
+    //         methodName: "storage_deposit",
+    //         args: {
+    //           account_id: connection?.getAccountId(),
+    //           registration_only: false,
+    //         },
+    //         amount: "0.25",
+    //       },
+    //     ],
+    //   });
+    // }
 
-    if (isEmpty(tokens)) {
-      throw toast(message);
-    }
+    transactions.push({
+      receiverId: import.meta.env.VITE_LOCKED_CONTRACT,
+      functionCalls: [
+        {
+          methodName: "ft_on_transfer",
+          amount: "50",
+          args: {
+            sender_id: connection?.getAccountId(),
+            msg: JSON.stringify({
+              type: "BuyFastPass",
+              account_id: connection?.getAccountId(),
+              vesting_id: vesting,
+            }),
+          },
+        },
+      ],
+    });
+
+    executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 }));
