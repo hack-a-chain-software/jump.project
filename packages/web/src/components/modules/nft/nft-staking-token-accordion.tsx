@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { InfoIcon } from "@jump/src/assets/svg";
-import { ValueBox } from "@jump/src/components";
-import { useTheme } from "@jump/src/hooks/theme";
+import { InfoIcon } from "@/assets/svg";
+import { ValueBox } from "@/components";
+import { useTheme } from "@/hooks/theme";
 import { Flex, Text, Grid, Image } from "@chakra-ui/react";
 
 type Props = {
-  select: Function;
+  select: any;
   selected: boolean;
   token: {
     nft_id: string;
@@ -14,9 +14,9 @@ type Props = {
       title?: string;
       description?: string;
     };
-    jumpRewards: "100";
-    acovaRewards: "10";
-    trpRewards: "30";
+    jumpRewards: string;
+    acovaRewards: string;
+    trpRewards: string;
   };
 };
 

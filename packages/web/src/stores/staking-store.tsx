@@ -10,11 +10,7 @@ import {
 import { NearConstants } from "../constants";
 import { JUMP_TOKEN, X_JUMP_TOKEN } from "../env/contract";
 
-import {
-  executeMultipleTransactions,
-  getAmount,
-  Transaction,
-} from "../hooks/near";
+import { executeMultipleTransactions, getAmount, Transaction } from "@/tools";
 
 interface StakingContract extends Contract {
   ft_on_transfer: FtOnTransfer;

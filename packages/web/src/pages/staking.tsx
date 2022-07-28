@@ -12,7 +12,7 @@ import {
   Card,
 } from "../components";
 import { X_JUMP_TOKEN } from "../env/contract";
-import { useNearContractsAndWallet } from "../hooks/near";
+import { useNearContractsAndWallet } from "@/context/near";
 import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";

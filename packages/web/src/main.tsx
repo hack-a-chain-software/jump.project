@@ -7,7 +7,8 @@ import ReactDOM from "react-dom/client";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import Router from "./router";
 import { NearEnvironment } from "react-near";
-import { NearContractsProvider, ProviderNear } from "./hooks/near";
+import { ProviderNear } from "./hooks/near";
+import { NearContractsProvider } from "@/context/near";
 import { theme } from "./theme";
 
 // TODO: Find a better way to handle this buffer error

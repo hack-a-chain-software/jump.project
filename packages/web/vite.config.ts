@@ -22,7 +22,7 @@ export default defineConfig({
     alias: {
       util: "util",
       process: "process/browser",
-      "@jump": resolve(__dirname, "."),
+      "@": resolve(__dirname, "./src"),
     },
   },
 });

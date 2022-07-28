@@ -1,5 +1,5 @@
 import { Box, Text, useColorModeValue } from "@chakra-ui/react";
-import { useTheme } from "@jump/src/hooks/theme";
+import { useTheme } from "@/hooks/theme";
 
 export function Toast({ type, children }) {
   const { jumpGradient, darkPurple } = useTheme();

@@ -1,7 +1,7 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
 
-import { InfoIcon, CheckIcon } from "@jump/src/assets/svg";
-import { useTheme } from "@jump/src/hooks/theme";
+import { InfoIcon, CheckIcon } from "@/assets/svg";
+import { useTheme } from "@/hooks/theme";
 
 type Props = {
   staked_meta: {
