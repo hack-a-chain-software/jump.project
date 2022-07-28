@@ -60,34 +60,35 @@ export const useVestingStore = create<{
   ) => {
     const transactions: Transaction[] = [];
 
-    // if (!storage || storage.total < "0.10") {
-    //   transactions.push({
-    //     receiverId: "jump_token.testnet",
-    //     functionCalls: [
-    //       {
-    //         methodName: "storage_deposit",
-    //         args: {
-    //           account_id: connection?.getAccountId(),
-    //           registration_only: false,
-    //         },
-    //         amount: "0.25",
-    //       },
-    //     ],
-    //   });
-    // }
+    if (!storage || storage.total < "0.10") {
+      transactions.push({
+        receiverId: "jump_token.testnet",
+        functionCalls: [
+          {
+            methodName: "storage_deposit",
+            args: {
+              account_id: connection?.getAccountId(),
+              registration_only: false,
+            },
+            amount: "0.25",
+          },
+        ],
+      });
+    }
 
     transactions.push({
-      receiverId: import.meta.env.VITE_LOCKED_CONTRACT,
+      receiverId: "jump_token.testnet",
       functionCalls: [
         {
-          methodName: "ft_on_transfer",
-          amount: "50",
+          methodName: "ft_transfer_call",
           args: {
-            sender_id: connection?.getAccountId(),
+            amount: "2500000000",
+            receiver_id: import.meta.env.VITE_LOCKED_CONTRACT,
+            memo: null,
             msg: JSON.stringify({
               type: "BuyFastPass",
               account_id: connection?.getAccountId(),
-              vesting_id: vesting,
+              vesting_index: vesting,
             }),
           },
         },
