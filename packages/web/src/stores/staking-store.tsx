@@ -10,7 +10,7 @@ import {
 import { NearConstants } from "../constants";
 import { JUMP_TOKEN, X_JUMP_TOKEN } from "../env/contract";
 
-import { executeMultipleTransactions, getAmount, Transaction } from "@/tools";
+import { executeMultipleTransactions, Transaction } from "@/tools";
 
 interface StakingContract extends Contract {
   ft_on_transfer: FtOnTransfer;
@@ -124,7 +124,7 @@ export const useStaking = create<{
 
       if (!stakingStorage) {
         transactions.push({
-          receiverId: JUMP_TOKEN,
+          receiverId: import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
           functionCalls: [
             {
               methodName: "storage_deposit",
@@ -139,7 +139,7 @@ export const useStaking = create<{
       }
 
       transactions.push({
-        receiverId: X_JUMP_TOKEN,
+        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
         functionCalls: [
           {
             methodName: "burn_x_token",
