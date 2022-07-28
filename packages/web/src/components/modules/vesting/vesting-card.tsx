@@ -1,18 +1,18 @@
 import * as R from "ramda";
 import { format, differenceInMilliseconds } from "date-fns";
 import { Box, BoxProps, Flex, Text, useColorModeValue } from "@chakra-ui/react";
-import { Button, ValueBox } from "@jump/src/components";
+import { Button, ValueBox } from "@/components";
 
-import { WalletIcon } from "@jump/src/assets/svg";
+import { WalletIcon } from "@/assets/svg";
 
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
-import { getNear } from "@jump/src/hooks/near";
+import { getNear } from "@/hooks/near";
 import { useNearQuery } from "react-near";
-import { useVestingStore } from "@jump/src/stores/vesting-store";
+import { useVestingStore } from "@/stores/vesting-store";
 import { WalletConnection } from "near-api-js";
-import { BuyFastPass } from "@jump/src/modals";
+import { BuyFastPass } from "@/modals";
 
 type Token = {
   decimals: number;

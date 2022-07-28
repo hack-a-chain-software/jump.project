@@ -28,7 +28,7 @@ import {
 } from "@/components";
 import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
-import { useNftStaking } from "../stores/nft-staking";
+import { useNftStaking } from "../stores/nft-staking-store";
 import { getNear } from "@/hooks/near";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";

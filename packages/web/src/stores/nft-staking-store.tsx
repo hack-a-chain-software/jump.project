@@ -4,7 +4,7 @@ import isEmpty from "lodash/isEmpty";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "@/tools";
 import { NearMutableContractCall } from "@near/ts";
-import { NearConstants } from "@jump/src/constants";
+import { NearConstants } from "@/constants";
 
 interface NFTStakingContract extends Contract {
   storage_balance_of: NearMutableContractCall<{ account_id: string }>;

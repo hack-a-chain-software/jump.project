@@ -1,7 +1,7 @@
 import { formatNumber } from "@near/ts";
-import { getNear } from "@jump/src/hooks/near";
-import { useVestingStore } from "@jump/src/stores/vesting-store";
-import { ModalImageDialog, Button } from "@jump/src/components";
+import { getNear } from "@/hooks/near";
+import { useVestingStore } from "@/stores/vesting-store";
+import { ModalImageDialog, Button } from "@/components";
 import { Flex, Text } from "@chakra-ui/react";
 import { WalletConnection } from "near-api-js";
 

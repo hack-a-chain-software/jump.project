@@ -1,5 +1,5 @@
 import { Flex, Grid } from "@chakra-ui/react";
-import { Toast } from "@jump/src/components";
+import { Toast } from "@/components";
 import { Toaster, resolveValue } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";

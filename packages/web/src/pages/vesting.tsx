@@ -8,8 +8,8 @@ import {
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useNearQuery } from "react-near";
-import { useTheme } from "@jump/src/hooks/theme";
-import { getNear } from "@jump/src/hooks/near";
+import { useTheme } from "@/hooks/theme";
+import { getNear } from "@/hooks/near";
 
 import { addMilliseconds } from "date-fns";
 import { useMemo } from "react";

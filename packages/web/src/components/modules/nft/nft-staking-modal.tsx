@@ -1,8 +1,7 @@
 import { useState } from "react";
 import isEmpty from "lodash/isEmpty";
-import { useState } from "react";
 import { getNear } from "@/hooks/near";
-import { useNftStaking } from "@/stores/nft-staking";
+import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
 import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
