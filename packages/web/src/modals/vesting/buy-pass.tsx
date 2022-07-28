@@ -17,7 +17,6 @@ export function BuyFastPass({
   token: any;
   storage: any;
   isOpen: boolean;
-  collection: string;
   acceleration: number;
   vestingId: string;
   totalAmount: number;
