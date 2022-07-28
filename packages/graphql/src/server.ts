@@ -7,9 +7,9 @@ import { Global, Launchpad, NFTStaking } from "./modules";
 const sequelize = new Sequelize({
   dialect: "postgres",
   username: "postgres",
-  password: "JDX-hcswdev15",
-  database: "jdx_dev_db",
-  host: "dev-jdx.cpvy55ndfvji.us-east-1.rds.amazonaws.com",
+  password: "JDX-secret_password-1683413286",
+  database: "jump_testnet",
+  host: "postgres-jump-testnet.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
   port: 5432,
 });
 
