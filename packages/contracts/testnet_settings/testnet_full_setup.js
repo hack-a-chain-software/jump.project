@@ -248,11 +248,11 @@ async function testnetSetup() {
       owner_id: ownerAccount.accountId,
       metadata: {
         spec: "nft-1.0.0",
-        name: "Classy Kangaroo NFT",
-        symbol: "ROO",
+        name: "NEAR Meerkat Kingdom",
+        symbol: "NMK",
         icon: null,
         base_uri:
-          "https://bafybeic3unknzrqczvuzhcx2d3dflqush2n2awz3t7usgtyuwosfrju65m.ipfs.dweb.link",
+          "https://bafybeiht5jof3n265j3jd3rm2sfg6anf567sfgcgqko4oepf77a6ewe3um.ipfs.dweb.link",
         reference: null,
         reference_hash: null,
       },
