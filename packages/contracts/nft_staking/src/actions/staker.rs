@@ -116,6 +116,7 @@ impl Contract {
     let amount = amount.map(|x| x.0).unwrap_or(available);
     assert!(amount <= available, "");
 
+    self.staking_programs.insert(&collection, &staking_program).unwrap();
     self.track_storage_usage(&caller_id, initial_storage);
 
     ext_fungible_token::ext(token_id)
