@@ -5,6 +5,7 @@ import { NearContractViewCall } from "@near/ts";
 import { NearConstants } from "@/constants";
 
 export interface Token {
+  balance?: any;
   token_id: string;
   owner_id: string;
   metadata: Metadata;
@@ -27,6 +28,27 @@ export interface Metadata {
 }
 
 export interface ApprovedAccountIds {}
+
+export interface Program {
+  collection: Collection;
+  collection_owner: string;
+  collection_treasury: any;
+  token_address: string;
+  farm: Farm;
+  min_staking_period: string;
+  early_withdraw_penalty: string;
+}
+
+export interface Collection {
+  type: string;
+  account_id: string;
+}
+
+export interface Farm {
+  round_interval: number;
+  start_at: number;
+  distributions: any;
+}
 
 interface CollectionContract extends Contract {
   nft_token: NearContractViewCall<{ token_id: string }, Token>;
@@ -102,7 +124,7 @@ export const useNftStaking = create<{
         },
       });
 
-      const tokens: Partial<Token>[] = [];
+      const tokens: Token[] = [];
 
       for (let i = 0; i < staked.length; i++) {
         const balance = await stakingContract.view_staked_nft_balance({
@@ -119,7 +141,7 @@ export const useNftStaking = create<{
           token_id: staked[i],
         });
 
-        tokens.push({ ...token, ...balance });
+        tokens.push({ ...token, balance: balance });
       }
 
       set({

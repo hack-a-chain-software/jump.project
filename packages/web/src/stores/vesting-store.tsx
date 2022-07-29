@@ -58,6 +58,7 @@ export const useVestingStore = create<{
   loading: boolean;
   vestings: Vesting[];
   investorInfo: Partial<InvestorInfo>;
+  getPages: (total: string, limit: number) => number;
   getInvestorInfo: (connection: WalletConnection) => Promise<void>;
   getVestings: (connection: WalletConnection) => Promise<void>;
   fastPass: (
@@ -142,7 +143,7 @@ export const useVestingStore = create<{
 
     const vestings: Vesting[] = [];
 
-    const pages = get().getPages(totalVestings);
+    const pages = get().getPages(totalVestings, 10);
 
     for (let i = 0; i <= pages; i++) {
       const items = await contract.view_vesting_paginated({

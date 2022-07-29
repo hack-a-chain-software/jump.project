@@ -35,6 +35,7 @@ import { StakingProjectDocument } from "@near/apollo";
 import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
+import { useNearQuery } from "react-near";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -102,14 +103,25 @@ export function NFTStakingProject() {
     })();
   }, [isFullyConnected, collection]);
 
-  console.log(loading);
-
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
       collection,
       accountId: wallet?.getAccountId() || "",
     },
   });
+
+  const { data, error } = useNearQuery("view_staking_program", {
+    contract: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+    variables: {
+      collection: {
+        type: "NFTContract",
+        account_id: collection,
+      },
+    },
+    skip: !isFullyConnected,
+  });
+
+  console.log(collection);
 
   return (
     <PageContainer>
@@ -214,7 +226,7 @@ export function NFTStakingProject() {
                   <GradientButton
                     disabled={!!isEmpty(tokens) && !loading}
                     onClick={() => {
-                      updateSelectedTokens(tokens);
+                      setSelected(tokens);
                       toggleUnstakeModal();
                     }}
                     bg={useColorModeValue("white", darkPurple)}
