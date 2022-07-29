@@ -6,6 +6,7 @@ import { NearConstants } from "@/constants";
 
 export interface Token {
   balance?: any;
+  id?: string;
   token_id: string;
   owner_id: string;
   metadata: Metadata;
@@ -68,7 +69,7 @@ interface NFTStakingContract extends Contract {
 
 export const useNftStaking = create<{
   loading: boolean;
-  tokens: Partial<Token>[];
+  tokens: Token[];
   getTokens: (
     connection: WalletConnection,
     collection: string

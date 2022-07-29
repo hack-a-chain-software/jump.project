@@ -15,7 +15,7 @@ export default defineConfig({
   ],
   esbuild: {},
   define: {
-    global: "window",
+    // global: "window",
     "process.env": {},
   },
   resolve: {
