@@ -4,9 +4,10 @@ use crate::StorageKey;
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{env, Timestamp};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug)]
 pub struct RewardsDistribution {
   pub undistributed: u128,
   pub unclaimed: u128,
@@ -88,12 +89,14 @@ impl RewardsDistribution {
   }
 }
 
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize)]
 pub struct Farm {
   pub round_interval: u32,
   pub start_at: u32,
 
   pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
+
+  #[serde(skip)]
   pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
 }
 
@@ -186,7 +189,7 @@ impl Farm {
     }
   }
 
-  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> HashMap<FungibleTokenID, u128> {
+  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     self.distribute();
 
     let mut token_rps = self.nfts_rps.get(token_id).unwrap();
@@ -206,6 +209,18 @@ impl Farm {
     self.nfts_rps.insert(token_id, &token_rps);
 
     rewards_map
+  }
+
+  pub fn unclaimed_token_balance(&self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
+    let token_rps = self.nfts_rps.get(token_id).unwrap();
+    let mut unclaimed_map = HashMap::new();
+
+    for (k, dist) in self.distributions.iter() {
+      let rps = token_rps.get(&k).unwrap();
+      unclaimed_map.insert(k.clone(), dist.rps - rps);
+    }
+
+    unclaimed_map
   }
 }
 
@@ -252,9 +267,9 @@ mod tests {
     .map(|(id, dist)| (id.clone(), dist))
   }
 
-  fn get_farm(dists: Vec<(AccountId, RewardsDistribution)>) -> Farm {
+  fn get_farm(vec_distributions: Vec<(AccountId, RewardsDistribution)>) -> Farm {
     let mut distributions = HashMap::new();
-    for (k, v) in dists {
+    for (k, v) in vec_distributions {
       distributions.insert(k, v);
     }
 
