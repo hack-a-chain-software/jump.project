@@ -21,17 +21,19 @@ import {
   NFTStakingCard,
   PageContainer,
   ValueBox,
-  StakeModal,
   TokenCard,
   BackButton,
   TokenAccordion,
 } from "@/components";
+import { NFTStakeModal, NFTUnstakeModal } from "@/modals";
 import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
-import { useNftStaking } from "../stores/nft-staking-store";
+import { useNftStaking, Token } from "../stores/nft-staking-store";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
 import { useNearContractsAndWallet } from "@/context/near";
+import toast from "react-hot-toast";
+import isEmpty from "lodash/isEmpty";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -42,13 +44,48 @@ export function NFTStakingProject() {
   const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
     useTheme();
 
-  const [show, setShow] = useState(false);
-  const [focused, setFocused] = useState<any>(null);
+  const [focused, setFocused] = useState<Token | null>(null);
+  const [showStake, setShowStake] = useState(false);
+  const [showUnstake, setShowUnstake] = useState(false);
+
+  const { getTokens, tokens } = useNftStaking();
 
   const { wallet, isFullyConnected, connectWallet } =
     useNearContractsAndWallet();
 
-  const { unstake, claimRewards, getTokens, tokens } = useNftStaking();
+  const [selected, setSelected] = useState<Token[]>([]);
+
+  const updateSelectedTokens = (token: Token) => {
+    if (selected.findIndex((item) => isEqual(item, token)) !== -1) {
+      setSelected([...selected.filter((item) => !isEqual(item, token))]);
+
+      return;
+    }
+
+    setSelected([...selected, token]);
+  };
+
+  const toggleStakeModal = () => {
+    if (!isFullyConnected) {
+      connectWallet();
+
+      return;
+    }
+
+    setShowStake(!showStake);
+  };
+
+  const toggleUnstakeModal = () => {
+    if (!isFullyConnected) {
+      return connectWallet();
+    }
+
+    if (isEmpty(selected)) {
+      return console.warn(toast("Ooops! Select tokens to continue"));
+    }
+
+    setShowUnstake(!showUnstake);
+  };
 
   useEffect(() => {
     (async () => {
@@ -60,28 +97,6 @@ export function NFTStakingProject() {
     })();
   }, [isFullyConnected]);
 
-  const [selected, setSelected] = useState<string[]>([]);
-
-  const select = (tokenId) => {
-    if (selected.includes(tokenId)) {
-      setSelected([...selected.filter((token) => token !== tokenId)]);
-
-      return;
-    }
-
-    setSelected([...selected, tokenId]);
-  };
-
-  const toggleStakeModal = () => {
-    if (!isFullyConnected) {
-      connectWallet();
-
-      return;
-    }
-
-    setShow(!show);
-  };
-
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
       collection,
@@ -91,15 +106,21 @@ export function NFTStakingProject() {
 
   return (
     <PageContainer>
-      <StakeModal
-        isOpen={show}
+      <NFTStakeModal
+        isOpen={showStake}
         collection={collection}
-        onClose={() => {
-          setShow(!show);
-        }}
+        onClose={() => toggleStakeModal()}
+      />
+
+      <NFTUnstakeModal
+        selected={selected}
+        isOpen={showUnstake}
+        collection={collection}
+        onClose={() => toggleUnstakeModal()}
       />
 
       <BackButton onClick={() => navigate("/nft-staking")} />
+
       <NFTStakingCard
         collectionLogo={staking?.collection_meta?.image}
         collectionName={staking?.collection_meta?.name}
@@ -118,6 +139,7 @@ export function NFTStakingProject() {
           },
         ]}
       />
+
       <Flex flex={1} direction="row">
         <Flex flex={1} direction="column">
           <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
@@ -196,27 +218,18 @@ export function NFTStakingProject() {
                   >
                     Stake NFT <WalletIcon />
                   </GradientButton>
-                  {/* <GradientButton
-                    onClick={() => unstake()}
-                    bg={darkPurple}
-                    justifyContent="space-between"
-                  >
-                    Unstake NFT <WalletIcon />
-                  </GradientButton> */}
                   <GradientButton
-                    onClick={() =>
-                      unstake(
-                        tokens.map(({ token_id }) => token_id),
-                        collection
-                      )
-                    }
+                    onClick={() => {
+                      updateSelectedTokens(tokens);
+                      toggleUnstakeModal();
+                    }}
                     bg={useColorModeValue("white", darkPurple)}
                     justifyContent="space-between"
                   >
                     Unstake All NFTs <WalletIcon />
                   </GradientButton>
                   <GradientButton
-                    onClick={() => claimRewards([])}
+                    onClick={() => {}}
                     bg={useColorModeValue("white", darkPurple)}
                     justifyContent="space-between"
                   >
@@ -288,7 +301,7 @@ export function NFTStakingProject() {
               color="black"
               display="flex"
               alignItems="center"
-              onClick={() => unstake(wallet, selected, collection)}
+              onClick={() => toggleUnstakeModal()}
             >
               <Text marginRight="16px">Unstake Selected NFTs!</Text>
 
@@ -309,11 +322,7 @@ export function NFTStakingProject() {
               }}
               transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
             >
-              <TokenAccordion
-                token={focused}
-                select={select}
-                selected={selected && selected.includes(focused?.nft_id)}
-              />
+              <TokenAccordion {...focused} />
             </motion.section>
           )}
         </AnimatePresence>
@@ -331,7 +340,9 @@ export function NFTStakingProject() {
                 <Flex
                   key={"nft-staked-tokens-" + index}
                   onClick={() =>
-                    setFocused(isEqual(token, focused) ? null : token)
+                    setFocused(
+                      isEqual(token, focused) ? null : (token as Token)
+                    )
                   }
                   borderRadius="20px"
                   border={
@@ -341,10 +352,12 @@ export function NFTStakingProject() {
                   }
                 >
                   <TokenCard
-                    {...token}
-                    select={select}
+                    {...(token as Token)}
+                    select={() => updateSelectedTokens(token as Token)}
                     key={"nft-staking-collection-token" + index}
-                    selected={selected && selected.includes(token.token_id)}
+                    selected={
+                      selected.findIndex((item) => isEqual(token, item)) !== -1
+                    }
                   />
                 </Flex>
               ))}

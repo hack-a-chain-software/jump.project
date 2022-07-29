@@ -6,8 +6,9 @@ import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
 import { useNearContractsAndWallet } from "@/context/near";
 import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
+import { WalletConnection } from "near-api-js";
 
-export function StakeModal({
+export function NFTStakeModal({
   isOpen = false,
   onClose = () => {},
   collection,
@@ -27,7 +28,7 @@ export function StakeModal({
       return;
     }
 
-    stake(wallet, collection, selected);
+    stake(wallet as WalletConnection, collection, selected);
   };
 
   const { data, loading } = useNearQuery("nft_tokens_for_owner", {

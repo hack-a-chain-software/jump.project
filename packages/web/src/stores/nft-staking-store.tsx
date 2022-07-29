@@ -62,7 +62,8 @@ export const useNftStaking = create<{
   ) => Promise<void>;
   claimRewards: (
     connection: WalletConnection,
-    tokens: string[]
+    tokens: string[],
+    collection: string
   ) => Promise<void>;
 }>((set, get) => ({
   tokens: [],
@@ -207,5 +208,5 @@ export const useNftStaking = create<{
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  claimRewards: async (connection, tokens) => {},
+  claimRewards: async (connection, tokens, collection) => {},
 }));

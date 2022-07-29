@@ -1,25 +1,14 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
-
 import { InfoIcon, CheckIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
-
-type Props = {
-  metadata: {
-    media: string;
-    title?: string;
-    description?: string;
-  };
-  select: Function;
-  token_id: string;
-  selected?: boolean;
-};
+import { Token } from "@/stores/nft-staking-store";
 
 export function TokenCard({
-  metadata: { media, title, description },
+  select,
+  metadata,
   token_id,
-  select = () => {},
   selected = false,
-}: Props) {
+}: Token & { select: any; selected: boolean }) {
   const { jumpGradient } = useTheme();
 
   return (
@@ -52,7 +41,7 @@ export function TokenCard({
         onClick={(e) => {
           e.stopPropagation();
 
-          select(token_id);
+          select();
         }}
       >
         {selected && <CheckIcon color="white" />}
@@ -81,7 +70,7 @@ export function TokenCard({
             fontFamily="Inter"
             marginBottom="-3px"
           >
-            {description}
+            {metadata.description}
           </Text>
 
           <Text
@@ -91,7 +80,7 @@ export function TokenCard({
             fontWeight="500"
             fontFamily="Inter"
           >
-            {title}
+            {metadata.title}
           </Text>
         </Flex>
 

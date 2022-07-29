@@ -2,25 +2,10 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
+import { Token } from "@/stores/nft-staking-store";
 import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
 
-type Props = {
-  select: any;
-  selected: boolean;
-  token: {
-    nft_id: string;
-    metadata: {
-      media: string;
-      title?: string;
-      description?: string;
-    };
-    jumpRewards: string;
-    acovaRewards: string;
-    trpRewards: string;
-  };
-};
-
-export function TokenAccordion({ token: { metadata, nft_id } }: Props) {
+export function TokenAccordion({ metadata, token_id }: Token) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
   return (
@@ -28,15 +13,10 @@ export function TokenAccordion({ token: { metadata, nft_id } }: Props) {
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       transition={{ duration: 0.55 }}
-      key={"nft-staking-token-accordion" + nft_id}
+      key={"nft-staking-token-accordion" + token_id}
     >
       <Flex width="100%" flexDirection="column">
         <Flex width="100%">
-          {/* <TokenCard
-            select={select}
-            selected={selected}
-            {...token}
-          /> */}
           <Flex width="309px" height="298px">
             <Image
               width="100%"
