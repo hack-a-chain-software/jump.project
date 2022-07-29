@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Stack, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import {
   If,
@@ -15,7 +16,7 @@ import { useNearContractsAndWallet } from "@/context/near";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
-import { useVestingStore } from "@/stores/vesting-store";
+import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { WalletConnection } from "near-api-js";
 
 export const Vesting = () => {
@@ -25,8 +26,14 @@ export const Vesting = () => {
 
   const [filter, setFilter] = useState("");
 
-  const { getInvestorInfo, getVestings, withdraw, investorInfo, vestings } =
-    useVestingStore();
+  const {
+    getInvestorInfo,
+    getVestings,
+    withdraw,
+    investorInfo,
+    vestings,
+    loading,
+  } = useVestingStore();
 
   const { data: storage } = useNearQuery("storage_balance_of", {
     contract: "jump_token.testnet",
@@ -79,49 +86,57 @@ export const Vesting = () => {
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
         content={
-          <>
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Locked"
-              value={
-                isFullyConnected
-                  ? `${formatNumber(
-                      investorInfo?.totalLocked,
-                      investorInfo?.token?.decimals
-                    )} ${investorInfo?.token?.symbol}`
-                  : "Connect Wallet  "
-              }
-              bottomText="All amount locked"
-            />
+          !loading && (
+            <motion.div
+              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
+              transition={{ duration: 0.55 }}
+            >
+              <Flex className="space-x-[1.25rem]">
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Locked"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalLocked || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="All amount locked"
+                />
 
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Unlocked"
-              value={
-                isFullyConnected
-                  ? `${formatNumber(
-                      investorInfo?.totalUnlocked,
-                      investorInfo?.token?.decimals
-                    )} ${investorInfo?.token?.symbol}`
-                  : "Connect Wallet"
-              }
-              bottomText="Unlocked amount"
-            />
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Unlocked"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalUnlocked || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Unlocked amount"
+                />
 
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Withdrawn"
-              value={
-                isFullyConnected
-                  ? `${formatNumber(
-                      investorInfo?.totalWithdrawn,
-                      investorInfo?.token?.decimals
-                    )} ${investorInfo?.token?.symbol}`
-                  : "Connect Wallet"
-              }
-              bottomText="Total quantity "
-            />
-          </>
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Withdrawn"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalWithdrawn || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Total quantity "
+                />
+              </Flex>
+            </motion.div>
+          )
         }
       />
 
@@ -207,7 +222,7 @@ export const Vesting = () => {
                       .filter(({ available_to_withdraw }) => {
                         return (
                           Number(available_to_withdraw) >
-                          Math.pow(10, investorInfo.token?.decimals)
+                          Math.pow(10, investorInfo.token?.decimals || 0)
                         );
                       })
                       .map(({ id }) => String(id)),
@@ -224,36 +239,14 @@ export const Vesting = () => {
           </Flex>
           {vestings && (
             <Stack spacing="32px">
-              {filtered.map(
-                (
-                  {
-                    id,
-                    fast_pass,
-                    locked_value,
-                    start_timestamp,
-                    vesting_duration,
-                    withdrawn_tokens,
-                    available_to_withdraw,
-                  },
-                  index
-                ) => (
-                  <VestingCard
-                    id={String(id)}
-                    token={investorInfo.token}
-                    contract={investorInfo.contractData}
-                    fast_pass={fast_pass}
-                    totalAmount={locked_value}
-                    key={"vesting-" + index}
-                    availableWidthdraw={available_to_withdraw}
-                    withdrawnTokens={withdrawn_tokens}
-                    createdAt={new Date(start_timestamp / 1000000)}
-                    endsAt={addMilliseconds(
-                      new Date(start_timestamp / 1000000),
-                      vesting_duration / 1000000
-                    )}
-                  />
-                )
-              )}
+              {filtered.map((vesting, index) => (
+                <VestingCard
+                  {...vesting}
+                  token={investorInfo.token as Token}
+                  contractData={investorInfo.contractData as ContractData}
+                  key={"vesting-" + index}
+                />
+              ))}
             </Stack>
           )}
         </>

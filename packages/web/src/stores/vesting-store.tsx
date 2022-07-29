@@ -3,7 +3,7 @@ import { WalletConnection, Contract } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
 import { NearContractViewCall } from "@near/ts";
 
-interface Vesting {
+export interface Vesting {
   id?: string | number;
   beneficiary: string;
   locked_value: string;
@@ -55,6 +55,7 @@ export interface ContractData {
 }
 
 export const useVestingStore = create<{
+  loading: boolean;
   vestings: Vesting[];
   investorInfo: Partial<InvestorInfo>;
   getInvestorInfo: (connection: WalletConnection) => Promise<void>;
@@ -73,9 +74,14 @@ export const useVestingStore = create<{
   ) => Promise<void>;
 }>((set, get) => ({
   vestings: [],
+  loading: true,
   investorInfo: {},
 
   getInvestorInfo: async (connection) => {
+    set({
+      loading: true,
+    });
+
     const tokenContract = new Contract(
       connection.account(),
       import.meta.env.VITE_BASE_TOKEN,
@@ -120,6 +126,7 @@ export const useVestingStore = create<{
 
     set({
       investorInfo,
+      loading: false,
     });
   },
 

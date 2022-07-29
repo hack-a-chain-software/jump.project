@@ -45,6 +45,7 @@ interface NFTStakingContract extends Contract {
 }
 
 export const useNftStaking = create<{
+  loading: boolean;
   tokens: Partial<Token>[];
   getTokens: (
     connection: WalletConnection,
@@ -67,8 +68,13 @@ export const useNftStaking = create<{
   ) => Promise<void>;
 }>((set, get) => ({
   tokens: [],
+  loading: false,
 
   getTokens: async (connection, collection) => {
+    set({
+      loading: true,
+    });
+
     const stakingContract = new Contract(
       connection.account(),
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -121,6 +127,14 @@ export const useNftStaking = create<{
       });
     } catch (e) {
       console.warn(e);
+
+      set({
+        tokens: [],
+      });
+    } finally {
+      set({
+        loading: false,
+      });
     }
   },
 

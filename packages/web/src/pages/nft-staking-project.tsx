@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   useColorModeValue,
+  Spinner,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -48,7 +49,7 @@ export function NFTStakingProject() {
   const [showStake, setShowStake] = useState(false);
   const [showUnstake, setShowUnstake] = useState(false);
 
-  const { getTokens, tokens } = useNftStaking();
+  const { getTokens, tokens, loading } = useNftStaking();
 
   const { wallet, isFullyConnected, connectWallet } =
     useNearContractsAndWallet();
@@ -77,11 +78,15 @@ export function NFTStakingProject() {
 
   const toggleUnstakeModal = () => {
     if (!isFullyConnected) {
-      return connectWallet();
+      connectWallet();
+
+      return;
     }
 
     if (isEmpty(selected)) {
-      return console.warn(toast("Ooops! Select tokens to continue"));
+      toast("Ooops! Select tokens to continue");
+
+      return;
     }
 
     setShowUnstake(!showUnstake);
@@ -95,7 +100,9 @@ export function NFTStakingProject() {
 
       await getTokens(wallet as WalletConnection, collection);
     })();
-  }, [isFullyConnected]);
+  }, [isFullyConnected, collection]);
+
+  console.log(loading);
 
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
@@ -124,20 +131,6 @@ export function NFTStakingProject() {
       <NFTStakingCard
         collectionLogo={staking?.collection_meta?.image}
         collectionName={staking?.collection_meta?.name}
-        tokens={[
-          {
-            name: "JUMP",
-            ammount: "10",
-          },
-          {
-            name: "ACOVA",
-            ammount: "20",
-          },
-          {
-            name: "CGK",
-            ammount: "10",
-          },
-        ]}
       />
 
       <Flex flex={1} direction="row">
@@ -219,6 +212,7 @@ export function NFTStakingProject() {
                     Stake NFT <WalletIcon />
                   </GradientButton>
                   <GradientButton
+                    disabled={!!isEmpty(tokens) && !loading}
                     onClick={() => {
                       updateSelectedTokens(tokens);
                       toggleUnstakeModal();
@@ -242,45 +236,37 @@ export function NFTStakingProject() {
         </Flex>
       </Flex>
 
-      <If
-        fallback={
-          isFullyConnected && (
-            <Flex
-              pt="20px"
-              marginX="auto"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-            >
-              <Text
-                fontWeight="800"
-                fontSize={30}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                You don't have a staked NFT
-              </Text>
+      <If condition={!!isFullyConnected && isEmpty(tokens) && !loading}>
+        <Flex
+          pt="20px"
+          marginX="auto"
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+        >
+          <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
+            You don't have a staked NFT
+          </Text>
 
-              <Text
-                _hover={{
-                  opacity: 0.8,
-                }}
-                onClick={() => toggleStakeModal()}
-                marginTop="-12px"
-                cursor="pointer"
-                color="#761BA0"
-                fontWeight="800"
-                fontSize={34}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                Stake Now!
-              </Text>
-            </Flex>
-          )
-        }
-        condition={!!isFullyConnected && tokens?.length > 0}
-      >
+          <Text
+            _hover={{
+              opacity: 0.8,
+            }}
+            onClick={() => toggleStakeModal()}
+            marginTop="-12px"
+            cursor="pointer"
+            color="#761BA0"
+            fontWeight="800"
+            fontSize={34}
+            letterSpacing="-0.03em"
+            mb={3}
+          >
+            Stake Now!
+          </Text>
+        </Flex>
+      </If>
+
+      <If condition={!!isFullyConnected && !isEmpty(tokens) && !loading}>
         <Flex
           paddingTop="66px"
           alignItems="center"

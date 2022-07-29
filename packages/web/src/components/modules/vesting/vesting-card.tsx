@@ -1,60 +1,54 @@
 import * as R from "ramda";
-import { format, differenceInMilliseconds } from "date-fns";
+import { format, differenceInMilliseconds, addMilliseconds } from "date-fns";
 import { Box, BoxProps, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import { Button, ValueBox } from "@/components";
-
 import { WalletIcon } from "@/assets/svg";
-
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
-import { getNear } from "@/hooks/near";
 import { useNearQuery } from "react-near";
-import { useVestingStore } from "@/stores/vesting-store";
+import {
+  useVestingStore,
+  Vesting,
+  Token,
+  ContractData,
+} from "@/stores/vesting-store";
 import { WalletConnection } from "near-api-js";
 import { BuyFastPass } from "@/modals";
+import { useNearContractsAndWallet } from "@/context/near";
 
-type Token = {
-  decimals: number;
-  symbol: string;
-};
-
-type Props = {
-  id: String;
-  endsAt: Date;
-  token: Token;
-  contract: any;
-  createdAt: Date;
-  fast_pass: boolean;
-  totalAmount: number;
-  withdrawnTokens: number;
-  availableWidthdraw: number;
-};
-
-export function VestingCard(props: Props & BoxProps) {
+export function VestingCard(
+  props: Vesting & BoxProps & { token: Token; contractData: ContractData }
+) {
   const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
     useTheme();
 
+  const createdAt = useMemo(() => {
+    return new Date(Number(props.start_timestamp) / 1000000);
+  }, [props.start_timestamp]);
+
+  const endAt = useMemo(() => {
+    return addMilliseconds(createdAt, Number(props.vesting_duration) / 1000000);
+  }, [props.start_timestamp, props.vesting_duration]);
+
   const progress = useMemo(() => {
-    const ends = props.endsAt || new Date();
-    const start = props.createdAt || new Date();
     const today = new Date();
-    const base = differenceInMilliseconds(ends, start);
-    const current = differenceInMilliseconds(today, start) * 100;
+    const base = differenceInMilliseconds(endAt, createdAt);
+    const current = differenceInMilliseconds(today, createdAt) * 100;
 
     return Math.round(current / base);
-  }, [props.endsAt, props.createdAt]);
+  }, [props.start_timestamp, props.vesting_duration]);
 
-  const { user, wallet } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
   const { withdraw, fastPass } = useVestingStore();
 
   const { data: storage } = useNearQuery("storage_balance_of", {
     contract: "jump_token.testnet",
     variables: {
-      account_id: user.address,
+      account_id: wallet?.getAccountId(),
     },
-    skip: !user.isConnected,
+    skip: !isFullyConnected,
   });
 
   const [showFastPass, setShowFastPass] = useState(false);
@@ -69,15 +63,15 @@ export function VestingCard(props: Props & BoxProps) {
       {...(R.omit(
         [
           "id",
-          "totalAmount",
-          "createdAt",
-          "endsAt",
-          "withdrawnTokens",
-          "token",
+          "beneficiary",
+          "locked_value",
+          "start_timestamp",
+          "vesting_duration",
           "fast_pass",
-          "contract",
-          "passCost",
-          "availableWidthdraw",
+          "withdrawn_tokens",
+          "available_to_withdraw",
+          "token",
+          "contractData",
         ],
         props
       ) as Record<string, string>)}
@@ -106,15 +100,15 @@ export function VestingCard(props: Props & BoxProps) {
             >
               <Text color="black" fontSize="14px" fontWeight="700">
                 {`Total amount - ${formatNumber(
-                  props.totalAmount,
-                  props?.token?.decimals
+                  Number(props.locked_value),
+                  props?.token?.decimals || 0
                 )} JUMP`}
               </Text>
             </Flex>
 
             <Flex marginTop="10px" flexDirection="column">
               <Text fontSize="20px" fontWeight="600" letterSpacing="-0.03em">
-                {`Ends at ${format(props.endsAt, "dd MMMM y")}`}
+                {`Ends at ${format(endAt, "dd MMMM y")}`}
               </Text>
 
               <Text
@@ -147,8 +141,8 @@ export function VestingCard(props: Props & BoxProps) {
               borderColor={glassyWhiteOpaque}
               title="Available to Claim"
               value={`${formatNumber(
-                props.availableWidthdraw,
-                props.token?.decimals
+                Number(props.available_to_withdraw),
+                props.token?.decimals || 0
               )} ${props.token?.symbol}`}
               bottomText="Unlocked amount"
             />
@@ -157,8 +151,8 @@ export function VestingCard(props: Props & BoxProps) {
               borderColor={glassyWhiteOpaque}
               title="Claimed Amount"
               value={`${formatNumber(
-                props.withdrawnTokens,
-                props.token?.decimals
+                Number(props.withdrawn_tokens),
+                props.token?.decimals || 0
               )} ${props.token?.symbol}`}
               bottomText="Withdrawn amount"
             />
@@ -191,8 +185,8 @@ export function VestingCard(props: Props & BoxProps) {
 
               <Button
                 disabled={
-                  props.availableWidthdraw <=
-                  Math.pow(10, props.token?.decimals)
+                  Number(props.available_to_withdraw) <=
+                  Math.pow(10, props.token?.decimals || 0)
                 }
                 onClick={() =>
                   withdraw(
@@ -221,10 +215,10 @@ export function VestingCard(props: Props & BoxProps) {
         isOpen={showFastPass}
         storage={storage}
         token={props.token}
-        vestingId={props.id}
-        passCost={Number(props?.contract?.fast_pass_cost)}
-        totalAmount={props.totalAmount}
-        acceleration={props?.contract?.fast_pass_acceleration}
+        vestingId={props.id || ""}
+        passCost={Number(props.contractData.fast_pass_cost)}
+        totalAmount={Number(props.locked_value)}
+        acceleration={Number(props.contractData?.fast_pass_acceleration)}
       />
     </Box>
   );

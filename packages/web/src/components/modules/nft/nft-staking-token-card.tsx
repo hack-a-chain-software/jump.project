@@ -6,7 +6,6 @@ import { Token } from "@/stores/nft-staking-store";
 export function TokenCard({
   select,
   metadata,
-  token_id,
   selected = false,
 }: Token & { select: any; selected: boolean }) {
   const { jumpGradient } = useTheme();
