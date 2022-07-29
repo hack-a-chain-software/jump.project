@@ -203,7 +203,7 @@ impl Event for LaunchpadEvent {
             // ListingStatus::Cancelled
             &Self::CancelListing([CancelListingLog { listing_id }]) => {
                 conn.execute(
-                    "update listings set status = 'canceled' where listing_id = $1;",
+                    "update listings set status = 'cancelled' where listing_id = $1;",
                     &[&Decimal::from_u64(listing_id.0).unwrap()],
                 )
                 .await
@@ -213,8 +213,8 @@ impl Event for LaunchpadEvent {
             &Self::ProjectFundListing(
                 [ProjectFundListingLog {
                     listing_id,
-                    tokens_sale,
-                    tokens_liquidity,
+                    tokens_sale: _,
+                    tokens_liquidity: _,
                 }],
             ) => {
                 conn.execute(
@@ -228,8 +228,8 @@ impl Event for LaunchpadEvent {
             &Self::ProjectWithdrawListing(
                 [ProjectWithdrawListingLog {
                     listing_id,
-                    project_tokens_withdraw,
-                    price_tokens_withdraw,
+                    project_tokens_withdraw: _,
+                    price_tokens_withdraw: _,
                     project_status,
                 }],
             ) => {
@@ -249,7 +249,7 @@ impl Event for LaunchpadEvent {
                     investor_id,
                     listing_id,
                     project_status,
-                    sale_phase,
+                    sale_phase: _,
                     allocations_purchased,
                     tokens_purchased,
                     total_allocations_sold,
@@ -293,32 +293,32 @@ impl Event for LaunchpadEvent {
                 .unwrap();
             }
 
-            &Self::InvestorStakeMembership(
-                [InvestorStakeMembershipLog {
-                    investor_id,
-                    token_quantity,
-                    new_membership_level,
-                }],
-            ) => {
-                conn.execute(
-                    "
-                    insert into launchpad_investors (account_id, staked_token, last_check)
-                    values ($1, $2, now())
-                    on conflict (account_id)
-                    do
-                        update launchpad_investors
-                        set staked_token = $2;",
-                    &[investor_id, &Decimal::from_u128(token_quantity.0).unwrap()],
-                )
-                .await
-                .unwrap();
-            }
+            // &Self::InvestorStakeMembership(
+            //     [InvestorStakeMembershipLog {
+            //         investor_id,
+            //         token_quantity,
+            //         new_membership_level,
+            //     }],
+            // ) => {
+            //     conn.execute(
+            //         "
+            //         insert into launchpad_investors (account_id, staked_token, last_check)
+            //         values ($1, $2, now())
+            //         on conflict (account_id)
+            //         do
+            //             update launchpad_investors
+            //             set staked_token = $2;",
+            //         &[investor_id, &Decimal::from_u128(token_quantity.0).unwrap()],
+            //     )
+            //     .await
+            //     .unwrap();
+            // }
 
             &Self::InvestorUnstakeMembership(
                 [InvestorUnstakeMembershipLog {
                     investor_id,
                     token_quantity,
-                    new_membership_level,
+                    new_membership_level: _,
                 }],
             ) => {
                 conn.execute(

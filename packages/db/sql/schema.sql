@@ -1,4 +1,12 @@
-/* Esses aq eu n tenho ideia */
+/* X token */
+create table if not exists x_token_ratios (
+    key_column bigserial primary key,
+    time_event timestamptz,
+    base_token_amount numeric(40),
+    x_token_amount numeric(40)
+);
+
+/* Launchpad */
 
 create table if not exists launchpad_investors (
     account_id text primary key,
@@ -57,6 +65,8 @@ create table if not exists listings_metadata (
     whitepaper text
 );
 
+alter table listings_metadata add constraint single_listing_data unique (listing_id);
+
 create table if not exists allocations (
     account_id text not null,
     listing_id numeric(21) references listings (listing_id),
@@ -67,7 +77,7 @@ create table if not exists allocations (
     total_allocation numeric(21)
 );
 
-/* Esses aqui eu tenho */
+/* NFT STaking */
 
 create table if not exists staking_programs (
     collection_id text primary key,
@@ -87,3 +97,32 @@ create table if not exists staked_nfts (
 
     staked_timestamp timestamptz
 );
+
+create or replace function investor_buy_allocations(
+    investor_id text,
+    listing_id_var numeric(21),
+    project_status listing_status,
+    allocations_purchased numeric(21),
+    tokens_purchased numeric(40),
+    total_allocations_sold numeric(21)
+)
+returns void
+as $$
+begin
+    insert into allocations (account_id, listing_id, total_allocation, total_quantity, quantity_withdrawn)
+    values ($1, $2, $4, $5, 0)
+    on conflict (account_id, listing_id)
+    do
+        update
+        set
+            total_allocation = allocations.total_allocation + $4,
+            total_quantity = allocations.total_quantity + $5;
+
+    update listings
+    set
+        status = $3,
+        allocations_sold = $6
+    where listing_id = $2;
+end
+$$
+language plpgsql volatile;

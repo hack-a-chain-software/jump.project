@@ -26,7 +26,7 @@ impl Contract {
   ) {
     let mut contract_treasury = self.contract_treasury.get(&token_id).unwrap_or(0);
 
-    let mut staking_program = self.staking_programs.get(&collection).unwrap();
+    let mut staking_program = self.staking_programs.get(collection).unwrap();
     staking_program.only_non_program_tokens(&token_id); // TODO: maybe refactor where this assertion is made. Otherwise, test it.
 
     let mut collection_treasury = *staking_program

@@ -362,10 +362,10 @@ mod tests {
 
           assert_eq!(serde_blob["standard"], "jump_launchpad");
           assert_eq!(serde_blob["version"], "1.0.0");
-          assert_eq!(serde_blob["event"], "project_withdraw");
+          assert_eq!(serde_blob["event"], "project_withdraw_listing");
 
           let data: serde_json::Value =
-            serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
+            serde_blob["data"][0].clone();
           assert_eq!(data["listing_id"], "0");
           assert_eq!(data["project_status"], json!(listing.status));
 
@@ -492,16 +492,16 @@ mod tests {
 
           assert_eq!(serde_blob["standard"], "jump_launchpad");
           assert_eq!(serde_blob["version"], "1.0.0");
-          assert_eq!(serde_blob["event"], "investor_withdraw");
+          assert_eq!(serde_blob["event"], "investor_withdraw_allocations");
 
           let data: serde_json::Value =
-            serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
+            serde_blob["data"][0].clone();
           assert_eq!(data["listing_id"], "0");
           assert_eq!(
-            data["project_tokens_withdrew"],
+            data["project_tokens_withdrawn"],
             withdrawn_tokens.to_string()
           );
-          assert_eq!(data["price_tokens_withdrew"], "0");
+          assert_eq!(data["price_tokens_withdrawn"], "0");
           assert_eq!(data["project_status"], json!(listing.status));
         }
       }

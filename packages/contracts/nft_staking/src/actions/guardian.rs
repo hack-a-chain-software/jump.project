@@ -4,7 +4,7 @@ use crate::staking::StakingProgram;
 use crate::treasury;
 use crate::types::*;
 use crate::{Contract, ContractExt};
-use near_sdk::json_types::U128;
+use near_sdk::json_types::{U128, U64};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId};
 use serde_json::json;
@@ -41,9 +41,9 @@ pub struct CreateStakingProgramPayload {
   pub collection_address: AccountId,
   pub collection_owner: AccountId,
   pub token_address: AccountId,
-  pub collection_rps: HashMap<FungibleTokenID, u128>,
-  pub min_staking_period: u64,
-  pub early_withdraw_penalty: u128,
+  pub collection_rps: HashMap<FungibleTokenID, U128>,
+  pub min_staking_period: U64,
+  pub early_withdraw_penalty: U128,
   pub round_interval: u32,
 }
 
@@ -51,6 +51,10 @@ pub struct CreateStakingProgramPayload {
 impl Contract {
   #[payable]
   pub fn create_staking_program(&mut self, payload: CreateStakingProgramPayload) {
+<<<<<<< HEAD
+=======
+    // panic!("TESTING_PANICS")
+>>>>>>> main
     let event_payload = payload.clone();
 
     self.only_guardians(env::predecessor_account_id());
@@ -61,21 +65,26 @@ impl Contract {
       account_id: payload.collection_address.clone(),
     };
 
-    assert!(!self.staking_programs.contains_key(&collection), "collection already");
-
-    let farm = Farm::new(
-      collection.clone(),
-      payload.collection_rps,
-      payload.round_interval,
+    assert!(
+      !self.staking_programs.contains_key(&collection),
+      "staking program already created"
     );
+
+    let collection_rps = payload
+      .collection_rps
+      .iter()
+      .map(|(k, v)| (k.clone(), v.0))
+      .collect();
+
+    let farm = Farm::new(collection.clone(), collection_rps, payload.round_interval);
 
     let staking_program = StakingProgram::new(
       farm,
       collection.clone(),
       payload.collection_owner,
       payload.token_address,
-      payload.min_staking_period,
-      payload.early_withdraw_penalty,
+      payload.min_staking_period.0,
+      payload.early_withdraw_penalty.0,
     );
 
     self.staking_programs.insert(&collection, &staking_program);

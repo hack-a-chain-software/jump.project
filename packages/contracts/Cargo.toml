@@ -10,7 +10,12 @@ members = [
   "./mintable_token_contract",
   "./token_contract",
   "./x_token",
+<<<<<<< HEAD
   "./launchpad",
+=======
+  "./locked_token",
+  "./launchpad"
+>>>>>>> main
 ]
 
 [profile.release]

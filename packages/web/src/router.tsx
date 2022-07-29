@@ -1,9 +1,12 @@
 import { Flex, Grid } from "@chakra-ui/react";
+import { Toast } from "@/components";
+import { Toaster, resolveValue } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
 import { useTheme } from "./hooks/theme";
 import { Home } from "./pages/home";
 import { NFTStaking } from "./pages/nft-staking";
+import { Vesting } from "./pages/vesting";
 import { NFTStakingProject } from "./pages/nft-staking-project";
 import { Project } from "./pages/project";
 import { Staking } from "./pages/staking";
@@ -28,6 +31,7 @@ function Router() {
             <Route path={routes.projectDetails} element={<Project />} />
             <Route path={routes.staking} element={<Staking />} />
             <Route path={routes.nftStaking} element={<NFTStaking />} />
+            <Route path={routes.vesting} element={<Vesting />} />
             <Route
               path={routes.nftStakingProject}
               element={<NFTStakingProject />}
@@ -35,6 +39,8 @@ function Router() {
           </Routes>
         </Grid>
       </BrowserRouter>
+
+      <Toaster position="top-center" />
     </Flex>
   );
 }

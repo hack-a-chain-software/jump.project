@@ -36,6 +36,11 @@ impl RewardsDistribution {
     let delta_t = dist.rr - self.rr;
     let mut added_reward = (delta_t as u128) * self.reward;
 
+    println!(
+      "delta_t = {}; round = {}; added_reward = {}; reward = {}",
+      delta_t, round, added_reward, self.reward
+    );
+
     if self.undistributed < added_reward {
       added_reward = self.undistributed;
 
@@ -110,7 +115,7 @@ fn get_key_closure(collection: NFTCollection) -> impl FnMut() -> StorageKey {
 impl Farm {
   pub fn new(
     collection: NFTCollection,
-    collection_round_reward: HashMap<FungibleTokenID, u128>,
+    collection_round_reward: FungibleTokenBalance,
     round_interval: u32,
   ) -> Self {
     let mut get_key = get_key_closure(collection);
@@ -234,6 +239,7 @@ mod tests {
   use near_sdk::AccountId;
   use rstest::rstest;
   use std::str::FromStr;
+  use std::vec;
 
   use super::*;
 
@@ -321,7 +327,7 @@ mod tests {
     context.block_timestamp(block_seconds * 10u64.pow(9));
     testing_env!(context.build());
 
-    let farm = get_farm();
+    let farm = get_farm(vec![]);
     assert_eq!(farm.round(), round);
   }
 
@@ -331,10 +337,17 @@ mod tests {
     context.block_timestamp(30 * 10u64.pow(9));
     testing_env!(context.build());
 
-    let mut farm = get_farm();
+    let dists = get_distributions()[0..2].to_vec();
+
+    let mut farm = get_farm(dists.clone());
     farm.distribute();
 
-    for (k, dist) in get_distributions().to_vec() {
+    for (k, dist) in &dists {
+      println!(
+        "round_interval = {}; balance = {}; reward = {}",
+        farm.round_interval, dist.undistributed, dist.reward
+      );
+
       let current_dist = farm.distributions.get(&k).unwrap();
       assert_eq!(
         current_dist.undistributed,
@@ -353,12 +366,14 @@ mod tests {
     context.block_timestamp(44 * 10u64.pow(9));
     testing_env!(context.build());
 
-    let mut farm = get_farm();
+    let dists = get_distributions()[0..2].to_vec();
+
+    let mut farm = get_farm(dists.clone());
 
     let [nft_id, _, _] = get_nft_ids();
     farm.add_nft(&nft_id);
 
-    for (k, dist) in get_distributions().to_vec() {
+    for (k, dist) in &dists {
       let current_dist = farm.distributions.get(&k).unwrap();
 
       assert_eq!(
@@ -375,7 +390,7 @@ mod tests {
     let mut context = get_context();
     context.block_timestamp(30 * 10u64.pow(9));
 
-    let mut farm = get_farm();
+    let mut farm = get_farm(vec![]);
 
     let [nft_id, _, _] = get_nft_ids();
     farm.add_nft(&nft_id);

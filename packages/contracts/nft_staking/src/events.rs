@@ -31,7 +31,10 @@ pub fn stake_nft(staked_nft: &StakedNFT) {
 }
 
 pub fn unstake_nft(nft_id: &NonFungibleTokenID, balance: FungibleTokenBalance) {
+<<<<<<< HEAD
   let balance: HashMap<AccountId, U128> = balance.into_iter().map(|(k, v)| (k, U128(v))).collect();
+=======
+>>>>>>> main
   log_event(
     "unstake_nft",
     json!({ "token_id": nft_id, "withdrawn_balance": balance }),

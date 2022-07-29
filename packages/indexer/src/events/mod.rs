@@ -1,5 +1,6 @@
 use self::launchpad::LaunchpadEvent;
 use self::nft_staking::NftStakingEvent;
+use self::x_token::XTokenEvent;
 use crate::config::contracts::ContractsConfig;
 use crate::pool::PgPooledConnection;
 use crate::types::AccountId;
@@ -7,6 +8,7 @@ use async_trait::async_trait;
 
 pub mod launchpad;
 pub mod nft_staking;
+pub mod x_token;
 
 #[async_trait]
 pub trait Event {
@@ -15,6 +17,7 @@ pub trait Event {
 pub enum ContractAccount {
     Launchpad,
     NftStaking,
+    XToken
 }
 
 impl ContractsConfig {
@@ -23,6 +26,8 @@ impl ContractsConfig {
             Some(ContractAccount::Launchpad)
         } else if account_id == self.nft_staking_contract_account_id {
             Some(ContractAccount::NftStaking)
+        } else if account_id == self.x_token_contract_account_id {
+            Some(ContractAccount::XToken)
         } else {
             None
         }
@@ -38,6 +43,10 @@ impl ContractAccount {
 
             ContractAccount::NftStaking => {
                 Box::new(serde_json::from_str::<NftStakingEvent>(event_json_string).unwrap())
+            }
+
+            ContractAccount::XToken => {
+                Box::new(serde_json::from_str::<XTokenEvent>(event_json_string).unwrap())
             }
         }
     }

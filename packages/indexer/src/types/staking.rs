@@ -8,7 +8,6 @@ pub type FungibleTokenBalance = HashMap<FungibleTokenId, U128>;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(tag = "type")]
-#[serde(rename_all = "snake_case")]
 pub enum NftCollection {
     NFTContract { account_id: AccountId },
 }

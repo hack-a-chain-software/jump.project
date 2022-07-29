@@ -1,5 +1,5 @@
 use crate::actions::transfer::FTRoutePayload;
-use crate::{Contract, ContractExt};
+use crate::{Contract, ContractExt, FungibleTokenID};
 use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise};
 
 impl Contract {
@@ -44,5 +44,21 @@ impl Contract {
     assert_one_yocto();
 
     self.guardians.remove(&guardian);
+  }
+
+  #[payable]
+  pub fn add_contract_token(&mut self, new_contract_token: FungibleTokenID) {
+    self.only_owner(env::predecessor_account_id());
+    assert_one_yocto();
+
+    self.contract_tokens.insert(&new_contract_token);
+  }
+
+  #[payable]
+  pub fn remove_contract_token(&mut self, remove_contract_token: FungibleTokenID) {
+    self.only_owner(env::predecessor_account_id());
+    assert_one_yocto();
+
+    self.contract_tokens.remove(&remove_contract_token);
   }
 }
