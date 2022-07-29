@@ -1,1 +1,16 @@
-{"ownerAccount":"fc14b360b9d8b78083901310f369278a70624f9aowner.testnet","userSampleAccount":"fc14b360b9d8b78083901310f369278a70624f9auser.testnet","jumpTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9ajump_token.testnet","auroraTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9aaurora_token.testnet","octopusTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9aoctopus_token.testnet","skywardTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9askyward_token.testnet","usdtTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9ausdt_token.testnet","xTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9axjump_token.testnet","lockedTokenAccount":"fc14b360b9d8b78083901310f369278a70624f9alocked_token.testnet","nftCollection1Account":"fc14b360b9d8b78083901310f369278a70624f9anft1.testnet","nftCollection2Account":"fc14b360b9d8b78083901310f369278a70624f9anft2.testnet","nftCollection3Account":"fc14b360b9d8b78083901310f369278a70624f9anft3.testnet","nftStaking":"fc14b360b9d8b78083901310f369278a70624f9anft_staking.testnet","launchpad":"fc14b360b9d8b78083901310f369278a70624f9alaunchpad.testnet"}
+{
+    "ownerAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803owner.testnet",
+    "userSampleAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803user.testnet",
+    "jumpTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803jump_token.testnet",
+    "auroraTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803aurora_token.testnet",
+    "octopusTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803octopus_token.testnet",
+    "skywardTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803skyward_token.testnet",
+    "usdtTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803usdt_token.testnet",
+    "xTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803xjump_token.testnet",
+    "lockedTokenAccount": "68bf7453dc97ff8bf845766051e8d827c3c46803locked_token.testnet",
+    "nftCollection1Account": "68bf7453dc97ff8bf845766051e8d827c3c46803nft1.testnet",
+    "nftCollection2Account": "68bf7453dc97ff8bf845766051e8d827c3c46803nft2.testnet",
+    "nftCollection3Account": "68bf7453dc97ff8bf845766051e8d827c3c46803nft3.testnet",
+    "nftStaking": "68bf7453dc97ff8bf845766051e8d827c3c46803nft_staking.testnet",
+    "launchpad": "68bf7453dc97ff8bf845766051e8d827c3c46803launchpad.testnet"
+}

@@ -122,7 +122,10 @@ impl StakingProgram {
     let staked_nft = self.staked_nfts.get(token_id).unwrap();
 
     self.staked_nfts.remove(token_id);
-    self.nfts_by_owner.get(owner_id).unwrap().remove(token_id);
+    let mut nfts_by_owner_set = self.nfts_by_owner.get(owner_id).unwrap();
+    nfts_by_owner_set.remove(token_id);
+    self.nfts_by_owner.insert(owner_id, &nfts_by_owner_set);
+
     self.farm.nfts_rps.remove(token_id);
 
     staked_nft
