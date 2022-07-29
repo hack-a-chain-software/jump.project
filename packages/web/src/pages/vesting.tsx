@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Stack, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import {
   If,
@@ -60,9 +59,12 @@ export const Vesting = () => {
     }
 
     return vestings.filter(({ start_timestamp, vesting_duration }) => {
-      const created = new Date(start_timestamp / 1000000);
+      const created = new Date(Number(start_timestamp) / 1000000);
 
-      const endAt = addMilliseconds(created, vesting_duration / 1000000);
+      const endAt = addMilliseconds(
+        created,
+        Number(vesting_duration) / 1000000
+      );
 
       const today = new Date();
 
@@ -86,12 +88,8 @@ export const Vesting = () => {
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
         content={
-          !loading && (
-            <motion.div
-              animate={{ opacity: 1 }}
-              initial={{ opacity: 0 }}
-              transition={{ duration: 0.55 }}
-            >
+          <>
+            {!loading && (
               <Flex className="space-x-[1.25rem]">
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
@@ -135,71 +133,73 @@ export const Vesting = () => {
                   bottomText="Total quantity "
                 />
               </Flex>
-            </motion.div>
-          )
+            )}
+          </>
         }
       />
 
       <If
         fallback={
-          isFullyConnected ? (
-            <Flex
-              width="100%"
-              height="100%"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Flex
-                marginX="auto"
-                height="100%"
-                alignItems="center"
-                justifyContent="center"
-                flexDirection="column"
-              >
-                <Text
-                  fontWeight="800"
-                  fontSize={30}
-                  letterSpacing="-0.03em"
-                  mb={3}
+          isFullyConnected
+            ? !loading && (
+                <Flex
+                  width="100%"
+                  height="100%"
+                  justifyContent="center"
+                  alignItems="center"
                 >
-                  Oops! No vestings available
-                </Text>
-              </Flex>
-            </Flex>
-          ) : (
-            <Flex
-              marginX="auto"
-              height="100%"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-            >
-              <Text
-                fontWeight="800"
-                fontSize={30}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                You must be logged in to view all vestings
-              </Text>
+                  <Flex
+                    marginX="auto"
+                    height="100%"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexDirection="column"
+                  >
+                    <Text
+                      fontWeight="800"
+                      fontSize={30}
+                      letterSpacing="-0.03em"
+                      mb={3}
+                    >
+                      Oops! No vestings available
+                    </Text>
+                  </Flex>
+                </Flex>
+              )
+            : !loading && (
+                <Flex
+                  marginX="auto"
+                  height="100%"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexDirection="column"
+                >
+                  <Text
+                    fontWeight="800"
+                    fontSize={30}
+                    letterSpacing="-0.03em"
+                    mb={3}
+                  >
+                    You must be logged in to view all vestings
+                  </Text>
 
-              <Text
-                _hover={{
-                  opacity: 0.8,
-                }}
-                // onClick={() => toggleStakeModal()}
-                marginTop="-12px"
-                cursor="pointer"
-                color="#761BA0"
-                fontWeight="800"
-                fontSize={34}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                Connect Wallet!
-              </Text>
-            </Flex>
-          )
+                  <Text
+                    _hover={{
+                      opacity: 0.8,
+                    }}
+                    // onClick={() => toggleStakeModal()}
+                    marginTop="-12px"
+                    cursor="pointer"
+                    color="#761BA0"
+                    fontWeight="800"
+                    fontSize={34}
+                    letterSpacing="-0.03em"
+                    mb={3}
+                  >
+                    Connect Wallet!
+                  </Text>
+                </Flex>
+              )
         }
         condition={!isEmpty(investorInfo) && !isEmpty(vestings)}
       >

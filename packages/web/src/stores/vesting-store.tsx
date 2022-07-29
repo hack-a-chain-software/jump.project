@@ -4,7 +4,7 @@ import { Transaction, executeMultipleTransactions } from "../hooks/near";
 import { NearContractViewCall } from "@near/ts";
 
 export interface Vesting {
-  id?: string | number;
+  id?: string;
   beneficiary: string;
   locked_value: string;
   start_timestamp: string;
@@ -78,10 +78,6 @@ export const useVestingStore = create<{
   investorInfo: {},
 
   getInvestorInfo: async (connection) => {
-    set({
-      loading: true,
-    });
-
     const tokenContract = new Contract(
       connection.account(),
       import.meta.env.VITE_BASE_TOKEN,
@@ -159,7 +155,7 @@ export const useVestingStore = create<{
     }
 
     set({
-      vestings: vestings.map((item, i) => ({ ...item, id: i })),
+      vestings: vestings.map((item, i) => ({ ...item, id: String(i) })),
     });
   },
 

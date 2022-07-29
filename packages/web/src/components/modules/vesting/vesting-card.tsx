@@ -138,6 +138,7 @@ export function VestingCard(
 
           <Flex gap={5} alignItems="center">
             <ValueBox
+              minWidth="250px"
               borderColor={glassyWhiteOpaque}
               title="Available to Claim"
               value={`${formatNumber(
@@ -148,6 +149,7 @@ export function VestingCard(
             />
 
             <ValueBox
+              minWidth="250px"
               borderColor={glassyWhiteOpaque}
               title="Claimed Amount"
               value={`${formatNumber(
