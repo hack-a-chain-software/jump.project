@@ -4,19 +4,19 @@ import { InfoIcon, CheckIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
 
 type Props = {
-  staked_meta: {
+  metadata: {
     media: string;
     title?: string;
     description?: string;
   };
   select: Function;
-  nft_id: string;
+  token_id: string;
   selected?: boolean;
 };
 
 export function TokenCard({
-  staked_meta: { media, title, description },
-  nft_id,
+  metadata: { media, title, description },
+  token_id,
   select = () => {},
   selected = false,
 }: Props) {
@@ -30,7 +30,14 @@ export function TokenCard({
       height="298px"
       position="relative"
     >
-      <Image width="100%" height="100%" borderRadius="20px" src={media} />
+      <Image
+        width="100%"
+        height="100%"
+        borderRadius="20px"
+        src={
+          "https://img.freepik.com/premium-vector/hand-drawn-bored-ape-style-punk-nft-style-collection-bored-ape-yacht-club-nft-artwork_361671-260.jpg?w=2000"
+        }
+      />
 
       <Flex
         top="22px"
@@ -45,7 +52,7 @@ export function TokenCard({
         onClick={(e) => {
           e.stopPropagation();
 
-          select(nft_id);
+          select(token_id);
         }}
       >
         {selected && <CheckIcon color="white" />}

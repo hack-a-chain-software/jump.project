@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
-import { Flex, Text, Grid, Image } from "@chakra-ui/react";
+import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
 
 type Props = {
   select: any;
   selected: boolean;
   token: {
     nft_id: string;
-    staked_meta: {
+    metadata: {
       media: string;
       title?: string;
       description?: string;
@@ -20,7 +20,7 @@ type Props = {
   };
 };
 
-export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
+export function TokenAccordion({ token: { metadata, nft_id } }: Props) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
   return (
@@ -42,7 +42,9 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
               width="100%"
               height="100%"
               borderRadius="20px"
-              src={staked_meta.media}
+              src={
+                "https://img.freepik.com/premium-vector/hand-drawn-bored-ape-style-punk-nft-style-collection-bored-ape-yacht-club-nft-artwork_361671-260.jpg?w=2000"
+              }
             />
           </Flex>
 
@@ -75,7 +77,7 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
                     fontWeight="700"
                     letterSpacing="-0.03em"
                   >
-                    {staked_meta.description}
+                    {metadata.description}
                   </Text>
 
                   <Text
@@ -84,7 +86,7 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
                     fontWeight="600"
                     lineHeight="29px"
                   >
-                    {staked_meta.title}
+                    {metadata.title}
                   </Text>
                 </Flex>
 

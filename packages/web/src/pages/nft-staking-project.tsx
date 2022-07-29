@@ -29,22 +29,9 @@ import {
 import { useTheme } from "../hooks/theme";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking } from "../stores/nft-staking-store";
-import { getNear } from "@/hooks/near";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
-import { useNearQuery } from "react-near";
-
-type Token = {
-  nft_id: string;
-  staked_meta: {
-    media: string;
-    title?: string;
-    description?: string;
-  };
-  jumpRewards: string;
-  acovaRewards: string;
-  trpRewards: string;
-};
+import { useNearContractsAndWallet } from "@/context/near";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -56,18 +43,24 @@ export function NFTStakingProject() {
     useTheme();
 
   const [show, setShow] = useState(false);
-  const [focused, setFocused] = useState<Token | null>(null);
+  const [focused, setFocused] = useState<any>(null);
 
-  const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
-  const { init, unstake, claimRewards } = useNftStaking();
+  const { wallet, isFullyConnected, connectWallet } =
+    useNearContractsAndWallet();
+
+  const { unstake, claimRewards, getTokens, tokens } = useNftStaking();
 
   useEffect(() => {
-    if (user.isConnected) {
-      init(wallet as WalletConnection);
-    }
-  }, [user.isConnected]);
+    (async () => {
+      if (!isFullyConnected) {
+        return;
+      }
 
-  const [selected, setSelected] = useState<Array<string>>([]);
+      await getTokens(wallet as WalletConnection, collection);
+    })();
+  }, [isFullyConnected]);
+
+  const [selected, setSelected] = useState<string[]>([]);
 
   const select = (tokenId) => {
     if (selected.includes(tokenId)) {
@@ -80,8 +73,8 @@ export function NFTStakingProject() {
   };
 
   const toggleStakeModal = () => {
-    if (!user.isConnected) {
-      user.connect();
+    if (!isFullyConnected) {
+      connectWallet();
 
       return;
     }
@@ -89,29 +82,15 @@ export function NFTStakingProject() {
     setShow(!show);
   };
 
-  const { data: { staking } = {}, loading } = useQuery(StakingProjectDocument, {
+  const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
       collection,
-      accountId: user.address || "",
+      accountId: wallet?.getAccountId() || "",
     },
   });
-
-  const { data: abc, error } = useNearQuery("view_staked", {
-    contract: import.meta.env.VITE_STAKING_CONTRACT,
-    variables: {
-      account_id: user.address || "",
-      collection: {
-        type: "n_f_t_contract",
-        account_id: collection,
-      },
-    },
-    skip: !user.isConnected,
-  });
-
-  const tokens = [];
 
   return (
-    <PageContainer loading={loading}>
+    <PageContainer>
       <StakeModal
         isOpen={show}
         collection={collection}
@@ -148,22 +127,22 @@ export function NFTStakingProject() {
             <ValueBox
               height="139px"
               title="Your JUMP Rewards"
-              value={user.isConnected ? "0 JUMP" : "Connect Wallet"}
-              bottomText={user.isConnected && "Your Total JUMP Rewards"}
+              value={isFullyConnected ? "0 JUMP" : "Connect Wallet"}
+              bottomText={isFullyConnected && "Your Total JUMP Rewards"}
             />
             <ValueBox
               height="139px"
               title="Your ACOVA Rewards"
-              value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
-              bottomText={user.isConnected && "Your Total ACOVA Rewards"}
+              value={isFullyConnected ? "0 ACOVA" : "Connect Wallet"}
+              bottomText={isFullyConnected && "Your Total ACOVA Rewards"}
             />
           </Grid>
           <ValueBox
             mt={3}
             height="139px"
             title="Your ACOVA Rewards"
-            value={user.isConnected ? "0 ACOVA" : "Connect Wallet"}
-            bottomText={user.isConnected && "Your Total ACOVA Rewards"}
+            value={isFullyConnected ? "0 ACOVA" : "Connect Wallet"}
+            bottomText={isFullyConnected && "Your Total ACOVA Rewards"}
           />
         </Flex>
 
@@ -227,7 +206,7 @@ export function NFTStakingProject() {
                   <GradientButton
                     onClick={() =>
                       unstake(
-                        tokens.map(({ nft_id }) => nft_id),
+                        tokens.map(({ token_id }) => token_id),
                         collection
                       )
                     }
@@ -252,7 +231,7 @@ export function NFTStakingProject() {
 
       <If
         fallback={
-          user.isConnected && (
+          isFullyConnected && (
             <Flex
               pt="20px"
               marginX="auto"
@@ -287,7 +266,7 @@ export function NFTStakingProject() {
             </Flex>
           )
         }
-        condition={user.isConnected && tokens?.length > 0}
+        condition={!!isFullyConnected && tokens?.length > 0}
       >
         <Flex
           paddingTop="66px"
@@ -309,7 +288,7 @@ export function NFTStakingProject() {
               color="black"
               display="flex"
               alignItems="center"
-              onClick={() => unstake(selected, collection)}
+              onClick={() => unstake(wallet, selected, collection)}
             >
               <Text marginRight="16px">Unstake Selected NFTs!</Text>
 
@@ -365,7 +344,7 @@ export function NFTStakingProject() {
                     {...token}
                     select={select}
                     key={"nft-staking-collection-token" + index}
-                    selected={selected && selected.includes(token.nft_id)}
+                    selected={selected && selected.includes(token.token_id)}
                   />
                 </Flex>
               ))}

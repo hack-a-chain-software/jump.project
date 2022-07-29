@@ -20,7 +20,7 @@ export const NFTStaking = () => {
   const items = data?.nft_staking_projects?.data;
 
   return (
-    <PageContainer loading={loading}>
+    <PageContainer>
       <TopCard
         gradientText="NFT"
         bigText="Staking"

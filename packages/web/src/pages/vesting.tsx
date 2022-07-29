@@ -9,122 +9,70 @@ import {
   GradientButton,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
-import { useNearQuery } from "react-near";
 import { useTheme } from "@/hooks/theme";
+import { useNearQuery } from "react-near";
 import { useNearContractsAndWallet } from "@/context/near";
-import { addMilliseconds } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { addMilliseconds, isBefore } from "date-fns";
+import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
+import { useVestingStore } from "@/stores/vesting-store";
+import { WalletConnection } from "near-api-js";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
 
   const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
-  const [vestingLoading, setVestingLoading] = useState(true);
-  const [items, setItems] = useState([]);
+  const [filter, setFilter] = useState("");
 
-  const getPages = (length) => {
-    const base = length / 10;
+  const { getInvestorInfo, getVestings, withdraw, investorInfo, vestings } =
+    useVestingStore();
 
-    if (!base || base < 1) {
-      return 1;
-    }
-
-    if (base % 1 !== 0) {
-      return base + 1;
-    }
-
-    return base;
-  };
-
-  const { refetch } = useNearQuery("view_vesting_paginated", {
-    contract: import.meta.env.VITE_LOCKED_CONTRACT,
-    skip: true,
-  });
-
-  const { data: vestingLength, loading: loadingLeng } = useNearQuery(
-    "view_vesting_vector_len",
-    {
-      contract: import.meta.env.VITE_LOCKED_CONTRACT,
-      variables: {
-        account_id: wallet?.getAccountId(),
-      },
-      skip: !isFullyConnected,
-    }
-  );
-
-  useEffect(() => {
-    (async () => {
-      if (!loadingLeng) {
-        return;
-      }
-
-      const pages = getPages(vestingLength);
-
-      console.log(pages);
-
-      const vestings = [];
-
-      for (let i = 0; i <= pages; i++) {
-        const page = await refetch({
-          account_id: wallet?.getAccountId(),
-          initial_id: String(i * 10),
-          size: "10",
-        });
-
-        vestings.push(...page);
-      }
-
-      setItems(vestings);
-      setVestingLoading(false);
-    })();
-  }, [loadingLeng, vestingLength]);
-
-  const { data: token, loading: tokenLoading } = useNearQuery("ft_metadata", {
-    contract: import.meta.env.VITE_BASE_TOKEN,
+  const { data: storage } = useNearQuery("storage_balance_of", {
+    contract: "jump_token.testnet",
+    variables: {
+      account_id: wallet?.getAccountId(),
+    },
     skip: !isFullyConnected,
   });
 
-  const { data: contract, loading: contractLoading } = useNearQuery(
-    "view_contract_data",
-    {
-      skip: !isFullyConnected,
-      contract: import.meta.env.VITE_LOCKED_CONTRACT,
-    }
-  );
-
-  const data = useMemo(() => {
-    if (vestingLoading || tokenLoading || contractLoading || loadingLeng) {
-      return;
-    }
-
-    return items.reduce(
-      (prev, token) => {
-        prev.items.push(token);
-
-        prev.totalLocked +=
-          Number(token.locked_value) -
-          Number(token.available_to_withdraw) -
-          Number(token.withdrawn_tokens);
-        prev.totalUnlocked += Number(token.available_to_withdraw);
-        prev.totalWithdrawn += Number(token.withdrawn_tokens);
-
-        return prev;
-      },
-      {
-        token,
-        contract,
-        items: [],
-        totalLocked: 0,
-        totalUnlocked: 0,
-        totalWithdrawn: 0,
+  useEffect(() => {
+    (async () => {
+      if (!isFullyConnected) {
+        return;
       }
-    );
-  }, [vestingLoading, tokenLoading, contractLoading, loadingLeng]);
+
+      await getVestings(wallet as WalletConnection);
+      await getInvestorInfo(wallet as WalletConnection);
+    })();
+  }, [isFullyConnected]);
+
+  const filtered = useMemo(() => {
+    if (!filter) {
+      return vestings;
+    }
+
+    return vestings.filter(({ start_timestamp, vesting_duration }) => {
+      const created = new Date(start_timestamp / 1000000);
+
+      const endAt = addMilliseconds(created, vesting_duration / 1000000);
+
+      const today = new Date();
+
+      if (filter === "complete") {
+        return isBefore(endAt, today);
+      }
+
+      if (filter === "runing") {
+        return isBefore(today, endAt);
+      }
+
+      return false;
+    });
+  }, [filter, vestings]);
 
   return (
-    <PageContainer loading={!data}>
+    <PageContainer>
       <TopCard
         gradientText="Locked Jump"
         bigText="Lock. Unlock. Withdraw."
@@ -138,9 +86,9 @@ export const Vesting = () => {
               value={
                 isFullyConnected
                   ? `${formatNumber(
-                      data?.totalLocked,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
+                      investorInfo?.totalLocked,
+                      investorInfo?.token?.decimals
+                    )} ${investorInfo?.token?.symbol}`
                   : "Connect Wallet  "
               }
               bottomText="All amount locked"
@@ -152,9 +100,9 @@ export const Vesting = () => {
               value={
                 isFullyConnected
                   ? `${formatNumber(
-                      data?.totalUnlocked,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
+                      investorInfo?.totalUnlocked,
+                      investorInfo?.token?.decimals
+                    )} ${investorInfo?.token?.symbol}`
                   : "Connect Wallet"
               }
               bottomText="Unlocked amount"
@@ -166,9 +114,9 @@ export const Vesting = () => {
               value={
                 isFullyConnected
                   ? `${formatNumber(
-                      data?.totalWithdrawn,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
+                      investorInfo?.totalWithdrawn,
+                      investorInfo?.token?.decimals
+                    )} ${investorInfo?.token?.symbol}`
                   : "Connect Wallet"
               }
               bottomText="Total quantity "
@@ -238,19 +186,35 @@ export const Vesting = () => {
             </Flex>
           )
         }
-        condition={data && !isEmpty(items)}
+        condition={!isEmpty(investorInfo) && !isEmpty(vestings)}
       >
         <>
           <Flex justifyContent="space-between">
-            <Select placeholder="Filter">
-              <option value="option2">Completed</option>
-              <option value="option3">Runing</option>
+            <Select
+              onChange={(event) => setFilter(event?.target?.value)}
+              placeholder="Filter"
+            >
+              <option value="completed">Completed</option>
+              <option value="runing">Runing</option>
             </Select>
 
             <Flex maxW="330px">
               <GradientButton
                 width="150px"
-                onClick={() => {}}
+                onClick={() => {
+                  withdraw(
+                    vestings
+                      .filter(({ available_to_withdraw }) => {
+                        return (
+                          Number(available_to_withdraw) >
+                          Math.pow(10, investorInfo.token?.decimals)
+                        );
+                      })
+                      .map(({ id }) => String(id)),
+                    storage,
+                    wallet as WalletConnection
+                  );
+                }}
                 justifyContent="center"
                 bg={useColorModeValue("white", darkPurple)}
               >
@@ -258,11 +222,12 @@ export const Vesting = () => {
               </GradientButton>
             </Flex>
           </Flex>
-          {items && (
+          {vestings && (
             <Stack spacing="32px">
-              {items.map(
+              {filtered.map(
                 (
                   {
+                    id,
                     fast_pass,
                     locked_value,
                     start_timestamp,
@@ -273,9 +238,9 @@ export const Vesting = () => {
                   index
                 ) => (
                   <VestingCard
-                    id={String(index)}
-                    token={token}
-                    contract={contract}
+                    id={String(id)}
+                    token={investorInfo.token}
+                    contract={investorInfo.contractData}
                     fast_pass={fast_pass}
                     totalAmount={locked_value}
                     key={"vesting-" + index}

@@ -76,6 +76,7 @@ export function VestingCard(props: Props & BoxProps) {
           "token",
           "fast_pass",
           "contract",
+          "passCost",
           "availableWidthdraw",
         ],
         props
@@ -177,8 +178,14 @@ export function VestingCard(props: Props & BoxProps) {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  Buy Fast Pass
-                  <WalletIcon />
+                  {props.fast_pass ? (
+                    "Bought Fast Pass"
+                  ) : (
+                    <>
+                      Buy Fast Pass
+                      <WalletIcon />
+                    </>
+                  )}
                 </Flex>
               </Button>
 
@@ -188,7 +195,11 @@ export function VestingCard(props: Props & BoxProps) {
                   Math.pow(10, props.token?.decimals)
                 }
                 onClick={() =>
-                  withdraw("0", storage, wallet as WalletConnection)
+                  withdraw(
+                    [String(props.id)],
+                    storage,
+                    wallet as WalletConnection
+                  )
                 }
               >
                 <Flex
@@ -211,6 +222,7 @@ export function VestingCard(props: Props & BoxProps) {
         storage={storage}
         token={props.token}
         vestingId={props.id}
+        passCost={Number(props?.contract?.fast_pass_cost)}
         totalAmount={props.totalAmount}
         acceleration={props?.contract?.fast_pass_acceleration}
       />
