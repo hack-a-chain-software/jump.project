@@ -210,18 +210,6 @@ impl Farm {
 
     rewards_map
   }
-
-  pub fn unclaimed_token_balance(&self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
-    let token_rps = self.nfts_rps.get(token_id).unwrap();
-    let mut unclaimed_map = HashMap::new();
-
-    for (k, dist) in self.distributions.iter() {
-      let rps = token_rps.get(&k).unwrap();
-      unclaimed_map.insert(k.clone(), dist.rps - rps);
-    }
-
-    unclaimed_map
-  }
 }
 
 const fn to_sec(timestamp: Timestamp) -> u32 {
