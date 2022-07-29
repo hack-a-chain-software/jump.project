@@ -94,15 +94,15 @@ export function NFTStakingProject() {
 
   useEffect(() => {
     (async () => {
-      await getStakingInfo(wallet as WalletConnection, collection);
-
-      if (!isFullyConnected) {
-        return;
+      if (wallet) {
+        await getStakingInfo(wallet as WalletConnection, collection);
       }
 
-      await getTokens(wallet as WalletConnection, collection);
+      if (isFullyConnected) {
+        await getTokens(wallet as WalletConnection, collection);
+      }
     })();
-  }, [isFullyConnected, collection]);
+  }, [isFullyConnected]);
 
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
@@ -110,8 +110,6 @@ export function NFTStakingProject() {
       accountId: wallet?.getAccountId() || "",
     },
   });
-
-  console.log(stakingInfo);
 
   return (
     <PageContainer>
