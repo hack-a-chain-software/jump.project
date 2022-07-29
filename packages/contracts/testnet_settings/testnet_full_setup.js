@@ -576,7 +576,7 @@ async function testnetSetup() {
     collection_rps,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
@@ -646,7 +646,7 @@ async function testnetSetup() {
     collection_rps: collection_rps2,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
@@ -716,7 +716,7 @@ async function testnetSetup() {
     collection_rps: collection_rps3,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
