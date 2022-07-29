@@ -40,6 +40,14 @@ export type LaunchpadListing = {
   fee_liquidity_tokens: string;
   status: string;
   dex_id: string;
+  project_name: string;
+  description_token: string;
+  description_project: string;
+  discord: string;
+  twitter: string;
+  telegram: string;
+  website: string;
+  whitepaper: string;
 };
 
 export type LaunchpadFilters = {
