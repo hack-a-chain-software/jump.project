@@ -7,34 +7,20 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useMemo } from "react";
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
+import { FToken } from "@/stores/nft-staking-store";
+import { formatNumber } from "@near/ts";
 
 type Props = {
+  rewards: FToken[];
   collectionName: string;
   collectionLogo: string;
-  frequency?: "weekly" | "daily" | "monthly";
 };
-
-const rewards = ["JUMP", "ACOVA", "CGK"];
 
 export function NFTStakingCard(props: Props & BoxProps) {
   const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
     useTheme();
-
-  const bottomText = useMemo(() => {
-    switch (props.frequency) {
-      case "daily":
-        return "Per Day";
-
-      case "weekly":
-        return "Per Week";
-
-      case "monthly":
-        return "Per Month";
-    }
-  }, [props.frequency]);
 
   return (
     <Box
@@ -44,7 +30,7 @@ export function NFTStakingCard(props: Props & BoxProps) {
       background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
       {...(R.omit(
-        ["collectionName", "collectionLogo", "tokens", "frequency"],
+        ["collectionName", "collectionLogo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
     >
@@ -84,22 +70,21 @@ export function NFTStakingCard(props: Props & BoxProps) {
             </Text>
           </Flex>
           <Flex gap={5}>
-            {rewards.map((token, i) => (
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                title={token + " Rewards"}
-                value={10 + " " + token}
-                bottomText={bottomText}
-                key={i}
-              />
-            ))}
+            {props.rewards &&
+              props.rewards.map(({ name, symbol, perMonth, decimals }, i) => (
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title={name + " Rewards"}
+                  value={
+                    formatNumber(Number(perMonth), decimals) + " " + symbol
+                  }
+                  bottomText="Per Month"
+                  key={"nft-staking-rewards" + i}
+                />
+              ))}
           </Flex>
         </Box>
       </Box>
     </Box>
   );
 }
-
-NFTStakingCard.defaultProps = {
-  frequency: "monthly",
-} as Props;

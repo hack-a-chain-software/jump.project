@@ -8,7 +8,6 @@ import {
   Text,
   Button,
   useColorModeValue,
-  Spinner,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -35,7 +34,6 @@ import { StakingProjectDocument } from "@near/apollo";
 import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
-import { useNearQuery } from "react-near";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -50,7 +48,8 @@ export function NFTStakingProject() {
   const [showStake, setShowStake] = useState(false);
   const [showUnstake, setShowUnstake] = useState(false);
 
-  const { getTokens, tokens, loading } = useNftStaking();
+  const { getTokens, getStakingInfo, tokens, loading, stakingInfo } =
+    useNftStaking();
 
   const { wallet, isFullyConnected, connectWallet } =
     useNearContractsAndWallet();
@@ -95,6 +94,8 @@ export function NFTStakingProject() {
 
   useEffect(() => {
     (async () => {
+      await getStakingInfo(wallet as WalletConnection, collection);
+
       if (!isFullyConnected) {
         return;
       }
@@ -110,18 +111,7 @@ export function NFTStakingProject() {
     },
   });
 
-  const { data, error } = useNearQuery("view_staking_program", {
-    contract: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-    variables: {
-      collection: {
-        type: "NFTContract",
-        account_id: collection,
-      },
-    },
-    skip: !isFullyConnected,
-  });
-
-  console.log(collection);
+  console.log(stakingInfo);
 
   return (
     <PageContainer>
@@ -141,6 +131,7 @@ export function NFTStakingProject() {
       <BackButton onClick={() => navigate("/nft-staking")} />
 
       <NFTStakingCard
+        rewards={stakingInfo?.rewards}
         collectionLogo={staking?.collection_meta?.image}
         collectionName={staking?.collection_meta?.name}
       />
