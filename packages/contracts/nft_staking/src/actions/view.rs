@@ -69,20 +69,11 @@ impl Contract {
 
   pub fn view_staked_nft_balance(&self, nft_id: NonFungibleTokenID) -> FungibleTokenBalance {
     let collection = &nft_id.0;
-    let staking_program = self.staking_programs.get(collection).unwrap();
+    let mut staking_program = self.staking_programs.get(collection).unwrap();
 
-    let staked_nft = staking_program.staked_nfts.get(&nft_id).unwrap();
+    let staked_nft = staking_program.claim_rewards(&nft_id);
 
-    let unclaimed_token_balance = staking_program.farm.unclaimed_token_balance(&nft_id);
-
-    let mut balance = HashMap::new();
-    for (ft_id, &claimed) in staked_nft.balance.iter() {
-      let unclaimed = *unclaimed_token_balance.get(ft_id).unwrap();
-
-      balance.insert(ft_id.clone(), claimed + unclaimed);
-    }
-
-    balance
+    staked_nft.balance
   }
 
   //retornar saldos do contract treasury
@@ -119,18 +110,15 @@ impl Contract {
         .take(limit)
         .map(|(_, id)| id)
         .collect(),
-      Some(owner_id) => {
-        match staking_program
-        .nfts_by_owner
-        .get(&owner_id) {
-          Some(nfts) => nfts.iter()
+      Some(owner_id) => match staking_program.nfts_by_owner.get(&owner_id) {
+        Some(nfts) => nfts
+          .iter()
           .skip(from_index as usize)
           .take(limit)
           .map(|(_, id)| id)
           .collect(),
-          None => vec![]
-        }
-        },
+        None => vec![],
+      },
     }
   }
 }
