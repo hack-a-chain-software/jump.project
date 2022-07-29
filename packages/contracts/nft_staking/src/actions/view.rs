@@ -119,15 +119,18 @@ impl Contract {
         .take(limit)
         .map(|(_, id)| id)
         .collect(),
-      Some(owner_id) => staking_program
+      Some(owner_id) => {
+        match staking_program
         .nfts_by_owner
-        .get(&owner_id)
-        .unwrap()
-        .iter()
-        .skip(from_index as usize)
-        .take(limit)
-        .map(|(_, id)| id)
-        .collect(),
+        .get(&owner_id) {
+          Some(nfts) => nfts.iter()
+          .skip(from_index as usize)
+          .take(limit)
+          .map(|(_, id)| id)
+          .collect(),
+          None => vec![]
+        }
+        },
     }
   }
 }
