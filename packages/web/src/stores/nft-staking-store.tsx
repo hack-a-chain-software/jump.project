@@ -1,7 +1,7 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "@/tools";
-import { NearContractViewCall } from "@near/ts";
+import { NearContractViewCall, NearMutableContractCall } from "@near/ts";
 import { NearConstants } from "@/constants";
 
 export interface Token {
@@ -378,5 +378,34 @@ export const useNftStaking = create<{
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  claimRewards: async (connection, tokens, collection) => {},
+  claimRewards: async (connection, tokens, collection) => {
+    const transactions: any = [];
+
+    tokens.forEach((item) => {
+      transactions.push({
+        receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+        functionCalls: [
+          {
+            methodName: "claim_reward",
+            args: {
+              collection: {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              token_id: [
+                {
+                  type: "NFTContract",
+                  account_id: collection,
+                },
+                item,
+              ],
+            },
+            gas: NearConstants.AttachedGas,
+          },
+        ],
+      });
+    });
+
+    executeMultipleTransactions(transactions, connection as WalletConnection);
+  },
 }));

@@ -8,13 +8,14 @@ import { useNearContractsAndWallet } from "@/context/near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { GradientButton, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
+import { WalletConnection } from "near-api-js";
 
 export function NFTStakingUserActions({ collection }: { collection: string }) {
   const { wallet, connectWallet } = useNearContractsAndWallet();
   const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
     useTheme();
 
-  const { tokens } = useNftStaking();
+  const { tokens, claimRewards } = useNftStaking();
 
   const [showStake, setShowStake] = useState(false);
   const [showUnstake, setShowUnstake] = useState(false);
@@ -118,7 +119,13 @@ export function NFTStakingUserActions({ collection }: { collection: string }) {
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
                 <GradientButton
-                  onClick={() => {}}
+                  onClick={() =>
+                    claimRewards(
+                      wallet as WalletConnection,
+                      tokens.map(({ token_id }) => token_id),
+                      collection
+                    )
+                  }
                   bg={useColorModeValue("white", darkPurple)}
                   justifyContent="space-between"
                 >
