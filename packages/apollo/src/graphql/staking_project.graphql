@@ -22,11 +22,6 @@ query StakingProject($collection: ID!, $accountId: ID) {
       rewards_jump
       rewards_acova
       rewards_project_token
-      staked_meta {
-        title
-        media
-        description
-      }
     }
   }
 }

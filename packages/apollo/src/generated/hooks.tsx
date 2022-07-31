@@ -54,7 +54,10 @@ export type LaunchpadListing = {
   allocation?: Maybe<InvestorAllocation>;
   allocations_sold?: Maybe<Scalars["String"]>;
   cliff_timestamp?: Maybe<Scalars["String"]>;
+  description_project?: Maybe<Scalars["String"]>;
+  description_token?: Maybe<Scalars["String"]>;
   dex_id?: Maybe<Scalars["String"]>;
+  discord?: Maybe<Scalars["String"]>;
   end_cliff_timestamp?: Maybe<Scalars["String"]>;
   fee_liquidity_tokens?: Maybe<Scalars["String"]>;
   fee_price_tokens?: Maybe<Scalars["String"]>;
@@ -69,13 +72,18 @@ export type LaunchpadListing = {
   open_sale_2_timestamp?: Maybe<Scalars["String"]>;
   price_token?: Maybe<Scalars["String"]>;
   price_token_info?: Maybe<ProjectTokenInfo>;
+  project_name?: Maybe<Scalars["String"]>;
   project_owner: Scalars["ID"];
   project_token: Scalars["ID"];
   project_token_info?: Maybe<ProjectTokenInfo>;
   status?: Maybe<Scalars["String"]>;
+  telegram?: Maybe<Scalars["String"]>;
   token_allocation_price?: Maybe<Scalars["String"]>;
   token_allocation_size?: Maybe<Scalars["String"]>;
   total_amount_sale_project_tokens?: Maybe<Scalars["String"]>;
+  twitter?: Maybe<Scalars["String"]>;
+  website?: Maybe<Scalars["String"]>;
+  whitepaper?: Maybe<Scalars["String"]>;
 };
 
 export type LaunchpadListingAllocationArgs = {
@@ -141,12 +149,17 @@ export type ProjectTokenInfo = {
 
 export type Query = {
   __typename?: "Query";
+  get_historical_ratio?: Maybe<XTokenRatio>;
   health?: Maybe<MessageOutput>;
   investor_info?: Maybe<LaunchpadInvestor>;
   launchpad_project?: Maybe<LaunchpadListing>;
   launchpad_projects: LaunchpadPage;
   nft_staking_projects: NftPage;
   staking?: Maybe<NftStaking>;
+};
+
+export type QueryGetHistoricalRatioArgs = {
+  timestamp?: InputMaybe<Scalars["String"]>;
 };
 
 export type QueryInvestorInfoArgs = {
@@ -175,13 +188,6 @@ export type QueryStakingArgs = {
   collection_id: Scalars["ID"];
 };
 
-export type StakedMeta = {
-  __typename?: "StakedMeta";
-  description?: Maybe<Scalars["String"]>;
-  media?: Maybe<Scalars["String"]>;
-  title?: Maybe<Scalars["String"]>;
-};
-
 export type StakedNft = {
   __typename?: "StakedNFT";
   collection_id?: Maybe<Scalars["ID"]>;
@@ -190,7 +196,6 @@ export type StakedNft = {
   rewards_acova?: Maybe<Scalars["String"]>;
   rewards_jump?: Maybe<Scalars["String"]>;
   rewards_project_token?: Maybe<Scalars["String"]>;
-  staked_meta?: Maybe<StakedMeta>;
   staked_timestamp?: Maybe<Scalars["String"]>;
 };
 
@@ -206,6 +211,14 @@ export enum VisibilityEnum {
   Private = "Private",
   Public = "Public",
 }
+
+export type XTokenRatio = {
+  __typename?: "XTokenRatio";
+  base_token_amount?: Maybe<Scalars["String"]>;
+  key_column?: Maybe<Scalars["String"]>;
+  time_event?: Maybe<Scalars["String"]>;
+  x_token_amount?: Maybe<Scalars["String"]>;
+};
 
 export type InvestorInfoQueryVariables = Exact<{
   accountId: Scalars["ID"];
@@ -393,12 +406,6 @@ export type StakingProjectQuery = {
       rewards_jump?: string | null;
       rewards_acova?: string | null;
       rewards_project_token?: string | null;
-      staked_meta?: {
-        __typename?: "StakedMeta";
-        title?: string | null;
-        media?: string | null;
-        description?: string | null;
-      } | null;
     } | null> | null;
   } | null;
 };
@@ -768,11 +775,6 @@ export const StakingProjectDocument = gql`
         rewards_jump
         rewards_acova
         rewards_project_token
-        staked_meta {
-          title
-          media
-          description
-        }
       }
     }
   }

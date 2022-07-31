@@ -7,13 +7,6 @@ export default gql`
     name: String
   }
 
-  # Blockchain Data
-  type StakedMeta @cacheControl(maxAge: 120, scope: PUBLIC) {
-    title: String
-    media: String
-    description: String
-  }
-
   type NFTStaking {
     # SQL + Blockchain Data
     collection_id: ID!
@@ -43,7 +36,6 @@ export default gql`
     rewards_jump: String
     rewards_acova: String
     rewards_project_token: String
-    staked_meta: StakedMeta # On Chain Data
   }
 
   type NFTPage {

@@ -60,6 +60,7 @@ export interface StakingProgram {
   stakingTokenRewards?: FToken[];
   min_staking_period: string;
   early_withdraw_penalty: string;
+  collectionMetadata?: CollectionMetaResponse;
 }
 
 export interface FToken {
@@ -72,6 +73,15 @@ export interface FToken {
   decimals: number;
   perMonth?: number;
   account_id?: string;
+  userBalance?: number;
+}
+
+export interface CollectionMetaResponse {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  base_uri: string;
 }
 
 export interface Collection {
@@ -91,6 +101,7 @@ interface TokenContract extends Contract {
 
 interface CollectionContract extends Contract {
   nft_token: NearContractViewCall<{ token_id: string }, Token>;
+  nft_metadata: NearContractViewCall<any, CollectionMetaResponse>;
 }
 
 interface NFTStakingContract extends Contract {
@@ -162,6 +173,13 @@ export const useNftStaking = create<{
       },
     });
 
+    const collectionContract = new Contract(connection.account(), collection, {
+      viewMethods: ["nft_metadata"],
+      changeMethods: [],
+    }) as CollectionContract;
+
+    const collectionMetadata = await collectionContract.nft_metadata();
+
     const secondsPerMonth = 2592000;
     const interval = stakingProgram.farm.round_interval;
     const distributions = stakingProgram.farm.distributions;
@@ -178,8 +196,6 @@ export const useNftStaking = create<{
 
       const { reward } = distributions[key];
 
-      console.log(metadata);
-
       stakingRewards.push({
         ...metadata,
         account_id: key,
@@ -190,6 +206,7 @@ export const useNftStaking = create<{
     set({
       stakingInfo: {
         ...stakingProgram,
+        collectionMetadata,
         stakingTokenRewards: stakingRewards.sort((a, b) =>
           a.symbol.localeCompare(b.symbol)
         ),

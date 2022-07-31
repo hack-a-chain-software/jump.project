@@ -7,8 +7,6 @@ export function NFTStakingUserRewards() {
   const { stakingInfo } = useNftStaking();
   const { wallet } = useNearContractsAndWallet();
 
-  console.log(stakingInfo);
-
   return (
     <Flex flex={1} direction="column">
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>

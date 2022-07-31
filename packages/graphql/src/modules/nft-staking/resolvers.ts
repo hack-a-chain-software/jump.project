@@ -2,7 +2,7 @@ import { CommonErrors } from "@/errors";
 import { AccountIdQuery, GraphQLContext } from "@/types";
 import { NFTStaking, StakedNFT } from "@/types/nft-staking";
 import { QueryTypes } from "sequelize";
-import { findCollectionMetadata, findStakedMetadata } from "../tools";
+import { findCollectionMetadata } from "../tools";
 import {
   createPageableQuery,
   PaginationFilters,
@@ -17,23 +17,6 @@ export default {
         image: icon,
       };
     },
-    // async storage_used(
-    //   _root: NFTStaking,
-    //   { account_id }: AccountIdQuery,
-    //   { sequelize }: GraphQLContext
-    // ) {
-    //   const result = await sequelize.query(
-    //     'select * from "nft_investors" where "account_id" = $1;',
-    //     {
-    //       bind: [account_id],
-    //       type: QueryTypes.SELECT,
-    //     }
-    //   );
-
-    //   if (!result[0]) throw new CommonErrors.NotFound();
-
-    //   return result[0];
-    // },
     async total_rewards(
       { collection_id }: NFTStaking,
       { account_id }: AccountIdQuery,
@@ -76,20 +59,6 @@ export default {
       );
 
       return result;
-    },
-  },
-  StakedNFT: {
-    async staked_meta({ collection_id, nft_id }: StakedNFT) {
-      const { title, description, media } = await findStakedMetadata(
-        collection_id,
-        nft_id
-      );
-
-      return {
-        title,
-        media,
-        description,
-      };
     },
   },
   Query: {

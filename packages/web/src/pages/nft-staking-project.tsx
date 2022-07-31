@@ -20,7 +20,6 @@ import { NFTUnstakeModal } from "@/modals";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking, Token } from "../stores/nft-staking-store";
 import { useQuery } from "@apollo/client";
-import { StakingProjectDocument } from "@near/apollo";
 import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
@@ -60,7 +59,7 @@ export function NFTStakingProject() {
     }
 
     if (isEmpty(selected)) {
-      toast("Ooops! Select tokens to continue");
+      toast("Ooops! Select tokens to Unstake");
 
       return;
     }
@@ -80,13 +79,6 @@ export function NFTStakingProject() {
     })();
   }, [isFullyConnected]);
 
-  const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
-    variables: {
-      collection,
-      accountId: wallet?.getAccountId() || "",
-    },
-  });
-
   return (
     <PageContainer>
       <NFTUnstakeModal
@@ -100,8 +92,8 @@ export function NFTStakingProject() {
 
       <NFTStakingCard
         rewards={stakingInfo?.stakingTokenRewards}
-        collectionLogo={staking?.collection_meta?.image}
-        collectionName={staking?.collection_meta?.name}
+        collectionName={stakingInfo?.collectionMetadata?.name || ""}
+        collectionLogo={stakingInfo?.collectionMetadata?.icon || ""}
       />
 
       <Flex flex={1} direction="row">
