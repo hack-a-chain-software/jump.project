@@ -1,5 +1,5 @@
 import create from "zustand";
-import { connect, Contract, WalletConnection } from "near-api-js";
+import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "@/tools";
 import { NearContractViewCall } from "@near/ts";
 import { NearConstants } from "@/constants";
