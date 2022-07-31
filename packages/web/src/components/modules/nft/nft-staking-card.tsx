@@ -13,7 +13,7 @@ import { FToken } from "@/stores/nft-staking-store";
 import { formatNumber } from "@near/ts";
 
 type Props = {
-  rewards: FToken[];
+  rewards: FToken[] | undefined;
   collectionName: string;
   collectionLogo: string;
 };

@@ -1,5 +1,5 @@
 import create from "zustand";
-import { Contract, WalletConnection } from "near-api-js";
+import { connect, Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "@/tools";
 import { NearContractViewCall } from "@near/ts";
 import { NearConstants } from "@/constants";
@@ -57,7 +57,7 @@ export interface StakingProgram {
   collection_treasury: any;
   token_address: string;
   farm: Farm;
-  rewards?: FToken[];
+  stakingTokenRewards?: FToken[];
   min_staking_period: string;
   early_withdraw_penalty: string;
 }
@@ -71,6 +71,7 @@ export interface FToken {
   reference_hash: any;
   decimals: number;
   perMonth?: number;
+  account_id?: string;
 }
 
 export interface Collection {
@@ -112,11 +113,11 @@ export const useNftStaking = create<{
   loading: boolean;
   tokens: Token[];
   stakingInfo: Partial<StakingProgram>;
-  getStakingInfo: (
+  fetchStakingInfo: (
     connection: WalletConnection,
     collection: string
   ) => Promise<void>;
-  getTokens: (
+  fetchUserTokens: (
     connection: WalletConnection,
     collection: string
   ) => Promise<void>;
@@ -140,7 +141,11 @@ export const useNftStaking = create<{
   stakingInfo: {},
   loading: false,
 
-  getStakingInfo: async (connection, collection) => {
+  fetchStakingInfo: async (connection, collection) => {
+    set({
+      loading: true,
+    });
+
     const contract = new Contract(
       connection.account(),
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -161,7 +166,7 @@ export const useNftStaking = create<{
     const interval = stakingProgram.farm.round_interval;
     const distributions = stakingProgram.farm.distributions;
 
-    const rewards: FToken[] = [];
+    const stakingRewards: FToken[] = [];
 
     for (const key in distributions) {
       const contract = new Contract(connection.account(), key, {
@@ -173,8 +178,11 @@ export const useNftStaking = create<{
 
       const { reward } = distributions[key];
 
-      rewards.push({
+      console.log(metadata);
+
+      stakingRewards.push({
         ...metadata,
+        account_id: key,
         perMonth: (secondsPerMonth * Number(reward)) / Number(interval),
       });
     }
@@ -182,16 +190,14 @@ export const useNftStaking = create<{
     set({
       stakingInfo: {
         ...stakingProgram,
-        rewards,
+        stakingTokenRewards: stakingRewards.sort((a, b) =>
+          a.symbol.localeCompare(b.symbol)
+        ),
       },
     });
   },
 
-  getTokens: async (connection, collection) => {
-    set({
-      loading: true,
-    });
-
+  fetchUserTokens: async (connection, collection) => {
     const stakingContract = new Contract(
       connection.account(),
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -221,6 +227,10 @@ export const useNftStaking = create<{
 
       const tokens: Token[] = [];
 
+      const {
+        stakingInfo: { stakingTokenRewards },
+      } = get();
+
       for (let i = 0; i < staked.length; i++) {
         const balance = await stakingContract.view_staked_nft_balance({
           nft_id: [
@@ -236,11 +246,23 @@ export const useNftStaking = create<{
           token_id: staked[i],
         });
 
-        tokens.push({ ...token, balance: balance });
+        tokens.push({ ...token, balance });
       }
 
       set({
         tokens,
+        stakingInfo: {
+          ...get().stakingInfo,
+          stakingTokenRewards: stakingTokenRewards?.map((item) => {
+            return {
+              ...item,
+              userBalance: tokens.reduce(
+                (sum, { balance }) => sum + balance[item.account_id || ""],
+                0
+              ),
+            };
+          }),
+        },
       });
     } catch (e) {
       console.warn(e);
