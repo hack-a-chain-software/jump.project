@@ -155,9 +155,8 @@ export type NFTStakingKeySpecifier = (
   | "collection_owner_id"
   | "early_withdraw_penalty"
   | "min_staking_period"
-  | "staked_nfts_by_owner"
+  | "rewards"
   | "token_address"
-  | "total_rewards"
   | NFTStakingKeySpecifier
 )[];
 export type NFTStakingFieldPolicy = {
@@ -166,20 +165,27 @@ export type NFTStakingFieldPolicy = {
   collection_owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
   early_withdraw_penalty?: FieldPolicy<any> | FieldReadFunction<any>;
   min_staking_period?: FieldPolicy<any> | FieldReadFunction<any>;
-  staked_nfts_by_owner?: FieldPolicy<any> | FieldReadFunction<any>;
+  rewards?: FieldPolicy<any> | FieldReadFunction<any>;
   token_address?: FieldPolicy<any> | FieldReadFunction<any>;
-  total_rewards?: FieldPolicy<any> | FieldReadFunction<any>;
 };
-export type NFTStakingTotalRewardsKeySpecifier = (
-  | "rewards_acova"
-  | "rewards_jump"
-  | "rewards_project_token"
-  | NFTStakingTotalRewardsKeySpecifier
+export type NFTStakingRewardKeySpecifier = (
+  | "account_id"
+  | "decimals"
+  | "icon"
+  | "name"
+  | "perMonth"
+  | "spec"
+  | "symbol"
+  | NFTStakingRewardKeySpecifier
 )[];
-export type NFTStakingTotalRewardsFieldPolicy = {
-  rewards_acova?: FieldPolicy<any> | FieldReadFunction<any>;
-  rewards_jump?: FieldPolicy<any> | FieldReadFunction<any>;
-  rewards_project_token?: FieldPolicy<any> | FieldReadFunction<any>;
+export type NFTStakingRewardFieldPolicy = {
+  account_id?: FieldPolicy<any> | FieldReadFunction<any>;
+  decimals?: FieldPolicy<any> | FieldReadFunction<any>;
+  icon?: FieldPolicy<any> | FieldReadFunction<any>;
+  name?: FieldPolicy<any> | FieldReadFunction<any>;
+  perMonth?: FieldPolicy<any> | FieldReadFunction<any>;
+  spec?: FieldPolicy<any> | FieldReadFunction<any>;
+  symbol?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type ProjectTokenInfoKeySpecifier = (
   | "image"
@@ -300,12 +306,12 @@ export type StrictTypedTypePolicies = {
       | (() => undefined | NFTStakingKeySpecifier);
     fields?: NFTStakingFieldPolicy;
   };
-  NFTStakingTotalRewards?: Omit<TypePolicy, "fields" | "keyFields"> & {
+  NFTStakingReward?: Omit<TypePolicy, "fields" | "keyFields"> & {
     keyFields?:
       | false
-      | NFTStakingTotalRewardsKeySpecifier
-      | (() => undefined | NFTStakingTotalRewardsKeySpecifier);
-    fields?: NFTStakingTotalRewardsFieldPolicy;
+      | NFTStakingRewardKeySpecifier
+      | (() => undefined | NFTStakingRewardKeySpecifier);
+    fields?: NFTStakingRewardFieldPolicy;
   };
   ProjectTokenInfo?: Omit<TypePolicy, "fields" | "keyFields"> & {
     keyFields?:

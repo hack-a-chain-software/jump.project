@@ -1,12 +1,26 @@
 import { CommonErrors } from "@/errors";
-import { AccountIdQuery, GraphQLContext } from "@/types";
-import { NFTStaking, StakedNFT } from "@/types/nft-staking";
+import { GraphQLContext } from "@/types";
+import { NFTStaking } from "@/types/nft-staking";
 import { QueryTypes } from "sequelize";
-import { findCollectionMetadata } from "../tools";
+import {
+  findCollectionMetadata,
+  findStakingProgram,
+  findTokenMetadata,
+} from "../tools";
 import {
   createPageableQuery,
   PaginationFilters,
 } from "../tools/createPaginatedConnection";
+
+export interface StakingToken {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  decimals: number;
+  perMonth: number;
+  account_id: string;
+}
 
 export default {
   NFTStaking: {
@@ -17,48 +31,29 @@ export default {
         image: icon,
       };
     },
-    async total_rewards(
-      { collection_id }: NFTStaking,
-      { account_id }: AccountIdQuery,
-      { sequelize }: GraphQLContext
-    ) {
-      return (
-        await sequelize.query<StakedNFT>(
-          'select * from "staked_nfts" where "owner_id" = $1 and "collection_id" = $2',
-          {
-            bind: [account_id, collection_id],
-            type: QueryTypes.SELECT,
-          }
-        )
-      ).reduce(
-        (prev, cur): any => {
-          return {
-            rewards_jump: prev.rewards_jump + Number(0),
-            rewards_acova: prev.rewards_jump + Number(0),
-            rewards_project_token: prev.rewards_jump + Number(0),
-          };
-        },
-        {
-          rewards_jump: 0,
-          rewards_acova: 0,
-          rewards_project_token: 0,
-        }
-      );
-    },
-    async staked_nfts_by_owner(
-      { collection_id }: NFTStaking,
-      { account_id }: AccountIdQuery,
-      { sequelize }: GraphQLContext
-    ) {
-      const result = await sequelize.query(
-        'select * from "staked_nfts" where "owner_id" = $1 and "collection_id" = $2',
-        {
-          bind: [account_id, collection_id],
-          type: QueryTypes.SELECT,
-        }
-      );
+    async rewards({ collection_id }: NFTStaking) {
+      const { farm } = await findStakingProgram(collection_id);
 
-      return result;
+      const secondsPerMonth = 2592000;
+
+      const interval = farm.round_interval;
+      const distributions = farm.distributions;
+
+      const stakingRewards: StakingToken[] = [];
+
+      for (const key in distributions) {
+        const metadata = await findTokenMetadata(key);
+
+        const { reward } = distributions[key];
+
+        stakingRewards.push({
+          ...metadata,
+          account_id: key,
+          perMonth: (secondsPerMonth * Number(reward)) / Number(interval),
+        });
+      }
+
+      return stakingRewards.sort((a, b) => a.symbol.localeCompare(b.symbol));
     },
   },
   Query: {

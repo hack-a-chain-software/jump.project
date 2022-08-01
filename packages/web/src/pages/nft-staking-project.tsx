@@ -8,7 +8,7 @@ import { WalletIcon } from "../assets/svg";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   If,
-  NFTStakingTopCard,
+  NFTStakingCard,
   PageContainer,
   TokenCard,
   BackButton,
@@ -22,6 +22,8 @@ import { useNftStaking, Token } from "../stores/nft-staking-store";
 import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
+import { useQuery } from "@apollo/client";
+import { StakingProjectDocument } from "@near/apollo";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -32,8 +34,7 @@ export function NFTStakingProject() {
   const [focused, setFocused] = useState<Token | null>(null);
   const [showUnstake, setShowUnstake] = useState(false);
 
-  const { fetchStakingInfo, fetchUserTokens, tokens, loading } =
-    useNftStaking();
+  const { fetchUserTokens, tokens, loading } = useNftStaking();
 
   const { wallet, isFullyConnected, connectWallet } =
     useNearContractsAndWallet();
@@ -68,15 +69,17 @@ export function NFTStakingProject() {
 
   useEffect(() => {
     (async () => {
-      if (wallet) {
-        await fetchStakingInfo(wallet as WalletConnection, collection);
-      }
-
       if (isFullyConnected) {
         await fetchUserTokens(wallet as WalletConnection, collection);
       }
     })();
   }, [isFullyConnected]);
+
+  const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
+    variables: {
+      collection,
+    },
+  });
 
   return (
     <PageContainer>
@@ -89,10 +92,14 @@ export function NFTStakingProject() {
 
       <BackButton onClick={() => navigate("/nft-staking")} />
 
-      <NFTStakingTopCard />
+      <NFTStakingCard
+        logo={staking?.collection_meta.image}
+        name={staking?.collection_meta.name}
+        rewards={staking?.rewards}
+      />
 
       <Flex flex={1} direction="row">
-        <NFTStakingUserRewards />
+        <NFTStakingUserRewards rewards={staking?.rewards} />
 
         <NFTStakingUserActions />
       </Flex>

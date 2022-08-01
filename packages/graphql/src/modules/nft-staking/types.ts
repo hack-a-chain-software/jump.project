@@ -17,14 +17,17 @@ export default gql`
     early_withdraw_penalty: String
 
     # Queries
-    total_rewards(account_id: ID): NFTStakingTotalRewards
-    staked_nfts_by_owner(account_id: ID): [StakedNFT]
+    rewards(account_id: ID): [NFTStakingReward] # On Chain Data
   }
 
-  type NFTStakingTotalRewards {
-    rewards_jump: String
-    rewards_acova: String
-    rewards_project_token: String
+  type NFTStakingReward @cacheControl(maxAge: 120, scope: PUBLIC) {
+    spec: String
+    name: String
+    symbol: String
+    icon: String
+    decimals: Int
+    perMonth: Int
+    account_id: String
   }
 
   type StakedNFT {

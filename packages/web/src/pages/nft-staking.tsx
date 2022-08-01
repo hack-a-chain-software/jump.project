@@ -21,11 +21,13 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
+  const { data, loading, error } = useQuery(
+    NftStakingProjectsConnectionDocument
+  );
 
   const items = data?.nft_staking_projects?.data;
 
-  console.log(items);
+  console.log(error);
 
   return (
     <PageContainer>
@@ -56,7 +58,7 @@ export const NFTStaking = () => {
       >
         {items && (
           <Stack spacing="32px">
-            {items.map(({ collection_meta, collection_id }, index) => (
+            {items.map(({ collection_meta, collection_id, rewards }, index) => (
               <NFTStakingCard
                 key={"nft-staking-collection" + index}
                 onClick={() =>
@@ -64,6 +66,7 @@ export const NFTStaking = () => {
                 }
                 logo={collection_meta.image}
                 name={collection_meta.name}
+                rewards={rewards}
               />
             ))}
           </Stack>

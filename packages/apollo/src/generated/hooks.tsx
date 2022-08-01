@@ -120,24 +120,23 @@ export type NftStaking = {
   collection_owner_id: Scalars["String"];
   early_withdraw_penalty?: Maybe<Scalars["String"]>;
   min_staking_period?: Maybe<Scalars["String"]>;
-  staked_nfts_by_owner?: Maybe<Array<Maybe<StakedNft>>>;
+  rewards?: Maybe<Array<Maybe<NftStakingReward>>>;
   token_address: Scalars["ID"];
-  total_rewards?: Maybe<NftStakingTotalRewards>;
 };
 
-export type NftStakingStakedNftsByOwnerArgs = {
+export type NftStakingRewardsArgs = {
   account_id?: InputMaybe<Scalars["ID"]>;
 };
 
-export type NftStakingTotalRewardsArgs = {
-  account_id?: InputMaybe<Scalars["ID"]>;
-};
-
-export type NftStakingTotalRewards = {
-  __typename?: "NFTStakingTotalRewards";
-  rewards_acova?: Maybe<Scalars["String"]>;
-  rewards_jump?: Maybe<Scalars["String"]>;
-  rewards_project_token?: Maybe<Scalars["String"]>;
+export type NftStakingReward = {
+  __typename?: "NFTStakingReward";
+  account_id?: Maybe<Scalars["String"]>;
+  decimals?: Maybe<Scalars["Int"]>;
+  icon?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  perMonth?: Maybe<Scalars["Int"]>;
+  spec?: Maybe<Scalars["String"]>;
+  symbol?: Maybe<Scalars["String"]>;
 };
 
 export type ProjectTokenInfo = {
@@ -368,13 +367,22 @@ export type NftStakingProjectsConnectionQuery = {
         image?: string | null;
         name?: string | null;
       } | null;
+      rewards?: Array<{
+        __typename?: "NFTStakingReward";
+        spec?: string | null;
+        name?: string | null;
+        symbol?: string | null;
+        icon?: string | null;
+        decimals?: number | null;
+        perMonth?: number | null;
+        account_id?: string | null;
+      } | null> | null;
     } | null> | null;
   };
 };
 
 export type StakingProjectQueryVariables = Exact<{
   collection: Scalars["ID"];
-  accountId?: InputMaybe<Scalars["ID"]>;
 }>;
 
 export type StakingProjectQuery = {
@@ -391,21 +399,15 @@ export type StakingProjectQuery = {
       image?: string | null;
       name?: string | null;
     } | null;
-    total_rewards?: {
-      __typename?: "NFTStakingTotalRewards";
-      rewards_jump?: string | null;
-      rewards_acova?: string | null;
-      rewards_project_token?: string | null;
-    } | null;
-    staked_nfts_by_owner?: Array<{
-      __typename?: "StakedNFT";
-      nft_id?: string | null;
-      collection_id?: string | null;
-      owner_id?: string | null;
-      staked_timestamp?: string | null;
-      rewards_jump?: string | null;
-      rewards_acova?: string | null;
-      rewards_project_token?: string | null;
+    rewards?: Array<{
+      __typename?: "NFTStakingReward";
+      spec?: string | null;
+      name?: string | null;
+      symbol?: string | null;
+      icon?: string | null;
+      decimals?: number | null;
+      perMonth?: number | null;
+      account_id?: string | null;
     } | null> | null;
   } | null;
 };
@@ -694,6 +696,15 @@ export const NftStakingProjectsConnectionDocument = gql`
         }
         collection_owner_id
         token_address
+        rewards {
+          spec
+          name
+          symbol
+          icon
+          decimals
+          perMonth
+          account_id
+        }
       }
     }
   }
@@ -751,7 +762,7 @@ export type NftStakingProjectsConnectionQueryResult = Apollo.QueryResult<
   NftStakingProjectsConnectionQueryVariables
 >;
 export const StakingProjectDocument = gql`
-  query StakingProject($collection: ID!, $accountId: ID) {
+  query StakingProject($collection: ID!) {
     staking(collection_id: $collection) {
       collection_id
       collection_meta {
@@ -762,19 +773,14 @@ export const StakingProjectDocument = gql`
       token_address
       min_staking_period
       early_withdraw_penalty
-      total_rewards(account_id: $accountId) {
-        rewards_jump
-        rewards_acova
-        rewards_project_token
-      }
-      staked_nfts_by_owner(account_id: $accountId) {
-        nft_id
-        collection_id
-        owner_id
-        staked_timestamp
-        rewards_jump
-        rewards_acova
-        rewards_project_token
+      rewards {
+        spec
+        name
+        symbol
+        icon
+        decimals
+        perMonth
+        account_id
       }
     }
   }
@@ -793,7 +799,6 @@ export const StakingProjectDocument = gql`
  * const { data, loading, error } = useStakingProjectQuery({
  *   variables: {
  *      collection: // value for 'collection'
- *      accountId: // value for 'accountId'
  *   },
  * });
  */

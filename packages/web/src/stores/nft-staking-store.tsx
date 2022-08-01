@@ -30,52 +30,6 @@ export interface Metadata {
 
 export interface ApprovedAccountIds {}
 
-export interface Program {
-  collection: Collection;
-  collection_owner: string;
-  collection_treasury: any;
-  token_address: string;
-  farm: Farm;
-  min_staking_period: string;
-  early_withdraw_penalty: string;
-}
-
-export interface Collection {
-  type: string;
-  account_id: string;
-}
-
-export interface Farm {
-  round_interval: number;
-  start_at: number;
-  distributions: any;
-}
-
-export interface StakingProgram {
-  collection: Collection;
-  collection_owner: string;
-  collection_treasury: any;
-  token_address: string;
-  farm: Farm;
-  stakingTokenRewards?: FToken[];
-  min_staking_period: string;
-  early_withdraw_penalty: string;
-  collectionMetadata?: CollectionMetaResponse;
-}
-
-export interface FToken {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: any;
-  reference: any;
-  reference_hash: any;
-  decimals: number;
-  perMonth?: number;
-  account_id?: string;
-  userBalance?: number;
-}
-
 export interface CollectionMetaResponse {
   spec: string;
   name: string;
@@ -84,19 +38,14 @@ export interface CollectionMetaResponse {
   base_uri: string;
 }
 
-export interface Collection {
-  type: string;
+export interface StakingToken {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  decimals: number;
+  perMonth: number;
   account_id: string;
-}
-
-export interface Farm {
-  round_interval: number;
-  start_at: number;
-  distributions: any;
-}
-
-interface TokenContract extends Contract {
-  ft_metadata: NearContractViewCall<any, FToken>;
 }
 
 interface CollectionContract extends Contract {
@@ -110,10 +59,6 @@ interface NFTStakingContract extends Contract {
     { account_id: string; collection: { account_id: string; type: string } },
     string[]
   >;
-  view_staking_program: NearContractViewCall<
-    { collection: { type: string; account_id: string } },
-    StakingProgram
-  >;
   view_staked_nft_balance: NearContractViewCall<
     { nft_id: [{ type: string; account_id: string }, string] },
     any
@@ -123,11 +68,6 @@ interface NFTStakingContract extends Contract {
 export const useNftStaking = create<{
   loading: boolean;
   tokens: Token[];
-  stakingInfo: Partial<StakingProgram>;
-  fetchStakingInfo: (
-    connection: WalletConnection,
-    collection: string
-  ) => Promise<void>;
   fetchUserTokens: (
     connection: WalletConnection,
     collection: string
@@ -149,72 +89,13 @@ export const useNftStaking = create<{
   ) => Promise<void>;
 }>((set, get) => ({
   tokens: [],
-  stakingInfo: {},
   loading: false,
 
-  fetchStakingInfo: async (connection, collection) => {
+  fetchUserTokens: async (connection, collection) => {
     set({
       loading: true,
     });
 
-    const contract = new Contract(
-      connection.account(),
-      import.meta.env.VITE_NFT_STAKING_CONTRACT,
-      {
-        viewMethods: ["view_staking_program"],
-        changeMethods: [],
-      }
-    ) as NFTStakingContract;
-
-    const stakingProgram = await contract.view_staking_program({
-      collection: {
-        type: "NFTContract",
-        account_id: collection,
-      },
-    });
-
-    const collectionContract = new Contract(connection.account(), collection, {
-      viewMethods: ["nft_metadata"],
-      changeMethods: [],
-    }) as CollectionContract;
-
-    const collectionMetadata = await collectionContract.nft_metadata();
-
-    const secondsPerMonth = 2592000;
-    const interval = stakingProgram.farm.round_interval;
-    const distributions = stakingProgram.farm.distributions;
-
-    const stakingRewards: FToken[] = [];
-
-    for (const key in distributions) {
-      const contract = new Contract(connection.account(), key, {
-        viewMethods: ["ft_metadata"],
-        changeMethods: [],
-      }) as TokenContract;
-
-      const metadata = await contract.ft_metadata();
-
-      const { reward } = distributions[key];
-
-      stakingRewards.push({
-        ...metadata,
-        account_id: key,
-        perMonth: (secondsPerMonth * Number(reward)) / Number(interval),
-      });
-    }
-
-    set({
-      stakingInfo: {
-        ...stakingProgram,
-        collectionMetadata,
-        stakingTokenRewards: stakingRewards.sort((a, b) =>
-          a.symbol.localeCompare(b.symbol)
-        ),
-      },
-    });
-  },
-
-  fetchUserTokens: async (connection, collection) => {
     const stakingContract = new Contract(
       connection.account(),
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -244,10 +125,6 @@ export const useNftStaking = create<{
 
       const tokens: Token[] = [];
 
-      const {
-        stakingInfo: { stakingTokenRewards },
-      } = get();
-
       for (let i = 0; i < staked.length; i++) {
         const balance = await stakingContract.view_staked_nft_balance({
           nft_id: [
@@ -268,18 +145,6 @@ export const useNftStaking = create<{
 
       set({
         tokens,
-        stakingInfo: {
-          ...get().stakingInfo,
-          stakingTokenRewards: stakingTokenRewards?.map((item) => {
-            return {
-              ...item,
-              userBalance: tokens.reduce(
-                (sum, { balance }) => sum + balance[item.account_id || ""],
-                0
-              ),
-            };
-          }),
-        },
       });
     } catch (e) {
       console.warn(e);

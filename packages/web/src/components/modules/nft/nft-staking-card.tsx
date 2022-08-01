@@ -11,8 +11,18 @@ import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
 import { formatNumber } from "@near/ts";
 
+export interface StakingToken {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  decimals: number;
+  perMonth: number;
+  account_id: string;
+}
+
 export function NFTStakingCard(
-  props: BoxProps & { name: string; logo: string }
+  props: BoxProps & { name: string; logo: string; rewards: StakingToken[] }
 ) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
@@ -46,7 +56,7 @@ export function NFTStakingCard(
           <Flex userSelect="none" direction="column">
             <Image src={props.logo} w="60px" h="60px" borderRadius={30} />
             <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
-              {props.logo}
+              {props.name}
             </Text>
             <Text
               w="500px"
@@ -59,17 +69,15 @@ export function NFTStakingCard(
             </Text>
           </Flex>
           <Flex gap={5}>
-            {/* {stakingInfo?.stakingTokenRewards?.map(({ name, symbol, perMonth, decimals }, i) => (
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title={name + " Rewards"}
-                  value={
-                    formatNumber(Number(perMonth), decimals) + " " + symbol
-                  }
-                  bottomText="Per Month"
-                  key={"nft-staking-rewards" + i}
-                />
-              ))} */}
+            {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title={name + " Rewards"}
+                value={formatNumber(Number(perMonth), decimals) + " " + symbol}
+                bottomText="Per Month"
+                key={"nft-staking-rewards" + i}
+              />
+            ))}
           </Flex>
         </Box>
       </Box>

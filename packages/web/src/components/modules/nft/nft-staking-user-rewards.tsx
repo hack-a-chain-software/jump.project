@@ -1,11 +1,29 @@
 import { ValueBox } from "@/components";
 import { Text, Flex, Grid } from "@chakra-ui/react";
 import { useNearContractsAndWallet } from "@/context/near";
-import { useNftStaking } from "@/stores/nft-staking-store";
+import { useNftStaking, StakingToken } from "@/stores/nft-staking-store";
+import { useMemo } from "react";
+import { formatNumber } from "@near/ts";
 
-export function NFTStakingUserRewards() {
-  const { stakingInfo } = useNftStaking();
+export function NFTStakingUserRewards({
+  rewards,
+}: {
+  rewards: StakingToken[];
+}) {
+  const { tokens } = useNftStaking();
   const { wallet } = useNearContractsAndWallet();
+
+  const tokenRewads = useMemo(() => {
+    return rewards?.map((token) => {
+      return {
+        ...token,
+        userBalance: tokens.reduce(
+          (sum, { balance }) => sum + balance[token.account_id || ""],
+          0
+        ),
+      };
+    });
+  }, [tokens, rewards]);
 
   return (
     <Flex flex={1} direction="column">
@@ -14,18 +32,18 @@ export function NFTStakingUserRewards() {
       </Text>
 
       <Grid gap={3} gridTemplateColumns="1fr 1fr">
-        {stakingInfo.stakingTokenRewards &&
-          stakingInfo.stakingTokenRewards.map((token, index) => (
+        {tokenRewads &&
+          tokenRewads.map(({ name, userBalance, decimals, symbol }, index) => (
             <ValueBox
               key={"user-rewards-" + index}
               height="139px"
-              title={`Your ${token.name} Rewards`}
+              title={`Your ${name} Rewards`}
               value={
                 wallet?.isSignedIn()
-                  ? `${token.userBalance || 0} ${token.symbol}`
+                  ? formatNumber(Number(userBalance), decimals) + " " + symbol
                   : "Connect Wallet"
               }
-              bottomText={`Your Total ${token.name} Rewards`}
+              bottomText={`Your Total ${name} Rewards`}
             />
           ))}
       </Grid>
