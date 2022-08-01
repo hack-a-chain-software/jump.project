@@ -10,16 +10,7 @@ import {
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
 import { formatNumber } from "@near/ts";
-
-export interface StakingToken {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  decimals: number;
-  perMonth: number;
-  account_id: string;
-}
+import { StakingToken } from "@/stores/nft-staking-store";
 
 export function NFTStakingCard(
   props: BoxProps & { name: string; logo: string; rewards: StakingToken[] }
