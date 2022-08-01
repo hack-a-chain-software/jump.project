@@ -124,20 +124,6 @@ export function NFTStakingProject() {
       <NFTStakingCard
         collectionLogo={staking?.collection_meta?.image}
         collectionName={staking?.collection_meta?.name}
-        tokens={[
-          {
-            name: "JUMP",
-            ammount: "10",
-          },
-          {
-            name: "ACOVA",
-            ammount: "20",
-          },
-          {
-            name: "CGK",
-            ammount: "10",
-          },
-        ]}
       />
       <Flex flex={1} direction="row">
         <Flex flex={1} direction="column">
@@ -348,7 +334,7 @@ export function NFTStakingProject() {
             gridTemplateColumns="repeat(auto-fill, 309px)"
           >
             {tokens &&
-              tokens.map((token, index) => (
+              tokens.map((token: Token, index) => (
                 <Flex
                   key={"nft-staked-tokens-" + index}
                   onClick={() =>

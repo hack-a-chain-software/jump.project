@@ -46,15 +46,15 @@ export const useNftStaking = create<{
     const transactions: Transaction[] = [];
 
     try {
-      const stakingStorage = await contract?.storage_balance_of(
+      const stakingStorage = (await contract?.storage_balance_of(
         {
           account_id: connection?.getAccountId(),
         },
         NearConstants.AttachedGas,
         NearConstants.OneYOctoNear
-      );
+      )) as any;
 
-      if (!stakingStorage || stakingStorage.total < "0.10") {
+      if (!stakingStorage || stakingStorage?.total < "0.10") {
         transactions.push({
           receiverId: import.meta.env.VITE_STAKING_CONTRACT,
           functionCalls: [

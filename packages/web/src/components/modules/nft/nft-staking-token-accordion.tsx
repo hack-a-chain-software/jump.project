@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
-import { Flex, Text, Grid, Image } from "@chakra-ui/react";
+import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
 
 type Props = {
   select: any;
