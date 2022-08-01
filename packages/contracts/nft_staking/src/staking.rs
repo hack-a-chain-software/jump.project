@@ -145,6 +145,19 @@ impl StakingProgram {
     staked_nft
   }
 
+  // method replicates claim_rewards without writing to permanent storage
+  pub fn view_claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
+    let rewards = self.farm.claim(token_id);
+
+    let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
+    staked_nft.balance = rewards
+      .iter()
+      .map(|(k, v)| (k.clone(), v + staked_nft.balance.get(k).unwrap_or(&0)))
+      .collect();
+
+    staked_nft
+  }
+
   // maybe refactor with a StakedNFT withdraw method?
   pub fn inner_withdraw(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     let mut staked_nft = self.claim_rewards(token_id);

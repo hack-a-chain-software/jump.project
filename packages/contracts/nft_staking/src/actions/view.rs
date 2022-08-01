@@ -71,7 +71,7 @@ impl Contract {
     let collection = &nft_id.0;
     let mut staking_program = self.staking_programs.get(collection).unwrap();
 
-    let staked_nft = staking_program.claim_rewards(&nft_id);
+    let staked_nft = staking_program.view_claim_rewards(&nft_id);
 
     staked_nft.balance
   }
