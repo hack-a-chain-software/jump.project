@@ -1,3 +1,4 @@
+import { WalletConnection } from "near-api-js";
 import { useNearQuery } from "react-near";
 
 const defaultLPOptions = {
@@ -91,5 +92,28 @@ export const useViewTotalEstimatedInvestorAllowance = (account_id: string) => {
     variables: {
       account_id,
     },
+  });
+};
+export const useViewLaunchpadSettings = () => {
+  return useNearQuery<{
+    membership_token: string;
+    token_lock_period: string;
+    tiers_minimum_tokens: string[];
+    tiers_entitled_allocations: string[]; // number of allocations to which each tier of members is entitled in phase 1
+    allowance_phase_2: string; // number of allocations to which every user is entitled in phase 2
+    partner_dex: string;
+  }>("view_contract_settings", {
+    ...defaultLPOptions,
+  });
+};
+
+export const useXTokenBalance = (wallet: string) => {
+  return useNearQuery<string, { account_id: string }>("ft_balance_of", {
+    contract: import.meta.env.VITE_STAKING_CONTRACT,
+    variables: {
+      account_id: wallet,
+    },
+    poolInterval: 1000 * 60,
+    debug: true,
   });
 };

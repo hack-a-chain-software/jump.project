@@ -1,3 +1,4 @@
+import { useNearContractsAndWallet } from "@/context/near";
 import {
   Box,
   Flex,
@@ -7,8 +8,9 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import {
   DiscordIcon,
   TelegramIcon,
@@ -40,6 +42,17 @@ const tabKinds = {
  */
 export const Project = () => {
   const [kind, setKind] = useState(tabKinds.pool);
+  const { id } = useParams();
+  const { wallet } = useNearContractsAndWallet();
+  const { data } = useLaunchPadProjectQuery({
+    variables: {
+      accountId: wallet?.getAccountId(),
+      projectId: id || "",
+    },
+  });
+
+  console.log(data);
+
   const navigate = useNavigate();
   const { jumpGradient, gradientBackground, gradientBoxTopCard } = useTheme();
   return (
@@ -59,44 +72,56 @@ export const Project = () => {
             bg={gradientBoxTopCard}
           >
             <Flex direction="column">
-              <Text
-                color="white"
-                fontWeight="800"
-                fontFamily="Inter"
-                letterSpacing="-0.05em"
-                fontSize="24px"
-                mb="-20px"
-                as="h1"
-                background={jumpGradient}
-                style={
-                  {
-                    "-webkit-background-clip": "text",
-                    "-webkit-text-fill-color": "transparent",
-                    "text-fill-color": "transparent",
-                  } as any
-                }
+              <Box
+                bg="white"
+                p="10px"
+                px="15px"
+                w="170px"
+                alignItems="center"
+                justifyContent="center"
+                display="flex"
+                borderRadius="30px"
+                color="black"
+                fontWeight="semibold"
               >
-                0.012 USDC
-              </Text>
-              <Text
-                fontWeight="800"
-                fontFamily="Inter"
-                letterSpacing="-0.05em"
-                fontSize="50px"
-                as="h1"
-              >
-                Polis
-              </Text>
+                {data?.launchpad_project?.fee_price_tokens}{" "}
+                {data?.launchpad_project?.price_token_info?.symbol}
+              </Box>
+              <Flex gap="12px" alignItems="center">
+                <Image
+                  w="50px"
+                  h="50px"
+                  src={data?.launchpad_project?.project_token_info?.image || ""}
+                />
+                <div>
+                  <Text
+                    fontWeight="800"
+                    fontFamily="Inter"
+                    letterSpacing="-0.05em"
+                    fontSize="24px"
+                    mb="-10px"
+                    as="h1"
+                    color="white"
+                  >
+                    Launchpad Project
+                  </Text>
+                  <Text
+                    fontWeight="800"
+                    fontFamily="Inter"
+                    letterSpacing="-0.05em"
+                    fontSize="40px"
+                    as="h1"
+                  >
+                    {data?.launchpad_project?.project_token_info?.name}
+                  </Text>
+                </div>
+              </Flex>
               <Text
                 fontWeight="bold"
                 letterSpacing="-0.03em"
                 fontSize="16px"
                 w="500px"
-              >
-                POLIS is the primary governance token of Star Atlas. Star Atlas
-                is a grand strategy game that combines space exploration,
-                territorial conquest, and political domination.
-              </Text>
+              ></Text>
             </Flex>
           </Box>
         </Box>

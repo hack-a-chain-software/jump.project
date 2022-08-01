@@ -6,7 +6,7 @@ import { NearContractViewCall, NearMutableContractCall } from "@near/ts";
 import { WalletConnection } from "near-api-js";
 import { Contract } from "near-api-js";
 import toast from "react-hot-toast";
-import create from "zustand/react";
+import create from "zustand";
 import { StakingContract } from "./staking-store";
 
 interface LaunchpadContract extends Contract {
@@ -75,7 +75,11 @@ export const useLaunchpadStore = create<{
         import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
         {
           changeMethods: ["withdraw_allocations"],
-          viewMethods: [],
+          viewMethods: [
+            "view_contract_settings",
+            "view_investor",
+            "storage_balance_of",
+          ],
         }
       ) as LaunchpadContract,
     });
@@ -225,11 +229,29 @@ export const useLaunchpadStore = create<{
 
       const { tiers_minimum_tokens } = await contract.view_contract_settings();
 
-      const { staked_token } = await contract.view_investor({
+      const investor = await contract.view_investor({
         account_id: connection.getAccountId(),
       });
 
       const minTokens = tiers_minimum_tokens[desiredLevel - 1];
+
+      if (!investor) {
+        transactions.push({
+          receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+          functionCalls: [
+            {
+              methodName: "storage_deposit",
+              args: {
+                account_id: connection.getAccountId(),
+                registration_only: false,
+              },
+              amount: "0.25",
+            },
+          ],
+        });
+      }
+
+      const { staked_token = "0" } = investor || {};
 
       transactions.push({
         receiverId: import.meta.env.VITE_STAKING_CONTRACT,
@@ -237,7 +259,7 @@ export const useLaunchpadStore = create<{
           {
             methodName: "ft_transfer_call",
             args: {
-              receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
+              receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
               amount: new bn(minTokens).sub(new bn(staked_token)).toString(),
               memo: null,
               msg: JSON.stringify({

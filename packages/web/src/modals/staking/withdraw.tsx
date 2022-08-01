@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import { Flex, Input, Text } from "@chakra-ui/react";
 import { X_JUMP_TOKEN } from "@/env/contract";
 import { useNearContractsAndWallet } from "@/context/near";
@@ -105,7 +106,10 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance: {Number(balance) * 10 ** -(jumpMetadata?.decimals || 0)}{" "}
+          Balance:{" "}
+          {new BN(balance || 0)
+            .mul(new BN(10 ** -(jumpMetadata?.decimals || 0)))
+            .toString()}{" "}
           xJUMP
         </Text>
       </Flex>

@@ -10,3 +10,4 @@ export * from "./check";
 export * from "./info";
 export * from "./arrow-right";
 export * from "./jump-big-white";
+export * from "./lock";

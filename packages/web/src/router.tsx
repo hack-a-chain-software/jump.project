@@ -1,4 +1,6 @@
 import { Flex, Grid } from "@chakra-ui/react";
+import { ErrorBoundary } from "react-error-boundary";
+
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
@@ -9,6 +11,16 @@ import { NFTStakingProject } from "./pages/nft-staking-project";
 import { Project } from "./pages/project";
 import { Staking } from "./pages/staking";
 import { routes } from "./routes";
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
 
 /**
  * @name Router

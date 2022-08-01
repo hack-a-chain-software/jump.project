@@ -9,6 +9,7 @@ type Props = {
   renderAsset?: JSX.Element;
   jumpLogo?: boolean;
   py?: boolean;
+  children?: React.ReactNode;
 };
 
 export const TopCard = ({
@@ -18,10 +19,15 @@ export const TopCard = ({
   renderAsset,
   jumpLogo = false,
   py = false,
+  children,
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();
   return (
-    <Box borderRadius={25} bg={useColorModeValue(jumpGradient, "transparent")}>
+    <Box
+      flex={1}
+      borderRadius={25}
+      bg={useColorModeValue(jumpGradient, "transparent")}
+    >
       <Box
         overflow="hidden"
         display="flex"
@@ -31,7 +37,9 @@ export const TopCard = ({
         w="100%"
         py={py ? "60px" : undefined}
         color="white"
+        flex="1"
         px="60px"
+        h="100%"
         borderRadius="24px"
         bg={glassyWhite}
       >
@@ -71,6 +79,7 @@ export const TopCard = ({
           >
             {bottomDescription}
           </Text>
+          {children}
         </Flex>
         <Flex position="relative" right="-60px" bottom="-60px">
           {jumpLogo && <JumpBigWhite />}
