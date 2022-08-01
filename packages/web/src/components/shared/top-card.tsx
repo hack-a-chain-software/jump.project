@@ -7,6 +7,7 @@ type Props = {
   bigText: string;
   bottomDescription: string;
   renderAsset?: JSX.Element;
+  content?: JSX.Element;
   jumpLogo?: boolean;
   py?: boolean;
   children?: React.ReactNode;
@@ -19,6 +20,7 @@ export const TopCard = ({
   renderAsset,
   jumpLogo = false,
   py = false,
+  content = <></>,
   children,
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();

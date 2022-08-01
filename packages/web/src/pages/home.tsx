@@ -22,7 +22,6 @@ import {
   Thead,
   Tr,
   useColorModeValue,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { useLaunchpadConenctionQuery } from "@near/apollo";
 import { useEffect, useMemo, useState } from "react";
@@ -36,7 +35,6 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
  * @name Home
  */
 export function Home() {
-  const [filters, setFilters] = useState({});
   const navigate = useNavigate();
   const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
@@ -46,7 +44,6 @@ export function Home() {
   );
   const { increaseMembership, init, decreaseMembership } = useLaunchpadStore();
 
-  const { data: balance = 0 } = useXTokenBalance(wallet?.getAccountId());
   const launchpadSettings = useViewLaunchpadSettings();
 
   useEffect(() => {
@@ -60,7 +57,6 @@ export function Home() {
       limit: 10,
     },
   });
-  console.log("🚀 ~ file: home.tsx ~ line 73 ~ Home ~ data", investor);
 
   const level = useMemo(() => {
     const find = (launchpadSettings.data?.tiers_minimum_tokens || [])
@@ -96,28 +92,12 @@ export function Home() {
     const formattedLevel = level + 1;
     increaseMembership(formattedLevel);
   };
+
   const downgradeLevel = () => {
     const formattedLevel = level - 1;
     decreaseMembership(formattedLevel);
     increaseMembership(formattedLevel);
   };
-  // const progress = useMemo(
-  //   () =>
-  //     new BN(investor.data?.staked_token || 0)
-  //       .div(new BN(amountToNextLevel || 0))
-  //       .toNumber(),
-  //   [investor.data?.staked_token, amountToNextLevel]
-  // );
-
-  console.log(
-    new BN(investor.data?.staked_token || 0).div(new BN(1000)).toString()
-  );
-
-  // console.log(
-  //   new BN(investor.data?.staked_token || 0)
-  //     .div(new BN(amountToNextLevel))
-  //     .toNumber()
-  // );
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
@@ -160,13 +140,12 @@ export function Home() {
             </Text>
             <Stack gap={1}>
               <Flex direction="column" flex={1} mt={5}>
-                <Flex mb="-10px" justifyContent="space-between" flex={1}>
+                <Flex mb="5px" justifyContent="space-between" flex={1}>
                   <Text fontSize={18} fontWeight="semibold">
                     Level {level}
                   </Text>
                   <Text>Stake more {amountToNextLevel} to next Level</Text>
                 </Flex>
-                <ProgressBar done={100} />
               </Flex>
               <Button
                 bg="transparent"

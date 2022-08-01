@@ -1,6 +1,7 @@
-import { Flex, FlexProps, Spinner } from "@chakra-ui/react";
+import { Flex, FlexProps, CircularProgress } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 import { motion } from "framer-motion";
+import { LoadingIndicator } from "./loading-indicator";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface Props extends PropsWithChildren<FlexProps> {
@@ -19,7 +20,7 @@ export const PageContainer = (props: Partial<Props>) => {
     >
       {props.loading ? (
         <Flex height="100%" alignItems="center" justifyContent="center">
-          <Spinner size="xl" />
+          <LoadingIndicator />
         </Flex>
       ) : (
         <motion.div
