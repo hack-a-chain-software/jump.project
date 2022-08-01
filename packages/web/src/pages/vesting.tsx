@@ -7,6 +7,7 @@ import {
   ValueBox,
   Select,
   GradientButton,
+  Empty,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
@@ -141,64 +142,9 @@ export const Vesting = () => {
       <If
         fallback={
           isFullyConnected
-            ? !loading && (
-                <Flex
-                  width="100%"
-                  height="100%"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Flex
-                    marginX="auto"
-                    height="100%"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexDirection="column"
-                  >
-                    <Text
-                      fontWeight="800"
-                      fontSize={30}
-                      letterSpacing="-0.03em"
-                      mb={3}
-                    >
-                      Oops! No vestings available
-                    </Text>
-                  </Flex>
-                </Flex>
-              )
-            : !loading && (
-                <Flex
-                  marginX="auto"
-                  height="100%"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexDirection="column"
-                >
-                  <Text
-                    fontWeight="800"
-                    fontSize={30}
-                    letterSpacing="-0.03em"
-                    mb={3}
-                  >
-                    You must be logged in to view all vestings
-                  </Text>
-
-                  <Text
-                    _hover={{
-                      opacity: 0.8,
-                    }}
-                    // onClick={() => toggleStakeModal()}
-                    marginTop="-12px"
-                    cursor="pointer"
-                    color="#761BA0"
-                    fontWeight="800"
-                    fontSize={34}
-                    letterSpacing="-0.03em"
-                    mb={3}
-                  >
-                    Connect Wallet!
-                  </Text>
-                </Flex>
+            ? !loading && <Empty text="No vestings available" />
+            : loading && (
+                <Empty text="You must be logged in to view all vestings" />
               )
         }
         condition={!isEmpty(investorInfo) && !isEmpty(vestings)}

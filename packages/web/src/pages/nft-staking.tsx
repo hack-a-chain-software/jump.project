@@ -1,6 +1,12 @@
-import { Image, Stack, Flex, Spinner, Text } from "@chakra-ui/react";
+import { Image, Stack } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { If, TopCard, NFTStakingCard, PageContainer } from "../components";
+import {
+  If,
+  TopCard,
+  NFTStakingCard,
+  PageContainer,
+  Empty,
+} from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
@@ -18,6 +24,8 @@ export const NFTStaking = () => {
   const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
   const items = data?.nft_staking_projects?.data;
+
+  console.log(items);
 
   return (
     <PageContainer>
@@ -42,7 +50,10 @@ export const NFTStaking = () => {
         }
       />
 
-      <If condition={!loading && !isEmpty(items)}>
+      <If
+        fallback={!loading && <Empty text="No collections available" />}
+        condition={!loading && !isEmpty(items)}
+      >
         {items && (
           <Stack spacing="32px">
             {items.map(({ collection_meta, collection_id }, index) => (
@@ -51,30 +62,12 @@ export const NFTStaking = () => {
                 onClick={() =>
                   navigate(`/nft-staking/${window.btoa(collection_id)}`)
                 }
-                collectionLogo={collection_meta.image}
-                collectionName={collection_meta.name}
-                // tokens={collection_treasury.map((item, index) => ({
-                //   name: rewards[index],
-                //   ammount: item,
-                // }))}
+                logo={collection_meta.image}
+                name={collection_meta.name}
               />
             ))}
           </Stack>
         )}
-      </If>
-
-      <If condition={!loading && isEmpty(items)}>
-        <Flex width="100%" justifyContent="center" marginTop="120px">
-          <Text
-            color="#EB5757"
-            fontSize="20px"
-            fontWeight="400"
-            lineHeight="24px"
-            marginLeft="16px"
-          >
-            Oops! No collections available
-          </Text>
-        </Flex>
       </If>
     </PageContainer>
   );

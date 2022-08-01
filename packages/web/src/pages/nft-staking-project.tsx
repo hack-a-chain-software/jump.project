@@ -8,7 +8,7 @@ import { WalletIcon } from "../assets/svg";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   If,
-  NFTStakingCard,
+  NFTStakingTopCard,
   PageContainer,
   TokenCard,
   BackButton,
@@ -19,7 +19,6 @@ import {
 import { NFTUnstakeModal } from "@/modals";
 import { WalletConnection } from "near-api-js";
 import { useNftStaking, Token } from "../stores/nft-staking-store";
-import { useQuery } from "@apollo/client";
 import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
@@ -33,7 +32,7 @@ export function NFTStakingProject() {
   const [focused, setFocused] = useState<Token | null>(null);
   const [showUnstake, setShowUnstake] = useState(false);
 
-  const { fetchStakingInfo, fetchUserTokens, tokens, loading, stakingInfo } =
+  const { fetchStakingInfo, fetchUserTokens, tokens, loading } =
     useNftStaking();
 
   const { wallet, isFullyConnected, connectWallet } =
@@ -90,16 +89,12 @@ export function NFTStakingProject() {
 
       <BackButton onClick={() => navigate("/nft-staking")} />
 
-      <NFTStakingCard
-        rewards={stakingInfo?.stakingTokenRewards}
-        collectionName={stakingInfo?.collectionMetadata?.name || ""}
-        collectionLogo={stakingInfo?.collectionMetadata?.icon || ""}
-      />
+      <NFTStakingTopCard />
 
       <Flex flex={1} direction="row">
         <NFTStakingUserRewards />
 
-        <NFTStakingUserActions collection={collection} />
+        <NFTStakingUserActions />
       </Flex>
 
       <If condition={!!isFullyConnected && !isEmpty(tokens) && !loading}>

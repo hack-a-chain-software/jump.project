@@ -3,6 +3,7 @@ import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
 import { WalletIcon } from "@/assets/svg";
 import { useState } from "react";
+import { useParams } from "react-router";
 import { NFTStakeModal, NFTUnstakeModal } from "@/modals";
 import { useNearContractsAndWallet } from "@/context/near";
 import { useNftStaking } from "@/stores/nft-staking-store";
@@ -10,7 +11,10 @@ import { GradientButton, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
 import { WalletConnection } from "near-api-js";
 
-export function NFTStakingUserActions({ collection }: { collection: string }) {
+export function NFTStakingUserActions(props: any) {
+  const { id = "" } = useParams();
+  const collection = window.atob(id);
+
   const { wallet, connectWallet } = useNearContractsAndWallet();
   const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
     useTheme();

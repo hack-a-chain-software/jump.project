@@ -10,11 +10,11 @@ import {
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
 import { formatNumber } from "@near/ts";
+import { useNftStaking } from "@/stores/nft-staking-store";
 
-export function NFTStakingCard(
-  props: BoxProps & { name: string; logo: string }
-) {
+export function NFTStakingTopCard(props: BoxProps) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
+  const { stakingInfo } = useNftStaking();
 
   return (
     <Box
@@ -24,7 +24,7 @@ export function NFTStakingCard(
       background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
       {...(R.omit(
-        ["name", "logo", "tokens", "frequency", "rewards"],
+        ["collectionName", "collectionLogo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
     >
@@ -44,9 +44,14 @@ export function NFTStakingCard(
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
           <Flex userSelect="none" direction="column">
-            <Image src={props.logo} w="60px" h="60px" borderRadius={30} />
+            <Image
+              src={stakingInfo.collectionMetadata?.icon}
+              w="60px"
+              h="60px"
+              borderRadius={30}
+            />
             <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
-              {props.logo}
+              {stakingInfo.collectionMetadata?.name}
             </Text>
             <Text
               w="500px"
@@ -54,12 +59,13 @@ export function NFTStakingCard(
               fontWeight="600"
               letterSpacing="-0.03em"
             >
-              Earn JUMP, ACOVA, CGK as rewards by staking on {props.name}{" "}
-              staking pool
+              Earn JUMP, ACOVA, CGK as rewards by staking on{" "}
+              {stakingInfo.collectionMetadata?.name} staking pool
             </Text>
           </Flex>
           <Flex gap={5}>
-            {/* {stakingInfo?.stakingTokenRewards?.map(({ name, symbol, perMonth, decimals }, i) => (
+            {stakingInfo?.stakingTokenRewards?.map(
+              ({ name, symbol, perMonth, decimals }, i) => (
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   title={name + " Rewards"}
@@ -69,7 +75,8 @@ export function NFTStakingCard(
                   bottomText="Per Month"
                   key={"nft-staking-rewards" + i}
                 />
-              ))} */}
+              )
+            )}
           </Flex>
         </Box>
       </Box>
