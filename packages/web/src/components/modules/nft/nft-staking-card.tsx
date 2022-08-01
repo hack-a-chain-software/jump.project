@@ -14,10 +14,6 @@ import { ValueBox } from "../../shared";
 type Props = {
   collectionName: string;
   collectionLogo: string;
-  // tokens: {
-  //   name: string;
-  //   ammount: string;
-  // }[];
   frequency?: "weekly" | "daily" | "monthly";
 };
 

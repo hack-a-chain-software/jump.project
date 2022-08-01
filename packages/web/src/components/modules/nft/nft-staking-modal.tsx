@@ -1,6 +1,7 @@
 import { useState } from "react";
 import isEmpty from "lodash/isEmpty";
 import { getNear } from "@/hooks/near";
+import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
