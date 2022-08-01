@@ -132,13 +132,7 @@ impl StakingProgram {
   }
 
   pub fn claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
-    let rewards = self.farm.claim(token_id);
-
-    let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
-    staked_nft.balance = rewards
-      .iter()
-      .map(|(k, v)| (k.clone(), v + staked_nft.balance.get(k).unwrap_or(&0)))
-      .collect();
+    let staked_nft = self.view_unclaimed_rewards(token_id);
 
     self.staked_nfts.insert(token_id, &staked_nft);
 
@@ -146,7 +140,7 @@ impl StakingProgram {
   }
 
   // method replicates claim_rewards without writing to permanent storage
-  pub fn view_claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
+  pub fn view_unclaimed_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
     let rewards = self.farm.claim(token_id);
 
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
