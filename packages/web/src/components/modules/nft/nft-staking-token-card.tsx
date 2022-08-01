@@ -22,9 +22,7 @@ export function TokenCard({
         width="100%"
         height="100%"
         borderRadius="20px"
-        src={
-          "https://img.freepik.com/premium-vector/hand-drawn-bored-ape-style-punk-nft-style-collection-bored-ape-yacht-club-nft-artwork_361671-260.jpg?w=2000"
-        }
+        src={metadata.media}
       />
 
       <Flex

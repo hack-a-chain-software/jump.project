@@ -1,7 +1,7 @@
 import create from "zustand";
 import { Contract, WalletConnection } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "@/tools";
-import { NearContractViewCall, NearMutableContractCall } from "@near/ts";
+import { NearContractViewCall } from "@near/ts";
 import { NearConstants } from "@/constants";
 
 export interface Token {
