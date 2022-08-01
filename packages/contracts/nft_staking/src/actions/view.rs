@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-
 use near_sdk::{
   json_types::{U128, U64},
   near_bindgen, AccountId,
@@ -8,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
   farm::{Farm, RewardsDistribution},
-  staking::StakingProgram,
+  staking::{StakingProgram, StakedNFT},
   types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
   Contract, ContractExt,
 };
@@ -71,7 +70,7 @@ impl Contract {
     let collection = &nft_id.0;
     let mut staking_program = self.staking_programs.get(collection).unwrap();
 
-    let staked_nft = staking_program.view_claim_rewards(&nft_id);
+    let staked_nft = staking_program.view_unclaimed_rewards(&nft_id);
 
     staked_nft.balance
   }
@@ -120,5 +119,14 @@ impl Contract {
         None => vec![],
       },
     }
+  }
+
+  pub fn view_staked_nft(&self, nft_id: NonFungibleTokenID) -> Option<StakedNFT> {
+    let collection = &nft_id.0;
+
+    self
+      .staking_programs
+      .get(collection)
+      .and_then(|staking_program| staking_program.staked_nfts.get(&nft_id))
   }
 }
