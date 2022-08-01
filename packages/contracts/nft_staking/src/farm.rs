@@ -4,10 +4,10 @@ use crate::StorageKey;
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::{env, Timestamp};
-use near_sdk::json_types::{U128};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug)]
 pub struct RewardsDistribution {
   pub undistributed: u128,
   pub unclaimed: u128,
@@ -35,6 +35,11 @@ impl RewardsDistribution {
 
     let delta_t = dist.rr - self.rr;
     let mut added_reward = (delta_t as u128) * self.reward;
+
+    println!(
+      "delta_t = {}; round = {}; added_reward = {}; reward = {}",
+      delta_t, round, added_reward, self.reward
+    );
 
     if self.undistributed < added_reward {
       added_reward = self.undistributed;
@@ -84,12 +89,14 @@ impl RewardsDistribution {
   }
 }
 
-#[derive(BorshSerialize, BorshDeserialize)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize)]
 pub struct Farm {
   pub round_interval: u32,
   pub start_at: u32,
 
-  pub distributions: UnorderedMap<FungibleTokenID, RewardsDistribution>,
+  pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
+
+  #[serde(skip)]
   pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
 }
 
@@ -108,14 +115,14 @@ fn get_key_closure(collection: NFTCollection) -> impl FnMut() -> StorageKey {
 impl Farm {
   pub fn new(
     collection: NFTCollection,
-    collection_round_reward: HashMap<FungibleTokenID, U128>,
+    collection_round_reward: FungibleTokenBalance,
     round_interval: u32,
   ) -> Self {
     let mut get_key = get_key_closure(collection);
-    
-    let mut distributions = UnorderedMap::new(get_key());
+
+    let mut distributions = HashMap::new();
     for (token_id, &rewards) in collection_round_reward.iter() {
-      distributions.insert(token_id, &RewardsDistribution::new(0, rewards.0));
+      distributions.insert(token_id.clone(), RewardsDistribution::new(0, rewards));
     }
 
     Farm {
@@ -133,7 +140,7 @@ impl Farm {
       .unwrap()
       .deposit_distribution_funds(amount);
 
-    self.distributions.insert(token_id, &dist);
+    self.distributions.insert(token_id.clone(), dist);
   }
 
   pub fn withdraw_beneficiary(&mut self, token_id: &FungibleTokenID) -> u128 {
@@ -143,7 +150,7 @@ impl Farm {
       .unwrap()
       .withdraw_beneficiary();
 
-    self.distributions.insert(token_id, &dist);
+    self.distributions.insert(token_id.clone(), dist);
 
     amount
   }
@@ -159,8 +166,8 @@ impl Farm {
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
     let mut balance = HashMap::new();
 
-    for (ft_id, dist) in self.distributions.to_vec() {
-      balance.insert(ft_id, dist.rps);
+    for (ft_id, dist) in self.distributions.iter() {
+      balance.insert(ft_id.clone(), dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
@@ -176,32 +183,44 @@ impl Farm {
 
     let total_seeds = self.nfts_rps.len();
 
-    for (k, prev_dist) in self.distributions.to_vec() {
+    for (k, prev_dist) in self.distributions.clone().iter() {
       let dist = prev_dist.distribute(total_seeds, round);
-      self.distributions.insert(&k, &dist);
+      self.distributions.insert(k.clone(), dist);
     }
   }
 
-  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> HashMap<FungibleTokenID, u128> {
+  pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     self.distribute();
 
     let mut token_rps = self.nfts_rps.get(token_id).unwrap();
     let mut rewards_map = HashMap::new();
 
-    for (k, prev_dist) in self.distributions.to_vec() {
-      let rps = *token_rps.get(&k).unwrap_or(&0);
+    for (k, prev_dist) in self.distributions.clone().iter() {
+      let rps = *token_rps.get(k).unwrap_or(&0);
 
       let (dist, claimed) = prev_dist.claim(rps);
 
       token_rps.insert(k.clone(), dist.rps);
-      self.distributions.insert(&k, &dist);
+      self.distributions.insert(k.clone(), dist);
 
-      rewards_map.insert(k, claimed);
+      rewards_map.insert(k.clone(), claimed);
     }
 
     self.nfts_rps.insert(token_id, &token_rps);
 
     rewards_map
+  }
+
+  pub fn unclaimed_token_balance(&self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
+    let token_rps = self.nfts_rps.get(token_id).unwrap();
+    let mut unclaimed_map = HashMap::new();
+
+    for (k, dist) in self.distributions.iter() {
+      let rps = token_rps.get(&k).unwrap();
+      unclaimed_map.insert(k.clone(), dist.rps - rps);
+    }
+
+    unclaimed_map
   }
 }
 
@@ -220,6 +239,7 @@ mod tests {
   use near_sdk::AccountId;
   use rstest::rstest;
   use std::str::FromStr;
+  use std::vec;
 
   use super::*;
 
@@ -247,10 +267,10 @@ mod tests {
     .map(|(id, dist)| (id.clone(), dist))
   }
 
-  fn get_farm() -> Farm {
-    let mut distributions = UnorderedMap::new(b'c');
-    for (k, v) in get_distributions() {
-      distributions.insert(&k, &v);
+  fn get_farm(vec_distributions: Vec<(AccountId, RewardsDistribution)>) -> Farm {
+    let mut distributions = HashMap::new();
+    for (k, v) in vec_distributions {
+      distributions.insert(k, v);
     }
 
     Farm {
@@ -307,7 +327,7 @@ mod tests {
     context.block_timestamp(block_seconds * 10u64.pow(9));
     testing_env!(context.build());
 
-    let farm = get_farm();
+    let farm = get_farm(vec![]);
     assert_eq!(farm.round(), round);
   }
 
@@ -317,10 +337,17 @@ mod tests {
     context.block_timestamp(30 * 10u64.pow(9));
     testing_env!(context.build());
 
-    let mut farm = get_farm();
+    let dists = get_distributions()[0..2].to_vec();
+
+    let mut farm = get_farm(dists.clone());
     farm.distribute();
 
-    for (k, dist) in get_distributions().to_vec() {
+    for (k, dist) in &dists {
+      println!(
+        "round_interval = {}; balance = {}; reward = {}",
+        farm.round_interval, dist.undistributed, dist.reward
+      );
+
       let current_dist = farm.distributions.get(&k).unwrap();
       assert_eq!(
         current_dist.undistributed,
@@ -339,12 +366,14 @@ mod tests {
     context.block_timestamp(44 * 10u64.pow(9));
     testing_env!(context.build());
 
-    let mut farm = get_farm();
+    let dists = get_distributions()[0..2].to_vec();
+
+    let mut farm = get_farm(dists.clone());
 
     let [nft_id, _, _] = get_nft_ids();
     farm.add_nft(&nft_id);
 
-    for (k, dist) in get_distributions().to_vec() {
+    for (k, dist) in &dists {
       let current_dist = farm.distributions.get(&k).unwrap();
 
       assert_eq!(
@@ -361,7 +390,7 @@ mod tests {
     let mut context = get_context();
     context.block_timestamp(30 * 10u64.pow(9));
 
-    let mut farm = get_farm();
+    let mut farm = get_farm(vec![]);
 
     let [nft_id, _, _] = get_nft_ids();
     farm.add_nft(&nft_id);

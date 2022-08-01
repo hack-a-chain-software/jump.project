@@ -12,7 +12,6 @@ pub type FungibleTokenBalance = HashMap<FungibleTokenID, u128>;
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "type")]
-#[serde(rename_all = "snake_case")] // TODO: this is a breaking change, update tests
 pub enum NFTCollection {
   NFTContract { account_id: AccountId },
 }

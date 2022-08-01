@@ -50,6 +50,14 @@ export default gql`
     fee_liquidity_tokens: String
     status: String
     dex_id: String
+    project_name: String
+    description_token: String
+    description_project: String
+    discord: String
+    twitter: String
+    telegram: String
+    website: String
+    whitepaper: String
 
     # Sub Queries
     project_token_info: ProjectTokenInfo

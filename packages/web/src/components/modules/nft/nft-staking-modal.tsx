@@ -1,9 +1,7 @@
+import { useState } from "react";
 import isEmpty from "lodash/isEmpty";
-import { useEffect, useState } from "react";
 import { getNear } from "@/hooks/near";
-import { WalletConnection } from "near-api-js";
-import { useNftStaking } from "@/stores/nft-staking";
-import { useCollection } from "@/stores/collection";
+import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
 import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
@@ -19,16 +17,9 @@ export function StakeModal({
 }) {
   const [selected, setSelected] = useState("");
 
-  const { user, wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
+  const { user } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
 
   const { stake } = useNftStaking();
-  const { tokens, loading, fetchTokens } = useCollection();
-
-  useEffect(() => {
-    if (user.isConnected && isOpen) {
-      fetchTokens(wallet as WalletConnection, collection);
-    }
-  }, [user.isConnected, isOpen]);
 
   const stakeNFT = async () => {
     if (!selected) {
@@ -37,6 +28,14 @@ export function StakeModal({
 
     stake(collection, selected);
   };
+
+  const { data, loading } = useNearQuery("nft_tokens_for_owner", {
+    contract: collection,
+    variables: {
+      account_id: user.address || "",
+    },
+    skip: !user.isConnected,
+  });
 
   return (
     <ModalImageDialog
@@ -51,7 +50,7 @@ export function StakeModal({
       }}
       footer={
         !loading &&
-        !isEmpty(tokens) && (
+        !isEmpty(data) && (
           <Button onClick={() => stakeNFT()} bg="white" color="black" w="100%">
             Stake Now!
             <ArrowRightIcon />
@@ -71,7 +70,7 @@ export function StakeModal({
           </Flex>
         ) : (
           <If
-            condition={!isEmpty(tokens)}
+            condition={!isEmpty(data)}
             fallback={
               <Flex pt="64px" marginTop="auto">
                 <Text fontSize="18px">
@@ -86,7 +85,7 @@ export function StakeModal({
               maxHeight="370px"
               overflow="auto"
             >
-              {tokens.map(({ metadata, token_id }, i) => (
+              {data.map(({ metadata, token_id }, i) => (
                 <Flex
                   key={"nft-stake-token" + i}
                   borderRadius="20px"

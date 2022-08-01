@@ -81,6 +81,18 @@ export const TopCard = ({
           </Text>
           {children}
         </Flex>
+
+        {content && (
+          <Flex
+            flex="1"
+            marginLeft="120px"
+            justifyContent="flex-end"
+            className="space-x-[1.25rem]"
+          >
+            {content}
+          </Flex>
+        )}
+
         <Flex position="relative" right="-60px" bottom="-60px">
           {jumpLogo && <JumpBigWhite />}
         </Flex>

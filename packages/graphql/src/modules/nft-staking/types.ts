@@ -35,6 +35,7 @@ export default gql`
   }
 
   type StakedNFT {
+    # SQL + Blockchain Data
     nft_id: ID
     collection_id: ID
     owner_id: ID

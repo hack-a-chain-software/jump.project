@@ -593,7 +593,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection1Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -606,7 +606,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection1Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -625,7 +625,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection1Account.accountId,
         },
       }),
@@ -640,10 +640,10 @@ async function testnetSetup() {
   collection_rps2[auroraTokenAccount.accountId] = "1000";
   collection_rps2[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload2 = {
-    collection_address: nftCollection1Account.accountId,
+    collection_address: nftCollection2Account.accountId,
     collection_owner: ownerAccount.accountId,
     token_address: usdtTokenAccount.accountId,
-    collection_rps2,
+    collection_rps: collection_rps2,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
     round_interval: 200,
@@ -663,7 +663,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection2Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -676,7 +676,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection2Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -695,7 +695,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection2Account.accountId,
         },
       }),
@@ -710,10 +710,10 @@ async function testnetSetup() {
   collection_rps3[auroraTokenAccount.accountId] = "1000";
   collection_rps3[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload3 = {
-    collection_address: nftCollection1Account.accountId,
+    collection_address: nftCollection3Account.accountId,
     collection_owner: ownerAccount.accountId,
     token_address: usdtTokenAccount.accountId,
-    collection_rps3,
+    collection_rps: collection_rps3,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
     round_interval: 200,
@@ -733,7 +733,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection3Account.accountId,
       },
       token_id: jumpTokenAccount.accountId,
@@ -746,7 +746,7 @@ async function testnetSetup() {
     methodName: "move_contract_funds_to_collection",
     args: {
       collection: {
-        type: "n_f_t_contract",
+        type: "NFTContract",
         account_id: nftCollection3Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
@@ -765,7 +765,7 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
         collection: {
-          type: "n_f_t_contract",
+          type: "NFTContract",
           account_id: nftCollection3Account.accountId,
         },
       }),

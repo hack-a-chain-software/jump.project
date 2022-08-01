@@ -62,13 +62,18 @@ impl Contract {
       account_id: payload.collection_address.clone(),
     };
 
-    assert!(!self.staking_programs.contains_key(&collection), "staking program already created");
-
-    let farm = Farm::new(
-      collection.clone(),
-      payload.collection_rps,
-      payload.round_interval,
+    assert!(
+      !self.staking_programs.contains_key(&collection),
+      "staking program already created"
     );
+
+    let collection_rps = payload
+      .collection_rps
+      .iter()
+      .map(|(k, v)| (k.clone(), v.0))
+      .collect();
+
+    let farm = Farm::new(collection.clone(), collection_rps, payload.round_interval);
 
     let staking_program = StakingProgram::new(
       farm,

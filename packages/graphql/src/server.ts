@@ -1,7 +1,7 @@
 import { ApolloServer } from "apollo-server";
 import { Sequelize } from "sequelize";
 import { EnvVariables } from "./env";
-import { Global, Launchpad, NFTStaking } from "./modules";
+import { Global, Launchpad, NFTStaking, XToken } from "./modules";
 
 // TODO: Remove this and pass it to the env later on
 const sequelize = new Sequelize({
@@ -14,8 +14,13 @@ const sequelize = new Sequelize({
 });
 
 const app = new ApolloServer({
-  resolvers: [Global.Resolvers, Launchpad.Resolvers, NFTStaking.Resolvers],
-  typeDefs: [Global.Types, Launchpad.Types, NFTStaking.Types],
+  resolvers: [
+    Global.Resolvers,
+    Launchpad.Resolvers,
+    NFTStaking.Resolvers,
+    XToken.Resolvers,
+  ],
+  typeDefs: [Global.Types, Launchpad.Types, NFTStaking.Types, XToken.Types],
   context: (context) => {
     // TODO: Add Auth Layer
     return {

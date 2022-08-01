@@ -188,8 +188,7 @@ mod tests {
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "create_listing");
 
-        let data: serde_json::Value =
-          serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
+        let data: serde_json::Value = serde_blob["data"][0].clone();
         assert_eq!(data["listing_data"], json!(VListing::V1(inserted_listing)));
       }
     }
@@ -419,8 +418,7 @@ mod tests {
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "cancel_listing");
 
-        let data: serde_json::Value =
-          serde_json::from_str(serde_blob["data"][0].as_str().unwrap()).unwrap();
+        let data: serde_json::Value = serde_blob["data"][0].clone();
         assert_eq!(data["listing_id"], "0");
       }
     }
