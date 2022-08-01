@@ -1,10 +1,10 @@
 // demonstrates how to query the state without setting
 // up an account. (View methods only)
-import { EnvVariables } from "@/env";
 import { NearQuery } from "@/types";
 import { providers } from "near-api-js";
+require("dotenv").config();
 
-const provider = new providers.JsonRpcProvider(EnvVariables.rpcURL);
+const provider = new providers.JsonRpcProvider(process.env.NEAR_RPC_URL);
 
 export interface TokenMetadataResponse {
   spec: string;
