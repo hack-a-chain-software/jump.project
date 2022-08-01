@@ -1,16 +1,25 @@
+import { EnvVariables } from "@/env";
 import { ApolloServer } from "apollo-server";
 import { Sequelize } from "sequelize";
 import { Global, Launchpad, NFTStaking, XToken } from "./modules";
 
-require("dotenv").config();
+const {
+  db_host,
+  db_name,
+  db_port,
+  db_dialect,
+  db_password,
+  db_username,
+  server_port,
+} = EnvVariables;
 
 const sequelize = new Sequelize({
-  dialect: process.env.DB_DIALECT,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+  port: db_port,
+  host: db_host,
+  database: db_name,
+  dialect: db_dialect,
+  username: db_username,
+  password: db_password,
 } as any);
 
 const app = new ApolloServer({
@@ -39,7 +48,7 @@ async function main(): Promise<void> {
     console.log("Checking Database Connection ☢️");
     await sequelize.authenticate();
     console.log("Database Authenticated ✅");
-    const serverInfo = await app.listen(process.env.SERVE_PORT);
+    const serverInfo = await app.listen(server_port);
     console.log(
       `GraphQL running on ${serverInfo.port} at the current url ${serverInfo.url} ✅`
     );
