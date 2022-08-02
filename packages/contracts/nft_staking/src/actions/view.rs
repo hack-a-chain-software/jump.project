@@ -83,4 +83,16 @@ impl Contract {
       .get(collection)
       .and_then(|staking_program| staking_program.staked_nfts.get(&nft_id))
   }
+
+  pub fn view_inner_balance(
+    &self,
+    collection: NFTCollection,
+    account_id: AccountId,
+  ) -> SerializableFungibleTokenBalance {
+    let staking_program = self.staking_programs.get(&collection).unwrap();
+
+    let balance = staking_program.stakers_balances.get(&account_id).unwrap();
+
+    SerializableFungibleTokenBalance(balance)
+  }
 }
