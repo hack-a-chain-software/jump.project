@@ -8,6 +8,7 @@ import {
   useColorModeValue,
   Skeleton,
 } from "@chakra-ui/react";
+import isEmpty from "lodash/isEmpty";
 import { useTheme } from "../../../hooks/theme";
 import { ValueBox } from "../../shared";
 import { formatNumber } from "@near/ts";
@@ -45,45 +46,71 @@ export function NFTStakingCard(
           borderRadius="24px"
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
-          <Flex userSelect="none" direction="column">
+          <Flex
+            minHeight="165px"
+            userSelect="none"
+            direction="column"
+            height="100%"
+            justifyContent="space-between"
+          >
             <Skeleton
-              height="60px"
               width="60px"
+              height="60px"
               borderRadius={30}
               isLoaded={!!props.logo}
             >
-              <Image src={props.logo} w="60px" h="60px" borderRadius={30} />
+              <Image src={props.logo} w="51px" h="60px" borderRadius={30} />
             </Skeleton>
 
-            <Skeleton height="51px" isLoaded={!!props.name}>
+            <Skeleton
+              minHeight="42px"
+              borderRadius={12}
+              isLoaded={!!props.name}
+            >
               <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
                 {props.name}
               </Text>
             </Skeleton>
 
-            <Skeleton height="54px" width="500px" isLoaded={!!props.name}>
+            <Skeleton
+              minHeight="54px"
+              borderRadius={12}
+              width="500px"
+              isLoaded={!!props.name}
+            >
               <Text
                 w="500px"
                 fontSize={18}
                 fontWeight="600"
                 letterSpacing="-0.03em"
               >
-                Earn JUMP, ACOVA, CGK as rewards by staking on {props.name}{" "}
-                staking pool
+                Earn {props.rewards?.map(({ symbol }) => symbol).join(", ")} as
+                rewards by staking on {props.name} staking pool
               </Text>
             </Skeleton>
           </Flex>
-          <Flex gap={5}>
-            {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                title={name + " Rewards"}
-                value={formatNumber(Number(perMonth), decimals) + " " + symbol}
-                bottomText="Per Month"
-                key={"nft-staking-rewards" + i}
-              />
-            ))}
-          </Flex>
+
+          <Skeleton
+            width="100%"
+            height="114px"
+            borderRadius={20}
+            maxWidth="640px"
+            isLoaded={!!!isEmpty(props.rewards)}
+          >
+            <Flex gap={5}>
+              {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title={name + " Rewards"}
+                  value={
+                    formatNumber(Number(perMonth), decimals) + " " + symbol
+                  }
+                  bottomText="Per Month"
+                  key={"nft-staking-rewards" + i}
+                />
+              ))}
+            </Flex>
+          </Skeleton>
         </Box>
       </Box>
     </Box>
