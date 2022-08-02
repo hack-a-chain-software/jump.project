@@ -40,10 +40,7 @@ export function TokenAccordion({
   }, [staked, endPenalty, token_id]);
 
   const withdrawPenalty = useMemo(() => {
-    const { symbol = "", decimals = 0 } =
-      rewards?.find(({ account_id }) => account_id === token) || {};
-
-    return formatNumber(Number(penalty), decimals) + " " + symbol;
+    return ` ${Number(penalty) / 10_000_000_000}%`;
   }, [rewards, token_id, penalty]);
 
   return (
