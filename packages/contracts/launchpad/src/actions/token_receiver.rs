@@ -127,8 +127,7 @@ mod tests {
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "project_fund_listing");
 
-        let data: serde_json::Value =
-          serde_blob["data"][0].clone();
+        let data: serde_json::Value = serde_blob["data"][0].clone();
         assert_eq!(data["listing_id"], "0");
         assert_eq!(
           data["tokens_sale"],
@@ -331,8 +330,7 @@ mod tests {
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "investor_buy_allocations");
 
-        let data: serde_json::Value =
-          serde_blob["data"][0].clone();
+        let data: serde_json::Value = serde_blob["data"][0].clone();
         assert_eq!(data["investor_id"], investor_correct.to_string());
         assert_eq!(data["listing_id"], "0");
         assert_eq!(data["sale_phase"], json!(sale_phase));
@@ -543,8 +541,7 @@ mod tests {
         assert_eq!(serde_blob["version"], "1.0.0");
         assert_eq!(serde_blob["event"], "investor_stake_membership");
 
-        let data: serde_json::Value =
-          serde_blob["data"][0].clone();
+        let data: serde_json::Value = serde_blob["data"][0].clone();
         assert_eq!(data["investor_id"], investor_correct.to_string());
         assert_eq!(data["token_quantity"], desired_tier_requirement.to_string());
         assert_eq!(data["new_membership_level"], desired_tier.to_string());

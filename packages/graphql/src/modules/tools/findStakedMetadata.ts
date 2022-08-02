@@ -6,26 +6,30 @@ import { providers } from "near-api-js";
 
 const provider = new providers.JsonRpcProvider(EnvVariables.rpc_url);
 
-export interface CollectionMetaResponse {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  base_uri: string;
+export interface StakedMetaResponse {
+  title: string;
+  description: string;
+  media: string;
 }
 
-export async function findCollectionMetadata(
-  collection_address: string
-): Promise<CollectionMetaResponse> {
+export async function findStakedMetadata(
+  collection_id: string,
+  nft_id: string
+): Promise<StakedMetaResponse> {
+  const args = {
+    token_id: nft_id,
+  };
+
   const rawResult = await provider.query<NearQuery>({
     request_type: "call_function",
-    account_id: collection_address,
-    method_name: "nft_metadata",
+    account_id: collection_id,
+    method_name: "nft_token",
     finality: "optimistic",
-    args_base64: "e30=",
+    args_base64: btoa(JSON.stringify(args)),
   });
 
   // format result
   const res = JSON.parse(Buffer.from(rawResult.result).toString());
-  return res;
+
+  return res?.metadata;
 }

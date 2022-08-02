@@ -45,7 +45,7 @@ impl Contract {
       media: Some(format!(
         "{}/{}",
         self.metadata.get().unwrap().base_uri.unwrap().clone(),
-        token_id
+        self.counter
       )),
       media_hash: None,
       copies: Some(self.counter),
