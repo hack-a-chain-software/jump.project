@@ -197,6 +197,17 @@ impl StakingProgram {
     amount
   }
 
+  pub fn outer_deposit(&mut self, staker_id: &AccountId, token_id: &FungibleTokenID, amount: u128) {
+    let mut balance = self
+      .stakers_balances
+      .get(staker_id)
+      .unwrap_or_else(|| HashMap::new());
+
+    *balance.entry(token_id.clone()).or_insert(0) += amount;
+
+    self.stakers_balances.insert(staker_id, &balance);
+  }
+
   pub fn deposit_distribution_funds(&mut self, token_id: &FungibleTokenID, amount: u128) {
     self.farm.deposit_distribution_funds(token_id, amount);
   }
@@ -306,5 +317,24 @@ mod tests {
 
     assert_eq!(old_nft.balance, HashMap::new());
     assert_eq!(new_nft.balance.len(), 3);
+  }
+
+  #[test]
+  fn test_outer_deposit() {
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let amount = 100;
+
+    staking_program.outer_deposit(&staker_id, &token_id, amount);
+
+    assert_eq!(
+      staking_program
+        .stakers_balances
+        .get(&staker_id)
+        .unwrap()
+        .get(&token_id),
+      Some(&amount)
+    );
   }
 }
