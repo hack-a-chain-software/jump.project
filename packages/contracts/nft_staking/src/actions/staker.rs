@@ -116,7 +116,10 @@ impl Contract {
     let amount = amount.map(|x| x.0).unwrap_or(available);
     assert!(amount <= available, "");
 
-    self.staking_programs.insert(&collection, &staking_program).unwrap();
+    self
+      .staking_programs
+      .insert(&collection, &staking_program)
+      .unwrap();
     self.track_storage_usage(&caller_id, initial_storage);
 
     ext_fungible_token::ext(token_id)
@@ -126,7 +129,11 @@ impl Contract {
   }
 
   #[payable]
-  pub fn claim_reward(&mut self, collection: NFTCollection, token_id: NonFungibleTokenID) {
+  pub fn claim_reward(
+    &mut self,
+    collection: NFTCollection,
+    token_id: NonFungibleTokenID,
+  ) -> FungibleTokenBalance {
     assert_one_yocto();
 
     let initial_storage = env::storage_usage();
@@ -134,10 +141,12 @@ impl Contract {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
     staking_program.assert_is_token_owner(&caller_id, &token_id);
 
-    staking_program.claim_rewards(&token_id);
+    let balance = staking_program.inner_withdraw(&token_id);
+
     self.staking_programs.insert(&collection, &staking_program);
 
     self.track_storage_usage(&caller_id, initial_storage);
-  }
 
+    balance
+  }
 }

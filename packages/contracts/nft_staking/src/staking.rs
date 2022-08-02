@@ -141,7 +141,7 @@ impl StakingProgram {
   pub fn claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
     let rewards = self.farm.claim(token_id);
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
-  
+
     staked_nft.update_balance(rewards);
     self.staked_nfts.insert(token_id, &staked_nft);
 
@@ -154,6 +154,7 @@ impl StakingProgram {
 
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
     staked_nft.update_balance(rewards);
+
     staked_nft
   }
 
