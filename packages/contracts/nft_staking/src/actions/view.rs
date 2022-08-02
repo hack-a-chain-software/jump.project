@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-
 use near_sdk::{
   json_types::{U128, U64},
   near_bindgen, AccountId,
@@ -8,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
   farm::{Farm, RewardsDistribution},
-  staking::StakingProgram,
+  staking::{StakingProgram, StakedNFT},
   types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
   Contract, ContractExt,
 };
@@ -69,24 +68,14 @@ impl Contract {
 
   pub fn view_staked_nft_balance(&self, nft_id: NonFungibleTokenID) -> FungibleTokenBalance {
     let collection = &nft_id.0;
-    let staking_program = self.staking_programs.get(collection).unwrap();
+    let mut staking_program = self.staking_programs.get(collection).unwrap();
 
-    let staked_nft = staking_program.staked_nfts.get(&nft_id).unwrap();
+    let staked_nft = staking_program.view_unclaimed_rewards(&nft_id);
 
-    let unclaimed_token_balance = staking_program.farm.unclaimed_token_balance(&nft_id);
-
-    let mut balance = HashMap::new();
-    for (ft_id, &claimed) in staked_nft.balance.iter() {
-      let unclaimed = *unclaimed_token_balance.get(ft_id).unwrap();
-
-      balance.insert(ft_id.clone(), claimed + unclaimed);
-    }
-
-    balance
+    staked_nft.balance
   }
 
   //retornar saldos do contract treasury
-
   pub fn view_guardians(&self, from_index: Option<u16>, limit: Option<u16>) -> Vec<String> {
     let from_index: usize = from_index.map(From::from).unwrap_or(0);
     let limit: usize = limit.map(From::from).unwrap_or(usize::MAX);
@@ -119,15 +108,24 @@ impl Contract {
         .take(limit)
         .map(|(_, id)| id)
         .collect(),
-      Some(owner_id) => staking_program
-        .nfts_by_owner
-        .get(&owner_id)
-        .unwrap()
-        .iter()
-        .skip(from_index as usize)
-        .take(limit)
-        .map(|(_, id)| id)
-        .collect(),
+      Some(owner_id) => match staking_program.nfts_by_owner.get(&owner_id) {
+        Some(nfts) => nfts
+          .iter()
+          .skip(from_index as usize)
+          .take(limit)
+          .map(|(_, id)| id)
+          .collect(),
+        None => vec![],
+      },
     }
+  }
+
+  pub fn view_staked_nft(&self, nft_id: NonFungibleTokenID) -> Option<StakedNFT> {
+    let collection = &nft_id.0;
+
+    self
+      .staking_programs
+      .get(collection)
+      .and_then(|staking_program| staking_program.staked_nfts.get(&nft_id))
   }
 }

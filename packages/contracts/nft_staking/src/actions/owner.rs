@@ -10,6 +10,10 @@ impl Contract {
 
   pub fn deposit_contract_treasury(&mut self, payload: FTRoutePayload) {
     self.only_owner(payload.sender_id);
+    assert!(
+      self.contract_treasury.contains_key(&payload.token_id),
+      "Transfered token is not accepted by this contract"
+    );
 
     let treasury_amount = self.contract_treasury.get(&payload.token_id).unwrap_or(0);
 

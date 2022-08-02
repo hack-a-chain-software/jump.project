@@ -248,11 +248,11 @@ async function testnetSetup() {
       owner_id: ownerAccount.accountId,
       metadata: {
         spec: "nft-1.0.0",
-        name: "Classy Kangaroo NFT",
-        symbol: "ROO",
+        name: "NEAR Meerkat Kingdom",
+        symbol: "NMK",
         icon: null,
         base_uri:
-          "https://bafybeic3unknzrqczvuzhcx2d3dflqush2n2awz3t7usgtyuwosfrju65m.ipfs.dweb.link",
+          "https://bafybeiht5jof3n265j3jd3rm2sfg6anf567sfgcgqko4oepf77a6ewe3um.ipfs.dweb.link",
         reference: null,
         reference_hash: null,
       },
@@ -576,7 +576,7 @@ async function testnetSetup() {
     collection_rps,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
@@ -646,7 +646,7 @@ async function testnetSetup() {
     collection_rps: collection_rps2,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
@@ -716,7 +716,7 @@ async function testnetSetup() {
     collection_rps: collection_rps3,
     min_staking_period: "10000000000000",
     early_withdraw_penalty: "1000000000000",
-    round_interval: 200,
+    round_interval: 10,
   };
   await ownerAccount.functionCall({
     contractId: nftStaking.accountId,
