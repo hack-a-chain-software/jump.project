@@ -146,7 +146,13 @@ export function NFTStakingProject() {
               }}
               transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
             >
-              <TokenAccordion {...focused} />
+              <TokenAccordion
+                {...focused}
+                rewards={staking?.rewards}
+                token={staking.token_address}
+                penalty={staking?.early_withdraw_penalty}
+                minStakedPeriod={staking?.min_staking_period}
+              />
             </motion.section>
           )}
         </AnimatePresence>

@@ -2,11 +2,49 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
-import { Token } from "@/stores/nft-staking-store";
-import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
+import { formatNumber } from "@near/ts";
+import { Token, StakingToken } from "@/stores/nft-staking-store";
+import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
+import { useMemo } from "react";
+import { format, isBefore, addMilliseconds } from "date-fns";
 
-export function TokenAccordion({ metadata, token_id }: Token) {
+export function TokenAccordion({
+  token,
+  rewards,
+  metadata,
+  token_id,
+  balance,
+  stakedAt,
+  minStakedPeriod,
+  penalty,
+}: Token & {
+  rewards: StakingToken[];
+  minStakedPeriod: string;
+  penalty: string;
+  token: string;
+}) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
+
+  const staked = useMemo(() => {
+    return new Date(Number(stakedAt) / 1000000);
+  }, [stakedAt, token_id]);
+
+  const endPenalty = useMemo(() => {
+    return addMilliseconds(staked, Number(minStakedPeriod) / 1000000);
+  }, [minStakedPeriod, token_id]);
+
+  const hasWithdrawPenalty = useMemo(() => {
+    const today = new Date();
+
+    return isBefore(today, endPenalty);
+  }, [staked, endPenalty, token_id]);
+
+  const withdrawPenalty = useMemo(() => {
+    const { symbol = "", decimals = 0 } =
+      rewards?.find(({ account_id }) => account_id === token) || {};
+
+    return formatNumber(Number(penalty), decimals) + " " + symbol;
+  }, [rewards, token_id, penalty]);
 
   return (
     <motion.div
@@ -68,35 +106,23 @@ export function TokenAccordion({ metadata, token_id }: Token) {
                   </Text>
                 </Flex>
 
-                <Grid
-                  gap="15px"
-                  width="100%"
-                  gridTemplateColumns="repeat(auto-fill, 200px)"
-                >
-                  <ValueBox
-                    color="white"
-                    value="400 JUMP"
-                    title="JUMP Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-
-                  <ValueBox
-                    color="white"
-                    value="80 ACOVA"
-                    title="ACOVA Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-
-                  <ValueBox
-                    color="white"
-                    value="80 TRP"
-                    title="TRP Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-                </Grid>
+                <Flex gap="15px" width="100%">
+                  {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
+                    <ValueBox
+                      minWidth="250px"
+                      borderColor={glassyWhiteOpaque}
+                      title={name + " Rewards"}
+                      color="white"
+                      value={
+                        formatNumber(Number(balance[account_id]), decimals) +
+                        " " +
+                        symbol
+                      }
+                      bottomText="Per Month"
+                      key={"nft-staking-rewards" + i}
+                    />
+                  ))}
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
@@ -110,6 +136,7 @@ export function TokenAccordion({ metadata, token_id }: Token) {
           alignItems="center"
           padding="0px 32px"
           margin="22px 0px 36px 0px"
+          opacity={hasWithdrawPenalty ? 1 : 0}
         >
           <InfoIcon color="white" />
 
@@ -120,8 +147,9 @@ export function TokenAccordion({ metadata, token_id }: Token) {
             lineHeight="24px"
             marginLeft="16px"
           >
-            This NFT is subject to an early withdraw penalty of 80%, wait until
-            22 April, 2022 - 10:00 AM GMT to withdraw
+            This NFT is subject to an early withdraw penalty of{" "}
+            {withdrawPenalty}, wait until
+            {format(endPenalty, " dd MMMM, yyyy - HH:mm a")}
           </Text>
         </Flex>
       </Flex>

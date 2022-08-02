@@ -9,8 +9,20 @@ export interface Token {
   id?: string;
   token_id: string;
   owner_id: string;
+  stakedAt?: number;
   metadata: Metadata;
   approved_account_ids: ApprovedAccountIds;
+}
+
+export interface StakedNFT {
+  token_id: [TokenId, string];
+  owner_id: string;
+  staked_timestamp: number;
+}
+
+export interface TokenId {
+  type: string;
+  account_id: string;
 }
 
 export interface Metadata {
@@ -63,6 +75,10 @@ interface NFTStakingContract extends Contract {
     { nft_id: [{ type: string; account_id: string }, string] },
     any
   >;
+  view_staked_nft: NearContractViewCall<
+    { nft_id: [{ type: string; account_id: string }, string] },
+    StakedNFT
+  >;
 }
 
 export const useNftStaking = create<{
@@ -103,6 +119,7 @@ export const useNftStaking = create<{
         viewMethods: [
           "view_staked",
           "view_guardians",
+          "view_staked_nft",
           "view_staked_nft_balance",
         ],
         changeMethods: [],
@@ -136,11 +153,21 @@ export const useNftStaking = create<{
           ],
         });
 
+        const { staked_timestamp } = await stakingContract.view_staked_nft({
+          nft_id: [
+            {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            staked[i],
+          ],
+        });
+
         const token = await collectionContract.nft_token({
           token_id: staked[i],
         });
 
-        tokens.push({ ...token, balance });
+        tokens.push({ ...token, balance, stakedAt: staked_timestamp });
       }
 
       set({
