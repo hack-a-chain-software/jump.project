@@ -251,49 +251,49 @@ export const useNftStaking = create<{
   unstake: async (connection, tokens, collection, balance) => {
     const transactions: any = [];
 
-    for (const key in balance) {
-      if (!balance[key]) {
-        continue;
-      }
+    // for (const key in balance) {
+    //   if (!balance[key]) {
+    //     continue;
+    //   }
 
-      const storage = await get().getTokenStorage(key, connection);
+    //   const storage = await get().getTokenStorage(key, connection);
 
-      if (!storage) {
-        transactions.push({
-          receiverId: key,
-          functionCalls: [
-            {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection?.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.10",
-            },
-          ],
-        });
-      }
+    //   if (!storage) {
+    //     transactions.push({
+    //       receiverId: key,
+    //       functionCalls: [
+    //         {
+    //           methodName: "storage_deposit",
+    //           args: {
+    //             account_id: connection?.getAccountId(),
+    //             registration_only: false,
+    //           },
+    //           amount: "0.10",
+    //         },
+    //       ],
+    //     });
+    //   }
 
-      // todo use get withdraw method
-      // transactions.push({
-      //   receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-      //   functionCalls: [
-      //     {
-      //       methodName: "whitdraw",
-      //       args: {
-      //         token_id: [
-      //           {
-      //             type: "whitdraw",
-      //             account_id: collection,
-      //           },
-      //           key,
-      //         ],
-      //       },
-      //       gas: NearConstants.AttachedGas,
-      //     },
-      //   ],
-      // });
-    }
+    //   // todo use get withdraw method
+    //   transactions.push({
+    //     receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+    //     functionCalls: [
+    //       {
+    //         methodName: "whitdraw",
+    //         args: {
+    //           token_id: [
+    //             {
+    //               type: "whitdraw",
+    //               account_id: collection,
+    //             },
+    //             key,
+    //           ],
+    //         },
+    //         gas: NearConstants.AttachedGas,
+    //       },
+    //     ],
+    //   });
+    // }
 
     tokens.forEach((item) => {
       transactions.push({
