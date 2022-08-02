@@ -1,9 +1,14 @@
-use crate::actions::guardian::CreateStakingProgramPayload;
-use crate::staking::StakedNFT;
-use crate::types::{FungibleTokenBalance, NonFungibleTokenID};
-use near_sdk::log;
 use near_sdk::serde::Serialize;
 use near_sdk::serde_json::json;
+use near_sdk::AccountId;
+use near_sdk::{json_types::U128, log};
+
+use crate::types::{FungibleTokenID, NFTCollection};
+use crate::{
+  actions::guardian::CreateStakingProgramPayload,
+  staking::StakedNFT,
+  types::{FungibleTokenBalance, NonFungibleTokenID, SerializableFungibleTokenBalance},
+};
 
 fn log_event<T: Serialize>(event: &str, data: T) {
   let event = json!({
@@ -29,8 +34,27 @@ pub fn stake_nft(staked_nft: &StakedNFT) {
 }
 
 pub fn unstake_nft(nft_id: &NonFungibleTokenID, balance: FungibleTokenBalance) {
+  let event = json!({
+    "token_id": nft_id,
+    "withdrawn_balance": SerializableFungibleTokenBalance(balance)
+  });
+
+  log_event("unstake_nft", event);
+}
+
+pub fn withdraw_reward(
+  collection: NFTCollection,
+  owner_id: AccountId,
+  token_id: FungibleTokenID,
+  amount: U128,
+) {
   log_event(
-    "unstake_nft",
-    json!({ "token_id": nft_id, "withdrawn_balance": balance }),
-  );
+    "withdraw_reward",
+    json!({
+      "collection": collection,
+      "owner_id": owner_id,
+      "token_id": token_id.to_string(),
+      "amount": amount,
+    }),
+  )
 }
