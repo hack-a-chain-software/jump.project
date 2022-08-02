@@ -76,7 +76,6 @@ impl Contract {
   }
 
   //retornar saldos do contract treasury
-
   pub fn view_guardians(&self, from_index: Option<u16>, limit: Option<u16>) -> Vec<String> {
     let from_index: usize = from_index.map(From::from).unwrap_or(0);
     let limit: usize = limit.map(From::from).unwrap_or(usize::MAX);

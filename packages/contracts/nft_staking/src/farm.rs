@@ -190,6 +190,17 @@ impl Farm {
   }
 
   pub fn claim(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
+    let (rewards_map, token_rps) = self.view_unclaimed_rewards(token_id);
+
+    self.nfts_rps.insert(token_id, &token_rps);
+
+    rewards_map
+  }
+
+  pub fn view_unclaimed_rewards(
+    &mut self,
+    token_id: &NonFungibleTokenID,
+  ) -> (FungibleTokenBalance, FungibleTokenBalance) {
     self.distribute();
 
     let mut token_rps = self.nfts_rps.get(token_id).unwrap();
@@ -206,9 +217,7 @@ impl Farm {
       rewards_map.insert(k.clone(), claimed);
     }
 
-    self.nfts_rps.insert(token_id, &token_rps);
-
-    rewards_map
+    (rewards_map, token_rps)
   }
 }
 
