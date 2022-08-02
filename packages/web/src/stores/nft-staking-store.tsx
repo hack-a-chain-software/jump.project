@@ -60,6 +60,23 @@ export interface StakingToken {
   account_id: string;
 }
 
+export interface TransactionObj {
+  receiverId: string;
+  functionCalls: FunctionCall[];
+}
+
+export interface FunctionCall {
+  methodName: string;
+  args: Args;
+  gas: string;
+  amount: string;
+}
+
+export interface TokenId {
+  type: string;
+  account_id: string;
+}
+
 interface CollectionContract extends Contract {
   nft_token: NearContractViewCall<{ token_id: string }, Token>;
   nft_metadata: NearContractViewCall<any, CollectionMetaResponse>;
@@ -84,6 +101,12 @@ interface NFTStakingContract extends Contract {
 export const useNftStaking = create<{
   loading: boolean;
   tokens: Token[];
+  getTransaction: (
+    receiver: string,
+    method: string,
+    args: any,
+    amount?: string
+  ) => TransactionObj;
   fetchUserTokens: (
     connection: WalletConnection,
     collection: string
@@ -98,11 +121,6 @@ export const useNftStaking = create<{
     tokens: string[],
     collection: string,
     rewards: any
-  ) => Promise<void>;
-  claimRewards: (
-    connection: WalletConnection,
-    tokens: string[],
-    collection: string
   ) => Promise<void>;
   getTokenStorage: (
     token: string,
@@ -192,6 +210,8 @@ export const useNftStaking = create<{
   },
 
   stake: async (connection, collection, tokenId) => {
+    const { getTransaction } = get();
+
     const contract = new Contract(
       connection.account(),
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -209,46 +229,40 @@ export const useNftStaking = create<{
       });
 
       if (!stakingStorage || stakingStorage?.available < "0.10") {
-        transactions.push({
-          receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            import.meta.env.VITE_NFT_STAKING_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection?.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: connection?.getAccountId(),
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
     } catch (e) {
       console.warn(e);
     }
 
-    transactions.push({
-      receiverId: collection,
-      functionCalls: [
-        {
-          methodName: "nft_transfer_call",
-          args: {
-            receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-            token_id: tokenId,
-            approval_id: null,
-            memo: null,
-            msg: JSON.stringify({
-              type: "Stake",
-            }),
-          },
-        },
-      ],
-    });
+    transactions.push(
+      getTransaction(collection, "nft_transfer_call", {
+        receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+        token_id: tokenId,
+        approval_id: null,
+        memo: null,
+        msg: JSON.stringify({
+          type: "Stake",
+        }),
+      })
+    );
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
   unstake: async (connection, tokens, collection, balance) => {
+    const { getTransaction } = get();
+
     const transactions: any = [];
 
     // for (const key in balance) {
@@ -259,92 +273,48 @@ export const useNftStaking = create<{
     //   const storage = await get().getTokenStorage(key, connection);
 
     //   if (!storage) {
-    //     transactions.push({
-    //       receiverId: key,
-    //       functionCalls: [
+    //     transactions.push(
+    //       getTransaction(
+    //         key,
+    //         "storage_deposit",
     //         {
-    //           methodName: "storage_deposit",
-    //           args: {
-    //             account_id: connection?.getAccountId(),
-    //             registration_only: false,
-    //           },
-    //           amount: "0.10",
+    //           account_id: connection?.getAccountId(),
+    //           registration_only: false,
     //         },
-    //       ],
-    //     });
+    //         "0.10",
+    //       ),
+    //     );
     //   }
 
-    //   // todo use get withdraw method
-    //   transactions.push({
-    //     receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-    //     functionCalls: [
+    //   transactions.push(
+    //     getTransaction(
+    //       import.meta.env.VITE_NFT_STAKING_CONTRACT,
+    //       "whitdraw",
     //       {
-    //         methodName: "whitdraw",
-    //         args: {
-    //           token_id: [
-    //             {
-    //               type: "whitdraw",
-    //               account_id: collection,
-    //             },
-    //             key,
-    //           ],
-    //         },
-    //         gas: NearConstants.AttachedGas,
+    //         token_id: [
+    //           {
+    //             type: "whitdraw",
+    //             account_id: collection,
+    //           },
+    //           key,
+    //         ],
     //       },
-    //     ],
-    //   });
+    //     ),
+    //   );
     // }
 
     tokens.forEach((item) => {
-      transactions.push({
-        receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-        functionCalls: [
-          {
-            methodName: "unstake",
-            args: {
-              token_id: [
-                {
-                  type: "NFTContract",
-                  account_id: collection,
-                },
-                item,
-              ],
+      transactions.push(
+        getTransaction(import.meta.env.VITE_NFT_STAKING_CONTRACT, "unstake", {
+          token_id: [
+            {
+              type: "NFTContract",
+              account_id: collection,
             },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
-    });
-
-    executeMultipleTransactions(transactions, connection as WalletConnection);
-  },
-
-  claimRewards: async (connection, tokens, collection) => {
-    const transactions: any = [];
-
-    tokens.forEach((item) => {
-      transactions.push({
-        receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-        functionCalls: [
-          {
-            methodName: "claim_reward",
-            args: {
-              collection: {
-                type: "NFTContract",
-                account_id: collection,
-              },
-              token_id: [
-                {
-                  type: "NFTContract",
-                  account_id: collection,
-                },
-                item,
-              ],
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            item,
+          ],
+        })
+      );
     });
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
@@ -363,5 +333,19 @@ export const useNftStaking = create<{
     } catch (e) {
       return;
     }
+  },
+
+  getTransaction: (receiver, method, args, amount = "1") => {
+    return {
+      receiverId: receiver,
+      functionCalls: [
+        {
+          args,
+          amount,
+          methodName: method,
+          gas: NearConstants.AttachedGas,
+        },
+      ],
+    };
   },
 }));
