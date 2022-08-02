@@ -274,24 +274,25 @@ export const useNftStaking = create<{
         });
       }
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-        functionCalls: [
-          {
-            methodName: "whitdraw",
-            args: {
-              token_id: [
-                {
-                  type: "whitdraw",
-                  account_id: collection,
-                },
-                key,
-              ],
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+      // todo use get withdraw method
+      // transactions.push({
+      //   receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      //   functionCalls: [
+      //     {
+      //       methodName: "whitdraw",
+      //       args: {
+      //         token_id: [
+      //           {
+      //             type: "whitdraw",
+      //             account_id: collection,
+      //           },
+      //           key,
+      //         ],
+      //       },
+      //       gas: NearConstants.AttachedGas,
+      //     },
+      //   ],
+      // });
     }
 
     tokens.forEach((item) => {
