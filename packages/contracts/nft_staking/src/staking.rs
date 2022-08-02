@@ -36,6 +36,13 @@ impl StakedNFT {
       balance,
     }
   }
+
+  pub fn update_balance(&mut self, rewards: FungibleTokenBalance) {
+    self.balance = rewards
+      .iter()
+      .map(|(k, v)| (k.clone(), v + self.balance.get(k).unwrap_or(&0)))
+      .collect();
+  }
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
@@ -132,8 +139,10 @@ impl StakingProgram {
   }
 
   pub fn claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
-    let staked_nft = self.view_unclaimed_rewards(token_id);
-
+    let rewards = self.farm.claim(token_id);
+    let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
+  
+    staked_nft.update_balance(rewards);
     self.staked_nfts.insert(token_id, &staked_nft);
 
     staked_nft
@@ -141,14 +150,10 @@ impl StakingProgram {
 
   // method replicates claim_rewards without writing to permanent storage
   pub fn view_unclaimed_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
-    let rewards = self.farm.claim(token_id);
+    let rewards = self.farm.view_unclaimed_rewards(token_id).0;
 
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
-    staked_nft.balance = rewards
-      .iter()
-      .map(|(k, v)| (k.clone(), v + staked_nft.balance.get(k).unwrap_or(&0)))
-      .collect();
-
+    staked_nft.update_balance(rewards);
     staked_nft
   }
 
