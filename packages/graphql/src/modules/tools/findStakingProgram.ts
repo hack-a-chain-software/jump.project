@@ -4,7 +4,7 @@ import { EnvVariables } from "@/env";
 import { NearQuery } from "@/types";
 import { providers } from "near-api-js";
 
-const provider = new providers.JsonRpcProvider(EnvVariables.rpcURL);
+const provider = new providers.JsonRpcProvider(EnvVariables.rpc_url);
 
 export interface StakingProgram {
   collection: Collection;
@@ -39,7 +39,7 @@ export async function findStakingProgram(
 
   const rawResult = await provider.query<NearQuery>({
     request_type: "call_function",
-    account_id: EnvVariables.nft_staking,
+    account_id: EnvVariables.nft_staking_contract,
     method_name: "view_staking_program",
     finality: "optimistic",
     args_base64: btoa(JSON.stringify(args)),

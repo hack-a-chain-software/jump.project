@@ -118,7 +118,7 @@ export function TokenAccordion({
                         " " +
                         symbol
                       }
-                      bottomText="Per Month"
+                      bottomText={`Total accumulated`}
                       key={"nft-staking-rewards" + i}
                     />
                   ))}
