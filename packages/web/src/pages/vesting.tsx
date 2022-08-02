@@ -1,4 +1,4 @@
-import { Stack, Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import { Stack, Flex, Skeleton, useColorModeValue } from "@chakra-ui/react";
 import {
   If,
   TopCard,
@@ -81,6 +81,14 @@ export const Vesting = () => {
     });
   }, [filter, vestings]);
 
+  const isLoading = useMemo(() => {
+    if (!isFullyConnected) {
+      return false;
+    }
+
+    return isEmpty(investorInfo);
+  }, [investorInfo, isFullyConnected]);
+
   return (
     <PageContainer>
       <TopCard
@@ -90,8 +98,14 @@ export const Vesting = () => {
         py
         content={
           <>
-            {!loading && (
-              <Flex className="space-x-[1.25rem]">
+            <Flex className="space-x-[1.25rem]">
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   title="Total Locked"
@@ -105,7 +119,15 @@ export const Vesting = () => {
                   }
                   bottomText="All amount locked"
                 />
+              </Skeleton>
 
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   title="Total Unlocked"
@@ -119,7 +141,15 @@ export const Vesting = () => {
                   }
                   bottomText="Unlocked amount"
                 />
+              </Skeleton>
 
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   title="Total Withdrawn"
@@ -133,8 +163,8 @@ export const Vesting = () => {
                   }
                   bottomText="Total quantity "
                 />
-              </Flex>
-            )}
+              </Skeleton>
+            </Flex>
           </>
         }
       />

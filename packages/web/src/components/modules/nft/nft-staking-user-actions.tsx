@@ -9,7 +9,6 @@ import { useNearContractsAndWallet } from "@/context/near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { GradientButton, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
-import { WalletConnection } from "near-api-js";
 
 export function NFTStakingUserActions(props: any) {
   const { id = "" } = useParams();
