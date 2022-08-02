@@ -34,7 +34,8 @@ export function NFTUnstakeModal({
             unstake(
               wallet as WalletConnection,
               selected.map((item) => item.token_id),
-              collection
+              collection,
+              selected[0].balance
             )
           }
           bg="white"

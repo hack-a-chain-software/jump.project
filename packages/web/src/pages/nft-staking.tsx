@@ -9,6 +9,7 @@ import {
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
+import { useMemo } from "react";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 const collectionImages = [
@@ -21,11 +22,17 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const { data, loading, error } = useQuery(
-    NftStakingProjectsConnectionDocument
-  );
+  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
-  const items = data?.nft_staking_projects?.data;
+  const items = useMemo(() => {
+    if (loading) {
+      return [...Array(5)];
+    }
+
+    return data?.nft_staking_projects?.data;
+  }, [loading]);
+
+  console.log(items);
 
   return (
     <PageContainer>
@@ -52,19 +59,21 @@ export const NFTStaking = () => {
 
       <If
         fallback={!loading && <Empty text="No collections available" />}
-        condition={!loading && !isEmpty(items)}
+        condition={!isEmpty(items)}
       >
         {items && (
           <Stack spacing="32px">
-            {items.map(({ collection_meta, collection_id, rewards }, index) => (
+            {items.map((staking, index) => (
               <NFTStakingCard
                 key={"nft-staking-collection" + index}
                 onClick={() =>
-                  navigate(`/nft-staking/${window.btoa(collection_id)}`)
+                  navigate(
+                    `/nft-staking/${window.btoa(staking?.collection_id)}`
+                  )
                 }
-                logo={collection_meta.image}
-                name={collection_meta.name}
-                rewards={rewards}
+                logo={staking?.collection_meta?.image}
+                name={staking?.collection_meta?.name}
+                rewards={staking?.rewards}
               />
             ))}
           </Stack>

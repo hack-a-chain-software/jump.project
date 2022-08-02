@@ -122,19 +122,6 @@ export function NFTStakingUserActions(props: any) {
                 >
                   Unstake All NFTs <WalletIcon />
                 </GradientButton>
-                <GradientButton
-                  onClick={() =>
-                    claimRewards(
-                      wallet as WalletConnection,
-                      tokens.map(({ token_id }) => token_id),
-                      collection
-                    )
-                  }
-                  bg={useColorModeValue("white", darkPurple)}
-                  justifyContent="space-between"
-                >
-                  Claim Pool Rewards <WalletIcon />
-                </GradientButton>
               </Stack>
             </Box>
           </Box>

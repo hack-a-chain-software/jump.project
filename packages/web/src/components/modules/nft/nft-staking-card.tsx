@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "../../../hooks/theme";
-import { ValueBox } from "../../shared";
+import { If, ValueBox } from "../../shared";
 import { formatNumber } from "@near/ts";
 import { StakingToken } from "@/stores/nft-staking-store";
 
@@ -57,6 +57,7 @@ export function NFTStakingCard(
               width="60px"
               height="60px"
               borderRadius={30}
+              endColor="rgba(255,255,255,0.3)"
               isLoaded={!!props.logo}
             >
               <Image src={props.logo} w="51px" h="60px" borderRadius={30} />
@@ -66,6 +67,7 @@ export function NFTStakingCard(
               minHeight="42px"
               borderRadius={12}
               isLoaded={!!props.name}
+              endColor="rgba(255,255,255,0.3)"
             >
               <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
                 {props.name}
@@ -77,6 +79,7 @@ export function NFTStakingCard(
               borderRadius={12}
               width="500px"
               isLoaded={!!props.name}
+              endColor="rgba(255,255,255,0.3)"
             >
               <Text
                 w="500px"
@@ -90,12 +93,23 @@ export function NFTStakingCard(
             </Skeleton>
           </Flex>
 
-          <Skeleton
-            width="100%"
-            height="114px"
-            borderRadius={20}
-            maxWidth="640px"
-            isLoaded={!!!isEmpty(props.rewards)}
+          <If
+            fallback={
+              <Flex gap={5}>
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton
+                    width="200px"
+                    height="114px"
+                    maxWidth="200px"
+                    borderRadius={20}
+                    endColor="rgba(255,255,255,0.3)"
+                    key={"nft-staking-card-reward=" + i}
+                    isLoaded={!!!isEmpty(props.rewards)}
+                  />
+                ))}
+              </Flex>
+            }
+            condition={!isEmpty(props.rewards)}
           >
             <Flex gap={5}>
               {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
@@ -110,7 +124,7 @@ export function NFTStakingCard(
                 />
               ))}
             </Flex>
-          </Skeleton>
+          </If>
         </Box>
       </Box>
     </Box>

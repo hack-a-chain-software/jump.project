@@ -96,13 +96,18 @@ export const useNftStaking = create<{
   unstake: (
     connection: WalletConnection,
     tokens: string[],
-    collection: string
+    collection: string,
+    rewards: any
   ) => Promise<void>;
   claimRewards: (
     connection: WalletConnection,
     tokens: string[],
     collection: string
   ) => Promise<void>;
+  getTokenStorage: (
+    token: string,
+    connection: WalletConnection
+  ) => Promise<any>;
 }>((set, get) => ({
   tokens: [],
   loading: false,
@@ -243,8 +248,51 @@ export const useNftStaking = create<{
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  unstake: async (connection, tokens, collection) => {
+  unstake: async (connection, tokens, collection, balance) => {
     const transactions: any = [];
+
+    for (const key in balance) {
+      if (!balance[key]) {
+        continue;
+      }
+
+      const storage = await get().getTokenStorage(key, connection);
+
+      if (!storage) {
+        transactions.push({
+          receiverId: key,
+          functionCalls: [
+            {
+              methodName: "storage_deposit",
+              args: {
+                account_id: connection?.getAccountId(),
+                registration_only: false,
+              },
+              amount: "0.10",
+            },
+          ],
+        });
+      }
+
+      transactions.push({
+        receiverId: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+        functionCalls: [
+          {
+            methodName: "whitdraw",
+            args: {
+              token_id: [
+                {
+                  type: "whitdraw",
+                  account_id: collection,
+                },
+                key,
+              ],
+            },
+            gas: NearConstants.AttachedGas,
+          },
+        ],
+      });
+    }
 
     tokens.forEach((item) => {
       transactions.push({
@@ -299,5 +347,20 @@ export const useNftStaking = create<{
     });
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
+  },
+
+  getTokenStorage: async (token, connection) => {
+    const contract = new Contract(connection.account(), token, {
+      viewMethods: [],
+      changeMethods: [],
+    }) as NFTStakingContract;
+
+    try {
+      return await contract?.storage_balance_of({
+        account_id: connection?.getAccountId(),
+      });
+    } catch (e) {
+      return;
+    }
   },
 }));
