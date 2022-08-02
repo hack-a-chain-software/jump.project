@@ -36,6 +36,13 @@ impl StakedNFT {
       balance,
     }
   }
+
+  pub fn update_balance(&mut self, rewards: FungibleTokenBalance) {
+    self.balance = rewards
+      .iter()
+      .map(|(k, v)| (k.clone(), v + self.balance.get(k).unwrap_or(&0)))
+      .collect();
+  }
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
@@ -122,7 +129,10 @@ impl StakingProgram {
     let staked_nft = self.staked_nfts.get(token_id).unwrap();
 
     self.staked_nfts.remove(token_id);
-    self.nfts_by_owner.get(owner_id).unwrap().remove(token_id);
+    let mut nfts_by_owner_set = self.nfts_by_owner.get(owner_id).unwrap();
+    nfts_by_owner_set.remove(token_id);
+    self.nfts_by_owner.insert(owner_id, &nfts_by_owner_set);
+
     self.farm.nfts_rps.remove(token_id);
 
     staked_nft
@@ -130,16 +140,20 @@ impl StakingProgram {
 
   pub fn claim_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
     let rewards = self.farm.claim(token_id);
-
     let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
-    staked_nft.balance = staked_nft
-      .balance
-      .iter()
-      .map(|(k, v)| (k.clone(), v + *rewards.get(k).unwrap_or(&0)))
-      .collect();
-
+  
+    staked_nft.update_balance(rewards);
     self.staked_nfts.insert(token_id, &staked_nft);
 
+    staked_nft
+  }
+
+  // method replicates claim_rewards without writing to permanent storage
+  pub fn view_unclaimed_rewards(&mut self, token_id: &NonFungibleTokenID) -> StakedNFT {
+    let rewards = self.farm.view_unclaimed_rewards(token_id).0;
+
+    let mut staked_nft = self.staked_nfts.get(token_id).unwrap();
+    staked_nft.update_balance(rewards);
     staked_nft
   }
 
@@ -241,23 +255,30 @@ mod tests {
     [Farm::new(collection, rps, 1)]
   }
 
-  #[test]
-  fn test_stake_nft() {
+  fn get_staking_program() -> StakingProgram {
     let [farm] = get_farms();
-    let [collection] = get_collections();
-    let [owner_id, _] = get_accounts();
-    let [_, _, token_id] = get_token_ids();
 
-    let mut staking_program = StakingProgram::new(
+    StakingProgram::new(
       farm,
-      collection.clone(),
-      owner_id.clone(),
-      token_id,
+      get_collections()[0].clone(),
+      get_accounts()[0].clone(),
+      get_token_ids()[2].clone(),
       5,
       DENOM / 20,
-    );
+    )
+  }
 
-    let nft_id = (collection, "#1".to_string());
+  fn get_nft_id() -> [NonFungibleTokenID; 1] {
+    let [collection] = get_collections();
+
+    [(collection.clone(), "#1".to_string())]
+  }
+
+  #[test]
+  fn test_stake_nft() {
+    let [owner_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let nft_id = get_nft_id()[0].clone();
 
     staking_program.stake_nft(nft_id.clone(), owner_id.clone());
 
@@ -271,5 +292,18 @@ mod tests {
       staking_program.staked_nfts.get(&nft_id).unwrap().token_id,
       nft_id,
     );
+  }
+
+  #[test]
+  fn test_claim_rewards_empty_balance() {
+    let [owner_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let nft_id = get_nft_id()[0].clone();
+
+    let old_nft = staking_program.stake_nft(nft_id.clone(), owner_id);
+    let new_nft = staking_program.claim_rewards(&nft_id);
+
+    assert_eq!(old_nft.balance, HashMap::new());
+    assert_eq!(new_nft.balance.len(), 3);
   }
 }

@@ -364,8 +364,7 @@ mod tests {
           assert_eq!(serde_blob["version"], "1.0.0");
           assert_eq!(serde_blob["event"], "project_withdraw_listing");
 
-          let data: serde_json::Value =
-            serde_blob["data"][0].clone();
+          let data: serde_json::Value = serde_blob["data"][0].clone();
           assert_eq!(data["listing_id"], "0");
           assert_eq!(data["project_status"], json!(listing.status));
 
@@ -494,8 +493,7 @@ mod tests {
           assert_eq!(serde_blob["version"], "1.0.0");
           assert_eq!(serde_blob["event"], "investor_withdraw_allocations");
 
-          let data: serde_json::Value =
-            serde_blob["data"][0].clone();
+          let data: serde_json::Value = serde_blob["data"][0].clone();
           assert_eq!(data["listing_id"], "0");
           assert_eq!(
             data["project_tokens_withdrawn"],
