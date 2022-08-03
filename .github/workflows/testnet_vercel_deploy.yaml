@@ -2,16 +2,17 @@ name: Tertnet Vercel Deploy
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_TESTNET_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_TESTNET_PROJECT_ID }}
-on:
-  pull_request:
-    types:
-      - closed
-    branches:
-      - testnet-version
+  VITE_GRAPHQL_API_URI: https://jacksondev.xyz/
+on: pull_request
+  # pull_request:
+    # types:
+    #   - closed
+    # branches:
+    #   - testnet-version
 
 jobs:
   vercel_deploy:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,10 +21,19 @@ jobs:
         run: npm install --global vercel@canary
 
       - name: Set Testnet environemnt variables
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
-      
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+        run: node .github/workflows/set_tetnet_environments.js
 
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      - name: Echo envcs
+        run: |
+          echo $VITE_GRAPHQL_API_URI &&
+          echo $VITE_BASE_TOKEN &&
+          echo $VITE_LOCKED_CONTRACT &&
+          echo $VITE_STAKING_CONTRACT &&
+          echo $VITE_NFT_STAKING_CONTRACT &&
+          echo $VITE_JUMP_LAUNCHPAD_CONTRACT
+      
+      # - name: Build Project Artifacts
+      #   run: vercel build --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+
+      # - name: Deploy Project Artifacts to Vercel
+      #   run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
