@@ -19,21 +19,21 @@ jobs:
 
       - name: Install Vercel CLI
         run: npm install --global vercel@canary
-
-      - name: Set Testnet environemnt variables
-        run: node .github/workflows/set_tetnet_environments.js
-
-      - name: Echo envcs
-        run: |
-          echo $VITE_GRAPHQL_API_URI &&
-          echo $VITE_BASE_TOKEN &&
-          echo $VITE_LOCKED_CONTRACT &&
-          echo $VITE_STAKING_CONTRACT &&
-          echo $VITE_NFT_STAKING_CONTRACT &&
-          echo $VITE_JUMP_LAUNCHPAD_CONTRACT
       
-      # - name: Build Project Artifacts
-      #   run: vercel build --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      - name: Install Yarn Globally
+        run: npm install -g yarn
 
-      # - name: Deploy Project Artifacts to Vercel
-      #   run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      - name: Installing Dependencies
+        run: yarn
+
+      - name: Set Testnet environment variables
+        run: yarn run setup:testnet:web
+      
+      - name: Pull vercel setup
+        run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
