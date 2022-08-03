@@ -41,10 +41,6 @@ impl Contract {
     msg: String,
   ) -> PromiseOrValue<U128> {
     let token_id = env::predecessor_account_id();
-    assert!(
-      self.contract_treasury.contains_key(&token_id),
-      "Transfered token is not accepted by this contract"
-    );
 
     self.match_ft_route(FTRoutePayload {
       sender_id,

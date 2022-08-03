@@ -1,61 +1,12 @@
-use std::collections::HashMap;
-
-use near_sdk::{
-  json_types::{U128, U64},
-  near_bindgen, AccountId,
-};
-use serde::{Deserialize, Serialize};
+use near_sdk::{near_bindgen, AccountId};
 
 use crate::{
-  farm::{Farm, RewardsDistribution},
-  staking::StakingProgram,
-  types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
+  staking::StakedNFT,
+  types::{NFTCollection, NonFungibleTokenID},
   Contract, ContractExt,
 };
 
-#[derive(Serialize)]
-pub struct SerializableStakingProgram {
-  pub collection: NFTCollection,
-  pub collection_owner: AccountId,
-  pub collection_treasury: FungibleTokenBalance,
-  pub token_address: AccountId,
-
-  pub farm: SerializableFarm,
-  pub min_staking_period: U64,
-  pub early_withdraw_penalty: U128,
-}
-
-impl From<StakingProgram> for SerializableStakingProgram {
-  fn from(staking_program: StakingProgram) -> Self {
-    Self {
-      collection: staking_program.collection,
-      collection_owner: staking_program.collection_owner,
-      early_withdraw_penalty: U128(staking_program.early_withdraw_penalty),
-      min_staking_period: U64(staking_program.min_staking_period),
-      token_address: staking_program.token_address,
-      collection_treasury: staking_program.collection_treasury,
-
-      farm: staking_program.farm.into(),
-    }
-  }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct SerializableFarm {
-  pub round_interval: u32,
-  pub start_at: u32,
-  pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
-}
-
-impl From<Farm> for SerializableFarm {
-  fn from(farm: Farm) -> Self {
-    Self {
-      round_interval: farm.round_interval,
-      start_at: farm.start_at,
-      distributions: farm.distributions,
-    }
-  }
-}
+use crate::types::{SerializableFungibleTokenBalance, SerializableStakingProgram};
 
 #[near_bindgen]
 impl Contract {
@@ -67,26 +18,19 @@ impl Contract {
     self.staking_programs.get(&collection).map(From::from)
   }
 
-  pub fn view_staked_nft_balance(&self, nft_id: NonFungibleTokenID) -> FungibleTokenBalance {
+  pub fn view_staked_nft_balance(
+    &self,
+    nft_id: NonFungibleTokenID,
+  ) -> SerializableFungibleTokenBalance {
     let collection = &nft_id.0;
-    let staking_program = self.staking_programs.get(collection).unwrap();
+    let mut staking_program = self.staking_programs.get(collection).unwrap();
 
-    let staked_nft = staking_program.staked_nfts.get(&nft_id).unwrap();
+    let staked_nft = staking_program.view_unclaimed_rewards(&nft_id);
 
-    let unclaimed_token_balance = staking_program.farm.unclaimed_token_balance(&nft_id);
-
-    let mut balance = HashMap::new();
-    for (ft_id, &claimed) in staked_nft.balance.iter() {
-      let unclaimed = *unclaimed_token_balance.get(ft_id).unwrap();
-
-      balance.insert(ft_id.clone(), claimed + unclaimed);
-    }
-
-    balance
+    SerializableFungibleTokenBalance(staked_nft.balance)
   }
 
   //retornar saldos do contract treasury
-
   pub fn view_guardians(&self, from_index: Option<u16>, limit: Option<u16>) -> Vec<String> {
     let from_index: usize = from_index.map(From::from).unwrap_or(0);
     let limit: usize = limit.map(From::from).unwrap_or(usize::MAX);
@@ -119,15 +63,36 @@ impl Contract {
         .take(limit)
         .map(|(_, id)| id)
         .collect(),
-      Some(owner_id) => staking_program
-        .nfts_by_owner
-        .get(&owner_id)
-        .unwrap()
-        .iter()
-        .skip(from_index as usize)
-        .take(limit)
-        .map(|(_, id)| id)
-        .collect(),
+      Some(owner_id) => match staking_program.nfts_by_owner.get(&owner_id) {
+        Some(nfts) => nfts
+          .iter()
+          .skip(from_index as usize)
+          .take(limit)
+          .map(|(_, id)| id)
+          .collect(),
+        None => vec![],
+      },
     }
+  }
+
+  pub fn view_staked_nft(&self, nft_id: NonFungibleTokenID) -> Option<StakedNFT> {
+    let collection = &nft_id.0;
+
+    self
+      .staking_programs
+      .get(collection)
+      .and_then(|staking_program| staking_program.staked_nfts.get(&nft_id))
+  }
+
+  pub fn view_inner_balance(
+    &self,
+    collection: NFTCollection,
+    account_id: AccountId,
+  ) -> SerializableFungibleTokenBalance {
+    let staking_program = self.staking_programs.get(&collection).unwrap();
+
+    let balance = staking_program.stakers_balances.get(&account_id).unwrap();
+
+    SerializableFungibleTokenBalance(balance)
   }
 }

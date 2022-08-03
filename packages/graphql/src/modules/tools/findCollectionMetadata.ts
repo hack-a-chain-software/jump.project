@@ -4,7 +4,7 @@ import { EnvVariables } from "@/env";
 import { NearQuery } from "@/types";
 import { providers } from "near-api-js";
 
-const provider = new providers.JsonRpcProvider(EnvVariables.rpcURL);
+const provider = new providers.JsonRpcProvider(EnvVariables.rpc_url);
 
 export interface CollectionMetaResponse {
   spec: string;

@@ -15,3 +15,4 @@ export * from "./back-button";
 export * from "./card";
 export * from "./toast";
 export * from "./progress-bar";
+export * from "./empty";

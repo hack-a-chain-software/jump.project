@@ -3,12 +3,9 @@ import { PropsWithChildren } from "react";
 import { motion } from "framer-motion";
 import { LoadingIndicator } from "./loading-indicator";
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-interface Props extends PropsWithChildren<FlexProps> {
-  loading: boolean;
-}
-
-export const PageContainer = (props: Partial<Props>) => {
+export const PageContainer = (
+  props: PropsWithChildren<FlexProps> & { loading: boolean }
+) => {
   return (
     <Flex
       direction="column"

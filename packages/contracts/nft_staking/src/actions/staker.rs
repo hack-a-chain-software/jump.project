@@ -5,7 +5,7 @@ use crate::staking::{StakedNFT, StakingProgram};
 use crate::{events, types::*};
 use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise, PromiseResult};
+use near_sdk::{assert_one_yocto, env, is_promise_success, near_bindgen, AccountId, Promise};
 
 impl StakingProgram {
   #[inline]
@@ -48,19 +48,16 @@ impl Contract {
     staked_timestamp: u64,
     balance: FungibleTokenBalance,
   ) {
-    assert_eq!(env::predecessor_account_id(), env::current_account_id()); // idk if this is redundant with private
+    if is_promise_success() {
+      events::unstake_nft(&token_id, balance);
+    } else {
+      let collection = token_id.0.clone();
 
-    match env::promise_result(0) {
-      PromiseResult::NotReady => env::abort(),
-      PromiseResult::Successful(_) => events::unstake_nft(&token_id, balance),
-      PromiseResult::Failed => {
-        let collection = token_id.0.clone();
+      let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp);
+      let mut staking_program = self.staking_programs.get(&collection).unwrap();
+      staking_program.insert_staked_nft(&staked_nft);
 
-        let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp);
-        let mut staking_program = self.staking_programs.get(&collection).unwrap();
-        staking_program.insert_staked_nft(&staked_nft);
-        self.staking_programs.insert(&collection, &staking_program);
-      }
+      self.staking_programs.insert(&collection, &staking_program);
     }
   }
 
@@ -99,6 +96,25 @@ impl Contract {
     }
   }
 
+  #[private]
+  pub fn compensate_withdraw_reward(
+    &mut self,
+    collection: NFTCollection,
+    token_id: FungibleTokenID,
+    owner_id: AccountId,
+    amount: U128,
+  ) {
+    if is_promise_success() {
+      events::withdraw_reward(collection, owner_id, token_id, amount);
+    } else {
+      let mut staking_program = self.staking_programs.get(&collection).unwrap();
+
+      staking_program.outer_deposit(&owner_id, &token_id, amount.0);
+
+      self.staking_programs.insert(&collection, &staking_program);
+    }
+  }
+
   #[payable]
   pub fn withdraw_reward(
     &mut self,
@@ -116,16 +132,29 @@ impl Contract {
     let amount = amount.map(|x| x.0).unwrap_or(available);
     assert!(amount <= available, "");
 
+    self
+      .staking_programs
+      .insert(&collection, &staking_program)
+      .unwrap();
     self.track_storage_usage(&caller_id, initial_storage);
 
-    ext_fungible_token::ext(token_id)
+    ext_fungible_token::ext(token_id.clone())
       .with_static_gas(FT_TRANSFER_GAS)
       .with_attached_deposit(1)
       .ft_transfer(caller_id.clone(), U128(amount), None)
+      .then(
+        ext_self::ext(env::current_account_id())
+          .with_static_gas(COMPENSATE_GAS)
+          .compensate_withdraw_reward(collection, token_id, caller_id, U128(amount)),
+      )
   }
 
   #[payable]
-  pub fn claim_reward(&mut self, collection: NFTCollection, token_id: NonFungibleTokenID) {
+  pub fn claim_reward(
+    &mut self,
+    collection: NFTCollection,
+    token_id: NonFungibleTokenID,
+  ) -> FungibleTokenBalance {
     assert_one_yocto();
 
     let initial_storage = env::storage_usage();
@@ -133,10 +162,12 @@ impl Contract {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
     staking_program.assert_is_token_owner(&caller_id, &token_id);
 
-    staking_program.claim_rewards(&token_id);
+    let balance = staking_program.inner_withdraw(&token_id);
+
     self.staking_programs.insert(&collection, &staking_program);
 
     self.track_storage_usage(&caller_id, initial_storage);
-  }
 
+    balance
+  }
 }

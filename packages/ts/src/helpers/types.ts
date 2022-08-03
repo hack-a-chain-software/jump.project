@@ -17,7 +17,7 @@ export type NearMutableContractCall<Params extends Record<string, any>> = (
 
 export type NearContractViewCall<
   Params extends Record<string, any>,
-  Data extends Record<string, any>
+  Data extends unknown
 > = (params?: Params) => Promise<Data>;
 
 export type FtOnTransfer = NearMutableContractCall<{

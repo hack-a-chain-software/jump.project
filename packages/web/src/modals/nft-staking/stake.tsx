@@ -1,12 +1,14 @@
 import { useState } from "react";
 import isEmpty from "lodash/isEmpty";
-import { getNear } from "@/hooks/near";
+import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
+import { useNearContractsAndWallet } from "@/context/near";
 import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
+import { WalletConnection } from "near-api-js";
 
-export function StakeModal({
+export function NFTStakeModal({
   isOpen = false,
   onClose = () => {},
   collection,
@@ -17,7 +19,7 @@ export function StakeModal({
 }) {
   const [selected, setSelected] = useState("");
 
-  const { user } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
   const { stake } = useNftStaking();
 
@@ -26,15 +28,15 @@ export function StakeModal({
       return;
     }
 
-    stake(collection, selected);
+    stake(wallet as WalletConnection, collection, selected);
   };
 
   const { data, loading } = useNearQuery("nft_tokens_for_owner", {
     contract: collection,
     variables: {
-      account_id: user.address || "",
+      account_id: wallet?.getAccountId(),
     },
-    skip: !user.isConnected,
+    skip: !isFullyConnected,
   });
 
   return (
@@ -85,46 +87,49 @@ export function StakeModal({
               maxHeight="370px"
               overflow="auto"
             >
-              {data.map(({ metadata, token_id }, i) => (
-                <Flex
-                  key={"nft-stake-token" + i}
-                  borderRadius="20px"
-                  cursor="pointer"
-                  width="100%"
-                  height="auto"
-                  padding="3px"
-                  position="relative"
-                  onClick={() =>
-                    setSelected(selected === token_id ? "" : token_id)
-                  }
-                  background={selected === token_id ? "#761BA0" : "transparent"}
-                >
-                  <Image
-                    width="100%"
-                    height="100%"
+              {data &&
+                data.map(({ metadata, token_id }, i) => (
+                  <Flex
+                    key={"nft-stake-token" + i}
                     borderRadius="20px"
-                    className="aspect-square"
-                    src={metadata.media}
-                  />
-
-                  {selected === token_id && (
-                    <Flex
-                      top="0"
-                      left="0"
-                      right="0"
-                      bottom="0"
+                    cursor="pointer"
+                    width="100%"
+                    height="auto"
+                    padding="3px"
+                    position="relative"
+                    onClick={() =>
+                      setSelected(selected === token_id ? "" : token_id)
+                    }
+                    background={
+                      selected === token_id ? "#761BA0" : "transparent"
+                    }
+                  >
+                    <Image
+                      width="100%"
+                      height="100%"
                       borderRadius="20px"
-                      alignItems="center"
-                      position="absolute"
-                      justifyContent="center"
-                      backdropFilter="blur(3px)"
-                      background="rgba(0, 0, 0, .1)"
-                    >
-                      <CheckIcon color="#761BA0" height="48px" width="48px" />
-                    </Flex>
-                  )}
-                </Flex>
-              ))}
+                      className="aspect-square"
+                      src={metadata.media}
+                    />
+
+                    {selected === token_id && (
+                      <Flex
+                        top="0"
+                        left="0"
+                        right="0"
+                        bottom="0"
+                        borderRadius="20px"
+                        alignItems="center"
+                        position="absolute"
+                        justifyContent="center"
+                        backdropFilter="blur(3px)"
+                        background="rgba(0, 0, 0, .1)"
+                      >
+                        <CheckIcon color="#761BA0" height="48px" width="48px" />
+                      </Flex>
+                    )}
+                  </Flex>
+                ))}
             </Grid>
           </If>
         )}

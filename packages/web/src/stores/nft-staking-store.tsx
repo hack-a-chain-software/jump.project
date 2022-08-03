@@ -1,161 +1,314 @@
 import create from "zustand";
-import toast from "react-hot-toast";
-import isEmpty from "lodash/isEmpty";
 import { Contract, WalletConnection } from "near-api-js";
-import { Transaction, executeMultipleTransactions } from "@/tools";
-import { NearMutableContractCall } from "@near/ts";
-import { NearConstants } from "@/constants";
+import {
+  getTransactionObject,
+  Transaction,
+  executeMultipleTransactions,
+} from "@/tools";
+import { NearContractViewCall } from "@near/ts";
+
+export interface Token {
+  balance?: any;
+  id?: string;
+  token_id: string;
+  owner_id: string;
+  stakedAt?: number;
+  metadata: Metadata;
+  approved_account_ids: ApprovedAccountIds;
+}
+
+export interface StakedNFT {
+  token_id: [TokenId, string];
+  owner_id: string;
+  staked_timestamp: number;
+}
+
+export interface TokenId {
+  type: string;
+  account_id: string;
+}
+
+export interface Metadata {
+  title: string;
+  description: any;
+  media: string;
+  media_hash: any;
+  copies: number;
+  issued_at: any;
+  expires_at: any;
+  starts_at: any;
+  updated_at: any;
+  extra: any;
+  reference: any;
+  reference_hash: any;
+}
+
+export interface ApprovedAccountIds {}
+
+export interface CollectionMetaResponse {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  base_uri: string;
+}
+
+export interface StakingToken {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  decimals: number;
+  perMonth: number;
+  account_id: string;
+}
+
+export interface TokenId {
+  type: string;
+  account_id: string;
+}
+
+interface CollectionContract extends Contract {
+  nft_token: NearContractViewCall<{ token_id: string }, Token>;
+  nft_metadata: NearContractViewCall<any, CollectionMetaResponse>;
+}
 
 interface NFTStakingContract extends Contract {
-  storage_balance_of: NearMutableContractCall<{ account_id: string }>;
+  storage_balance_of: NearContractViewCall<{ account_id: string }, any>;
+  view_staked: NearContractViewCall<
+    { account_id: string; collection: { account_id: string; type: string } },
+    string[]
+  >;
+  view_staked_nft_balance: NearContractViewCall<
+    { nft_id: [{ type: string; account_id: string }, string] },
+    any
+  >;
+  view_staked_nft: NearContractViewCall<
+    { nft_id: [{ type: string; account_id: string }, string] },
+    StakedNFT
+  >;
 }
 
 export const useNftStaking = create<{
-  contract: NFTStakingContract | null;
-  connection: WalletConnection | null;
-  validate: (tokens: Array<string>, message?: string) => void;
-  init: (connection: WalletConnection) => Promise<void>;
-  stake: (collection: any, tokenId: string) => Promise<void>;
-  unstake: (tokens: Array<string>, collection: string) => Promise<void>;
-  claimRewards: (tokens: Array<string>) => Promise<void>;
+  loading: boolean;
+  tokens: Token[];
+  fetchUserTokens: (
+    connection: WalletConnection,
+    collection: string
+  ) => Promise<void>;
+  stake: (
+    connection: WalletConnection,
+    collection: string,
+    tokenId: string
+  ) => Promise<void>;
+  unstake: (
+    connection: WalletConnection,
+    tokens: string[],
+    collection: string,
+    rewards: any
+  ) => Promise<void>;
+  getTokenStorage: (
+    token: string,
+    connection: WalletConnection
+  ) => Promise<any>;
 }>((set, get) => ({
-  contract: null,
-  connection: null,
+  tokens: [],
+  loading: false,
 
-  init: async (connection: WalletConnection) => {
+  fetchUserTokens: async (connection, collection) => {
+    set({
+      loading: true,
+    });
+
+    const stakingContract = new Contract(
+      connection.account(),
+      import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      {
+        viewMethods: [
+          "view_staked",
+          "view_guardians",
+          "view_staked_nft",
+          "view_staked_nft_balance",
+        ],
+        changeMethods: [],
+      }
+    ) as NFTStakingContract;
+
+    const collectionContract = new Contract(connection.account(), collection, {
+      viewMethods: ["nft_token"],
+      changeMethods: [],
+    }) as CollectionContract;
+
     try {
+      const staked = await stakingContract.view_staked({
+        account_id: connection.getAccountId(),
+        collection: {
+          type: "NFTContract",
+          account_id: collection,
+        },
+      });
+
+      const tokens: Token[] = [];
+
+      for (let i = 0; i < staked.length; i++) {
+        const balance = await stakingContract.view_staked_nft_balance({
+          nft_id: [
+            {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            staked[i],
+          ],
+        });
+
+        const { staked_timestamp } = await stakingContract.view_staked_nft({
+          nft_id: [
+            {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            staked[i],
+          ],
+        });
+
+        const token = await collectionContract.nft_token({
+          token_id: staked[i],
+        });
+
+        tokens.push({ ...token, balance, stakedAt: staked_timestamp });
+      }
+
       set({
-        connection: connection as WalletConnection,
-        contract: new Contract(
-          connection.account(),
-          import.meta.env.VITE_STAKING_CONTRACT,
-          {
-            viewMethods: ["storage_balance_of"],
-            changeMethods: ["storage_deposit"],
-          }
-        ) as NFTStakingContract,
+        tokens,
       });
     } catch (e) {
       console.warn(e);
+
+      set({
+        tokens: [],
+      });
+    } finally {
+      set({
+        loading: false,
+      });
     }
   },
 
-  stake: async (collection: string, tokenId: string) => {
-    const { contract, connection } = get();
-
+  stake: async (connection, collection, tokenId) => {
     const transactions: Transaction[] = [];
 
-    try {
-      const stakingStorage = await contract?.storage_balance_of(
-        {
-          account_id: connection?.getAccountId(),
-        },
-        NearConstants.AttachedGas,
-        NearConstants.OneYOctoNear
-      );
+    const stakingStorage = await get().getTokenStorage(
+      import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      connection
+    );
 
-      if (!stakingStorage || stakingStorage.total < "0.10") {
-        transactions.push({
-          receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-          functionCalls: [
-            {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection?.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
-            },
-          ],
-        });
-      }
-    } catch (e) {
-      console.warn(e);
+    if (!stakingStorage || stakingStorage?.available < "0.10") {
+      transactions.push(
+        getTransactionObject(
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "storage_deposit",
+          {
+            account_id: connection?.getAccountId(),
+            registration_only: false,
+          },
+          "0.25"
+        )
+      );
     }
 
-    transactions.push({
-      receiverId: collection,
-      functionCalls: [
-        {
-          methodName: "nft_transfer_call",
-          args: {
-            receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
-            token_id: tokenId,
-            approval_id: null,
-            memo: null,
-            msg: JSON.stringify({
-              type: "Stake",
-            }),
-          },
-        },
-      ],
-    });
+    transactions.push(
+      getTransactionObject(collection, "nft_transfer_call", {
+        receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+        token_id: tokenId,
+        approval_id: null,
+        memo: null,
+        msg: JSON.stringify({
+          type: "Stake",
+        }),
+      })
+    );
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  unstake: async (tokens: Array<string>, collection: string) => {
-    const { validate, connection } = get();
-
-    try {
-      validate(tokens);
-    } catch (e) {
-      console.warn(e);
-
-      return;
-    }
-
+  unstake: async (connection, tokens, collection, balance) => {
     const transactions: any = [];
 
     tokens.forEach((item) => {
-      transactions.push({
-        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransactionObject(
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "unstake",
           {
-            methodName: "unstake",
-            args: {
-              token_id: [
-                {
-                  type: "n_f_t_contract",
-                  account_id: collection,
-                },
-                item,
-              ],
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            token_id: [
+              {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              item,
+            ],
+          }
+        )
+      );
     });
+
+    for (const key in balance) {
+      if (!balance[key]) {
+        continue;
+      }
+
+      const storage = await get().getTokenStorage(key, connection);
+
+      if (!storage) {
+        transactions.push(
+          getTransactionObject(
+            key,
+            "storage_deposit",
+            {
+              account_id: connection?.getAccountId(),
+              registration_only: false,
+            },
+            "0.10"
+          )
+        );
+      }
+    }
+
+    for (const key in balance) {
+      if (!balance[key]) {
+        continue;
+      }
+
+      transactions.push(
+        getTransactionObject(
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "withdraw_reward",
+          {
+            collection: {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            token_id: key,
+          }
+        )
+      );
+    }
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
-  claimRewards: async (tokens: Array<string>) => {
-    //
-    const { validate } = get();
+  getTokenStorage: async (token, connection) => {
+    const contract = new Contract(connection.account(), token, {
+      viewMethods: ["storage_balance_of"],
+      changeMethods: [],
+    }) as NFTStakingContract;
 
     try {
-      validate(tokens, "You don't have rewards available");
+      return await contract?.storage_balance_of({
+        account_id: connection?.getAccountId(),
+      });
     } catch (e) {
-      console.warn(e);
-
       return;
-    }
-  },
-
-  validate: (
-    tokens: Array<string>,
-    message = "Ooops! Select tokens to continue"
-  ) => {
-    const { connection, contract } = get();
-
-    if (!connection || !contract) {
-      throw toast("connect wallet pls");
-    }
-
-    if (isEmpty(tokens)) {
-      throw toast(message);
     }
   },
 }));

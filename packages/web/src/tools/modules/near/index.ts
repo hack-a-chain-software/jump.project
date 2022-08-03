@@ -17,7 +17,7 @@ import {
 const { PublicKey } = utils;
 
 export const getGas = (gas?: string): BN =>
-  gas ? new BN(gas) : new BN("100000000000000");
+  gas ? new BN(gas) : new BN("300000000000000");
 
 export const getAmount = (amount?: string | undefined): BN => {
   const value = amount ? utils.format.parseNearAmount(amount) : "1";
@@ -98,4 +98,22 @@ export const getTransaction = async (
     actions,
     blockHash
   );
+};
+
+export const getTransactionObject = (
+  receiver,
+  method,
+  args,
+  amount?: string
+) => {
+  return {
+    receiverId: receiver,
+    functionCalls: [
+      {
+        args,
+        amount,
+        methodName: method,
+      },
+    ],
+  };
 };

@@ -8,6 +8,7 @@ import { WalletConnection } from "near-api-js";
 export function BuyFastPass({
   token,
   storage,
+  passCost,
   vestingId,
   totalAmount,
   acceleration,
@@ -20,6 +21,7 @@ export function BuyFastPass({
   acceleration: number;
   vestingId: string;
   totalAmount: number;
+  passCost: number;
   onClose: () => void;
 }) {
   const { wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
@@ -43,6 +45,7 @@ export function BuyFastPass({
               vestingId,
               storage,
               totalAmount,
+              passCost,
               wallet as WalletConnection
             )
           }
