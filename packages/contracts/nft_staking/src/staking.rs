@@ -188,9 +188,22 @@ impl StakingProgram {
     balance
   }
 
-  pub fn outer_withdraw(&mut self, staker_id: &AccountId, token_id: FungibleTokenID) -> u128 {
-    let mut balance = self.stakers_balances.get(staker_id).unwrap();
-    let amount = balance.insert(token_id, 0).unwrap_or(0);
+  pub fn outer_withdraw(
+    &mut self,
+    staker_id: &AccountId,
+    token_id: &FungibleTokenID,
+    amount: Option<u128>,
+  ) -> u128 {
+    let mut balance = self
+      .stakers_balances
+      .get(staker_id)
+      .unwrap_or_else(|| HashMap::new());
+
+    let available = balance.entry(token_id.clone()).or_insert(0);
+    let amount = amount.unwrap_or(*available);
+    assert!(amount <= *available);
+
+    *available -= amount;
 
     self.stakers_balances.insert(staker_id, &balance);
 
@@ -317,6 +330,67 @@ mod tests {
 
     assert_eq!(old_nft.balance, HashMap::new());
     assert_eq!(new_nft.balance.len(), 3);
+  }
+
+  #[test]
+  #[should_panic]
+  fn test_outer_withdraw_overdraw() {
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let amount = Some(100);
+
+    staking_program.outer_withdraw(&staker_id, &token_id, amount);
+  }
+
+  #[test]
+  fn test_outer_withdraw_empty() {
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let amount = None;
+
+    // balance_amount = 0
+
+    let withdrawn_amount = staking_program.outer_withdraw(&staker_id, &token_id, amount);
+
+    assert_eq!(withdrawn_amount, 0);
+
+    let balance_amount = *staking_program
+      .stakers_balances
+      .get(&staker_id)
+      .unwrap()
+      .get(&token_id)
+      .unwrap();
+
+    assert_eq!(balance_amount, 0);
+  }
+
+  #[test]
+  fn test_outer_withdraw_non_null() {
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let amount = Some(100);
+    let balance_amount = 200u128;
+
+    let mut balance = HashMap::new();
+    balance.insert(token_id.clone(), balance_amount);
+    staking_program
+      .stakers_balances
+      .insert(&staker_id, &balance);
+
+    let withdrawn_amount = staking_program.outer_withdraw(&staker_id, &token_id, amount);
+
+    assert_eq!(Some(withdrawn_amount), amount);
+    assert_eq!(
+      staking_program
+        .stakers_balances
+        .get(&staker_id)
+        .unwrap()
+        .get(&token_id),
+      Some(&(balance_amount - withdrawn_amount))
+    );
   }
 
   #[test]
