@@ -99,3 +99,16 @@ export const getTransaction = async (
     blockHash
   );
 };
+
+export const getTransactionObject = (receiver, method, args, amount = "1") => {
+  return {
+    receiverId: receiver,
+    functionCalls: [
+      {
+        args,
+        amount,
+        methodName: method,
+      },
+    ],
+  };
+};
