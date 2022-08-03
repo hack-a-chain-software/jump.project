@@ -42,6 +42,15 @@ pub struct UnstakeNftLog {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct WithdrawRewardLog {
+    pub collection: NftCollection,
+    pub owner_id: AccountId,
+    pub token_id: FungibleTokenId,
+    pub amount: U128,
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "event", content = "data")]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
@@ -50,6 +59,7 @@ pub enum NftStakingEvent {
     UpdateStakingProgram([UpdateStakingProgramLog; 1]),
     StakeNft([StakeNftLog; 1]),
     UnstakeNft([UnstakeNftLog; 1]),
+    WithdrawReward([WithdrawRewardLog; 1]),
 }
 
 #[async_trait]
@@ -164,6 +174,10 @@ impl Event for NftStakingEvent {
                 )
                 .await
                 .unwrap();
+            }
+
+            _ => {
+                println!("unimplemented!()");
             }
         }
     }
