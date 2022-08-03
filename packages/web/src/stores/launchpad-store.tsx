@@ -56,7 +56,7 @@ export const useLaunchpadStore = create<{
   connection: WalletConnection | null;
   init(connection: WalletConnection): Promise<void>;
   buyTickets(
-    amount: number,
+    amount: number | string,
     priceToken: string,
     listingId: string
   ): Promise<void>;

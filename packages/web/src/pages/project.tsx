@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import { useNearContractsAndWallet } from "@/context/near";
 import {
   useViewInvestorAllocation,
@@ -5,7 +6,7 @@ import {
 } from "@/hooks/modules/launchpad";
 import { Box, Flex, Image, Input, Text } from "@chakra-ui/react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   DiscordIcon,
@@ -21,12 +22,14 @@ import { ProgressBar } from "../components/shared/progress-bar";
 import { useTheme } from "../hooks/theme";
 import { useNearQuery } from "react-near";
 import { useTokenBalance } from "@/hooks/modules/token";
+import { useLaunchpadStore } from "@/stores/launchpad-store";
 
 /**
  * @description - Launchpad project details page
  * @name Project
  */
 export const Project = () => {
+  const [tickets, setTickets] = useState(0);
   const { id } = useParams();
   const { wallet, connectWallet, isFullyConnected } =
     useNearContractsAndWallet();
@@ -40,8 +43,6 @@ export const Project = () => {
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(wallet?.getAccountId(), id as string);
 
-  console.log(investorAllocation);
-
   const navigate = useNavigate();
 
   const { jumpGradient } = useTheme();
@@ -53,7 +54,7 @@ export const Project = () => {
     window.open(uri);
   };
 
-  console.log(data?.launchpad_project?.price_token);
+  const { buyTickets } = useLaunchpadStore();
 
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(
@@ -115,7 +116,29 @@ export const Project = () => {
     ]
   );
 
-  console.log(priceTokenBalance);
+  console.log();
+
+  const onJoinProject = useCallback(
+    (amount: number) => {
+      if (
+        typeof data?.launchpad_project?.listing_id &&
+        data?.launchpad_project?.price_token
+      ) {
+        buyTickets(
+          new BN(amount)
+            .mul(new BN(data.launchpad_project.token_allocation_price || 0))
+            .toString(),
+          data.launchpad_project.price_token,
+          data.launchpad_project.listing_id
+        );
+      }
+    },
+    [
+      data?.launchpad_project?.project_token,
+      data?.launchpad_project?.token_allocation_price,
+      1,
+    ]
+  );
 
   return (
     <PageContainer loading={isLoading}>
@@ -279,10 +302,12 @@ export const Project = () => {
                 {data?.launchpad_project?.price_token_info?.symbol}
               </Text>
               <Input
+                value={tickets}
+                type="number"
+                onChange={(e) => setTickets(Number(e.target.value))}
                 bg="white"
                 color="black"
                 placeholder="Tickets"
-                type="number"
                 variant="filled"
                 _hover={{ bg: "white" }}
                 _focus={{ bg: "white" }}
@@ -309,7 +334,7 @@ export const Project = () => {
               }
             >
               <Button
-                onClick={connectWallet}
+                onClick={() => onJoinProject(tickets)}
                 justifyContent="space-between"
                 w="100%"
               >
