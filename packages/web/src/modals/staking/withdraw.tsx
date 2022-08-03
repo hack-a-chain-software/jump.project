@@ -64,7 +64,7 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
           justifyContent="space-between"
           bg="white"
           color="black"
-          isLoading={isSubmitting}
+          isLoading={isSubmitting as any}
           disabled={isSubmitting}
           w="100%"
           onClick={() => handleSubmit()}

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { LoadingIndicator } from "./loading-indicator";
 
 export const PageContainer = (
-  props: PropsWithChildren<FlexProps> & { loading: boolean }
+  props: PropsWithChildren<FlexProps> & { pageLoading?: boolean }
 ) => {
   return (
     <Flex
@@ -15,7 +15,7 @@ export const PageContainer = (
       pt="150px"
       {...props}
     >
-      {props.loading ? (
+      {props.pageLoading ? (
         <Flex height="100%" alignItems="center" justifyContent="center">
           <LoadingIndicator />
         </Flex>

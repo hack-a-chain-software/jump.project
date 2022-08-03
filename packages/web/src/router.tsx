@@ -1,6 +1,4 @@
 import { Flex, Grid } from "@chakra-ui/react";
-import { ErrorBoundary } from "react-error-boundary";
-
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header, Nav } from "./components";
