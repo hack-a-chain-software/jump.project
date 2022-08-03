@@ -16,7 +16,8 @@
     "contract:lib:tests": "yarn workspace @near/contracts test:lib",
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "setup:testnet:web": "node .github/utilities/set_testnet_environments.js"
   },
   "husky": {
     "hooks": {

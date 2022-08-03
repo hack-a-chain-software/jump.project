@@ -19,6 +19,24 @@ const {
 // setup locked jump correctly
 
 async function testnetSetup() {
+  // set connection
+  const CREDENTIALS_DIR = "./.near-credentials";
+  const keyStore = new keyStores.UnencryptedFileSystemKeyStore(CREDENTIALS_DIR);
+
+  const config = {
+    networkId: "testnet",
+    nodeUrl: "https://rpc.testnet.near.org",
+    walletUrl: "https://wallet.testnet.near.org",
+    helperUrl: "https://helper.testnet.near.org",
+    explorerUrl: "https://explorer.testnet.near.org",
+    deps: { keyStore },
+  };
+
+  const near = await connect(config);
+
+  let last_block = await near.connection.provider.block({ finality: "final" });
+  let last_block_height = last_block.header.height;
+
   const random_prefix = crypto.randomBytes(20).toString("hex");
   const accountMap = {
     ownerAccount: random_prefix + "owner.testnet",
@@ -35,6 +53,7 @@ async function testnetSetup() {
     nftCollection3Account: random_prefix + "nft3.testnet",
     nftStaking: random_prefix + "nft_staking.testnet",
     launchpad: random_prefix + "launchpad.testnet",
+    last_block_height: last_block_height,
   };
 
   const storeData = (data, path) => {
@@ -46,22 +65,6 @@ async function testnetSetup() {
   };
   storeData(accountMap, "./account_map.json");
 
-  // set connection
-  const CREDENTIALS_DIR = "./.near-credentials";
-  const keyStore = new keyStores.UnencryptedFileSystemKeyStore(CREDENTIALS_DIR);
-
-  const config = {
-    networkId: "testnet",
-    nodeUrl: "https://rpc.testnet.near.org",
-    walletUrl: "https://wallet.testnet.near.org",
-    helperUrl: "https://helper.testnet.near.org",
-    explorerUrl: "https://explorer.testnet.near.org",
-    deps: { keyStore },
-  };
-
-  const near = await connect(config);
-
-  // create account function
   const {
     accountCreator: { UrlAccountCreator },
   } = nearAPI;
