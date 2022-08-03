@@ -1,4 +1,4 @@
-name: Tertnet Vercel Deploy
+name: Testnet Vercel Deploy
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_TESTNET_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_TESTNET_PROJECT_ID }}
