@@ -1,8 +1,18 @@
+import BN from "bn.js";
+import { LockIcon, WalletIcon } from "@/assets/svg";
+import { useNearContractsAndWallet } from "@/context/near";
+import {
+  useViewInvestor,
+  useViewLaunchpadSettings,
+  useViewTotalEstimatedInvestorAllowance,
+  useXTokenBalance,
+} from "@/hooks/modules/launchpad";
 import {
   Box,
   Flex,
   Image,
   Input,
+  Stack,
   Table,
   TableContainer,
   Tbody,
@@ -13,9 +23,11 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { useLaunchpadConenctionQuery } from "@near/apollo";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { CardEndWithJumpLogo } from "../assets/svg/cardEnd";
-import { Select, TopCard } from "../components";
+import { Button, Card, ProgressBar, Select, TopCard } from "../components";
+import { useLaunchpadStore } from "@/stores/launchpad-store";
 
 /**
  * @route - '/'
@@ -24,24 +36,169 @@ import { Select, TopCard } from "../components";
  */
 export function Home() {
   const navigate = useNavigate();
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+
+  const investor = useViewInvestor(wallet?.getAccountId());
+  const totalAllocations = useViewTotalEstimatedInvestorAllowance(
+    wallet?.getAccountId()
+  );
+  const { increaseMembership, init, decreaseMembership } = useLaunchpadStore();
+
+  const launchpadSettings = useViewLaunchpadSettings();
+
+  useEffect(() => {
+    if (wallet && isFullyConnected) {
+      init(wallet);
+    }
+  }, [wallet, isFullyConnected]);
+
+  const { refetch, data, loading, error } = useLaunchpadConenctionQuery({
+    variables: {
+      limit: 10,
+    },
+  });
+
+  const level = useMemo(() => {
+    const find = (launchpadSettings.data?.tiers_minimum_tokens || [])
+      .map((minTokens, i) => ({
+        minTokens,
+        level: i++,
+      }))
+      .filter((e) => {
+        return new BN(e.minTokens).lte(
+          new BN(investor.data?.staked_token || "0")
+        );
+      }) as any;
+
+    return find.length || 0;
+  }, [
+    launchpadSettings.data?.tiers_minimum_tokens,
+    investor.data?.staked_token,
+  ]);
+
+  const amountToNextLevel = useMemo(() => {
+    if (launchpadSettings?.data?.tiers_minimum_tokens[level]) {
+      return new BN(launchpadSettings?.data?.tiers_minimum_tokens[level])
+        .sub(new BN(investor?.data?.staked_token || "0"))
+        .toString();
+    }
+    return "0";
+  }, [
+    launchpadSettings.data?.tiers_minimum_tokens,
+    investor.data?.staked_token,
+  ]);
+
+  const upgradeLevel = () => {
+    const formattedLevel = level + 1;
+    increaseMembership(formattedLevel);
+  };
+
+  const downgradeLevel = () => {
+    const formattedLevel = level - 1;
+    decreaseMembership(formattedLevel);
+    increaseMembership(formattedLevel);
+  };
+
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
-      <TopCard
-        gradientText="Launchpad"
-        bigText="Stake. Help. Earn."
-        bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
-        jumpLogo
-      />
+      <Flex gap={5}>
+        <TopCard
+          gradientText="Launchpad"
+          bigText="Stake. Help. Earn."
+          bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
+          jumpLogo
+        >
+          <Box
+            bg="white"
+            p="10px"
+            px="15px"
+            minW="170px"
+            maxW="200px"
+            alignItems="center"
+            justifyContent="center"
+            display="flex"
+            borderRadius="30px"
+            mt="20px"
+            color="black"
+            fontWeight="semibold"
+          >
+            {!wallet
+              ? "Connect your wallet"
+              : investor.data
+              ? `${
+                  launchpadSettings.data?.tiers_entitled_allocations[
+                    !level ? 0 : level - 1
+                  ] || 0
+                } Tickets Available`
+              : `${totalAllocations.data || 0} Tickets Available`}
+          </Box>
+        </TopCard>
+        <Card flex={1}>
+          <Flex w="100%" h="100%" flexDirection="column">
+            <Text justifyContent="space-between" fontSize={22} fontWeight="900">
+              Member Area
+            </Text>
+            <Stack gap={1}>
+              <Flex direction="column" flex={1} mt={5}>
+                <Flex mb="5px" justifyContent="space-between" flex={1}>
+                  <Text fontSize={18} fontWeight="semibold">
+                    Level {level}
+                  </Text>
+                  <Text>Stake more {amountToNextLevel} to next Level</Text>
+                </Flex>
+              </Flex>
+              <Button
+                bg="transparent"
+                border="1px solid white"
+                color="white"
+                onClick={downgradeLevel}
+                justifyContent="space-between"
+                disabled={!level}
+              >
+                Downgrade Level
+                {!!level ? <WalletIcon /> : <LockIcon />}
+              </Button>
+              <Button
+                onClick={upgradeLevel}
+                disabled={
+                  (launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
+                  level
+                }
+                bg="white"
+                color="black"
+                justifyContent="space-between"
+              >
+                Upgrade Level
+                {(launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
+                level ? (
+                  <LockIcon />
+                ) : (
+                  <WalletIcon />
+                )}
+              </Button>
+            </Stack>
+          </Flex>
+        </Card>
+      </Flex>
 
       <Flex justifyContent="space-between">
-        <Select placeholder="Select the status">
-          <option value="option1">All</option>
-          <option value="option2">Open</option>
-          <option value="option3">Closed</option>
-        </Select>
+        <Flex gap="4">
+          <Select placeholder="Status">
+            <option value="ALL">All</option>
+            <option value="OPEN">Open</option>
+            <option value="CLOSED">Closed</option>
+          </Select>
+          <Select placeholder="Visibility">
+            <option value="PRIVATE">Private</option>
+            <option value="CLOSED">Closed</option>
+          </Select>
+          <Select placeholder="Mine Only">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </Select>
+        </Flex>
         <Flex maxW="330px" w="100%">
           <Input
-            // borderColor={useColorModeValue("black", "grey.600")}
             borderWidth="2px"
             h="60px"
             maxW="330px"
@@ -51,7 +208,6 @@ export function Home() {
             _placeholder={{
               color: useColorModeValue("black", "white"),
             }}
-            // borderColor="transparent"
             outline="none"
             px="20px"
           />
@@ -73,28 +229,29 @@ export function Home() {
             </Tr>
           </Thead>
           <Tbody>
-            <Tr
-              cursor="pointer"
-              onClick={() => navigate(`/launchpad/1`)}
-              h="50px"
-              alignItems="center"
-            >
-              <Td>
-                <Image
-                  borderRadius={100}
-                  w={30}
-                  h={30}
-                  src="https://img.raydium.io/icon/poLisWXnNRwC6oBu1vHiuKQzFjGL4XDSu4g9qjz9qVk.png"
-                />
-              </Td>
-              <Td>ATLAS</Td>
-              <Td>0.012 USDC</Td>
-              <Td>JUMP Pool</Td>
-              <Td>Lottery</Td>
-              <Td>30,000,000 ATLAS</Td>
-              <Td>6159.22%</Td>
-              <Td>Closed</Td>
-            </Tr>
+            {data?.launchpad_projects.data?.map((e) => (
+              <Tr
+                cursor="pointer"
+                onClick={() => navigate(`/launchpad/${e?.listing_id}`)}
+                key={e?.listing_id}
+              >
+                <Td>
+                  <Image
+                    borderRadius={100}
+                    w={30}
+                    h={30}
+                    src={e?.project_token_info?.image || ""}
+                  />
+                </Td>
+                <Td>{e?.project_token_info?.name}</Td>
+                <Td>{e?.fee_price_tokens}</Td>
+                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td>{e?.liquidity_pool_price_tokens}</Td>
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </TableContainer>
