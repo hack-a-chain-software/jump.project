@@ -50,7 +50,7 @@ export function VestingCard(props: Props & BoxProps) {
   const { withdraw, fastPass } = useVestingStore();
 
   const { data: storage } = useNearQuery("storage_balance_of", {
-    contract: "jump_token.testnet",
+    contract: import.meta.env.VITE_BASE_TOKEN,
     variables: {
       account_id: user.address,
     },

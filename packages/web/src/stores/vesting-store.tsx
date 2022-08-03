@@ -24,7 +24,7 @@ export const useVestingStore = create<{
 
     if (!storage || storage.total < "0.10") {
       transactions.push({
-        receiverId: "jump_token.testnet",
+        receiverId: import.meta.env.VITE_BASE_TOKEN,
         functionCalls: [
           {
             methodName: "storage_deposit",
@@ -63,7 +63,7 @@ export const useVestingStore = create<{
 
     if (!storage || storage.total < "0.10") {
       transactions.push({
-        receiverId: "jump_token.testnet",
+        receiverId: import.meta.env.VITE_BASE_TOKEN,
         functionCalls: [
           {
             methodName: "storage_deposit",
@@ -78,7 +78,7 @@ export const useVestingStore = create<{
     }
 
     transactions.push({
-      receiverId: "jump_token.testnet",
+      receiverId: import.meta.env.VITE_BASE_TOKEN,
       functionCalls: [
         {
           methodName: "ft_transfer_call",
