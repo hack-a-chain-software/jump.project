@@ -1,82 +1,96 @@
-import { Stack, Flex, Text } from "@chakra-ui/react";
+import { Stack, Flex, Skeleton, useColorModeValue } from "@chakra-ui/react";
 import {
   If,
   TopCard,
   VestingCard,
   PageContainer,
   ValueBox,
+  Select,
+  GradientButton,
+  Empty,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
-import { useNearQuery } from "react-near";
 import { useTheme } from "@/hooks/theme";
-import { getNear } from "@/hooks/near";
-
-import { addMilliseconds } from "date-fns";
-import { useMemo } from "react";
+import { useNearQuery } from "react-near";
+import { useNearContractsAndWallet } from "@/context/near";
+import { addMilliseconds, isBefore } from "date-fns";
+import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
+import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
+import { WalletConnection } from "near-api-js";
 
 export const Vesting = () => {
-  const { glassyWhiteOpaque } = useTheme();
+  const { glassyWhiteOpaque, darkPurple } = useTheme();
 
-  const { user } = getNear(import.meta.env.VITE_LOCKED_CONTRACT);
+  const { wallet, isFullyConnected } = useNearContractsAndWallet();
 
-  const { data: items = [], loading: vestingLoading } = useNearQuery(
-    "view_vesting_paginated",
-    {
-      contract: import.meta.env.VITE_LOCKED_CONTRACT,
-      variables: {
-        account_id: user.address,
-        initial_id: "0",
-        size: "1000",
-      },
-      skip: !user.isConnected,
-    }
-  );
+  const [filter, setFilter] = useState("");
 
-  const { data: token, loading: tokenLoading } = useNearQuery("ft_metadata", {
-    contract: import.meta.env.VITE_BASE_TOKEN,
-    skip: !user.isConnected,
+  const {
+    getInvestorInfo,
+    getVestings,
+    withdraw,
+    investorInfo,
+    vestings,
+    loading,
+  } = useVestingStore();
+
+  const { data: storage } = useNearQuery("storage_balance_of", {
+    contract: "jump_token.testnet",
+    variables: {
+      account_id: wallet?.getAccountId(),
+    },
+    skip: !isFullyConnected,
   });
 
-  const { data: contract, loading: contractLoading } = useNearQuery(
-    "view_contract_data",
-    {
-      skip: !user.isConnected,
-      contract: import.meta.env.VITE_LOCKED_CONTRACT,
-    }
-  );
-
-  const data = useMemo(() => {
-    if (vestingLoading && tokenLoading && contractLoading) {
-      return;
-    }
-
-    return items.reduce(
-      (prev, token) => {
-        prev.items.push(token);
-
-        prev.totalLocked +=
-          Number(token.locked_value) -
-          Number(token.available_to_withdraw) -
-          Number(token.withdrawn_tokens);
-        prev.totalUnlocked += Number(token.available_to_withdraw);
-        prev.totalWithdrawn += Number(token.withdrawn_tokens);
-
-        return prev;
-      },
-      {
-        token,
-        contract,
-        items: [],
-        totalLocked: 0,
-        totalUnlocked: 0,
-        totalWithdrawn: 0,
+  useEffect(() => {
+    (async () => {
+      if (!isFullyConnected) {
+        return;
       }
-    );
-  }, [vestingLoading, tokenLoading, contractLoading]);
+
+      await getVestings(wallet as WalletConnection);
+      await getInvestorInfo(wallet as WalletConnection);
+    })();
+  }, [isFullyConnected]);
+
+  const filtered = useMemo(() => {
+    if (!filter) {
+      return vestings;
+    }
+
+    return vestings.filter(({ start_timestamp, vesting_duration }) => {
+      const created = new Date(Number(start_timestamp) / 1000000);
+
+      const endAt = addMilliseconds(
+        created,
+        Number(vesting_duration) / 1000000
+      );
+
+      const today = new Date();
+
+      if (filter === "complete") {
+        return isBefore(endAt, today);
+      }
+
+      if (filter === "runing") {
+        return isBefore(today, endAt);
+      }
+
+      return false;
+    });
+  }, [filter, vestings]);
+
+  const isLoading = useMemo(() => {
+    if (!isFullyConnected) {
+      return false;
+    }
+
+    return isEmpty(investorInfo);
+  }, [investorInfo, isFullyConnected]);
 
   return (
-    <PageContainer loading={!data}>
+    <PageContainer>
       <TopCard
         gradientText="Locked Jump"
         bigText="Lock. Unlock. Withdraw."
@@ -84,147 +98,134 @@ export const Vesting = () => {
         py
         content={
           <>
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Locked"
-              value={
-                user.isConnected
-                  ? `${formatNumber(
-                      data?.totalLocked,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
-                  : "Connect Wallet  "
-              }
-              bottomText="All amount locked"
-            />
+            <Flex className="space-x-[1.25rem]">
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Locked"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalLocked || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="All amount locked"
+                />
+              </Skeleton>
 
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Unlocked"
-              value={
-                user.isConnected
-                  ? `${formatNumber(
-                      data?.totalUnlocked,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
-                  : "Connect Wallet"
-              }
-              bottomText="Unlocked amount"
-            />
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Unlocked"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalUnlocked || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Unlocked amount"
+                />
+              </Skeleton>
 
-            <ValueBox
-              borderColor={glassyWhiteOpaque}
-              title="Total Withdrawn"
-              value={
-                user.isConnected
-                  ? `${formatNumber(
-                      data?.totalWithdrawn,
-                      data?.token?.decimals
-                    )} ${data?.token?.symbol}`
-                  : "Connect Wallet"
-              }
-              bottomText="Total quantity "
-            />
+              <Skeleton
+                height="114px"
+                minWidth="240px"
+                borderRadius={20}
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Withdrawn"
+                  value={
+                    isFullyConnected
+                      ? `${formatNumber(
+                          investorInfo?.totalWithdrawn || 0,
+                          investorInfo?.token?.decimals || 0
+                        )} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Total quantity "
+                />
+              </Skeleton>
+            </Flex>
           </>
         }
       />
 
       <If
         fallback={
-          user.isConnected ? (
-            <Flex
-              width="100%"
-              height="100%"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Flex
-                marginX="auto"
-                height="100%"
-                alignItems="center"
-                justifyContent="center"
-                flexDirection="column"
-              >
-                <Text
-                  fontWeight="800"
-                  fontSize={30}
-                  letterSpacing="-0.03em"
-                  mb={3}
-                >
-                  Oops! No vestings available
-                </Text>
-              </Flex>
-            </Flex>
-          ) : (
-            <Flex
-              marginX="auto"
-              height="100%"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-            >
-              <Text
-                fontWeight="800"
-                fontSize={30}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                You must be logged in to view all vestings
-              </Text>
-
-              <Text
-                _hover={{
-                  opacity: 0.8,
-                }}
-                // onClick={() => toggleStakeModal()}
-                marginTop="-12px"
-                cursor="pointer"
-                color="#761BA0"
-                fontWeight="800"
-                fontSize={34}
-                letterSpacing="-0.03em"
-                mb={3}
-              >
-                Connect Wallet!
-              </Text>
-            </Flex>
-          )
-        }
-        condition={data && !isEmpty(items)}
-      >
-        {items && (
-          <Stack spacing="32px">
-            {items.map(
-              (
-                {
-                  fast_pass,
-                  locked_value,
-                  start_timestamp,
-                  vesting_duration,
-                  withdrawn_tokens,
-                  available_to_withdraw,
-                },
-                index
-              ) => (
-                <VestingCard
-                  id={String(index)}
-                  token={token}
-                  contract={contract}
-                  fast_pass={fast_pass}
-                  totalAmount={locked_value}
-                  key={"vesting-" + index}
-                  availableWidthdraw={available_to_withdraw}
-                  withdrawnTokens={withdrawn_tokens}
-                  createdAt={new Date(start_timestamp / 1000000)}
-                  endsAt={addMilliseconds(
-                    new Date(start_timestamp / 1000000),
-                    vesting_duration / 1000000
-                  )}
-                />
+          isFullyConnected
+            ? !loading && <Empty text="No vestings available" />
+            : loading && (
+                <Empty text="You must be logged in to view all vestings" />
               )
-            )}
-          </Stack>
-        )}
+        }
+        condition={!isEmpty(investorInfo) && !isEmpty(vestings)}
+      >
+        <>
+          <Flex justifyContent="space-between">
+            <Select
+              onChange={(event) => setFilter(event?.target?.value)}
+              placeholder="Filter"
+            >
+              <option value="completed">Completed</option>
+              <option value="runing">Runing</option>
+            </Select>
+
+            <Flex maxW="330px">
+              <GradientButton
+                width="150px"
+                onClick={() => {
+                  withdraw(
+                    vestings
+                      .filter(({ available_to_withdraw }) => {
+                        return (
+                          Number(available_to_withdraw) >
+                          Math.pow(10, investorInfo.token?.decimals || 0)
+                        );
+                      })
+                      .map(({ id }) => String(id)),
+                    storage,
+                    wallet as WalletConnection
+                  );
+                }}
+                justifyContent="center"
+                bg={useColorModeValue("white", darkPurple)}
+              >
+                Claim All
+              </GradientButton>
+            </Flex>
+          </Flex>
+          {vestings && (
+            <Stack spacing="32px">
+              {filtered.map((vesting, index) => (
+                <VestingCard
+                  {...vesting}
+                  token={investorInfo.token as Token}
+                  contractData={investorInfo.contractData as ContractData}
+                  key={"vesting-" + index}
+                />
+              ))}
+            </Stack>
+          )}
+        </>
       </If>
     </PageContainer>
   );

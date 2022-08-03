@@ -1,6 +1,6 @@
 import { CommonErrors } from "@/errors";
 import { TimestampQuery, GraphQLContext } from "@/types";
-import { XTokenRatio } from "@/types/x-token";
+import { XTokenRatio } from "../../types/x-token";
 import { QueryTypes, DataTypes } from "sequelize";
 
 export default {

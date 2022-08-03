@@ -2,47 +2,62 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
-import { Flex, Text, Grid, Image, useColorModeValue } from "@chakra-ui/react";
+import { formatNumber } from "@near/ts";
+import { Token, StakingToken } from "@/stores/nft-staking-store";
+import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
+import { useMemo } from "react";
+import { format, isBefore, addMilliseconds } from "date-fns";
 
-type Props = {
-  select: any;
-  selected: boolean;
-  token: {
-    nft_id: string;
-    staked_meta: {
-      media: string;
-      title?: string;
-      description?: string;
-    };
-    jumpRewards: string;
-    acovaRewards: string;
-    trpRewards: string;
-  };
-};
-
-export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
+export function TokenAccordion({
+  token,
+  rewards,
+  metadata,
+  token_id,
+  balance,
+  stakedAt,
+  minStakedPeriod,
+  penalty,
+}: Token & {
+  rewards: StakingToken[];
+  minStakedPeriod: string;
+  penalty: string;
+  token: string;
+}) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
+
+  const staked = useMemo(() => {
+    return new Date(Number(stakedAt) / 1000000);
+  }, [stakedAt, token_id]);
+
+  const endPenalty = useMemo(() => {
+    return addMilliseconds(staked, Number(minStakedPeriod) / 1000000);
+  }, [minStakedPeriod, token_id]);
+
+  const hasWithdrawPenalty = useMemo(() => {
+    const today = new Date();
+
+    return isBefore(today, endPenalty);
+  }, [staked, endPenalty, token_id]);
+
+  const withdrawPenalty = useMemo(() => {
+    return ` ${Number(penalty) / 10_000_000_000}%`;
+  }, [rewards, token_id, penalty]);
 
   return (
     <motion.div
       animate={{ opacity: 1 }}
       initial={{ opacity: 0 }}
       transition={{ duration: 0.55 }}
-      key={"nft-staking-token-accordion" + nft_id}
+      key={"nft-staking-token-accordion" + token_id}
     >
       <Flex width="100%" flexDirection="column">
         <Flex width="100%">
-          {/* <TokenCard
-            select={select}
-            selected={selected}
-            {...token}
-          /> */}
           <Flex width="309px" height="298px">
             <Image
               width="100%"
               height="100%"
               borderRadius="20px"
-              src={staked_meta.media}
+              src={metadata.media}
             />
           </Flex>
 
@@ -75,7 +90,7 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
                     fontWeight="700"
                     letterSpacing="-0.03em"
                   >
-                    {staked_meta.description}
+                    {metadata.description}
                   </Text>
 
                   <Text
@@ -84,39 +99,27 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
                     fontWeight="600"
                     lineHeight="29px"
                   >
-                    {staked_meta.title}
+                    {metadata.title}
                   </Text>
                 </Flex>
 
-                <Grid
-                  gap="15px"
-                  width="100%"
-                  gridTemplateColumns="repeat(auto-fill, 200px)"
-                >
-                  <ValueBox
-                    color="white"
-                    value="400 JUMP"
-                    title="JUMP Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-
-                  <ValueBox
-                    color="white"
-                    value="80 ACOVA"
-                    title="ACOVA Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-
-                  <ValueBox
-                    color="white"
-                    value="80 TRP"
-                    title="TRP Rewards"
-                    bottomText="Per Week"
-                    borderColor={glassyWhiteOpaque}
-                  />
-                </Grid>
+                <Flex gap="15px" width="100%">
+                  {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
+                    <ValueBox
+                      minWidth="250px"
+                      borderColor={glassyWhiteOpaque}
+                      title={name + " Rewards"}
+                      color="white"
+                      value={
+                        formatNumber(Number(balance[account_id]), decimals) +
+                        " " +
+                        symbol
+                      }
+                      bottomText={`Total accumulated`}
+                      key={"nft-staking-rewards" + i}
+                    />
+                  ))}
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
@@ -130,6 +133,7 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
           alignItems="center"
           padding="0px 32px"
           margin="22px 0px 36px 0px"
+          opacity={hasWithdrawPenalty ? 1 : 0}
         >
           <InfoIcon color="white" />
 
@@ -140,8 +144,9 @@ export function TokenAccordion({ token: { staked_meta, nft_id } }: Props) {
             lineHeight="24px"
             marginLeft="16px"
           >
-            This NFT is subject to an early withdraw penalty of 80%, wait until
-            22 April, 2022 - 10:00 AM GMT to withdraw
+            This NFT is subject to an early withdraw penalty of{" "}
+            {withdrawPenalty}, wait until
+            {format(endPenalty, " dd MMMM, yyyy - HH:mm a")}
           </Text>
         </Flex>
       </Flex>

@@ -12,6 +12,15 @@ query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
       }
       collection_owner_id
       token_address
+      rewards {
+        spec
+        name
+        symbol
+        icon
+        decimals
+        perMonth
+        account_id
+      }
     }
   }
 }
