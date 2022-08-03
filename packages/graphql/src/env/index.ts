@@ -10,5 +10,6 @@ export const EnvVariables = {
   server_port: process.env.SERVER_PORT || 4000,
   db_dialect: process.env.DB_DIALECT || "postgres",
   db_username: process.env.DB_USERNAME || "postgres",
+  nft_staking_contract: process.env.NFT_STAKING_CONTRACT,
   rpc_url: process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org",
 };

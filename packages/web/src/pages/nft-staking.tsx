@@ -1,8 +1,15 @@
-import { Image, Stack, Flex, Spinner, Text } from "@chakra-ui/react";
+import { Image, Stack } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { If, TopCard, NFTStakingCard, PageContainer } from "../components";
+import {
+  If,
+  TopCard,
+  NFTStakingCard,
+  PageContainer,
+  Empty,
+} from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
+import { useMemo } from "react";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 const collectionImages = [
@@ -17,10 +24,16 @@ export const NFTStaking = () => {
 
   const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
-  const items = data?.nft_staking_projects?.data;
+  const items = useMemo(() => {
+    if (loading) {
+      return [...Array(5)];
+    }
+
+    return data?.nft_staking_projects?.data;
+  }, [loading]);
 
   return (
-    <PageContainer loading={loading}>
+    <PageContainer>
       <TopCard
         gradientText="NFT"
         bigText="Staking"
@@ -42,39 +55,27 @@ export const NFTStaking = () => {
         }
       />
 
-      <If condition={!loading && !isEmpty(items)}>
+      <If
+        fallback={!loading && <Empty text="No collections available" />}
+        condition={!isEmpty(items)}
+      >
         {items && (
           <Stack spacing="32px">
-            {items.map(({ collection_meta, collection_id }, index) => (
+            {items.map((staking, index) => (
               <NFTStakingCard
                 key={"nft-staking-collection" + index}
                 onClick={() =>
-                  navigate(`/nft-staking/${window.btoa(collection_id)}`)
+                  navigate(
+                    `/nft-staking/${window.btoa(staking?.collection_id)}`
+                  )
                 }
-                collectionLogo={collection_meta.image}
-                collectionName={collection_meta.name}
-                // tokens={collection_treasury.map((item, index) => ({
-                //   name: rewards[index],
-                //   ammount: item,
-                // }))}
+                logo={staking?.collection_meta?.image}
+                name={staking?.collection_meta?.name}
+                rewards={staking?.rewards}
               />
             ))}
           </Stack>
         )}
-      </If>
-
-      <If condition={!loading && isEmpty(items)}>
-        <Flex width="100%" justifyContent="center" marginTop="120px">
-          <Text
-            color="#EB5757"
-            fontSize="20px"
-            fontWeight="400"
-            lineHeight="24px"
-            marginLeft="16px"
-          >
-            Oops! No collections available
-          </Text>
-        </Flex>
       </If>
     </PageContainer>
   );
