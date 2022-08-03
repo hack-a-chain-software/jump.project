@@ -43,6 +43,8 @@ export const Project = () => {
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(wallet?.getAccountId(), id as string);
 
+  console.log(investorAllocation.totalTokensBought);
+
   const navigate = useNavigate();
 
   const { jumpGradient } = useTheme();
@@ -54,7 +56,7 @@ export const Project = () => {
     window.open(uri);
   };
 
-  const { buyTickets } = useLaunchpadStore();
+  const { buyTickets, withdrawAllocations } = useLaunchpadStore();
 
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(
@@ -116,7 +118,17 @@ export const Project = () => {
     ]
   );
 
-  console.log();
+  const retrieveTokens = () => {
+    if (
+      typeof data?.launchpad_project?.listing_id &&
+      data?.launchpad_project?.price_token
+    ) {
+      withdrawAllocations(
+        data.launchpad_project.price_token,
+        data.launchpad_project.listing_id
+      );
+    }
+  };
 
   const onJoinProject = useCallback(
     (amount: number) => {
@@ -276,74 +288,92 @@ export const Project = () => {
           </Text>
           <Text>{data?.launchpad_project?.description_project}</Text>
         </Flex>
-        <Card flex={0.9}>
-          <Flex direction="column" flex={1}>
-            <GradientText
-              fontWeight="800"
-              letterSpacing="-0,03em"
-              fontSize={24}
-            >
-              Join Project
-            </GradientText>
-            <Text
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="50px"
-              marginTop="-20px"
-              as="h1"
-            >
-              {data?.launchpad_project?.project_name}
-            </Text>
-
-            <Flex my="30px" gap="5px" direction="column">
-              <Text>
-                Balance - {priceTokenBalance || "0"}{" "}
-                {data?.launchpad_project?.price_token_info?.symbol}
+        <Flex direction="column" flex={0.9}>
+          <Card flex={0.9}>
+            <Flex direction="column" flex={1}>
+              <GradientText
+                fontWeight="800"
+                letterSpacing="-0,03em"
+                fontSize={24}
+              >
+                Join Project
+              </GradientText>
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="50px"
+                marginTop="-20px"
+                as="h1"
+              >
+                {data?.launchpad_project?.project_name}
               </Text>
-              <Input
-                value={tickets}
-                type="number"
-                onChange={(e) => setTickets(Number(e.target.value))}
-                bg="white"
-                color="black"
-                placeholder="Tickets"
-                variant="filled"
-                _hover={{ bg: "white" }}
-                _focus={{ bg: "white" }}
-              />
-              <Text>
-                You have{" "}
-                {Number(totalAllowanceData) -
-                  Number(investorAllocation.allocationsBought)}{" "}
-                tickets available to deposit
-              </Text>
-            </Flex>
 
-            <If
-              condition={!!isFullyConnected}
-              fallback={
+              <Flex my="30px" gap="5px" direction="column">
+                <Text>
+                  Balance - {priceTokenBalance || "0"}{" "}
+                  {data?.launchpad_project?.price_token_info?.symbol}
+                </Text>
+                <Input
+                  value={tickets}
+                  type="number"
+                  onChange={(e) => setTickets(Number(e.target.value))}
+                  bg="white"
+                  color="black"
+                  placeholder="Tickets"
+                  variant="filled"
+                  _hover={{ bg: "white" }}
+                  _focus={{ bg: "white" }}
+                />
+                <Text>
+                  You have{" "}
+                  {Number(totalAllowanceData) -
+                    Number(investorAllocation.allocationsBought)}{" "}
+                  tickets available to deposit
+                </Text>
+              </Flex>
+
+              <If
+                condition={!!isFullyConnected}
+                fallback={
+                  <Button
+                    onClick={connectWallet}
+                    justifyContent="space-between"
+                    w="100%"
+                  >
+                    Connect Wallet
+                    <WalletIcon />
+                  </Button>
+                }
+              >
                 <Button
-                  onClick={connectWallet}
+                  onClick={() => onJoinProject(tickets)}
                   justifyContent="space-between"
                   w="100%"
                 >
-                  Connect Wallet
+                  Join Project
                   <WalletIcon />
                 </Button>
-              }
-            >
+              </If>
+            </Flex>
+          </Card>
+          <If
+            condition={new BN(investorAllocation.totalTokensBought).gt(
+              new BN(0)
+            )}
+          >
+            <Card mt="15px">
               <Button
-                onClick={() => onJoinProject(tickets)}
+                onClick={() => retrieveTokens()}
                 justifyContent="space-between"
                 w="100%"
               >
-                Join Project
+                Retrieve Tokens
                 <WalletIcon />
               </Button>
-            </If>
-          </Flex>
-        </Card>
+            </Card>
+          </If>
+        </Flex>
       </Flex>
       <Box
         bg={jumpGradient}
