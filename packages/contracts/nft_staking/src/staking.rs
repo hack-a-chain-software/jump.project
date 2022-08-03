@@ -166,9 +166,9 @@ impl StakingProgram {
     let staking_duration = env::block_timestamp() - staked_nft.staked_timestamp;
     let early_withdraw = staking_duration < self.min_staking_period;
     let withdraw_rate = if early_withdraw {
-      DENOM - self.early_withdraw_penalty / DENOM
+      DENOM - self.early_withdraw_penalty
     } else {
-      1
+      DENOM
     };
 
     let mut balance = self
@@ -179,7 +179,12 @@ impl StakingProgram {
     let staked_nft_balance = staked_nft.balance.clone();
     for (k, amount) in staked_nft_balance {
       staked_nft.balance.insert(k.clone(), 0);
-      balance.insert(k.clone(), amount * withdraw_rate);
+
+      let withdrawable_amount = amount * withdraw_rate / DENOM;
+      let remainder = amount - withdrawable_amount;
+
+      balance.insert(k.clone(), withdrawable_amount);
+      *self.collection_treasury.entry(k).or_insert(0) += remainder;
     }
 
     self.stakers_balances.insert(&owner_id, &balance);
@@ -252,7 +257,13 @@ impl StakingProgram {
 mod tests {
   use std::{collections::HashMap, str::FromStr};
 
+  use near_sdk::{test_utils::VMContextBuilder, testing_env};
+
   use super::*;
+
+  fn get_context() -> VMContextBuilder {
+    VMContextBuilder::new()
+  }
 
   fn get_token_ids() -> [AccountId; 3] {
     ["token_a.testnet", "token_b.testnet", "token_c.testnet"]
@@ -288,8 +299,8 @@ mod tests {
       get_collections()[0].clone(),
       get_accounts()[0].clone(),
       get_token_ids()[2].clone(),
-      5,
-      DENOM / 20,
+      5 * 10u64.pow(9),
+      DENOM / 5,
     )
   }
 
@@ -330,6 +341,55 @@ mod tests {
 
     assert_eq!(old_nft.balance, HashMap::new());
     assert_eq!(new_nft.balance.len(), 3);
+  }
+
+  #[test]
+  fn test_inner_withdraw() {
+    let mut context = get_context();
+    context.block_timestamp(10 * 10u64.pow(9));
+    testing_env!(context.build());
+
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let nft_id = get_nft_id()[0].clone();
+
+    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 4 * 10u64.pow(9));
+    staked_nft.balance.insert(token_id.clone(), 10);
+    staking_program.insert_staked_nft(&staked_nft);
+
+    let withdrawn_balance = staking_program.inner_withdraw(&nft_id);
+
+    assert_eq!(withdrawn_balance.get(&token_id).unwrap(), &10);
+  }
+
+  #[test]
+  fn test_inner_withdraw_early_withdraw() {
+    let mut context = get_context();
+    context.block_timestamp(10 * 10u64.pow(9));
+    testing_env!(context.build());
+
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+    let nft_id = get_nft_id()[0].clone();
+
+    let withdrawn_amount = 8;
+    let remainder = 2;
+
+    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 9 * 10u64.pow(9));
+    staked_nft
+      .balance
+      .insert(token_id.clone(), withdrawn_amount + remainder);
+    staking_program.insert_staked_nft(&staked_nft);
+
+    let withdrawn_balance = staking_program.inner_withdraw(&nft_id);
+
+    assert_eq!(withdrawn_balance.get(&token_id).unwrap(), &withdrawn_amount);
+    assert_eq!(
+      staking_program.collection_treasury.get(&token_id).unwrap(),
+      &remainder
+    );
   }
 
   #[test]

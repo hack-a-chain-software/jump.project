@@ -36,11 +36,6 @@ impl RewardsDistribution {
     let delta_t = dist.rr - self.rr;
     let mut added_reward = (delta_t as u128) * self.reward;
 
-    println!(
-      "delta_t = {}; round = {}; added_reward = {}; reward = {}",
-      delta_t, round, added_reward, self.reward
-    );
-
     if self.undistributed < added_reward {
       added_reward = self.undistributed;
 
