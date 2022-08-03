@@ -18,7 +18,7 @@ export function NFTStakingUserActions(props: any) {
   const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
     useTheme();
 
-  const { tokens, claimRewards } = useNftStaking();
+  const { tokens } = useNftStaking();
 
   const [showStake, setShowStake] = useState(false);
   const [showUnstake, setShowUnstake] = useState(false);
