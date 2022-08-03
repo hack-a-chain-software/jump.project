@@ -234,6 +234,24 @@ export const useNftStaking = create<{
   unstake: async (connection, tokens, collection, balance) => {
     const transactions: any = [];
 
+    tokens.forEach((item) => {
+      transactions.push(
+        getTransactionObject(
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "unstake",
+          {
+            token_id: [
+              {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              item,
+            ],
+          }
+        )
+      );
+    });
+
     for (const key in balance) {
       if (!balance[key]) {
         continue;
@@ -254,48 +272,34 @@ export const useNftStaking = create<{
           )
         );
       }
+    }
+
+    for (const key in balance) {
+      if (!balance[key]) {
+        continue;
+      }
 
       transactions.push(
         getTransactionObject(
           import.meta.env.VITE_NFT_STAKING_CONTRACT,
-          "whitdraw",
+          "withdraw_reward",
           {
-            token_id: [
-              {
-                type: "whitdraw",
-                account_id: collection,
-              },
-              key,
-            ],
+            collection: {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            token_id: key,
           }
         )
       );
     }
-
-    tokens.forEach((item) => {
-      transactions.push(
-        getTransactionObject(
-          import.meta.env.VITE_NFT_STAKING_CONTRACT,
-          "unstake",
-          {
-            token_id: [
-              {
-                type: "NFTContract",
-                account_id: collection,
-              },
-              item,
-            ],
-          }
-        )
-      );
-    });
 
     executeMultipleTransactions(transactions, connection as WalletConnection);
   },
 
   getTokenStorage: async (token, connection) => {
     const contract = new Contract(connection.account(), token, {
-      viewMethods: [],
+      viewMethods: ["storage_balance_of"],
       changeMethods: [],
     }) as NFTStakingContract;
 

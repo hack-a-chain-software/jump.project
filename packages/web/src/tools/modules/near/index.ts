@@ -100,7 +100,12 @@ export const getTransaction = async (
   );
 };
 
-export const getTransactionObject = (receiver, method, args, amount = "1") => {
+export const getTransactionObject = (
+  receiver,
+  method,
+  args,
+  amount?: string
+) => {
   return {
     receiverId: receiver,
     functionCalls: [
