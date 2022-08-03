@@ -1,3 +1,5 @@
+import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { useStaking } from "@/stores/staking-store";
 import { WalletConnection, Account } from "near-api-js";
 import {
   useEffect,
@@ -6,7 +8,6 @@ import {
   PropsWithChildren,
   useContext,
 } from "react";
-import toast from "react-hot-toast";
 import { useNearUser, useNearWallet } from "react-near";
 
 interface INearContext {
@@ -53,6 +54,9 @@ export const NearContractsProvider: React.FC<
 > = ({ children }) => {
   const wallet = useNearWallet();
 
+  const { init: initStaking } = useStaking();
+  const { init: initLaunchpad } = useLaunchpadStore();
+
   const nftStakingNearUser = useNearUser(
     import.meta.env.VITE_NFT_STAKING_CONTRACT
   );
@@ -75,7 +79,8 @@ export const NearContractsProvider: React.FC<
 
   useEffect(() => {
     if (wallet?.getAccountId()) {
-      toast.success("Welcome " + wallet.getAccountId());
+      initStaking(wallet);
+      initLaunchpad(wallet);
     }
   }, [wallet]);
 

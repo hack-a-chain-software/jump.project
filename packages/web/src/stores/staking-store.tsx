@@ -1,18 +1,16 @@
 import create from "zustand";
 import { WalletConnection, Contract } from "near-api-js";
 import toast from "react-hot-toast";
-import { ConnectWallet } from "../components/modules/toasts";
+import { ConnectWallet } from "@/components/modules/toasts";
 import {
   FtOnTransfer,
   NearContractViewCall,
   NearMutableContractCall,
 } from "@near/ts";
-import { NearConstants } from "../constants";
-import { JUMP_TOKEN, X_JUMP_TOKEN } from "../env/contract";
+import { executeMultipleTransactions, Transaction } from "@/tools";
+import { NearConstants } from "@/constants";
 
-import { executeMultipleTransactions, getAmount, Transaction } from "@/tools";
-
-interface StakingContract extends Contract {
+export interface StakingContract extends Contract {
   ft_on_transfer: FtOnTransfer;
   burn_x_token: NearMutableContractCall<{ quantity_to_burn: string }>;
 
@@ -88,7 +86,7 @@ export const useStaking = create<{
       }
 
       transactions.push({
-        receiverId: JUMP_TOKEN,
+        receiverId: import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
         functionCalls: [
           {
             methodName: "ft_transfer_call",
@@ -104,7 +102,6 @@ export const useStaking = create<{
       });
 
       await executeMultipleTransactions(transactions, connection);
-      toast.success("Staking Complete");
     } catch (error) {
       return console.error(toast.error(`Stake Error: ${error}`));
     }
@@ -124,7 +121,7 @@ export const useStaking = create<{
 
       if (!stakingStorage) {
         transactions.push({
-          receiverId: JUMP_TOKEN,
+          receiverId: import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
           functionCalls: [
             {
               methodName: "storage_deposit",
@@ -139,7 +136,7 @@ export const useStaking = create<{
       }
 
       transactions.push({
-        receiverId: X_JUMP_TOKEN,
+        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
         functionCalls: [
           {
             methodName: "burn_x_token",

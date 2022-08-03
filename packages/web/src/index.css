@@ -9,3 +9,26 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+.progress {
+	background-color: rgba(0,0,0,0.20);
+	border-radius: 8px;
+	position: relative;
+	margin: 15px 0;
+	height: 10px;
+	width: 100%;
+}
+
+.progress-done {
+	background: #fff;
+	/* box-shadow: 0 3px 3px -5px #F2709C, 0 2px 5px #F2709C; */
+	border-radius: 4px;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 0;
+	opacity: 0; 
+	transition: 1s ease 0.3s;
+}

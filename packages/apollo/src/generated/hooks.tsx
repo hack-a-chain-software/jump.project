@@ -320,6 +320,14 @@ export type LaunchPadProjectQuery = {
     fee_price_tokens?: string | null;
     fee_liquidity_tokens?: string | null;
     status?: string | null;
+    project_name?: string | null;
+    description_token?: string | null;
+    description_project?: string | null;
+    discord?: string | null;
+    twitter?: string | null;
+    telegram?: string | null;
+    website?: string | null;
+    whitepaper?: string | null;
     dex_id?: string | null;
     project_token_info?: {
       __typename?: "ProjectTokenInfo";
@@ -608,6 +616,14 @@ export const LaunchPadProjectDocument = gql`
       fee_price_tokens
       fee_liquidity_tokens
       status
+      project_name
+      description_token
+      description_project
+      discord
+      twitter
+      telegram
+      website
+      whitepaper
       project_token_info {
         name
         image
