@@ -253,7 +253,7 @@ export const useNftStaking = create<{
     });
 
     for (const key in balance) {
-      if (balance[key] == 0) {
+      if (balance[key] === "0") {
         continue;
       }
 
@@ -275,7 +275,7 @@ export const useNftStaking = create<{
     }
 
     for (const key in balance) {
-      if (balance[key] == 0) {
+      if (balance[key] === "0") {
         continue;
       }
 
