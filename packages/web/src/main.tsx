@@ -9,6 +9,7 @@ import Router from "./router";
 import { NearEnvironment } from "react-near";
 import { ProviderNear } from "./hooks/near";
 import { NearContractsProvider } from "@/context/near";
+import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
 
 // TODO: Find a better way to handle this buffer error
@@ -19,10 +20,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ApolloProvider client={client}>
       <ChakraProvider theme={theme}>
         <ProviderNear environment={NearEnvironment.TestNet}>
-          <NearContractsProvider>
-            <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-            <Router />
-          </NearContractsProvider>
+          <WalletSelectorContextProvider>
+            <NearContractsProvider>
+              <ColorModeScript
+                initialColorMode={theme.config.initialColorMode}
+              />
+              <Router />
+            </NearContractsProvider>
+          </WalletSelectorContextProvider>
         </ProviderNear>
       </ChakraProvider>
     </ApolloProvider>
