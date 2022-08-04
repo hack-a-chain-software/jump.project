@@ -1,8 +1,6 @@
 use near_sdk::Timestamp;
 
-use crate::types::u256::U256;
-
-const DENOM_U256: U256 = U256([0x0010A5D4E8, 0, 0, 0]);
+use crate::{constants::DENOM_U256, types::u256::U256};
 
 pub const fn to_sec(timestamp: Timestamp) -> u32 {
   (timestamp / 10u64.pow(9)) as u32
