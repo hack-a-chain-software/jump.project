@@ -1,18 +1,24 @@
-use crate::constants::DENOM;
+use crate::calc::ceil_division;
+use crate::calc::denom_convert;
+use crate::calc::denom_division;
+use crate::calc::to_sec;
+use crate::types::u256::U256;
 use crate::types::*;
 use crate::StorageKey;
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
-use near_sdk::{env, Timestamp};
+use near_sdk::env;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+type TokenRPS = HashMap<FungibleTokenID, U256>;
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug)]
 pub struct RewardsDistribution {
   pub undistributed: u128,
   pub unclaimed: u128,
   pub beneficiary: u128,
-  pub rps: u128,
+  pub rps: U256,
   pub rr: u32,
   pub reward: u128,
 }
@@ -23,7 +29,7 @@ impl RewardsDistribution {
       undistributed: balance,
       unclaimed: 0,
       beneficiary: 0,
-      rps: 0,
+      rps: U256::zero(),
       rr: 0,
       reward,
     }
@@ -48,18 +54,18 @@ impl RewardsDistribution {
 
     if total_seeds == 0 {
       dist.beneficiary += added_reward;
-      dist.rps = 0;
+      dist.rps = U256::zero();
     } else {
       dist.unclaimed += added_reward;
-      dist.rps += added_reward * DENOM / total_seeds as u128;
+      dist.rps += denom_division(added_reward, total_seeds.into());
     }
 
     dist
   }
 
-  pub fn claim(&self, token_rps: u128) -> (Self, u128) {
+  pub fn claim(&self, token_rps: U256) -> (Self, u128) {
     let mut dist = self.clone();
-    let claimed = (self.rps - token_rps) / DENOM;
+    let claimed = denom_convert(self.rps - token_rps);
 
     dist.unclaimed -= claimed;
 
@@ -92,7 +98,7 @@ pub struct Farm {
   pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
 
   #[serde(skip)]
-  pub nfts_rps: UnorderedMap<NonFungibleTokenID, FungibleTokenBalance>,
+  pub nfts_rps: UnorderedMap<NonFungibleTokenID, TokenRPS>,
 }
 
 // TODO: turn this into a macro
@@ -195,14 +201,14 @@ impl Farm {
   pub fn view_unclaimed_rewards(
     &mut self,
     token_id: &NonFungibleTokenID,
-  ) -> (FungibleTokenBalance, FungibleTokenBalance) {
+  ) -> (FungibleTokenBalance, TokenRPS) {
     self.distribute();
 
     let mut token_rps = self.nfts_rps.get(token_id).unwrap();
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.clone().iter() {
-      let rps = *token_rps.get(k).unwrap_or(&0);
+      let rps = *token_rps.get(k).unwrap_or(&U256::zero());
 
       let (dist, claimed) = prev_dist.claim(rps);
 
@@ -214,14 +220,6 @@ impl Farm {
 
     (rewards_map, token_rps)
   }
-}
-
-const fn to_sec(timestamp: Timestamp) -> u32 {
-  (timestamp / 10u64.pow(9)) as u32
-}
-
-const fn ceil_division(a: u128, b: u128) -> u128 {
-  a / b + (a % b != 0) as u128
 }
 
 #[cfg(test)]
@@ -306,7 +304,7 @@ mod tests {
 
     assert_eq!(new_dist.undistributed, expected.0);
     assert_eq!(new_dist.unclaimed, expected.1);
-    assert_eq!(new_dist.rps / DENOM, expected.2)
+    assert_eq!(denom_convert(new_dist.rps), expected.2)
   }
 
   #[rstest]
@@ -347,7 +345,7 @@ mod tests {
       );
       assert_eq!(current_dist.beneficiary, 2 * dist.reward);
       assert_eq!(current_dist.unclaimed, 0);
-      assert_eq!(current_dist.rps, 0);
+      assert_eq!(current_dist.rps, U256::zero());
       assert_eq!(current_dist.rr, 2);
     }
   }
@@ -372,7 +370,7 @@ mod tests {
         current_dist.undistributed,
         dist.undistributed - 2 * dist.reward
       );
-      assert_eq!(current_dist.rps / DENOM, 2 * dist.reward);
+      assert_eq!(denom_convert(current_dist.rps), 2 * dist.reward);
       assert_eq!(current_dist.rr, 2);
     }
   }

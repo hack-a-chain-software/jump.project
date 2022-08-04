@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::calc::denom_multiplication;
 use crate::constants::DENOM;
 use crate::farm::Farm;
 use crate::types::*;
@@ -180,7 +181,7 @@ impl StakingProgram {
     for (k, amount) in staked_nft_balance {
       staked_nft.balance.insert(k.clone(), 0);
 
-      let withdrawable_amount = amount * withdraw_rate / DENOM;
+      let withdrawable_amount = denom_multiplication(amount, withdraw_rate);
       let remainder = amount - withdrawable_amount;
 
       balance.insert(k.clone(), withdrawable_amount);
