@@ -59,7 +59,7 @@ export interface StakingToken {
   symbol: string;
   icon: string;
   decimals: number;
-  perMonth: number;
+  perMonth: string;
   account_id: string;
 }
 
@@ -253,7 +253,7 @@ export const useNftStaking = create<{
     });
 
     for (const key in balance) {
-      if (!balance[key]) {
+      if (balance[key] === "0") {
         continue;
       }
 
@@ -275,7 +275,7 @@ export const useNftStaking = create<{
     }
 
     for (const key in balance) {
-      if (!balance[key]) {
+      if (balance[key] === "0") {
         continue;
       }
 

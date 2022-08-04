@@ -26,7 +26,7 @@ export default gql`
     symbol: String
     icon: String
     decimals: Int
-    perMonth: Int
+    perMonth: String
     account_id: String
   }
 
