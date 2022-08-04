@@ -1,6 +1,9 @@
 use std::io::{Error, ErrorKind};
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::{
+  borsh::{BorshDeserialize, BorshSerialize},
+  serde::{self, de::Visitor, Deserialize, Serialize},
+};
 use uint::construct_uint;
 
 // U1024 with 256 bits consisting of 4 x 64-bit words
@@ -31,7 +34,7 @@ impl BorshSerialize for U256 {
 
   fn try_to_vec(&self) -> std::io::Result<Vec<u8>> {
     let mut result = Vec::with_capacity(BYTE_SIZE);
-    self.serialize(&mut result)?;
+    BorshSerialize::serialize(&self, &mut result)?;
     Ok(result)
   }
 }
@@ -54,6 +57,48 @@ impl BorshDeserialize for U256 {
   }
 }
 
+impl Serialize for U256 {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::Serializer,
+  {
+    serializer.serialize_str(&self.to_string())
+  }
+}
+
+struct U256Visitor;
+
+impl<'de> Visitor<'de> for U256Visitor {
+  type Value = U256;
+
+  fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+    formatter.write_str("an unsigned integer smaller than 2^256 - 1, encoded as a string")
+  }
+
+  fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+  where
+    E: serde::de::Error,
+  {
+    U256::from_dec_str(&v).or_else(|e| Err(E::custom(e)))
+  }
+
+  fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+  where
+    E: serde::de::Error,
+  {
+    U256::from_dec_str(v).or_else(|e| Err(E::custom(e)))
+  }
+}
+
+impl<'de> Deserialize<'de> for U256 {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: serde::Deserializer<'de>,
+  {
+    deserializer.deserialize_str(U256Visitor)
+  }
+}
+
 mod tests {
   use super::*;
   use std::io::BufWriter;
@@ -68,24 +113,38 @@ mod tests {
   }
 
   #[test]
-  fn test_serialize_deserialize_lossless() {
+  fn test_borsh_serialize_deserialize_lossless() {
     let num: U256 = U256::one();
 
     let writer_buffer: &mut [u8] = &mut empty_256_buffer();
     let writer = &mut BufWriter::new(writer_buffer);
 
-    let serialize_result = num.serialize(writer);
+    let serialize_result = BorshSerialize::serialize(&num, writer);
     assert!(serialize_result.is_ok());
 
-    let deserialize_result = U256::deserialize(&mut writer.buffer());
+    let deserialize_result = <U256 as BorshDeserialize>::deserialize(&mut writer.buffer());
     assert_eq!(deserialize_result.unwrap(), num);
   }
 
   #[test]
-  fn test_deserialize_short_buffer() {
+  fn test_borsh_deserialize_short_buffer() {
     let mut buffer: &[u8] = &[0, 0, 0, 0, 0, 0, 0, 0];
 
-    let deserialize_result = U256::deserialize(&mut buffer);
+    let deserialize_result = <U256 as BorshDeserialize>::deserialize(&mut buffer);
     assert!(deserialize_result.is_err());
+  }
+
+  #[test]
+  fn test_serde_deserialize() {
+    let deserialize_result = serde_json::from_str::<U256>("\"1\"");
+
+    assert_eq!(deserialize_result.unwrap(), U256::one());
+  }
+
+  #[test]
+  fn test_serde_serialize() {
+    let serialize_result = serde_json::to_string(&U256::one());
+
+    assert_eq!(serialize_result.unwrap(), "\"1\"");
   }
 }
