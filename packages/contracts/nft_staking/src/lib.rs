@@ -8,6 +8,7 @@ use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault};
 use std::vec::Vec;
 
 mod actions;
+mod calc;
 mod constants;
 mod errors;
 mod events;

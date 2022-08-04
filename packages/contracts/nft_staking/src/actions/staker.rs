@@ -128,9 +128,8 @@ impl Contract {
     let caller_id = env::predecessor_account_id();
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
-    let available = staking_program.outer_withdraw(&caller_id, token_id.clone());
-    let amount = amount.map(|x| x.0).unwrap_or(available);
-    assert!(amount <= available, "");
+    let requested_amount = amount.map(|x| x.0);
+    let withdrawn_amount = staking_program.outer_withdraw(&caller_id, &token_id, requested_amount);
 
     self
       .staking_programs
@@ -141,11 +140,11 @@ impl Contract {
     ext_fungible_token::ext(token_id.clone())
       .with_static_gas(FT_TRANSFER_GAS)
       .with_attached_deposit(1)
-      .ft_transfer(caller_id.clone(), U128(amount), None)
+      .ft_transfer(caller_id.clone(), U128(withdrawn_amount), None)
       .then(
         ext_self::ext(env::current_account_id())
           .with_static_gas(COMPENSATE_GAS)
-          .compensate_withdraw_reward(collection, token_id, caller_id, U128(amount)),
+          .compensate_withdraw_reward(collection, token_id, caller_id, U128(withdrawn_amount)),
       )
   }
 
