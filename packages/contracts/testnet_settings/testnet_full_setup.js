@@ -428,7 +428,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: lockedTokenAccount.accountId,
-      amount: "1000000000000000",
+      amount: "3000000000000000000000",
       memo: null,
       msg: JSON.stringify({
         type: "Mint",
@@ -566,7 +566,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "300000000000000",
+      amount: "3000000000000000000000",
       memo: null,
       msg: JSON.stringify({ type: "OwnerDeposit" }),
     },
@@ -578,7 +578,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "300000000000000",
+      amount: "3000000000000000000000",
       memo: null,
       msg: JSON.stringify({ type: "OwnerDeposit" }),
     },
@@ -587,9 +587,9 @@ async function testnetSetup() {
   });
 
   const collection_rps = {};
-  collection_rps[lockedTokenAccount.accountId] = "1000";
-  collection_rps[auroraTokenAccount.accountId] = "1000";
-  collection_rps[usdtTokenAccount.accountId] = "1000";
+  collection_rps[lockedTokenAccount.accountId] = "20000000000000";
+  collection_rps[auroraTokenAccount.accountId] = "20000000000000";
+  collection_rps[usdtTokenAccount.accountId] = "30";
   const createStakingPayload = {
     collection_address: nftCollection1Account.accountId,
     collection_owner: ownerAccount.accountId,
@@ -618,7 +618,7 @@ async function testnetSetup() {
         account_id: nftCollection1Account.accountId,
       },
       token_id: lockedTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -631,7 +631,7 @@ async function testnetSetup() {
         account_id: nftCollection1Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -641,7 +641,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000",
       memo: null,
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
@@ -657,9 +657,9 @@ async function testnetSetup() {
 
   // create staking program 2
   const collection_rps2 = {};
-  collection_rps2[lockedTokenAccount.accountId] = "1000";
-  collection_rps2[auroraTokenAccount.accountId] = "1000";
-  collection_rps2[usdtTokenAccount.accountId] = "1000";
+  collection_rps2[lockedTokenAccount.accountId] = "20000000000000";
+  collection_rps2[auroraTokenAccount.accountId] = "20000000000000";
+  collection_rps2[usdtTokenAccount.accountId] = "30";
   const createStakingPayload2 = {
     collection_address: nftCollection2Account.accountId,
     collection_owner: ownerAccount.accountId,
@@ -688,7 +688,7 @@ async function testnetSetup() {
         account_id: nftCollection2Account.accountId,
       },
       token_id: lockedTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -701,7 +701,7 @@ async function testnetSetup() {
         account_id: nftCollection2Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -711,7 +711,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000",
       memo: null,
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
@@ -727,9 +727,9 @@ async function testnetSetup() {
 
   // create staking program 3
   const collection_rps3 = {};
-  collection_rps3[lockedTokenAccount.accountId] = "1000";
-  collection_rps3[auroraTokenAccount.accountId] = "1000";
-  collection_rps3[usdtTokenAccount.accountId] = "1000";
+  collection_rps3[lockedTokenAccount.accountId] = "20000000000000";
+  collection_rps3[auroraTokenAccount.accountId] = "20000000000000";
+  collection_rps3[usdtTokenAccount.accountId] = "30";
   const createStakingPayload3 = {
     collection_address: nftCollection3Account.accountId,
     collection_owner: ownerAccount.accountId,
@@ -758,7 +758,7 @@ async function testnetSetup() {
         account_id: nftCollection3Account.accountId,
       },
       token_id: lockedTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -771,7 +771,7 @@ async function testnetSetup() {
         account_id: nftCollection3Account.accountId,
       },
       token_id: auroraTokenAccount.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000000000000",
     },
     attachedDeposit: new BN(1),
   });
@@ -781,7 +781,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "10000000000000",
+      amount: "1000000000000",
       memo: null,
       msg: JSON.stringify({
         type: "CollectionOwnerDeposit",
