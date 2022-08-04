@@ -37,7 +37,7 @@ async function testnetSetup() {
   let last_block = await near.connection.provider.block({ finality: "final" });
   let last_block_height = last_block.header.height;
 
-  const random_prefix = crypto.randomBytes(20).toString("hex");
+  const random_prefix = crypto.randomBytes(10).toString("hex");
   const accountMap = {
     ownerAccount: random_prefix + "owner.testnet",
     userSampleAccount: random_prefix + "user.testnet",
@@ -319,7 +319,7 @@ async function testnetSetup() {
     args: {
       owner_id: ownerAccount.accountId,
       contract_tokens: [
-        jumpTokenAccount.accountId,
+        lockedTokenAccount.accountId,
         auroraTokenAccount.accountId,
       ],
     },
@@ -401,6 +401,7 @@ async function testnetSetup() {
 
   // setup minters in locked jump
   const minterContracts = [
+    ownerAccount,
     xTokenAccount,
     lockedTokenAccount,
     launchpad,
@@ -420,6 +421,23 @@ async function testnetSetup() {
     );
   }
   await Promise.all(promisesMint);
+
+  // create sample locked jump
+  await ownerAccount.functionCall({
+    contractId: jumpTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: lockedTokenAccount.accountId,
+      amount: "1000000000000000",
+      memo: null,
+      msg: JSON.stringify({
+        type: "Mint",
+        account_id: ownerAccount.accountId,
+      }),
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN("300000000000000"),
+  });
 
   // create launchpad listings
   console.log("Launchpad");
@@ -544,7 +562,7 @@ async function testnetSetup() {
   });
 
   await ownerAccount.functionCall({
-    contractId: jumpTokenAccount.accountId,
+    contractId: lockedTokenAccount.accountId,
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
@@ -569,7 +587,7 @@ async function testnetSetup() {
   });
 
   const collection_rps = {};
-  collection_rps[jumpTokenAccount.accountId] = "1000";
+  collection_rps[lockedTokenAccount.accountId] = "1000";
   collection_rps[auroraTokenAccount.accountId] = "1000";
   collection_rps[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload = {
@@ -599,7 +617,7 @@ async function testnetSetup() {
         type: "NFTContract",
         account_id: nftCollection1Account.accountId,
       },
-      token_id: jumpTokenAccount.accountId,
+      token_id: lockedTokenAccount.accountId,
       amount: "10000000000000",
     },
     attachedDeposit: new BN(1),
@@ -639,7 +657,7 @@ async function testnetSetup() {
 
   // create staking program 2
   const collection_rps2 = {};
-  collection_rps2[jumpTokenAccount.accountId] = "1000";
+  collection_rps2[lockedTokenAccount.accountId] = "1000";
   collection_rps2[auroraTokenAccount.accountId] = "1000";
   collection_rps2[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload2 = {
@@ -669,7 +687,7 @@ async function testnetSetup() {
         type: "NFTContract",
         account_id: nftCollection2Account.accountId,
       },
-      token_id: jumpTokenAccount.accountId,
+      token_id: lockedTokenAccount.accountId,
       amount: "10000000000000",
     },
     attachedDeposit: new BN(1),
@@ -709,7 +727,7 @@ async function testnetSetup() {
 
   // create staking program 3
   const collection_rps3 = {};
-  collection_rps3[jumpTokenAccount.accountId] = "1000";
+  collection_rps3[lockedTokenAccount.accountId] = "1000";
   collection_rps3[auroraTokenAccount.accountId] = "1000";
   collection_rps3[usdtTokenAccount.accountId] = "1000";
   const createStakingPayload3 = {
@@ -739,7 +757,7 @@ async function testnetSetup() {
         type: "NFTContract",
         account_id: nftCollection3Account.accountId,
       },
-      token_id: jumpTokenAccount.accountId,
+      token_id: lockedTokenAccount.accountId,
       amount: "10000000000000",
     },
     attachedDeposit: new BN(1),
