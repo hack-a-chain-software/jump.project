@@ -59,7 +59,7 @@ export interface StakingToken {
   symbol: string;
   icon: string;
   decimals: number;
-  perMonth: number;
+  perMonth: string;
   account_id: string;
 }
 

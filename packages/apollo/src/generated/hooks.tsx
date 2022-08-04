@@ -134,7 +134,7 @@ export type NftStakingReward = {
   decimals?: Maybe<Scalars["Int"]>;
   icon?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
-  perMonth?: Maybe<Scalars["Int"]>;
+  perMonth?: Maybe<Scalars["String"]>;
   spec?: Maybe<Scalars["String"]>;
   symbol?: Maybe<Scalars["String"]>;
 };
@@ -374,7 +374,7 @@ export type NftStakingProjectsConnectionQuery = {
         symbol?: string | null;
         icon?: string | null;
         decimals?: number | null;
-        perMonth?: number | null;
+        perMonth?: string | null;
         account_id?: string | null;
       } | null> | null;
     } | null> | null;
@@ -406,7 +406,7 @@ export type StakingProjectQuery = {
       symbol?: string | null;
       icon?: string | null;
       decimals?: number | null;
-      perMonth?: number | null;
+      perMonth?: string | null;
       account_id?: string | null;
     } | null> | null;
   } | null;

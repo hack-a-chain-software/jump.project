@@ -11,14 +11,15 @@ import {
   createPageableQuery,
   PaginationFilters,
 } from "../tools/createPaginatedConnection";
+import BN from "bn.js";
 
 export interface StakingToken {
   spec: string;
   name: string;
   symbol: string;
   icon: string;
+  perMonth: string;
   decimals: number;
-  perMonth: number;
   account_id: string;
 }
 
@@ -46,10 +47,14 @@ export default {
 
         const { reward } = distributions[key];
 
+        const rewardBN = new BN(reward);
+        const intervalBN = new BN(interval);
+        const secondsPerMonthBN = new BN(secondsPerMonth);
+
         stakingRewards.push({
           ...metadata,
           account_id: key,
-          perMonth: (secondsPerMonth * Number(reward)) / Number(interval),
+          perMonth: secondsPerMonthBN.mul(rewardBN).div(intervalBN).toString(),
         });
       }
 
