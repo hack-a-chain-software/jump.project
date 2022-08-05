@@ -22,7 +22,7 @@ export function TokenCard({
         width="100%"
         height="100%"
         borderRadius="20px"
-        src={metadata.media}
+        src={`https://images.weserv.nl/?url=${metadata.media}&w=800&fit=contain`}
       />
 
       <Flex
