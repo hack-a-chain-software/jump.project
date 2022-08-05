@@ -8,25 +8,17 @@ import React, {
 import { map, distinctUntilChanged } from "rxjs";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
-import { setupModal } from "@near-wallet-selector/modal-ui";
-import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupLedger } from "@near-wallet-selector/ledger";
 
-declare global {
-  interface Window {
-    selector: WalletSelector;
-    modal: WalletSelectorModal;
-  }
-}
-
 interface WalletSelectorContextValue {
   selector: WalletSelector;
-  modal: WalletSelectorModal;
   accounts: AccountState[];
   accountId: string | null;
+  showModal: boolean;
+  signOut: () => Promise<void>;
+  toggleModal: () => void;
 }
 
 const WalletSelectorContext =
@@ -35,32 +27,35 @@ const WalletSelectorContext =
 export const WalletSelectorContextProvider: React.FC<
   PropsWithChildren<Record<any, any>>
 > = ({ children }) => {
-  const [selector, setSelector] = useState<WalletSelector | null>(null);
-  const [modal, setModal] = useState<WalletSelectorModal | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState<AccountState[]>([]);
+  const [selector, setSelector] = useState<WalletSelector | null>(null);
+
+  const toggleModal = () => setShowModal(!showModal);
+
+  const signOut = async () => {
+    if (!selector) {
+      return;
+    }
+
+    const wallet = await selector.wallet();
+
+    console.log("WALLLLLLLLET", wallet);
+
+    wallet.signOut();
+  };
 
   const init = useCallback(async () => {
     const _selector = await setupWalletSelector({
       network: "testnet",
       debug: true,
-      modules: [
-        setupNearWallet(),
-        setupMyNearWallet(),
-        setupSender(),
-        setupLedger(),
-      ],
-    });
-
-    const _modal = setupModal(_selector, {
-      contractId: import.meta.env.VITE_STAKING_CONTRACT,
+      modules: [setupSender(), setupLedger(), setupNearWallet()],
     });
 
     const state = _selector.store.getState();
 
     setAccounts(state.accounts);
-
-    window.selector = _selector;
-    window.modal = _modal;
+    setSelector(_selector);
   }, []);
 
   useEffect(() => {
@@ -89,7 +84,7 @@ export const WalletSelectorContextProvider: React.FC<
     return () => subscription.unsubscribe();
   }, [selector]);
 
-  if (!selector || !modal) {
+  if (!selector) {
     return null;
   }
 
@@ -100,9 +95,11 @@ export const WalletSelectorContextProvider: React.FC<
     <WalletSelectorContext.Provider
       value={{
         selector,
-        modal,
         accounts,
         accountId,
+        showModal,
+        signOut,
+        toggleModal,
       }}
     >
       {children}

@@ -11,6 +11,7 @@ import { ProviderNear } from "./hooks/near";
 import { NearContractsProvider } from "@/context/near";
 import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
+import { WalletSelectorModal } from "@/modals";
 
 // TODO: Find a better way to handle this buffer error
 window.Buffer = window.Buffer || Buffer;
@@ -26,6 +27,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 initialColorMode={theme.config.initialColorMode}
               />
               <Router />
+
+              <WalletSelectorModal />
             </NearContractsProvider>
           </WalletSelectorContextProvider>
         </ProviderNear>
