@@ -104,9 +104,9 @@ export const useVestingStore = create<{
 
     const investorInfo = get().vestings.reduce(
       (info: InvestorInfo, vesting: Vesting) => {
-        const locked = new BN(Number(vesting.locked_value));
-        const available = new BN(Number(vesting.available_to_withdraw));
-        const totalWithdrawn = new BN(Number(vesting.withdrawn_tokens));
+        const locked = new BN(vesting.locked_value);
+        const available = new BN(vesting.available_to_withdraw);
+        const totalWithdrawn = new BN(vesting.withdrawn_tokens);
 
         info.totalLocked = info.totalLocked.add(
           locked.sub(available).sub(totalWithdrawn)
