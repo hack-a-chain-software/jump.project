@@ -31,9 +31,9 @@ interface VestingContract extends Contract {
 export interface InvestorInfo {
   token: Token;
   contractData: ContractData;
-  totalLocked: any;
-  totalUnlocked: any;
-  totalWithdrawn: any;
+  totalLocked: BN;
+  totalUnlocked: BN;
+  totalWithdrawn: BN;
 }
 
 export interface Token {

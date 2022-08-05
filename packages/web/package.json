@@ -16,6 +16,7 @@
     "@near/apollo": "*",
     "@near/contracts": "*",
     "@near/ts": "*",
+    "@types/bn.js": "^5.1.0",
     "@types/ramda": "^0.28.14",
     "@types/yup": "^0.29.14",
     "@xstate/react": "^3.0.0",

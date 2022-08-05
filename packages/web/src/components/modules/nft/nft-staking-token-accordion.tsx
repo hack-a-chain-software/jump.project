@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
@@ -40,7 +41,10 @@ export function TokenAccordion({
   }, [staked, endPenalty, token_id]);
 
   const withdrawPenalty = useMemo(() => {
-    return ` ${Number(penalty) / 10_000_000_000}%`;
+    const denom = new BN("10000000000000000000000");
+    const penaltyBN = new BN(penalty);
+
+    return penaltyBN.div(denom).toString() + "%";
   }, [rewards, token_id, penalty]);
 
   return (
