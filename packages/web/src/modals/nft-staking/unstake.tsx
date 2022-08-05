@@ -74,7 +74,7 @@ export function NFTUnstakeModal({
                   height="100%"
                   borderRadius="20px"
                   className="aspect-square"
-                  src={metadata.media}
+                  src={`https://images.weserv.nl/?url=${metadata.media}&w=800&fit=contain`}
                 />
               </Flex>
             ))}

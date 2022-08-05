@@ -112,7 +112,7 @@ export const Vesting = () => {
                   value={
                     isFullyConnected
                       ? `${formatNumber(
-                          investorInfo?.totalLocked?.toString() || 0,
+                          investorInfo?.totalLocked || 0,
                           investorInfo?.token?.decimals || 0
                         )} ${investorInfo?.token?.symbol}`
                       : "Connect Wallet"
@@ -134,7 +134,7 @@ export const Vesting = () => {
                   value={
                     isFullyConnected
                       ? `${formatNumber(
-                          investorInfo?.totalUnlocked?.toString() || 0,
+                          investorInfo?.totalUnlocked || 0,
                           investorInfo?.token?.decimals || 0
                         )} ${investorInfo?.token?.symbol}`
                       : "Connect Wallet"
@@ -156,7 +156,7 @@ export const Vesting = () => {
                   value={
                     isFullyConnected
                       ? `${formatNumber(
-                          investorInfo?.totalWithdrawn?.toString() || 0,
+                          investorInfo?.totalWithdrawn || 0,
                           investorInfo?.token?.decimals || 0
                         )} ${investorInfo?.token?.symbol}`
                       : "Connect Wallet"
