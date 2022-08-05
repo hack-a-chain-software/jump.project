@@ -21,6 +21,14 @@ query LaunchPadProject($projectId: ID!, $accountId: ID!) {
     fee_price_tokens
     fee_liquidity_tokens
     status
+    project_name
+    description_token
+    description_project
+    discord
+    twitter
+    telegram
+    website
+    whitepaper
     project_token_info {
       name
       image

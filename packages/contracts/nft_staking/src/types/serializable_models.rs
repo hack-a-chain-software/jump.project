@@ -1,30 +1,19 @@
 use std::collections::HashMap;
 
+use serde::ser::SerializeMap;
+
 use near_sdk::{
-  borsh::{BorshDeserialize, BorshSerialize},
   json_types::{U128, U64},
   serde::{Deserialize, Serialize},
   AccountId,
 };
-use serde::ser::SerializeMap;
 
 use crate::{
   farm::{Farm, RewardsDistribution},
   staking::StakingProgram,
 };
 
-pub type FungibleTokenID = AccountId;
-
-pub type FungibleTokenBalance = HashMap<FungibleTokenID, u128>;
-
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug, PartialEq)]
-#[serde(crate = "near_sdk::serde")]
-#[serde(tag = "type")]
-pub enum NFTCollection {
-  NFTContract { account_id: AccountId },
-}
-
-pub type NonFungibleTokenID = (NFTCollection, String);
+use super::tokens::{FungibleTokenBalance, FungibleTokenID, NFTCollection};
 
 #[derive(Serialize)]
 pub struct SerializableStakingProgram {

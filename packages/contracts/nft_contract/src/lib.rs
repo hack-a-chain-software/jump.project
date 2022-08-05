@@ -43,7 +43,7 @@ impl Contract {
       title: Some("Generic NFT".to_string()),
       description: None,
       media: Some(format!(
-        "{}/{}",
+        "{}/{}.png",
         self.metadata.get().unwrap().base_uri.unwrap().clone(),
         self.counter
       )),

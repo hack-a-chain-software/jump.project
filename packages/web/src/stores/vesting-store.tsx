@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import create from "zustand";
 import { WalletConnection, Contract } from "near-api-js";
 import { Transaction, executeMultipleTransactions } from "../hooks/near";
@@ -30,9 +31,9 @@ interface VestingContract extends Contract {
 export interface InvestorInfo {
   token: Token;
   contractData: ContractData;
-  totalLocked: number;
-  totalUnlocked: number;
-  totalWithdrawn: number;
+  totalLocked: BN;
+  totalUnlocked: BN;
+  totalWithdrawn: BN;
 }
 
 export interface Token {
@@ -103,21 +104,25 @@ export const useVestingStore = create<{
 
     const investorInfo = get().vestings.reduce(
       (info: InvestorInfo, vesting: Vesting) => {
-        info.totalLocked +=
-          Number(vesting.locked_value) -
-          Number(vesting.available_to_withdraw) -
-          Number(vesting.withdrawn_tokens);
-        info.totalUnlocked += Number(vesting.available_to_withdraw);
-        info.totalWithdrawn += Number(vesting.withdrawn_tokens);
+        const locked = new BN(vesting.locked_value);
+        const available = new BN(vesting.available_to_withdraw);
+        const totalWithdrawn = new BN(vesting.withdrawn_tokens);
+
+        info.totalLocked = info.totalLocked.add(
+          locked.sub(available).sub(totalWithdrawn)
+        );
+
+        info.totalUnlocked = info.totalUnlocked.add(available);
+        info.totalWithdrawn = info.totalWithdrawn.add(totalWithdrawn);
 
         return info;
       },
       {
         token,
         contractData,
-        totalLocked: 0,
-        totalUnlocked: 0,
-        totalWithdrawn: 0,
+        totalLocked: new BN(0),
+        totalUnlocked: new BN(0),
+        totalWithdrawn: new BN(0),
       }
     );
 
@@ -179,7 +184,7 @@ export const useVestingStore = create<{
 
     if (!storage || storage.total < "0.10") {
       transactions.push({
-        receiverId: "jump_token.testnet",
+        receiverId: import.meta.env.VITE_BASE_TOKEN,
         functionCalls: [
           {
             methodName: "storage_deposit",
@@ -215,7 +220,7 @@ export const useVestingStore = create<{
 
     if (!storage || storage.total < "0.10") {
       transactions.push({
-        receiverId: "jump_token.testnet",
+        receiverId: import.meta.env.VITE_BASE_TOKEN,
         functionCalls: [
           {
             methodName: "storage_deposit",
@@ -230,7 +235,7 @@ export const useVestingStore = create<{
     }
 
     transactions.push({
-      receiverId: "jump_token.testnet",
+      receiverId: import.meta.env.VITE_BASE_TOKEN,
       functionCalls: [
         {
           methodName: "ft_transfer_call",

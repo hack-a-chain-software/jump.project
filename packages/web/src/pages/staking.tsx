@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 
 interface TokenRatio {
   x_token: string;
-  "jump_token.testnet": string;
+  base_token: string;
 }
 
 /**
@@ -33,8 +33,9 @@ export const Staking = () => {
   const { wallet, isFullyConnected } = useNearContractsAndWallet();
   const { init, stakeXToken, burnXToken } = useStaking();
 
-  const { data = { "jump_token.testnet": "1", x_token: "1" } } =
-    useNearQuery<TokenRatio>("view_token_ratio", {
+  const { data = { base_token: "1", x_token: "1" } } = useNearQuery<TokenRatio>(
+    "view_token_ratio",
+    {
       contract: X_JUMP_TOKEN,
       poolInterval: 1000 * 60,
       debug: true,
@@ -42,7 +43,8 @@ export const Staking = () => {
       onError(err) {
         console.log(err);
       },
-    });
+    }
+  );
 
   const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
     "ft_balance_of",
@@ -66,8 +68,8 @@ export const Staking = () => {
   const balanceXToken = useMemo(() => balance || "0", [balance]);
 
   const tokenRatio = useMemo(() => {
-    return Number(data["jump_token.testnet"]) / Number(data.x_token);
-  }, [data["jump_token.testnet"], data.x_token]);
+    return Number(data.base_token) / Number(data.x_token);
+  }, [data.base_token, data.x_token]);
 
   useEffect(() => {
     if (wallet && isFullyConnected) {
