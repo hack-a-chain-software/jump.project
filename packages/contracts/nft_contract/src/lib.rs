@@ -34,14 +34,14 @@ impl Contract {
   }
 
   #[payable]
-  pub fn nft_mint(&mut self) -> Token {
-    let account_id = env::predecessor_account_id();
+  pub fn nft_mint(&mut self, receiver_id: Option<AccountId>) -> Token {
+    let account_id = receiver_id.unwrap_or(env::predecessor_account_id());
 
     let token_id = self.get_next_id();
 
     let metadata = TokenMetadata {
-      title: Some("Generic NFT".to_string()),
-      description: None,
+      title: Some(format!("Generic NFT {}", self.counter)),
+      description: Some(format!("Description of Generic NFT {} goes here", self.counter)),
       media: Some(format!(
         "{}/{}.png",
         self.metadata.get().unwrap().base_uri.unwrap().clone(),
