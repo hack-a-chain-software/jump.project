@@ -8,7 +8,6 @@ import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import Router from "./router";
 import { NearEnvironment } from "react-near";
 import { ProviderNear } from "./hooks/near";
-import { NearContractsProvider } from "@/context/near";
 import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
 import { WalletSelectorModal } from "@/modals";
@@ -22,12 +21,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ChakraProvider theme={theme}>
         <ProviderNear environment={NearEnvironment.TestNet}>
           <WalletSelectorContextProvider>
-            {/* <NearContractsProvider> */}
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
             <Router />
 
             <WalletSelectorModal />
-            {/* </NearContractsProvider> */}
           </WalletSelectorContextProvider>
         </ProviderNear>
       </ChakraProvider>
