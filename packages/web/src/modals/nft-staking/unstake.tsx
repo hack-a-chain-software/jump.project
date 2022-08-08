@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
 import { Flex, Text, Grid, Image } from "@chakra-ui/react";
 import { WalletConnection } from "near-api-js";
-import { Token } from "@/stores/nft-staking-store";
+import { Token } from "@near/ts";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTUnstakeModal({
@@ -33,7 +33,7 @@ export function NFTUnstakeModal({
           onClick={() =>
             unstake(
               selector,
-              accountId,
+              accountId as string,
               selected.map((item) => item.token_id),
               collection,
               selected[0].balance

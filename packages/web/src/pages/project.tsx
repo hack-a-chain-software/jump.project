@@ -339,16 +339,12 @@ export const Project = () => {
               </Flex>
 
               <If
-                condition={!!isFullyConnected}
+                condition={!!accountId}
                 fallback={
-                  <Button
-                    onClick={connectWallet}
-                    justifyContent="space-between"
-                    w="100%"
-                  >
+                  <Flex justifyContent="space-between" w="100%">
                     Connect Wallet
                     <WalletIcon />
-                  </Button>
+                  </Flex>
                 }
               >
                 <Button

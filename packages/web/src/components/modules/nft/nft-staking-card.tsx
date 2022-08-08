@@ -11,8 +11,7 @@ import {
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "../../../hooks/theme";
 import { If, ValueBox } from "../../shared";
-import { formatNumber } from "@near/ts";
-import { StakingToken } from "@/stores/nft-staking-store";
+import { formatNumber, StakingToken } from "@near/ts";
 
 export function NFTStakingCard(
   props: BoxProps & { name: string; logo: string; rewards: StakingToken[] }

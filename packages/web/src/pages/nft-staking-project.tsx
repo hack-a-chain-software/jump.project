@@ -17,11 +17,12 @@ import {
   NFTStakingUserActions,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
-import { useNftStaking, Token } from "../stores/nft-staking-store";
+import { useNftStaking } from "../stores/nft-staking-store";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
+import { Token } from "@near/ts";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingProject() {

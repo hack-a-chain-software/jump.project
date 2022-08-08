@@ -4,7 +4,7 @@ import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
 import { formatNumber } from "@near/ts";
-import { Token, StakingToken } from "@/stores/nft-staking-store";
+import { Token, StakingToken } from "@near/ts";
 import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { format, isBefore, addMilliseconds } from "date-fns";

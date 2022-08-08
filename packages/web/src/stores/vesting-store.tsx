@@ -244,7 +244,7 @@ export const useVestingStore = create<{
           memo: null,
           msg: JSON.stringify({
             type: "BuyFastPass",
-            account_id: connection?.getAccountId(),
+            account_id: accountId,
             vesting_index: vesting,
           }),
         }
