@@ -1,13 +1,11 @@
 import { formatNumber } from "@near/ts";
-import { getNear } from "@/hooks/near";
 import { useVestingStore } from "@/stores/vesting-store";
 import { ModalImageDialog, Button } from "@/components";
 import { Flex, Text } from "@chakra-ui/react";
-import { WalletConnection } from "near-api-js";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function BuyFastPass({
   token,
-  storage,
   passCost,
   vestingId,
   totalAmount,
@@ -16,7 +14,6 @@ export function BuyFastPass({
   onClose = () => {},
 }: {
   token: any;
-  storage: any;
   isOpen: boolean;
   acceleration: number;
   vestingId: string;
@@ -24,7 +21,7 @@ export function BuyFastPass({
   passCost: number;
   onClose: () => void;
 }) {
-  const { wallet } = getNear(import.meta.env.VITE_STAKING_CONTRACT);
+  const { accountId, selector } = useWalletSelector();
 
   const { fastPass } = useVestingStore();
 
@@ -43,10 +40,10 @@ export function BuyFastPass({
           onClick={() =>
             fastPass(
               vestingId,
-              storage,
               totalAmount,
               passCost,
-              wallet as WalletConnection
+              accountId as string,
+              selector
             )
           }
           bg="white"

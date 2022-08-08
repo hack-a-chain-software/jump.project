@@ -56,7 +56,6 @@ export const useVestingStore = create<{
   getVestings: (connection: WalletSelector, accountId: string) => Promise<void>;
   fastPass: (
     vesting: string,
-    storage: any,
     amount: number,
     passCost: number,
     accountId: string,
@@ -64,10 +63,14 @@ export const useVestingStore = create<{
   ) => Promise<void>;
   withdraw: (
     vestings: string[],
-    storage: any,
     accountId: string,
     connection: WalletSelector
   ) => Promise<void>;
+  getTokenStorage: (
+    connection: WalletSelector,
+    account: string,
+    token: string
+  ) => Promise<any>;
 }>((set, get) => ({
   vestings: [],
   loading: true,
@@ -164,8 +167,14 @@ export const useVestingStore = create<{
     return base;
   },
 
-  withdraw: async (vestings, storage, accountId, connection) => {
+  withdraw: async (vestings, accountId, connection) => {
     const transactions: Transaction[] = [];
+
+    const storage = await get().getTokenStorage(
+      connection,
+      accountId,
+      import.meta.env.VITE_BASE_TOKEN
+    );
 
     if (!storage || storage.total < "0.10") {
       transactions.push(
@@ -200,15 +209,14 @@ export const useVestingStore = create<{
     executeMultipleTransactions(transactions, wallet);
   },
 
-  fastPass: async (
-    vesting,
-    storage,
-    amount,
-    passCost,
-    accountId,
-    connection
-  ) => {
+  fastPass: async (vesting, amount, passCost, accountId, connection) => {
     const transactions: Transaction[] = [];
+
+    const storage = await get().getTokenStorage(
+      connection,
+      accountId,
+      import.meta.env.VITE_BASE_TOKEN
+    );
 
     if (!storage || storage.total < "0.10") {
       transactions.push(
@@ -246,5 +254,15 @@ export const useVestingStore = create<{
     const wallet = await connection.wallet();
 
     executeMultipleTransactions(transactions, wallet);
+  },
+
+  getTokenStorage: async (connection, account, token) => {
+    try {
+      return await await viewFunction(connection, token, "storage_balance_of", {
+        account_id: account,
+      });
+    } catch (e) {
+      return;
+    }
   },
 }));
