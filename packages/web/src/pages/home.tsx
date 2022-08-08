@@ -1,6 +1,5 @@
 import BN from "bn.js";
 import { LockIcon, WalletIcon } from "@/assets/svg";
-import { useNearContractsAndWallet } from "@/context/near";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -24,10 +23,11 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useLaunchpadConenctionQuery } from "@near/apollo";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Button, Card, ProgressBar, Select, TopCard } from "../components";
+import { Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 /**
  * @route - '/'
@@ -36,21 +36,15 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
  */
 export function Home() {
   const navigate = useNavigate();
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
-  const investor = useViewInvestor(wallet?.getAccountId());
+  const investor = useViewInvestor(accountId as string);
   const totalAllocations = useViewTotalEstimatedInvestorAllowance(
-    wallet?.getAccountId()
+    accountId as string
   );
-  const { increaseMembership, init, decreaseMembership } = useLaunchpadStore();
+  const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const launchpadSettings = useViewLaunchpadSettings();
-
-  useEffect(() => {
-    if (wallet && isFullyConnected) {
-      init(wallet);
-    }
-  }, [wallet, isFullyConnected]);
 
   const { refetch, data, loading, error } = useLaunchpadConenctionQuery({
     variables: {
@@ -90,13 +84,13 @@ export function Home() {
 
   const upgradeLevel = () => {
     const formattedLevel = level + 1;
-    increaseMembership(formattedLevel);
+    increaseMembership(formattedLevel, accountId as string, selector);
   };
 
   const downgradeLevel = () => {
     const formattedLevel = level - 1;
-    decreaseMembership(formattedLevel);
-    increaseMembership(formattedLevel);
+    decreaseMembership(formattedLevel, accountId as string, selector);
+    increaseMembership(formattedLevel, accountId as string, selector);
   };
 
   return (
@@ -122,7 +116,7 @@ export function Home() {
             color="black"
             fontWeight="semibold"
           >
-            {!wallet
+            {!accountId
               ? "Connect your wallet"
               : investor.data
               ? `${

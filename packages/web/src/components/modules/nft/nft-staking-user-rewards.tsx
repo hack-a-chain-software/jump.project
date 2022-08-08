@@ -1,10 +1,11 @@
 import { ValueBox, If } from "@/components";
 import { Text, Flex, Grid, Skeleton } from "@chakra-ui/react";
-import { useNearContractsAndWallet } from "@/context/near";
-import { useNftStaking, StakingToken } from "@/stores/nft-staking-store";
+import { useNftStaking } from "@/stores/nft-staking-store";
+import { StakingToken } from "@near/ts";
 import { useMemo } from "react";
 import { formatNumber } from "@near/ts";
 import isEmpty from "lodash/isEmpty";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingUserRewards({
   rewards,
@@ -12,7 +13,7 @@ export function NFTStakingUserRewards({
   rewards: StakingToken[];
 }) {
   const { tokens } = useNftStaking();
-  const { wallet } = useNearContractsAndWallet();
+  const { accountId } = useWalletSelector();
 
   const tokenRewads = useMemo(() => {
     return rewards?.map((token) => {
@@ -56,7 +57,7 @@ export function NFTStakingUserRewards({
                   height="139px"
                   title={`Your ${name} Rewards`}
                   value={
-                    wallet?.isSignedIn()
+                    accountId
                       ? formatNumber(Number(userBalance), decimals) +
                         " " +
                         symbol

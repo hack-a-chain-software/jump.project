@@ -5,16 +5,17 @@ import { WalletIcon } from "@/assets/svg";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { NFTStakeModal, NFTUnstakeModal } from "@/modals";
-import { useNearContractsAndWallet } from "@/context/near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { GradientButton, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingUserActions(props: any) {
   const { id = "" } = useParams();
   const collection = window.atob(id);
 
-  const { wallet, connectWallet } = useNearContractsAndWallet();
+  const { accountId } = useWalletSelector();
+
   const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
     useTheme();
 
@@ -24,9 +25,7 @@ export function NFTStakingUserActions(props: any) {
   const [showUnstake, setShowUnstake] = useState(false);
 
   const toggleStakeModal = () => {
-    if (!wallet?.isSignedIn()) {
-      connectWallet();
-
+    if (!accountId) {
       return;
     }
 
@@ -34,9 +33,7 @@ export function NFTStakingUserActions(props: any) {
   };
 
   const toggleUnstakeModal = () => {
-    if (!wallet?.isSignedIn()) {
-      connectWallet();
-
+    if (!accountId) {
       return;
     }
 

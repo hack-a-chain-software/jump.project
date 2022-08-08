@@ -12,12 +12,12 @@ import {
   Card,
 } from "../components";
 import { X_JUMP_TOKEN } from "../env/contract";
-import { useNearContractsAndWallet } from "@/context/near";
 import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
 import toast from "react-hot-toast";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 interface TokenRatio {
   x_token: string;
@@ -30,8 +30,8 @@ interface TokenRatio {
  * @description - This is the staking JUMP page where user can stake and unstake Jump
  */
 export const Staking = () => {
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
-  const { init, stakeXToken, burnXToken } = useStaking();
+  const { accountId, selector } = useWalletSelector();
+  const { stakeXToken, burnXToken } = useStaking();
 
   const { data = { base_token: "1", x_token: "1" } } = useNearQuery<TokenRatio>(
     "view_token_ratio",
@@ -51,10 +51,10 @@ export const Staking = () => {
     {
       contract: X_JUMP_TOKEN,
       variables: {
-        account_id: wallet?.getAccountId(),
+        account_id: accountId as string,
       },
       poolInterval: 1000 * 60,
-      skip: !isFullyConnected,
+      skip: !accountId,
       debug: true,
     }
   );
@@ -71,15 +71,9 @@ export const Staking = () => {
     return Number(data.base_token) / Number(data.x_token);
   }, [data.base_token, data.x_token]);
 
-  useEffect(() => {
-    if (wallet && isFullyConnected) {
-      init(wallet);
-    }
-  }, [wallet, isFullyConnected]);
-
   const submitStaking = useCallback(async (amount: string) => {
     try {
-      await stakeXToken(amount);
+      await stakeXToken(amount, accountId as string, selector);
       toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
     } catch (error) {
       console.log(error);
@@ -88,7 +82,7 @@ export const Staking = () => {
 
   const submitWithdraw = useCallback(async (amount: string) => {
     try {
-      await burnXToken(amount);
+      await burnXToken(amount, accountId as string, selector);
       toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
     } catch (error) {
       console.log(error);

@@ -5,7 +5,6 @@ import React, {
   useState,
   PropsWithChildren,
 } from "react";
-import { providers } from "near-api-js";
 import type { AccountView } from "near-api-js/lib/providers/provider";
 import { map, distinctUntilChanged } from "rxjs";
 import { setupWalletSelector } from "@near-wallet-selector/core";

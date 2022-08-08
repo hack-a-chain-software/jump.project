@@ -1,5 +1,4 @@
 import BN from "bn.js";
-import { useNearContractsAndWallet } from "@/context/near";
 import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
@@ -23,6 +22,7 @@ import { useTheme } from "../hooks/theme";
 import { useNearQuery } from "react-near";
 import { useTokenBalance } from "@/hooks/modules/token";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 /**
  * @description - Launchpad project details page
@@ -31,17 +31,18 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 export const Project = () => {
   const [tickets, setTickets] = useState(0);
   const { id } = useParams();
-  const { wallet, connectWallet, isFullyConnected } =
-    useNearContractsAndWallet();
+
+  const { accountId, selector } = useWalletSelector();
+
   const { data, loading } = useLaunchPadProjectQuery({
     variables: {
-      accountId: wallet?.getAccountId(),
+      accountId: accountId as string,
       projectId: id || "",
     },
   });
 
   const { data: investorAllocation, loading: loadingAllocation } =
-    useViewInvestorAllocation(wallet?.getAccountId(), id as string);
+    useViewInvestorAllocation(accountId as string, id as string);
 
   console.log(investorAllocation.totalTokensBought);
 
@@ -50,7 +51,7 @@ export const Project = () => {
   const { jumpGradient } = useTheme();
 
   const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
-    useViewTotalEstimatedInvestorAllowance(wallet?.getAccountId());
+    useViewTotalEstimatedInvestorAllowance(accountId as string);
 
   const navigateToExternalURL = (uri: string) => {
     window.open(uri);
@@ -61,7 +62,7 @@ export const Project = () => {
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(
       data?.launchpad_project?.price_token as string,
-      wallet?.getAccountId() as string
+      accountId as string
     );
 
   const { data: metadataUSDT, loading: isUSDTMetadataLoading } = useNearQuery<
@@ -125,7 +126,9 @@ export const Project = () => {
     ) {
       withdrawAllocations(
         data.launchpad_project.price_token,
-        data.launchpad_project.listing_id
+        data.launchpad_project.listing_id,
+        accountId as string,
+        selector
       );
     }
   };
@@ -141,7 +144,9 @@ export const Project = () => {
             .mul(new BN(data.launchpad_project.token_allocation_price || 0))
             .toString(),
           data.launchpad_project.price_token,
-          data.launchpad_project.listing_id
+          data.launchpad_project.listing_id,
+          accountId as string,
+          selector
         );
       }
     },

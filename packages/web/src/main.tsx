@@ -22,14 +22,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ChakraProvider theme={theme}>
         <ProviderNear environment={NearEnvironment.TestNet}>
           <WalletSelectorContextProvider>
-            <NearContractsProvider>
-              <ColorModeScript
-                initialColorMode={theme.config.initialColorMode}
-              />
-              <Router />
+            {/* <NearContractsProvider> */}
+            <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+            <Router />
 
-              <WalletSelectorModal />
-            </NearContractsProvider>
+            <WalletSelectorModal />
+            {/* </NearContractsProvider> */}
           </WalletSelectorContextProvider>
         </ProviderNear>
       </ChakraProvider>
