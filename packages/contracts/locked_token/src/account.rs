@@ -56,7 +56,7 @@ impl Account {
       self.storage_used = U64(storage_used + final_storage - initial_storage);
       self.assert_storage_usage_cost();
     } else {
-      self.storage_used = U64(storage_used - final_storage + initial_storage);
+      self.storage_used = U64(storage_used + initial_storage - final_storage);
     }
   }
 
