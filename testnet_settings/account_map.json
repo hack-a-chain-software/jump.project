@@ -1,1 +1,17 @@
-{"ownerAccount":"435e83966177404677f0owner.testnet","userSampleAccount":"435e83966177404677f0user.testnet","jumpTokenAccount":"435e83966177404677f0jump_token.testnet","auroraTokenAccount":"435e83966177404677f0aurora_token.testnet","octopusTokenAccount":"435e83966177404677f0octopus_token.testnet","skywardTokenAccount":"435e83966177404677f0skyward_token.testnet","usdtTokenAccount":"435e83966177404677f0usdt_token.testnet","xTokenAccount":"435e83966177404677f0xjump_token.testnet","lockedTokenAccount":"435e83966177404677f0locked_token.testnet","nftCollection1Account":"435e83966177404677f0nft1.testnet","nftCollection2Account":"435e83966177404677f0nft2.testnet","nftCollection3Account":"435e83966177404677f0nft3.testnet","nftStaking":"435e83966177404677f0nft_staking.testnet","launchpad":"435e83966177404677f0launchpad.testnet","last_block_height":96827183}
+{
+    "ownerAccount": "27adb250008d4826292eowner.testnet",
+    "userSampleAccount": "27adb250008d4826292euser.testnet",
+    "jumpTokenAccount": "27adb250008d4826292ejump_token.testnet",
+    "auroraTokenAccount": "27adb250008d4826292eaurora_token.testnet",
+    "octopusTokenAccount": "27adb250008d4826292eoctopus_token.testnet",
+    "skywardTokenAccount": "27adb250008d4826292eskyward_token.testnet",
+    "usdtTokenAccount": "27adb250008d4826292eusdt_token.testnet",
+    "xTokenAccount": "27adb250008d4826292exjump_token.testnet",
+    "lockedTokenAccount": "27adb250008d4826292elocked_token.testnet",
+    "nftCollection1Account": "27adb250008d4826292enft1.testnet",
+    "nftCollection2Account": "27adb250008d4826292enft2.testnet",
+    "nftCollection3Account": "27adb250008d4826292enft3.testnet",
+    "nftStaking": "27adb250008d4826292enft_staking.testnet",
+    "launchpad": "27adb250008d4826292elaunchpad.testnet",
+    "last_block_height": 97020033
+}
