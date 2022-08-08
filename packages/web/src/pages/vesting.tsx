@@ -12,17 +12,17 @@ import {
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
 import { useNearQuery } from "react-near";
-import { useNearContractsAndWallet } from "@/context/near";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { WalletConnection } from "near-api-js";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
 
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
   const [filter, setFilter] = useState("");
 
@@ -38,21 +38,21 @@ export const Vesting = () => {
   const { data: storage } = useNearQuery("storage_balance_of", {
     contract: "jump_token.testnet",
     variables: {
-      account_id: wallet?.getAccountId(),
+      account_id: accountId,
     },
-    skip: !isFullyConnected,
+    skip: !accountId,
   });
 
   useEffect(() => {
     (async () => {
-      if (!isFullyConnected) {
+      if (!accountId) {
         return;
       }
 
-      await getVestings(wallet as WalletConnection);
-      await getInvestorInfo(wallet as WalletConnection);
+      await getVestings(selector, accountId);
+      await getInvestorInfo(selector);
     })();
-  }, [isFullyConnected]);
+  }, [accountId]);
 
   const filtered = useMemo(() => {
     if (!filter) {
@@ -82,12 +82,12 @@ export const Vesting = () => {
   }, [filter, vestings]);
 
   const isLoading = useMemo(() => {
-    if (!isFullyConnected) {
+    if (!accountId) {
       return false;
     }
 
     return isEmpty(investorInfo);
-  }, [investorInfo, isFullyConnected]);
+  }, [investorInfo, accountId]);
 
   return (
     <PageContainer>
@@ -110,7 +110,7 @@ export const Vesting = () => {
                   borderColor={glassyWhiteOpaque}
                   title="Total Locked"
                   value={
-                    isFullyConnected
+                    accountId
                       ? `${formatNumber(
                           investorInfo?.totalLocked || 0,
                           investorInfo?.token?.decimals || 0
@@ -132,7 +132,7 @@ export const Vesting = () => {
                   borderColor={glassyWhiteOpaque}
                   title="Total Unlocked"
                   value={
-                    isFullyConnected
+                    accountId
                       ? `${formatNumber(
                           investorInfo?.totalUnlocked || 0,
                           investorInfo?.token?.decimals || 0
@@ -154,7 +154,7 @@ export const Vesting = () => {
                   borderColor={glassyWhiteOpaque}
                   title="Total Withdrawn"
                   value={
-                    isFullyConnected
+                    accountId
                       ? `${formatNumber(
                           investorInfo?.totalWithdrawn || 0,
                           investorInfo?.token?.decimals || 0
@@ -171,7 +171,7 @@ export const Vesting = () => {
 
       <If
         fallback={
-          isFullyConnected
+          accountId
             ? !loading && <Empty text="No vestings available" />
             : loading && (
                 <Empty text="You must be logged in to view all vestings" />

@@ -5,6 +5,8 @@ import React, {
   useState,
   PropsWithChildren,
 } from "react";
+import { providers } from "near-api-js";
+import type { AccountView } from "near-api-js/lib/providers/provider";
 import { map, distinctUntilChanged } from "rxjs";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
@@ -21,12 +23,17 @@ interface WalletSelectorContextValue {
   toggleModal: () => void;
 }
 
+export type Account = AccountView & {
+  account_id: string;
+};
+
 const WalletSelectorContext =
   React.createContext<WalletSelectorContextValue | null>(null);
 
 export const WalletSelectorContextProvider: React.FC<
   PropsWithChildren<Record<any, any>>
 > = ({ children }) => {
+  const [accountId, setAccountId] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState<AccountState[]>([]);
   const [selector, setSelector] = useState<WalletSelector | null>(null);
@@ -84,12 +91,16 @@ export const WalletSelectorContextProvider: React.FC<
     return () => subscription.unsubscribe();
   }, [selector]);
 
+  useEffect(() => {
+    const newAccount =
+      accounts.find((account) => account.active)?.accountId || "";
+
+    setAccountId(newAccount);
+  }, [accounts]);
+
   if (!selector) {
     return null;
   }
-
-  const accountId =
-    accounts.find((account) => account.active)?.accountId || null;
 
   return (
     <WalletSelectorContext.Provider

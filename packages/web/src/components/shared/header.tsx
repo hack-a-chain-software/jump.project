@@ -4,20 +4,11 @@ import { JumpTextIcon } from "../../assets/svg/jump-text";
 import { Button } from "./button";
 import { If } from "./if";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { useEffect, useMemo } from "react";
 
 export function Header() {
   const { toggleColorMode } = useColorMode();
 
-  const { selector, accountId, toggleModal, signOut } = useWalletSelector();
-
-  useEffect(() => {
-    (async () => {
-      const wallet = await selector.wallet();
-
-      console.log("fucking wallet, bro", wallet);
-    })();
-  }, [selector]);
+  const { accountId, toggleModal, signOut } = useWalletSelector();
 
   return (
     <div

@@ -21,14 +21,9 @@ const modalRadius = 20;
 export function WalletSelectorModal(props: {}) {
   const { jumpGradient } = useTheme();
 
-  const { selector, accounts, accountId, showModal, toggleModal } =
-    useWalletSelector();
-
-  console.log(selector, selector.isSignedIn(), accounts, accountId);
+  const { selector, showModal, toggleModal } = useWalletSelector();
 
   const [modules, setModules] = useState<ModuleState[]>([]);
-
-  const { selectedWalletId } = selector.store.getState();
 
   useEffect(() => {
     const subscription = selector.store.observable.subscribe((state) => {

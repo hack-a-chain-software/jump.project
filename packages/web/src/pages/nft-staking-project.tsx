@@ -17,13 +17,12 @@ import {
   NFTStakingUserActions,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
-import { WalletConnection } from "near-api-js";
 import { useNftStaking, Token } from "../stores/nft-staking-store";
-import { useNearContractsAndWallet } from "@/context/near";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -36,8 +35,7 @@ export function NFTStakingProject() {
 
   const { fetchUserTokens, tokens, loading } = useNftStaking();
 
-  const { wallet, isFullyConnected, connectWallet } =
-    useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
   const [selected, setSelected] = useState<Token[]>([]);
 
@@ -52,9 +50,7 @@ export function NFTStakingProject() {
   };
 
   const toggleUnstakeModal = () => {
-    if (!isFullyConnected) {
-      connectWallet();
-
+    if (!accountId) {
       return;
     }
 
@@ -69,11 +65,11 @@ export function NFTStakingProject() {
 
   useEffect(() => {
     (async () => {
-      if (isFullyConnected) {
-        await fetchUserTokens(wallet as WalletConnection, collection);
+      if (accountId) {
+        await fetchUserTokens(selector, accountId, collection);
       }
     })();
-  }, [isFullyConnected]);
+  }, [accountId]);
 
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
@@ -104,7 +100,7 @@ export function NFTStakingProject() {
         <NFTStakingUserActions />
       </Flex>
 
-      <If condition={!!isFullyConnected && !isEmpty(tokens) && !loading}>
+      <If condition={!isEmpty(tokens) && !loading}>
         <Flex
           paddingTop="66px"
           alignItems="center"

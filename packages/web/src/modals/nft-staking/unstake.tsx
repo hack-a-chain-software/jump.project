@@ -1,10 +1,10 @@
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
-import { useNearContractsAndWallet } from "@/context/near";
 import { Flex, Text, Grid, Image } from "@chakra-ui/react";
 import { WalletConnection } from "near-api-js";
 import { Token } from "@/stores/nft-staking-store";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTUnstakeModal({
   selected,
@@ -18,7 +18,7 @@ export function NFTUnstakeModal({
   onClose: () => void;
 }) {
   const { unstake } = useNftStaking();
-  const { wallet } = useNearContractsAndWallet();
+  const { selector, accountId } = useWalletSelector();
 
   return (
     <ModalImageDialog
@@ -32,7 +32,8 @@ export function NFTUnstakeModal({
         <Button
           onClick={() =>
             unstake(
-              wallet as WalletConnection,
+              selector,
+              accountId,
               selected.map((item) => item.token_id),
               collection,
               selected[0].balance
