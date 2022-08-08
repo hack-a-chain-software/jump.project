@@ -53,7 +53,11 @@ export const WalletSelectorContextProvider: React.FC<
     const _selector = await setupWalletSelector({
       network: "testnet",
       debug: true,
-      modules: [setupSender(), setupLedger(), setupNearWallet()],
+      modules: [
+        setupSender(),
+        // setupLedger(),
+        setupNearWallet(),
+      ],
     });
 
     const state = _selector.store.getState();
