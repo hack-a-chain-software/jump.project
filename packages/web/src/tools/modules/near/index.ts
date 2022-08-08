@@ -59,3 +59,13 @@ export const viewFunction = async (
     JSON.parse(Buffer.from(res.result).toString())
   );
 };
+
+export const getTokenStorage = async (connection, account, token) => {
+  try {
+    return await await viewFunction(connection, token, "storage_balance_of", {
+      account_id: account,
+    });
+  } catch (e) {
+    return;
+  }
+};
