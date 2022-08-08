@@ -47,8 +47,6 @@ export const WalletSelectorContextProvider: React.FC<
 
     const wallet = await selector.wallet();
 
-    console.log("WALLLLLLLLET", wallet);
-
     wallet.signOut();
   };
 

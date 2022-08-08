@@ -1,13 +1,16 @@
 import bn from "bn.js";
 import { ConnectWallet } from "@/components";
 import { NearConstants } from "@/constants";
-import { executeMultipleTransactions, Transaction } from "@/tools";
+import { executeMultipleTransactions } from "@/tools";
 import { NearContractViewCall, NearMutableContractCall } from "@near/ts";
 import { WalletConnection } from "near-api-js";
 import { Contract } from "near-api-js";
 import toast from "react-hot-toast";
 import create from "zustand";
 import { StakingContract } from "./staking-store";
+
+import { Transaction } from "@near/ts";
+import type { WalletSelector } from "@near-wallet-selector/core";
 
 interface LaunchpadContract extends Contract {
   withdraw_allocations: NearMutableContractCall<{
@@ -58,11 +61,26 @@ export const useLaunchpadStore = create<{
   buyTickets(
     amount: number | string,
     priceToken: string,
-    listingId: string
+    listingId: string,
+    accountId: string,
+    connection: WalletSelector
   ): Promise<void>;
-  withdrawAllocations(listingId: string, project_token: string): Promise<void>;
-  increaseMembership(desiredLevel: number): Promise<void>;
-  decreaseMembership(desiredLevel: number): Promise<void>;
+  withdrawAllocations(
+    listingId: string,
+    project_token: string,
+    accountId: string,
+    connection: WalletSelector
+  ): Promise<void>;
+  increaseMembership(
+    desiredLevel: number,
+    accountId: string,
+    connection: WalletSelector
+  ): Promise<void>;
+  decreaseMembership(
+    desiredLevel: number,
+    accountId: string,
+    connection: WalletSelector
+  ): Promise<void>;
 }>((set, get) => ({
   contract: null,
   connection: null,
@@ -85,9 +103,7 @@ export const useLaunchpadStore = create<{
     });
   },
 
-  async withdrawAllocations(listing_id, project_token) {
-    const { contract, connection } = get();
-
+  async withdrawAllocations(listing_id, project_token, accountId, connection) {
     try {
       if (!connection || !contract) {
         return console.warn(toast((t) => <ConnectWallet t={t} />));
