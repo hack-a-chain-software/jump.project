@@ -1,63 +1,16 @@
 import bn from "bn.js";
-import { ConnectWallet } from "@/components";
-import { NearConstants } from "@/constants";
-import { executeMultipleTransactions } from "@/tools";
-import { NearContractViewCall, NearMutableContractCall } from "@near/ts";
-import { WalletConnection } from "near-api-js";
-import { Contract } from "near-api-js";
 import toast from "react-hot-toast";
 import create from "zustand";
-import { StakingContract } from "./staking-store";
 
+import {
+  viewFunction,
+  getTransaction,
+  executeMultipleTransactions,
+} from "@/tools";
 import { Transaction } from "@near/ts";
 import type { WalletSelector } from "@near-wallet-selector/core";
 
-interface LaunchpadContract extends Contract {
-  withdraw_allocations: NearMutableContractCall<{
-    listing_id: string;
-  }>;
-  storage_deposit: NearMutableContractCall<{
-    account_id: string | null;
-    registration_only: boolean | null;
-  }>;
-  view_investor: NearContractViewCall<
-    { account_id: string },
-    {
-      account_id: string;
-      storage_deposit: string;
-      storage_used: string;
-      is_listing_owner: string;
-      staked_token: string;
-      last_check: string;
-    }
-  >;
-
-  view_contract_settings: NearContractViewCall<
-    Record<any, any>,
-    {
-      membership_token: string;
-      token_lock_period: string;
-      tiers_minimum_tokens: string[];
-      tiers_entitled_allocations: string[];
-      allowance_phase_2: string;
-      partner_dex: string;
-    }
-  >;
-  storage_balance_of: NearContractViewCall<
-    {
-      account_id: string;
-    },
-    {
-      total: string;
-      available: string;
-    }
-  >;
-}
-
 export const useLaunchpadStore = create<{
-  contract: LaunchpadContract | null;
-  connection: WalletConnection | null;
-  init(connection: WalletConnection): Promise<void>;
   buyTickets(
     amount: number | string,
     priceToken: string,
@@ -81,94 +34,52 @@ export const useLaunchpadStore = create<{
     accountId: string,
     connection: WalletSelector
   ): Promise<void>;
+  getTokenStorage: (
+    connection: WalletSelector,
+    account: string,
+    token: string
+  ) => Promise<any>;
 }>((set, get) => ({
-  contract: null,
-  connection: null,
-
-  async init(connection) {
-    set({
-      connection,
-      contract: new Contract(
-        connection.account(),
-        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-        {
-          changeMethods: ["withdraw_allocations"],
-          viewMethods: [
-            "view_contract_settings",
-            "view_investor",
-            "storage_balance_of",
-          ],
-        }
-      ) as LaunchpadContract,
-    });
-  },
-
   async withdrawAllocations(listing_id, project_token, accountId, connection) {
     try {
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
-
-      const projectTokenContract = new Contract(
-        connection?.account(),
-        project_token,
-        {
-          changeMethods: ["storage_deposit"],
-          viewMethods: ["storage_balance_of"],
-        }
-      ) as Contract & {
-        storage_deposit: NearMutableContractCall<{
-          account_id: string | null;
-          registration_only: boolean | null;
-        }>;
-        storage_balance_of: NearContractViewCall<
-          {
-            account_id: string;
-          },
-          {
-            total: string;
-            available: string;
-          }
-        >;
-      };
-
-      const projectTokenStorageBalance =
-        projectTokenContract.storage_balance_of({
-          account_id: connection.getAccountId(),
-        });
+      const projectTokenStorageBalance = get().getTokenStorage(
+        connection,
+        accountId,
+        project_token
+      );
 
       const transactions: Transaction[] = [];
 
       if (!projectTokenStorageBalance) {
-        transactions.push({
-          receiverId: projectTokenContract.contractId,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            project_token,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+          "withdraw_allocations",
           {
-            methodName: "withdraw_allocations",
-            args: {
-              listing_id,
-            },
-            gas: NearConstants.AttachedGas,
+            listing_id,
           },
-        ],
-      });
+          "0.25"
+        )
+      );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
 
       toast.success(
         "You have withdrawn all the available allocations for this project with success!"
@@ -178,189 +89,188 @@ export const useLaunchpadStore = create<{
     }
   },
 
-  async buyTickets(amount, priceToken, listingId) {
-    const { contract, connection } = get();
+  async buyTickets(amount, priceToken, listingId, accountId, connection) {
     try {
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
-
-      const launchpadStorage = await contract.storage_balance_of({
-        account_id: connection.getAccountId(),
-      });
-
       const transactions: Transaction[] = [];
 
+      const launchpadStorage = await get().getTokenStorage(
+        connection,
+        accountId,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT
+      );
+
       if (!launchpadStorage) {
-        transactions.push({
-          receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
-      transactions.push({
-        receiverId: priceToken,
-        functionCalls: [
-          {
-            methodName: "ft_transfer_call",
-            args: {
-              receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
-              amount,
-              memo: null,
-              msg: JSON.stringify({
-                type: "BuyAllocation",
-                listing_id: listingId,
-              }),
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+      transactions.push(
+        getTransaction(accountId, priceToken, "ft_transfer_call", {
+          receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
+          amount,
+          memo: null,
+          msg: JSON.stringify({
+            type: "BuyAllocation",
+            listing_id: listingId,
+          }),
+        })
+      );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
       return console.error(
         toast.error(`Buy Tickets to Launchpad Error: ${error}`)
       );
     }
   },
-  async increaseMembership(desiredLevel) {
+  async increaseMembership(desiredLevel, accountId, connection) {
     try {
       const transactions: Transaction[] = [];
 
-      const { connection, contract } = get();
+      const { tiers_minimum_tokens } = await viewFunction(
+        connection,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_contract_settings"
+      );
 
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
-
-      const { tiers_minimum_tokens } = await contract.view_contract_settings();
-
-      const investor = await contract.view_investor({
-        account_id: connection.getAccountId(),
-      });
+      const investor = await viewFunction(
+        connection,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_investor",
+        {
+          account_id: accountId,
+        }
+      );
 
       const minTokens = tiers_minimum_tokens[desiredLevel - 1];
 
       if (!investor) {
-        transactions.push({
-          receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
       const { staked_token = "0" } = investor || {};
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_STAKING_CONTRACT,
+          "ft_transfer_call",
           {
-            methodName: "ft_transfer_call",
-            args: {
-              receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-              amount: new bn(minTokens).sub(new bn(staked_token)).toString(),
-              memo: null,
-              msg: JSON.stringify({
-                type: "VerifyAccount",
-                membership_tier: desiredLevel.toString(),
-              }),
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+            amount: new bn(minTokens).sub(new bn(staked_token)).toString(),
+            memo: null,
+            msg: JSON.stringify({
+              type: "VerifyAccount",
+              membership_tier: desiredLevel.toString(),
+            }),
+          }
+        )
+      );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
       return console.error(
         toast.error(`Error While Increasing Membership: ${error}`)
       );
     }
   },
-  async decreaseMembership(desiredLevel) {
+  async decreaseMembership(desiredLevel, accountId, connection) {
     try {
-      const { connection, contract } = get();
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
-
       const transactions: Transaction[] = [];
 
-      const stakingContract = new Contract(
-        connection?.account(),
-        import.meta.env.VITE_STAKING_CONTRACT,
-        {
-          changeMethods: [],
-          viewMethods: ["storage_balance_of"],
-        }
-      ) as StakingContract;
-
-      const stakingStorageBalance = await stakingContract.storage_balance_of({
-        account_id: connection.getAccountId(),
-      });
+      const stakingStorageBalance = await get().getTokenStorage(
+        connection,
+        accountId,
+        import.meta.env.VITE_STAKING_CONTRACT
+      );
 
       if (!stakingStorageBalance) {
-        transactions.push({
-          receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            import.meta.env.VITE_STAKING_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: connection.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
-      const { tiers_minimum_tokens } = await contract.view_contract_settings();
+      const { tiers_minimum_tokens } = await viewFunction(
+        connection,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_contract_settings"
+      );
 
-      const { staked_token } = await contract.view_investor({
-        account_id: connection.getAccountId(),
-      });
+      const { staked_token } = await viewFunction(
+        connection,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_investor",
+        {
+          account_id: accountId,
+        }
+      );
 
       const minTokens = tiers_minimum_tokens[desiredLevel - 1];
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+          "decrease_membership_tier",
           {
-            methodName: "decrease_membership_tier",
-            args: {
-              withdraw_amount: new bn(staked_token)
-                .sub(new bn(minTokens))
-                .toString(),
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            withdraw_amount: new bn(staked_token)
+              .sub(new bn(minTokens))
+              .toString(),
+          }
+        )
+      );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
       return console.error(
         toast.error(`Error While Decreasing Membership: ${error}`)
       );
+    }
+  },
+
+  getTokenStorage: async (connection, account, token) => {
+    try {
+      return await await viewFunction(connection, token, "storage_balance_of", {
+        account_id: account,
+      });
+    } catch (e) {
+      return;
     }
   },
 }));

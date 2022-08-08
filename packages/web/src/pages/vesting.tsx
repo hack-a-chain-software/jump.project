@@ -11,12 +11,10 @@ import {
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
-import { useNearQuery } from "react-near";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
-import { WalletConnection } from "near-api-js";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export const Vesting = () => {
@@ -34,14 +32,6 @@ export const Vesting = () => {
     vestings,
     loading,
   } = useVestingStore();
-
-  const { data: storage } = useNearQuery("storage_balance_of", {
-    contract: "jump_token.testnet",
-    variables: {
-      account_id: accountId,
-    },
-    skip: !accountId,
-  });
 
   useEffect(() => {
     (async () => {
@@ -202,8 +192,8 @@ export const Vesting = () => {
                         );
                       })
                       .map(({ id }) => String(id)),
-                    storage,
-                    wallet as WalletConnection
+                    accountId as string,
+                    selector
                   );
                 }}
                 justifyContent="center"
