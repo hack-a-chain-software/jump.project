@@ -428,7 +428,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: lockedTokenAccount.accountId,
-      amount: "3000000000000000000000",
+      amount: "1003000000000000000000000",
       memo: null,
       msg: JSON.stringify({
         type: "Mint",

@@ -78,6 +78,30 @@ async function testnetSeed(seededUsers) {
       gas: new BN("300000000000000"),
     });
 
+    // send jump token to be able to invest in launchpad
+    const lockedjumpQuantity = "10000000000000000000";
+    await ownerAccount.functionCall({
+      contractId: accountMap.lockedTokenAccount,
+      methodName: "storage_deposit",
+      args: {
+        account_id: seededUser,
+        registration_only: false,
+      },
+      gas: new BN("300000000000000"),
+      attachedDeposit: new BN("1500000000000000000000000"),
+    });
+    await ownerAccount.functionCall({
+      contractId: accountMap.lockedTokenAccount,
+      methodName: "ft_transfer",
+      args: {
+        receiver_id: seededUser,
+        amount: lockedjumpQuantity,
+        memo: null,
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN("300000000000000"),
+    });
+
     // mint nfts
     for (let i = 0; i < 4; i++) {
       await ownerAccount.functionCall({
