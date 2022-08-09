@@ -27,6 +27,7 @@ export const TopCard = ({
   return (
     <Box
       flex={1}
+      minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
     >
@@ -34,18 +35,20 @@ export const TopCard = ({
         overflow="hidden"
         display="flex"
         flexDirection="row"
+        flexWrap="wrap"
         alignItems="center"
         justifyContent="space-between"
         w="100%"
-        py={py ? "60px" : undefined}
+        pt={py ? "60px" : undefined}
         color="white"
         flex="1"
         px="60px"
         h="100%"
         borderRadius="24px"
+        position="relative"
         bg={glassyWhite}
       >
-        <Flex direction="column">
+        <Flex direction="column" flexGrow="1" pb={py ? "60px" : undefined}>
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
@@ -87,15 +90,14 @@ export const TopCard = ({
         {content && (
           <Flex
             flex="1"
-            marginLeft="120px"
-            justifyContent="flex-end"
+            pb={py ? "60px" : undefined}
             className="space-x-[1.25rem]"
           >
             {content}
           </Flex>
         )}
 
-        <Flex position="relative" right="-60px" bottom="-60px">
+        <Flex position="absolute" right="-60px" bottom="-60px">
           {jumpLogo && <JumpBigWhite />}
         </Flex>
       </Box>

@@ -91,8 +91,8 @@ export const Staking = () => {
 
   return (
     <PageContainer>
-      <Grid gap={4} templateColumns="1fr 1fr" templateRows="400px">
-        <Card p="3px" borderRadius="26px">
+      <Flex gap={4} w="100%" flexWrap="wrap">
+        <Card p="3px" flexGrow="1" borderRadius="26px">
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -152,7 +152,7 @@ export const Staking = () => {
             </Flex>
           </Flex>
         </Card>
-        <Card flex={1}>
+        <Card flex={1} flexGrow="1">
           <Flex
             h="100%"
             direction="column"
@@ -194,7 +194,7 @@ export const Staking = () => {
             </Stack>
           </Flex>
         </Card>
-      </Grid>
+      </Flex>
       <Box
         bg={jumpGradient}
         p="30px"

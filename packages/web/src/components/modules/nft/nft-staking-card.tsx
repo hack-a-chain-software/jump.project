@@ -37,11 +37,13 @@ export function NFTStakingCard(
       >
         <Box
           display="flex"
+          flexWrap="wrap"
           flexDirection="row"
           alignItems="center"
           justifyContent="space-between"
           w="100%"
           p="40px"
+          pb="0px"
           borderRadius="24px"
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
@@ -50,6 +52,7 @@ export function NFTStakingCard(
             userSelect="none"
             direction="column"
             height="100%"
+            pb="40px"
             justifyContent="space-between"
           >
             <Skeleton
@@ -94,7 +97,7 @@ export function NFTStakingCard(
 
           <If
             fallback={
-              <Flex gap={5}>
+              <Flex gap={5} pb="40px">
                 {[...Array(3)].map((_, i) => (
                   <Skeleton
                     width="200px"
@@ -110,7 +113,7 @@ export function NFTStakingCard(
             }
             condition={!isEmpty(props.rewards)}
           >
-            <Flex gap={5}>
+            <Flex gap={5} pb="40px">
               {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
                 <ValueBox
                   borderColor={glassyWhiteOpaque}

@@ -158,7 +158,7 @@ export const Project = () => {
   );
 
   return (
-    <PageContainer pageLoading={isLoading}>
+    <PageContainer>
       <BackButton onClick={() => navigate("/")} />
       <Flex gap={5} justifyContent="space-between">
         <Card flex={0.5}>

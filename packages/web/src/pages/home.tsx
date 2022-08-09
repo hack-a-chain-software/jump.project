@@ -95,7 +95,7 @@ export function Home() {
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
-      <Flex gap={5}>
+      <Flex gap={5} flexWrap="wrap">
         <TopCard
           gradientText="Launchpad"
           bigText="Stake. Help. Earn."

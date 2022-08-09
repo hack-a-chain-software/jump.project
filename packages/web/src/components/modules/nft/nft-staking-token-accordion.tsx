@@ -56,7 +56,7 @@ export function TokenAccordion({
     >
       <Flex width="100%" flexDirection="column">
         <Flex width="100%">
-          <Flex width="309px" height="298px">
+          <Flex width="309px" height="298px" flexShrink="0">
             <Image
               width="100%"
               height="100%"
@@ -67,7 +67,7 @@ export function TokenAccordion({
 
           <Flex
             flexGrow="1"
-            height="298px"
+            minHeight="298px"
             marginLeft="20px"
             padding="3px"
             borderRadius="25px"
@@ -107,7 +107,7 @@ export function TokenAccordion({
                   </Text>
                 </Flex>
 
-                <Flex gap="15px" width="100%">
+                <Flex gap="15px" width="100%" flexWrap="wrap">
                   {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
                     <ValueBox
                       minWidth="250px"
