@@ -78,12 +78,12 @@ export function VestingCard(
           justifyContent="space-between"
           w="100%"
           p="40px"
-          pb="0px"
           borderRadius="24px"
           flexWrap="wrap"
+          gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
-          <Flex userSelect="none" direction="column" pb="40px">
+          <Flex userSelect="none" direction="column">
             <Flex
               padding="9px 20px"
               background="white"
@@ -128,7 +128,7 @@ export function VestingCard(
             </Flex>
           </Flex>
 
-          <Flex gap={5} alignItems="center" pb="40px" flexWrap="wrap">
+          <Flex gap={5} alignItems="center" flexWrap="wrap">
             <ValueBox
               minWidth="250px"
               borderColor={glassyWhiteOpaque}

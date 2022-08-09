@@ -39,7 +39,7 @@ export const TopCard = ({
         alignItems="center"
         justifyContent="space-between"
         w="100%"
-        pt={py ? "60px" : undefined}
+        py={py ? "60px" : undefined}
         color="white"
         flex="1"
         px="60px"
@@ -47,8 +47,9 @@ export const TopCard = ({
         borderRadius="24px"
         position="relative"
         bg={glassyWhite}
+        gap={5}
       >
-        <Flex direction="column" flexGrow="1" pb={py ? "60px" : undefined}>
+        <Flex direction="column" flexGrow="1">
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
@@ -88,11 +89,7 @@ export const TopCard = ({
         </Flex>
 
         {content && (
-          <Flex
-            flex="1"
-            pb={py ? "60px" : undefined}
-            className="space-x-[1.25rem]"
-          >
+          <Flex flex="1" className="space-x-[1.25rem]">
             {content}
           </Flex>
         )}

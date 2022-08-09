@@ -202,7 +202,7 @@ export const Staking = () => {
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}
-        position="absolute"
+        // position="absolute"
         bottom="30px"
         left="150px"
         right="30px"

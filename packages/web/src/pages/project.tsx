@@ -160,8 +160,8 @@ export const Project = () => {
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
-      <Flex gap={5} justifyContent="space-between">
-        <Card flex={0.5}>
+      <Flex gap={5} justifyContent="space-between" flexWrap="wrap">
+        <Card flex={0.5} flexGrow="1">
           <Flex direction="column">
             <Flex alignItems="center">
               <div>
@@ -215,7 +215,7 @@ export const Project = () => {
             ></Text>
           </Flex>
         </Card>
-        <Card flex={1}>
+        <Card flex={1} flexGrow="2">
           <Flex direction="column">
             <Text
               color="white"
@@ -314,7 +314,7 @@ export const Project = () => {
                 {data?.launchpad_project?.project_name}
               </Text>
 
-              <Flex my="30px" gap="5px" direction="column">
+              <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
                 <Text>
                   Balance - {priceTokenBalance || "0"}{" "}
                   {data?.launchpad_project?.price_token_info?.symbol}
@@ -351,6 +351,7 @@ export const Project = () => {
                   onClick={() => onJoinProject(tickets)}
                   justifyContent="space-between"
                   w="100%"
+                  maxWidth="380px"
                 >
                   Join Project
                   <WalletIcon />
@@ -376,6 +377,7 @@ export const Project = () => {
           </If>
         </Flex>
       </Flex>
+
       <Box
         bg={jumpGradient}
         p="30px"

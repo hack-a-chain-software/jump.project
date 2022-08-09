@@ -127,7 +127,7 @@ export function Home() {
               : `${totalAllocations.data || 0} Tickets Available`}
           </Box>
         </TopCard>
-        <Card flex={1}>
+        <Card flex={1} minWidth="410px">
           <Flex w="100%" h="100%" flexDirection="column">
             <Text justifyContent="space-between" fontSize={22} fontWeight="900">
               Member Area
