@@ -52,6 +52,7 @@ export function ModalImageDialog({
       isCentered
       isOpen={isOpen}
       onClose={onClose}
+      scrollBehavior="outside"
       size={isMobile ? "full" : "md"}
     >
       <ModalOverlay

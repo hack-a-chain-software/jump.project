@@ -82,6 +82,7 @@ export function WalletSelectorModal(props: {}) {
         flexDirection="row"
         bg="transparent"
         borderRadius={modalRadius}
+        overflow="hidden"
       >
         <ModalBody
           bg={jumpGradient}
