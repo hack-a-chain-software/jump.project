@@ -195,7 +195,7 @@ export const Project = () => {
         ],
       },
       vesting: {
-        name: "Vesting and Dates",
+        name: "Vesting",
         items: [
           {
             label: "Start sale date",

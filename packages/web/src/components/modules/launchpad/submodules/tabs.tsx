@@ -19,7 +19,7 @@ export function Tabs({
       className="
         flex-grow
         flex flex-col
-        max-w-[300px]
+        max-w-[210px]
         h-max
       "
     >
