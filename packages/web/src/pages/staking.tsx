@@ -91,8 +91,8 @@ export const Staking = () => {
 
   return (
     <PageContainer>
-      <Grid gap={4} templateColumns="1fr 1fr" templateRows="400px">
-        <Card p="3px" borderRadius="26px">
+      <Flex gap={4} w="100%" flexWrap="wrap">
+        <Card p="3px" flexGrow="1" borderRadius="26px">
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -115,13 +115,19 @@ export const Staking = () => {
                 >
                   Staking
                 </Text>
-                <Text w="300px" fontSize={16}>
+                <Text maxW="300px" fontSize={16}>
                   When you stake JUMP tokens you earn tickets to join the
                   Launchpad pools!
                 </Text>
               </Flex>
             </Flex>
-            <Flex flex={1} pt={2} gap={3} mt={2}>
+            <Flex
+              className="flex-wrap lg:flex-nowrap"
+              flex={1}
+              pt={2}
+              gap={3}
+              mt={2}
+            >
               <ValueBox
                 borderColor={glassyWhiteOpaque}
                 h="144px"
@@ -152,12 +158,14 @@ export const Staking = () => {
             </Flex>
           </Flex>
         </Card>
-        <Card flex={1}>
+
+        <Card flex={1} flexGrow="1">
           <Flex
             h="100%"
             direction="column"
             flex={1}
             justifyContent="space-between"
+            flexWrap="wrap"
           >
             <div>
               <GradientText
@@ -167,34 +175,52 @@ export const Staking = () => {
               >
                 User Area
               </GradientText>
-              <Text mb="40px" w="500px" fontWeight="semibold" fontSize={16}>
+              <Text mb="40px" maxW="500px" fontWeight="semibold" fontSize={16}>
                 This is the user area where you can interact with the Jump
                 staking to earn passive income as an investor.
               </Text>
             </div>
-            <Stack gap={1}>
+            <Flex direction="column" gap={1} width="100%">
               <Button
                 color="white"
                 border="1px solid white"
                 bg="transparent"
+                maxWidth="100%"
                 justifyContent="space-between"
                 onClick={withdrawDisclosure.onOpen}
               >
-                Unstake and Claim Rewards <WalletIcon />
+                <Flex
+                  w="100%"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  className="flex md:hidden"
+                >
+                  Unstake <WalletIcon />
+                </Flex>
+
+                <Flex
+                  w="100%"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  className="hidden md:flex"
+                >
+                  Unstake and Claim Rewards <WalletIcon />
+                </Flex>
               </Button>
               <Button
                 color="black"
                 border="1px solid white"
                 bg="white"
                 justifyContent="space-between"
+                maxWidth="100%"
                 onClick={stakingDisclosure.onOpen}
               >
                 Stake <WalletIcon />
               </Button>
-            </Stack>
+            </Flex>
           </Flex>
         </Card>
-      </Grid>
+      </Flex>
       <Box
         bg={jumpGradient}
         p="30px"
@@ -202,7 +228,7 @@ export const Staking = () => {
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}
-        position="absolute"
+        // position="absolute"
         bottom="30px"
         left="150px"
         right="30px"

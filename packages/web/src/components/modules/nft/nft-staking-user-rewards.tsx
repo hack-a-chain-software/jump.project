@@ -28,12 +28,12 @@ export function NFTStakingUserRewards({
   }, [tokens, rewards]);
 
   return (
-    <Flex flex={1} direction="column">
+    <Flex flex={1} direction="column" flexWrap="wrap">
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
         Your Position:
       </Text>
 
-      <Grid gap={3} gridTemplateColumns="1fr 1fr">
+      <Flex gap={3} flexWrap="wrap">
         <If
           fallback={
             <>
@@ -41,6 +41,7 @@ export function NFTStakingUserRewards({
                 <Skeleton
                   height="128px"
                   borderRadius={20}
+                  flex="1"
                   endColor="rgba(255,255,255,0.3)"
                   key={"nft-staking-user-reward-" + i}
                 />
@@ -54,7 +55,10 @@ export function NFTStakingUserRewards({
               ({ name, userBalance, decimals, symbol }, index) => (
                 <ValueBox
                   key={"user-rewards-" + index}
-                  height="139px"
+                  flex="1"
+                  flexGrow="1"
+                  alignItems="stretch"
+                  maxHeight="max-content"
                   title={`Your ${name} Rewards`}
                   value={
                     accountId
@@ -68,7 +72,7 @@ export function NFTStakingUserRewards({
               )
             )}
         </If>
-      </Grid>
+      </Flex>
     </Flex>
   );
 }

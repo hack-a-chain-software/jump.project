@@ -79,6 +79,8 @@ export function VestingCard(
           w="100%"
           p="40px"
           borderRadius="24px"
+          flexWrap="wrap"
+          gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
           <Flex userSelect="none" direction="column">
@@ -87,6 +89,7 @@ export function VestingCard(
               background="white"
               rounded="30px"
               width="max-content"
+              maxW="100%"
             >
               <Text color="black" fontSize="14px" fontWeight="700">
                 {`Total amount - ${formatNumber(
@@ -102,7 +105,7 @@ export function VestingCard(
               </Text>
 
               <Text
-                w="500px"
+                maxW="500px"
                 fontSize="30px"
                 fontWeight="800"
                 letterSpacing="-0.03em"
@@ -126,7 +129,13 @@ export function VestingCard(
             </Flex>
           </Flex>
 
-          <Flex gap={5} alignItems="center">
+          <Flex
+            gap={5}
+            alignItems="center"
+            flexGrow="1"
+            maxWidth="840px"
+            flexWrap="wrap"
+          >
             <ValueBox
               minWidth="250px"
               borderColor={glassyWhiteOpaque}
@@ -150,7 +159,8 @@ export function VestingCard(
             />
 
             <Flex
-              width="300px"
+              w="100%"
+              maxW="300px"
               height="133px"
               flexDirection="column"
               justifyContent="space-between"

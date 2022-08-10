@@ -95,7 +95,13 @@ export function NFTStakingProject() {
         rewards={staking?.rewards}
       />
 
-      <Flex flex={1} direction="row">
+      <Flex
+        flex={1}
+        direction="row"
+        flexWrap="wrap"
+        className="flex-col md:flex-row"
+        gap={12}
+      >
         <NFTStakingUserRewards rewards={staking?.rewards} />
 
         <NFTStakingUserActions />
@@ -106,6 +112,8 @@ export function NFTStakingProject() {
           paddingTop="66px"
           alignItems="center"
           justifyContent="space-between"
+          flexWrap="wrap"
+          gap={5}
         >
           <Flex>
             <Text fontSize="24px" fontWeight="700">

@@ -27,6 +27,7 @@ export const TopCard = ({
   return (
     <Box
       flex={1}
+      minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
     >
@@ -34,18 +35,20 @@ export const TopCard = ({
         overflow="hidden"
         display="flex"
         flexDirection="row"
+        flexWrap="wrap"
         alignItems="center"
         justifyContent="space-between"
         w="100%"
-        py={py ? "60px" : undefined}
         color="white"
         flex="1"
-        px="60px"
+        p="60px"
         h="100%"
         borderRadius="24px"
+        position="relative"
         bg={glassyWhite}
+        gap={5}
       >
-        <Flex direction="column">
+        <Flex direction="column" zIndex="2" position="relative" flexGrow="1">
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
@@ -66,18 +69,14 @@ export const TopCard = ({
                 {bigText}
               </Text>
             </Flex>
-
-            {renderAsset && (
-              <Flex ml="30px" direction="row">
-                {renderAsset}
-              </Flex>
-            )}
           </Flex>
           <Text
             fontWeight="bold"
             letterSpacing="-0.03em"
             fontSize="16px"
-            w="500px"
+            maxW="500px"
+            zIndex="2"
+            position="relative"
           >
             {bottomDescription}
           </Text>
@@ -87,15 +86,15 @@ export const TopCard = ({
         {content && (
           <Flex
             flex="1"
-            marginLeft="120px"
-            justifyContent="flex-end"
+            zIndex="2"
+            position="relative"
             className="space-x-[1.25rem]"
           >
             {content}
           </Flex>
         )}
 
-        <Flex position="relative" right="-60px" bottom="-60px">
+        <Flex position="absolute" zIndex="1" right="-60px" bottom="-60px">
           {jumpLogo && <JumpBigWhite />}
         </Flex>
       </Box>
