@@ -1,12 +1,12 @@
 import BN from "bn.js";
 import { Flex, Input, Text } from "@chakra-ui/react";
 import { X_JUMP_TOKEN } from "@/env/contract";
-import { useNearContractsAndWallet } from "@/context/near";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 interface IWithdrawModalProps
   extends Omit<DialogParams, "children" | "title" | "footer"> {
@@ -14,17 +14,17 @@ interface IWithdrawModalProps
 }
 
 export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId } = useWalletSelector();
 
   const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
     "ft_balance_of",
     {
       contract: X_JUMP_TOKEN,
       variables: {
-        account_id: wallet?.getAccountId(),
+        account_id: accountId as string,
       },
       poolInterval: 1000 * 60,
-      skip: !isFullyConnected,
+      skip: !accountId,
       debug: true,
     }
   );

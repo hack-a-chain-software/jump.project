@@ -1,6 +1,5 @@
 import BN from "bn.js";
 import { LockIcon, WalletIcon } from "@/assets/svg";
-import { useNearContractsAndWallet } from "@/context/near";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -24,10 +23,11 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useLaunchpadConenctionQuery } from "@near/apollo";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Button, Card, ProgressBar, Select, TopCard } from "../components";
+import { Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 /**
  * @route - '/'
@@ -36,21 +36,15 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
  */
 export function Home() {
   const navigate = useNavigate();
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
-  const investor = useViewInvestor(wallet?.getAccountId());
+  const investor = useViewInvestor(accountId as string);
   const totalAllocations = useViewTotalEstimatedInvestorAllowance(
-    wallet?.getAccountId()
+    accountId as string
   );
-  const { increaseMembership, init, decreaseMembership } = useLaunchpadStore();
+  const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const launchpadSettings = useViewLaunchpadSettings();
-
-  useEffect(() => {
-    if (wallet && isFullyConnected) {
-      init(wallet);
-    }
-  }, [wallet, isFullyConnected]);
 
   const { refetch, data, loading, error } = useLaunchpadConenctionQuery({
     variables: {
@@ -90,18 +84,18 @@ export function Home() {
 
   const upgradeLevel = () => {
     const formattedLevel = level + 1;
-    increaseMembership(formattedLevel);
+    increaseMembership(formattedLevel, accountId as string, selector);
   };
 
   const downgradeLevel = () => {
     const formattedLevel = level - 1;
-    decreaseMembership(formattedLevel);
-    increaseMembership(formattedLevel);
+    decreaseMembership(formattedLevel, accountId as string, selector);
+    increaseMembership(formattedLevel, accountId as string, selector);
   };
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
-      <Flex gap={5}>
+      <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
           gradientText="Launchpad"
           bigText="Stake. Help. Earn."
@@ -112,7 +106,6 @@ export function Home() {
             bg="white"
             p="10px"
             px="15px"
-            minW="170px"
             maxW="200px"
             alignItems="center"
             justifyContent="center"
@@ -122,7 +115,7 @@ export function Home() {
             color="black"
             fontWeight="semibold"
           >
-            {!wallet
+            {!accountId
               ? "Connect your wallet"
               : investor.data
               ? `${
@@ -133,18 +126,27 @@ export function Home() {
               : `${totalAllocations.data || 0} Tickets Available`}
           </Box>
         </TopCard>
-        <Card flex={1}>
+
+        <Card minWidth="315px" className="lg:flex-grow lg:max-w-[400px]">
           <Flex w="100%" h="100%" flexDirection="column">
             <Text justifyContent="space-between" fontSize={22} fontWeight="900">
               Member Area
             </Text>
             <Stack gap={1}>
               <Flex direction="column" flex={1} mt={5}>
-                <Flex mb="5px" justifyContent="space-between" flex={1}>
+                <Flex
+                  mb="5px"
+                  flexWrap="wrap"
+                  justifyContent="space-between"
+                  flex={1}
+                >
                   <Text fontSize={18} fontWeight="semibold">
                     Level {level}
                   </Text>
-                  <Text>Stake more {amountToNextLevel} to next Level</Text>
+                  <Text>
+                    Stake more {Number(amountToNextLevel) / 1000000000000000000}{" "}
+                    to next Level
+                  </Text>
                 </Flex>
               </Flex>
               <Button
@@ -181,8 +183,8 @@ export function Home() {
         </Card>
       </Flex>
 
-      <Flex justifyContent="space-between">
-        <Flex gap="4">
+      <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
+        <Flex gap="4" flexGrow="1" flexWrap="wrap">
           <Select placeholder="Status">
             <option value="ALL">All</option>
             <option value="OPEN">Open</option>
@@ -197,11 +199,11 @@ export function Home() {
             <option value="no">No</option>
           </Select>
         </Flex>
-        <Flex maxW="330px" w="100%">
+        <Flex className="md:max-w-[330px]" w="100%">
           <Input
             borderWidth="2px"
             h="60px"
-            maxW="330px"
+            maxW="100%"
             w="100%"
             borderRadius={15}
             placeholder="Search by Pool Name, Token, Address"

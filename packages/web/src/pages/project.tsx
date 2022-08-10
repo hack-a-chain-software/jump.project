@@ -1,5 +1,4 @@
 import BN from "bn.js";
-import { useNearContractsAndWallet } from "@/context/near";
 import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
@@ -23,6 +22,7 @@ import { useTheme } from "../hooks/theme";
 import { useNearQuery } from "react-near";
 import { useTokenBalance } from "@/hooks/modules/token";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 /**
  * @description - Launchpad project details page
@@ -31,17 +31,18 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 export const Project = () => {
   const [tickets, setTickets] = useState(0);
   const { id } = useParams();
-  const { wallet, connectWallet, isFullyConnected } =
-    useNearContractsAndWallet();
+
+  const { accountId, selector } = useWalletSelector();
+
   const { data, loading } = useLaunchPadProjectQuery({
     variables: {
-      accountId: wallet?.getAccountId(),
+      accountId: accountId as string,
       projectId: id || "",
     },
   });
 
   const { data: investorAllocation, loading: loadingAllocation } =
-    useViewInvestorAllocation(wallet?.getAccountId(), id as string);
+    useViewInvestorAllocation(accountId as string, id as string);
 
   console.log(investorAllocation.totalTokensBought);
 
@@ -50,7 +51,7 @@ export const Project = () => {
   const { jumpGradient } = useTheme();
 
   const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
-    useViewTotalEstimatedInvestorAllowance(wallet?.getAccountId());
+    useViewTotalEstimatedInvestorAllowance(accountId as string);
 
   const navigateToExternalURL = (uri: string) => {
     window.open(uri);
@@ -61,7 +62,7 @@ export const Project = () => {
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(
       data?.launchpad_project?.price_token as string,
-      wallet?.getAccountId() as string
+      accountId as string
     );
 
   const { data: metadataUSDT, loading: isUSDTMetadataLoading } = useNearQuery<
@@ -125,7 +126,9 @@ export const Project = () => {
     ) {
       withdrawAllocations(
         data.launchpad_project.price_token,
-        data.launchpad_project.listing_id
+        data.launchpad_project.listing_id,
+        accountId as string,
+        selector
       );
     }
   };
@@ -141,7 +144,9 @@ export const Project = () => {
             .mul(new BN(data.launchpad_project.token_allocation_price || 0))
             .toString(),
           data.launchpad_project.price_token,
-          data.launchpad_project.listing_id
+          data.launchpad_project.listing_id,
+          accountId as string,
+          selector
         );
       }
     },
@@ -153,10 +158,14 @@ export const Project = () => {
   );
 
   return (
-    <PageContainer pageLoading={isLoading}>
+    <PageContainer>
       <BackButton onClick={() => navigate("/")} />
-      <Flex gap={5} justifyContent="space-between">
-        <Card flex={0.5}>
+      <Flex
+        gap={5}
+        justifyContent="space-between"
+        className="flex-col lg:flex-row"
+      >
+        <Card flex={0.5} flexGrow="1">
           <Flex direction="column">
             <Flex alignItems="center">
               <div>
@@ -202,15 +211,10 @@ export const Project = () => {
                 </Text>
               </div>
             </Flex>
-            <Text
-              fontWeight="bold"
-              letterSpacing="-0.03em"
-              fontSize="16px"
-              w="500px"
-            ></Text>
           </Flex>
         </Card>
-        <Card flex={1}>
+
+        <Card flex={1} flexGrow="1.9">
           <Flex direction="column">
             <Text
               color="white"
@@ -232,7 +236,7 @@ export const Project = () => {
             >
               Stats
             </Text>
-            <Flex justifyContent="space-between" gap="30px">
+            <Flex flexWrap="wrap" justifyContent="space-between" gap="30px">
               <Flex direction="column">
                 <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
                   <GradientText lineHeight={1}>
@@ -275,8 +279,9 @@ export const Project = () => {
           </Flex>
         </Card>
       </Flex>
-      <Flex justifyContent="space-between">
-        <Flex flex={0.5} p="20px" direction="column">
+
+      <Flex w="100%" justifyContent="space-between" flexWrap="wrap">
+        <Flex flex={0.5} p="20px" w="100%" direction="column">
           <Text
             fontWeight="800"
             fontFamily="Inter"
@@ -288,8 +293,9 @@ export const Project = () => {
           </Text>
           <Text>{data?.launchpad_project?.description_project}</Text>
         </Flex>
-        <Flex direction="column" flex={0.9}>
-          <Card flex={0.9}>
+
+        <Flex w="100%" direction="column" className="md:flex-[0.9]">
+          <Card flex={0.9} w="100%">
             <Flex direction="column" flex={1}>
               <GradientText
                 fontWeight="800"
@@ -309,7 +315,7 @@ export const Project = () => {
                 {data?.launchpad_project?.project_name}
               </Text>
 
-              <Flex my="30px" gap="5px" direction="column">
+              <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
                 <Text>
                   Balance - {priceTokenBalance || "0"}{" "}
                   {data?.launchpad_project?.price_token_info?.symbol}
@@ -334,22 +340,19 @@ export const Project = () => {
               </Flex>
 
               <If
-                condition={!!isFullyConnected}
+                condition={!!accountId}
                 fallback={
-                  <Button
-                    onClick={connectWallet}
-                    justifyContent="space-between"
-                    w="100%"
-                  >
+                  <Flex justifyContent="space-between" w="100%">
                     Connect Wallet
                     <WalletIcon />
-                  </Button>
+                  </Flex>
                 }
               >
                 <Button
                   onClick={() => onJoinProject(tickets)}
                   justifyContent="space-between"
                   w="100%"
+                  maxWidth="380px"
                 >
                   Join Project
                   <WalletIcon />
@@ -375,10 +378,13 @@ export const Project = () => {
           </If>
         </Flex>
       </Flex>
+
       <Box
         bg={jumpGradient}
         p="30px"
         display="flex"
+        flexWrap="wrap"
+        gap={5}
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}

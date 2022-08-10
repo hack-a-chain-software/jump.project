@@ -1,8 +1,13 @@
 import BN from "bn.js";
 import create from "zustand";
-import { WalletConnection, Contract } from "near-api-js";
-import { Transaction, executeMultipleTransactions } from "../hooks/near";
-import { NearContractViewCall } from "@near/ts";
+import {
+  viewFunction,
+  getTransaction,
+  executeMultipleTransactions,
+} from "@/tools";
+import type { WalletSelector } from "@near-wallet-selector/core";
+
+import { Transaction } from "@near/ts";
 
 export interface Vesting {
   id?: string;
@@ -13,19 +18,6 @@ export interface Vesting {
   fast_pass: boolean;
   withdrawn_tokens: string;
   available_to_withdraw: string;
-}
-
-interface TokenContract extends Contract {
-  ft_metadata: NearContractViewCall<any, Token>;
-}
-
-interface VestingContract extends Contract {
-  view_vesting_paginated: NearContractViewCall<
-    { account_id: string; initial_id: string; size: string },
-    Vesting[]
-  >;
-  view_vesting_vector_len: NearContractViewCall<{ account_id: string }, string>;
-  view_contract_data: NearContractViewCall<any, ContractData>;
 }
 
 export interface InvestorInfo {
@@ -60,47 +52,42 @@ export const useVestingStore = create<{
   vestings: Vesting[];
   investorInfo: Partial<InvestorInfo>;
   getPages: (total: string, limit: number) => number;
-  getInvestorInfo: (connection: WalletConnection) => Promise<void>;
-  getVestings: (connection: WalletConnection) => Promise<void>;
+  getInvestorInfo: (connection: WalletSelector) => Promise<void>;
+  getVestings: (connection: WalletSelector, accountId: string) => Promise<void>;
   fastPass: (
     vesting: string,
-    storage: any,
     amount: number,
     passCost: number,
-    connection: WalletConnection
+    accountId: string,
+    connection: WalletSelector
   ) => Promise<void>;
   withdraw: (
     vestings: string[],
-    storage: any,
-    connection: WalletConnection
+    accountId: string,
+    connection: WalletSelector
   ) => Promise<void>;
+  getTokenStorage: (
+    connection: WalletSelector,
+    account: string,
+    token: string
+  ) => Promise<any>;
 }>((set, get) => ({
   vestings: [],
   loading: true,
   investorInfo: {},
 
   getInvestorInfo: async (connection) => {
-    const tokenContract = new Contract(
-      connection.account(),
+    const token = await viewFunction(
+      connection,
       import.meta.env.VITE_BASE_TOKEN,
-      {
-        viewMethods: ["ft_metadata"],
-        changeMethods: [],
-      }
-    ) as TokenContract;
+      "ft_metadata"
+    );
 
-    const token = await tokenContract.ft_metadata();
-
-    const vestingContract = new Contract(
-      connection.account(),
+    const contractData = await viewFunction(
+      connection,
       import.meta.env.VITE_LOCKED_CONTRACT,
-      {
-        viewMethods: ["view_contract_data"],
-        changeMethods: [],
-      }
-    ) as VestingContract;
-
-    const contractData = await vestingContract.view_contract_data();
+      "view_contract_data"
+    );
 
     const investorInfo = get().vestings.reduce(
       (info: InvestorInfo, vesting: Vesting) => {
@@ -132,30 +119,31 @@ export const useVestingStore = create<{
     });
   },
 
-  getVestings: async (connection) => {
-    const contract = new Contract(
-      connection.account(),
+  getVestings: async (connection, accountId) => {
+    const totalVestings = await viewFunction(
+      connection,
       import.meta.env.VITE_LOCKED_CONTRACT,
+      "view_vesting_vector_len",
       {
-        viewMethods: ["view_vesting_paginated", "view_vesting_vector_len"],
-        changeMethods: [],
+        account_id: accountId,
       }
-    ) as VestingContract;
-
-    const totalVestings = await contract.view_vesting_vector_len({
-      account_id: connection.getAccountId(),
-    });
+    );
 
     const vestings: Vesting[] = [];
 
     const pages = get().getPages(totalVestings, 10);
 
     for (let i = 0; i <= pages; i++) {
-      const items = await contract.view_vesting_paginated({
-        account_id: connection.getAccountId(),
-        initial_id: String(i * 10),
-        size: "10",
-      });
+      const items = await viewFunction(
+        connection,
+        import.meta.env.VITE_LOCKED_CONTRACT,
+        "view_vesting_paginated",
+        {
+          account_id: accountId,
+          initial_id: String(i * 10),
+          size: "10",
+        }
+      );
 
       vestings.push(...items);
     }
@@ -179,80 +167,102 @@ export const useVestingStore = create<{
     return base;
   },
 
-  withdraw: async (vestings, storage, connection) => {
+  withdraw: async (vestings, accountId, connection) => {
     const transactions: Transaction[] = [];
 
+    const storage = await get().getTokenStorage(
+      connection,
+      accountId,
+      import.meta.env.VITE_BASE_TOKEN
+    );
+
     if (!storage || storage.total < "0.10") {
-      transactions.push({
-        receiverId: import.meta.env.VITE_BASE_TOKEN,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_BASE_TOKEN,
+          "storage_deposit",
           {
-            methodName: "storage_deposit",
-            args: {
-              account_id: connection?.getAccountId(),
-              registration_only: false,
-            },
-            amount: "0.25",
+            account_id: accountId,
+            registration_only: false,
           },
-        ],
-      });
+          "0.25"
+        )
+      );
     }
 
     vestings.forEach((vesting) => {
-      transactions.push({
-        receiverId: import.meta.env.VITE_LOCKED_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_LOCKED_CONTRACT,
+          "withdraw_locked_tokens",
           {
-            methodName: "withdraw_locked_tokens",
-            args: {
-              vesting_id: vesting,
-            },
-          },
-        ],
-      });
+            vesting_id: vesting,
+          }
+        )
+      );
     });
 
-    executeMultipleTransactions(transactions, connection as WalletConnection);
+    const wallet = await connection.wallet();
+
+    executeMultipleTransactions(transactions, wallet);
   },
 
-  fastPass: async (vesting, storage, amount, passCost, connection) => {
+  fastPass: async (vesting, amount, passCost, accountId, connection) => {
     const transactions: Transaction[] = [];
 
+    const storage = await get().getTokenStorage(
+      connection,
+      accountId,
+      import.meta.env.VITE_BASE_TOKEN
+    );
+
     if (!storage || storage.total < "0.10") {
-      transactions.push({
-        receiverId: import.meta.env.VITE_BASE_TOKEN,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_BASE_TOKEN,
+          "storage_deposit",
           {
-            methodName: "storage_deposit",
-            args: {
-              account_id: connection?.getAccountId(),
-              registration_only: false,
-            },
-            amount: "0.25",
+            account_id: accountId,
+            registration_only: false,
           },
-        ],
-      });
+          "0.25"
+        )
+      );
     }
 
-    transactions.push({
-      receiverId: import.meta.env.VITE_BASE_TOKEN,
-      functionCalls: [
+    transactions.push(
+      getTransaction(
+        accountId,
+        import.meta.env.VITE_BASE_TOKEN,
+        "ft_transfer_call",
         {
-          methodName: "ft_transfer_call",
-          args: {
-            amount: String((amount * passCost) / 10000),
-            receiver_id: import.meta.env.VITE_LOCKED_CONTRACT,
-            memo: null,
-            msg: JSON.stringify({
-              type: "BuyFastPass",
-              account_id: connection?.getAccountId(),
-              vesting_index: vesting,
-            }),
-          },
-        },
-      ],
-    });
+          amount: String((amount * passCost) / 10000),
+          receiver_id: import.meta.env.VITE_LOCKED_CONTRACT,
+          memo: null,
+          msg: JSON.stringify({
+            type: "BuyFastPass",
+            account_id: accountId,
+            vesting_index: vesting,
+          }),
+        }
+      )
+    );
 
-    executeMultipleTransactions(transactions, connection as WalletConnection);
+    const wallet = await connection.wallet();
+
+    executeMultipleTransactions(transactions, wallet);
+  },
+
+  getTokenStorage: async (connection, account, token) => {
+    try {
+      return await await viewFunction(connection, token, "storage_balance_of", {
+        account_id: account,
+      });
+    } catch (e) {
+      return;
+    }
   },
 }));

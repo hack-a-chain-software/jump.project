@@ -1,12 +1,12 @@
 import BN from "bn.js";
 import { Flex, Input, Text } from "@chakra-ui/react";
 import { JUMP_TOKEN } from "@/env/contract";
-import { useNearContractsAndWallet } from "@/context/near";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 interface IStakeModalProps
   extends Omit<DialogParams, "children" | "footer" | "title"> {
@@ -14,7 +14,7 @@ interface IStakeModalProps
 }
 
 export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
-  const { wallet, contracts } = useNearContractsAndWallet();
+  const { accountId } = useWalletSelector();
 
   const { data: balanceJump = "0" } = useNearQuery<
     string,
@@ -22,10 +22,10 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
   >("ft_balance_of", {
     contract: JUMP_TOKEN,
     variables: {
-      account_id: wallet?.getAccountId(),
+      account_id: accountId as string,
     },
     poolInterval: 1000 * 60,
-    skip: !contracts?.staking.isConnected,
+    skip: !accountId,
     debug: true,
   });
 
@@ -37,7 +37,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
   >("ft_metadata", {
     contract: JUMP_TOKEN,
     poolInterval: 1000 * 60,
-    skip: !contracts?.staking.isConnected,
+    skip: !accountId,
     debug: true,
   });
 

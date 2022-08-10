@@ -4,9 +4,8 @@ import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
-import { useNearContractsAndWallet } from "@/context/near";
 import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
-import { WalletConnection } from "near-api-js";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakeModal({
   isOpen = false,
@@ -19,7 +18,7 @@ export function NFTStakeModal({
 }) {
   const [selected, setSelected] = useState("");
 
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { selector, accountId } = useWalletSelector();
 
   const { stake } = useNftStaking();
 
@@ -28,15 +27,15 @@ export function NFTStakeModal({
       return;
     }
 
-    stake(wallet as WalletConnection, collection, selected);
+    stake(selector, accountId as string, collection, selected);
   };
 
   const { data, loading } = useNearQuery("nft_tokens_for_owner", {
     contract: collection,
     variables: {
-      account_id: wallet?.getAccountId(),
+      account_id: accountId,
     },
-    skip: !isFullyConnected,
+    skip: !accountId,
   });
 
   return (

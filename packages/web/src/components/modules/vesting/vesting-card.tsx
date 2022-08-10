@@ -6,16 +6,14 @@ import { WalletIcon } from "@/assets/svg";
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
-import { useNearQuery } from "react-near";
 import {
   useVestingStore,
   Vesting,
   Token,
   ContractData,
 } from "@/stores/vesting-store";
-import { WalletConnection } from "near-api-js";
 import { BuyFastPass } from "@/modals";
-import { useNearContractsAndWallet } from "@/context/near";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function VestingCard(
   props: Vesting & BoxProps & { token: Token; contractData: ContractData }
@@ -39,17 +37,9 @@ export function VestingCard(
     return Math.round(current / base);
   }, [props.start_timestamp, props.vesting_duration]);
 
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
-  const { withdraw, fastPass } = useVestingStore();
-
-  const { data: storage } = useNearQuery("storage_balance_of", {
-    contract: import.meta.env.VITE_BASE_TOKEN,
-    variables: {
-      account_id: wallet?.getAccountId(),
-    },
-    skip: !isFullyConnected,
-  });
+  const { withdraw } = useVestingStore();
 
   const [showFastPass, setShowFastPass] = useState(false);
 
@@ -89,6 +79,8 @@ export function VestingCard(
           w="100%"
           p="40px"
           borderRadius="24px"
+          flexWrap="wrap"
+          gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
           <Flex userSelect="none" direction="column">
@@ -97,6 +89,7 @@ export function VestingCard(
               background="white"
               rounded="30px"
               width="max-content"
+              maxW="100%"
             >
               <Text color="black" fontSize="14px" fontWeight="700">
                 {`Total amount - ${formatNumber(
@@ -112,7 +105,7 @@ export function VestingCard(
               </Text>
 
               <Text
-                w="500px"
+                maxW="500px"
                 fontSize="30px"
                 fontWeight="800"
                 letterSpacing="-0.03em"
@@ -136,7 +129,13 @@ export function VestingCard(
             </Flex>
           </Flex>
 
-          <Flex gap={5} alignItems="center">
+          <Flex
+            gap={5}
+            alignItems="center"
+            flexGrow="1"
+            maxWidth="840px"
+            flexWrap="wrap"
+          >
             <ValueBox
               minWidth="250px"
               borderColor={glassyWhiteOpaque}
@@ -160,7 +159,8 @@ export function VestingCard(
             />
 
             <Flex
-              width="300px"
+              w="100%"
+              maxW="300px"
               height="133px"
               flexDirection="column"
               justifyContent="space-between"
@@ -191,11 +191,7 @@ export function VestingCard(
                   Math.pow(10, props.token?.decimals || 0)
                 }
                 onClick={() =>
-                  withdraw(
-                    [String(props.id)],
-                    storage,
-                    wallet as WalletConnection
-                  )
+                  withdraw([String(props.id)], accountId as string, selector)
                 }
               >
                 <Flex
@@ -215,7 +211,6 @@ export function VestingCard(
       <BuyFastPass
         onClose={() => setShowFastPass(false)}
         isOpen={showFastPass}
-        storage={storage}
         token={props.token}
         vestingId={props.id || ""}
         passCost={Number(props.contractData.fast_pass_cost)}

@@ -1,7 +1,7 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
 import { InfoIcon, CheckIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
-import { Token } from "@/stores/nft-staking-store";
+import { Token } from "@near/ts";
 
 export function TokenCard({
   select,

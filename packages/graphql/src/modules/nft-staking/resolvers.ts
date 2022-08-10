@@ -33,7 +33,7 @@ export default {
       };
     },
     async rewards({ collection_id }: NFTStaking) {
-      const { farm } = await findStakingProgram(collection_id);
+      const { farm } = (await findStakingProgram(collection_id)) || {};
 
       const secondsPerMonth = 2592000;
 
