@@ -88,11 +88,11 @@ export const Vesting = () => {
         py
         content={
           <>
-            <Flex className="space-x-[1.25rem]">
+            <Flex gap="1.25rem" flexWrap="wrap">
               <Skeleton
                 height="114px"
-                minWidth="240px"
                 borderRadius={20}
+                className="md:min-w-[240px]"
                 endColor="rgba(255,255,255,0.3)"
                 isLoaded={!isLoading}
               >
@@ -113,8 +113,8 @@ export const Vesting = () => {
 
               <Skeleton
                 height="114px"
-                minWidth="240px"
                 borderRadius={20}
+                className="md:min-w-[240px]"
                 endColor="rgba(255,255,255,0.3)"
                 isLoaded={!isLoading}
               >
@@ -135,8 +135,8 @@ export const Vesting = () => {
 
               <Skeleton
                 height="114px"
-                minWidth="240px"
                 borderRadius={20}
+                className="md:min-w-[240px]"
                 endColor="rgba(255,255,255,0.3)"
                 isLoaded={!isLoading}
               >

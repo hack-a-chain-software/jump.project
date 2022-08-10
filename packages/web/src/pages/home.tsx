@@ -127,18 +127,26 @@ export function Home() {
               : `${totalAllocations.data || 0} Tickets Available`}
           </Box>
         </TopCard>
-        <Card flex={1} minWidth="410px">
+        <Card flex={1} minWidth="315px">
           <Flex w="100%" h="100%" flexDirection="column">
             <Text justifyContent="space-between" fontSize={22} fontWeight="900">
               Member Area
             </Text>
             <Stack gap={1}>
               <Flex direction="column" flex={1} mt={5}>
-                <Flex mb="5px" justifyContent="space-between" flex={1}>
+                <Flex
+                  mb="5px"
+                  flexWrap="wrap"
+                  justifyContent="space-between"
+                  flex={1}
+                >
                   <Text fontSize={18} fontWeight="semibold">
                     Level {level}
                   </Text>
-                  <Text>Stake more {amountToNextLevel} to next Level</Text>
+                  <Text>
+                    Stake more {amountToNextLevel / 1000000000000000000} to next
+                    Level
+                  </Text>
                 </Flex>
               </Flex>
               <Button
@@ -175,8 +183,8 @@ export function Home() {
         </Card>
       </Flex>
 
-      <Flex justifyContent="space-between">
-        <Flex gap="4">
+      <Flex justifyContent="space-between" flexWrap="wrap-reverse" gap={5}>
+        <Flex gap="4" flexWrap="wrap">
           <Select placeholder="Status">
             <option value="ALL">All</option>
             <option value="OPEN">Open</option>

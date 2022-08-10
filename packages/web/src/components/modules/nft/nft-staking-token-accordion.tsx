@@ -55,7 +55,7 @@ export function TokenAccordion({
       key={"nft-staking-token-accordion" + token_id}
     >
       <Flex width="100%" flexDirection="column">
-        <Flex width="100%">
+        <Flex width="100%" className="flex-col lg:flex-row" gap="20px">
           <Flex width="309px" height="298px" flexShrink="0">
             <Image
               width="100%"
@@ -68,9 +68,10 @@ export function TokenAccordion({
           <Flex
             flexGrow="1"
             minHeight="298px"
-            marginLeft="20px"
             padding="3px"
             borderRadius="25px"
+            maxWidth="100%"
+            flexWrap="wrap"
             background={useColorModeValue("transparent", jumpGradient)}
           >
             <Flex
@@ -110,7 +111,7 @@ export function TokenAccordion({
                 <Flex gap="15px" width="100%" flexWrap="wrap">
                   {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
                     <ValueBox
-                      minWidth="250px"
+                      className="md:min-w-[250px]"
                       borderColor={glassyWhiteOpaque}
                       title={name + " Rewards"}
                       color="white"

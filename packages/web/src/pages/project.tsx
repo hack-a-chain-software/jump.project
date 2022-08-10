@@ -207,14 +207,9 @@ export const Project = () => {
                 </Text>
               </div>
             </Flex>
-            <Text
-              fontWeight="bold"
-              letterSpacing="-0.03em"
-              fontSize="16px"
-              w="500px"
-            ></Text>
           </Flex>
         </Card>
+
         <Card flex={1} flexGrow="2">
           <Flex direction="column">
             <Text
@@ -237,7 +232,7 @@ export const Project = () => {
             >
               Stats
             </Text>
-            <Flex justifyContent="space-between" gap="30px">
+            <Flex flexWrap="wrap" justifyContent="space-between" gap="30px">
               <Flex direction="column">
                 <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
                   <GradientText lineHeight={1}>
@@ -280,8 +275,9 @@ export const Project = () => {
           </Flex>
         </Card>
       </Flex>
-      <Flex justifyContent="space-between">
-        <Flex flex={0.5} p="20px" direction="column">
+
+      <Flex w="100%" justifyContent="space-between" flexWrap="wrap">
+        <Flex flex={0.5} p="20px" w="100%" direction="column">
           <Text
             fontWeight="800"
             fontFamily="Inter"
@@ -293,8 +289,9 @@ export const Project = () => {
           </Text>
           <Text>{data?.launchpad_project?.description_project}</Text>
         </Flex>
-        <Flex direction="column" flex={0.9}>
-          <Card flex={0.9}>
+
+        <Flex w="100%" direction="column" flex={0.9}>
+          <Card flex={0.9} w="100%">
             <Flex direction="column" flex={1}>
               <GradientText
                 fontWeight="800"
@@ -382,6 +379,8 @@ export const Project = () => {
         bg={jumpGradient}
         p="30px"
         display="flex"
+        flexWrap="wrap"
+        gap={5}
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}

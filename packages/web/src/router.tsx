@@ -33,7 +33,12 @@ function Router() {
       <BrowserRouter>
         <Header />
 
-        <Flex w="100vw" maxWidth="calc(100vw - 120px)" ml="auto" minH="100vh">
+        <Flex
+          w="100vw"
+          className="md:w-[calc(100vw-120px)]"
+          ml="auto"
+          minH="100vh"
+        >
           <Nav />
           <Routes>
             <Route path="/" element={<Navigate to={routes.home} />} />
