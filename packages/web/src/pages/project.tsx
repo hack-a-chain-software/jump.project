@@ -165,32 +165,26 @@ export const Project = () => {
           {
             label: "Total raise (in price token)",
             value: "0",
-            description: "",
           },
           {
             label: "Project tokens for sale",
             value: "0",
-            description: "",
           },
           {
             label: "Allocation size",
             value: "0",
-            description: "",
           },
           {
             label: "How many allocations you can still buy",
             value: "0",
-            description: "",
           },
           {
             label: "How many allocations you already bought",
             value: "0",
-            description: "",
           },
           {
             label: "Total allocations bought / total allocations",
             value: "0",
-            description: "",
           },
         ],
       },
@@ -200,47 +194,38 @@ export const Project = () => {
           {
             label: "Start sale date",
             value: "0",
-            description: "",
           },
           {
             label: "Start sale phase 2 date",
             value: "0",
-            description: "",
           },
           {
             label: "End sale date",
             value: "0",
-            description: "",
           },
           {
             label: "DEX Launch date",
             value: "0",
-            description: "",
           },
           {
             label: "Vesting initial release %",
             value: "0",
-            description: "",
           },
           {
             label: "Vesting cliff release %",
             value: "0",
-            description: "",
           },
           {
             label: "Vesting final release %",
             value: "0",
-            description: "",
           },
           {
             label: "Vesting cliff start date",
             value: "0",
-            description: "",
           },
           {
             label: "Vesting cliff end date",
             value: "0",
-            description: "",
           },
         ],
       },

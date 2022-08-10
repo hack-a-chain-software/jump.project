@@ -5,7 +5,21 @@ import { useTheme } from "@/hooks/theme";
 import { Card, ValueBox } from "@/components";
 import { Flex, Text, useMediaQuery } from "@chakra-ui/react";
 
-export function ProjectStats({ tabs }: { tabs: {} }) {
+interface Tabs {
+  [key: string]: tab;
+}
+
+export interface tab {
+  name: string;
+  items: Item[];
+}
+
+export interface Item {
+  label: string;
+  value: string;
+}
+
+export function ProjectStats({ tabs }: { tabs: Tabs }) {
   const { glassyWhiteOpaque } = useTheme();
   const [isMobile] = useMediaQuery("(max-width: 1024px)");
   const [current, setCurrent] = useState<string>(Object.keys(tabs).at(0) || "");
