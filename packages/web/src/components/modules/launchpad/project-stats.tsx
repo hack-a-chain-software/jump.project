@@ -68,13 +68,12 @@ export function ProjectStats({ tabs }: { tabs: Tabs }) {
             key={current}
             className="max-w-full space-x-[12px] overflow-x-auto"
           >
-            {tabs[current].items.map(({ label, value, description }, index) => (
+            {tabs[current].items.map(({ label, value }, index) => (
               <ValueBox
                 title={label}
                 value={value}
                 height="114px"
                 borderColor={glassyWhiteOpaque}
-                bottomText={description}
                 key={"project-stats-" + current + index}
               />
             ))}
