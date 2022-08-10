@@ -95,7 +95,7 @@ export function Home() {
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
-      <Flex gap={5} className="flex-col lg:flex-row">
+      <Flex gap={5}>
         <TopCard
           gradientText="Launchpad"
           bigText="Stake. Help. Earn."
@@ -106,6 +106,7 @@ export function Home() {
             bg="white"
             p="10px"
             px="15px"
+            minW="170px"
             maxW="200px"
             alignItems="center"
             justifyContent="center"
@@ -126,27 +127,18 @@ export function Home() {
               : `${totalAllocations.data || 0} Tickets Available`}
           </Box>
         </TopCard>
-
-        <Card minWidth="315px" className="lg:flex-grow lg:max-w-[400px]">
+        <Card flex={1}>
           <Flex w="100%" h="100%" flexDirection="column">
             <Text justifyContent="space-between" fontSize={22} fontWeight="900">
               Member Area
             </Text>
             <Stack gap={1}>
               <Flex direction="column" flex={1} mt={5}>
-                <Flex
-                  mb="5px"
-                  flexWrap="wrap"
-                  justifyContent="space-between"
-                  flex={1}
-                >
+                <Flex mb="5px" justifyContent="space-between" flex={1}>
                   <Text fontSize={18} fontWeight="semibold">
                     Level {level}
                   </Text>
-                  <Text>
-                    Stake more {Number(amountToNextLevel) / 1000000000000000000}{" "}
-                    to next Level
-                  </Text>
+                  <Text>Stake more {amountToNextLevel} to next Level</Text>
                 </Flex>
               </Flex>
               <Button
@@ -183,8 +175,8 @@ export function Home() {
         </Card>
       </Flex>
 
-      <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
-        <Flex gap="4" flexGrow="1" flexWrap="wrap">
+      <Flex justifyContent="space-between">
+        <Flex gap="4">
           <Select placeholder="Status">
             <option value="ALL">All</option>
             <option value="OPEN">Open</option>
@@ -199,11 +191,11 @@ export function Home() {
             <option value="no">No</option>
           </Select>
         </Flex>
-        <Flex className="md:max-w-[330px]" w="100%">
+        <Flex maxW="330px" w="100%">
           <Input
             borderWidth="2px"
             h="60px"
-            maxW="100%"
+            maxW="330px"
             w="100%"
             borderRadius={15}
             placeholder="Search by Pool Name, Token, Address"

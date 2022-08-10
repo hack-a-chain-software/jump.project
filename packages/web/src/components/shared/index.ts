@@ -16,4 +16,3 @@ export * from "./card";
 export * from "./toast";
 export * from "./progress-bar";
 export * from "./empty";
-export * from "./mobile-nav";

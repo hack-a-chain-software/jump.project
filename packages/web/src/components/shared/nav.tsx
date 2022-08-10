@@ -1,5 +1,13 @@
-import { Flex, Stack, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  Stack,
+  Text,
+  useColorMode,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { useNavigate } from "react-router";
+import { JumpIcon } from "../../assets/svg/jump-logo";
+import { useTheme } from "../../hooks/theme";
 import { navRoutes, routes } from "../../routes";
 
 const enabledRoutes = [
@@ -14,7 +22,7 @@ export const Nav = () => {
 
   return (
     <Flex
-      minH="100vh"
+      h="100vh"
       w="120px"
       zIndex="1"
       bg="transparent"
@@ -24,10 +32,12 @@ export const Nav = () => {
       bottom="0px"
       flexDirection="column"
       alignItems="center"
-      pt="121px"
+      pt="40px"
       gap="25px"
-      className="hidden md:flex"
     >
+      <Flex>
+        <JumpIcon />
+      </Flex>
       <Stack
         display="flex"
         flex={1}

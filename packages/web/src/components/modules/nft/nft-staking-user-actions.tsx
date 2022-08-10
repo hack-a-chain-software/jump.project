@@ -63,6 +63,7 @@ export function NFTStakingUserActions(props: any) {
 
       <Flex flex={1}>
         <Box
+          ml="20px"
           display="flex"
           p="3px"
           w="100%"

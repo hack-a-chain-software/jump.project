@@ -158,14 +158,10 @@ export const Project = () => {
   );
 
   return (
-    <PageContainer>
+    <PageContainer pageLoading={isLoading}>
       <BackButton onClick={() => navigate("/")} />
-      <Flex
-        gap={5}
-        justifyContent="space-between"
-        className="flex-col lg:flex-row"
-      >
-        <Card flex={0.5} flexGrow="1">
+      <Flex gap={5} justifyContent="space-between">
+        <Card flex={0.5}>
           <Flex direction="column">
             <Flex alignItems="center">
               <div>
@@ -211,10 +207,15 @@ export const Project = () => {
                 </Text>
               </div>
             </Flex>
+            <Text
+              fontWeight="bold"
+              letterSpacing="-0.03em"
+              fontSize="16px"
+              w="500px"
+            ></Text>
           </Flex>
         </Card>
-
-        <Card flex={1} flexGrow="1.9">
+        <Card flex={1}>
           <Flex direction="column">
             <Text
               color="white"
@@ -236,7 +237,7 @@ export const Project = () => {
             >
               Stats
             </Text>
-            <Flex flexWrap="wrap" justifyContent="space-between" gap="30px">
+            <Flex justifyContent="space-between" gap="30px">
               <Flex direction="column">
                 <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
                   <GradientText lineHeight={1}>
@@ -279,9 +280,8 @@ export const Project = () => {
           </Flex>
         </Card>
       </Flex>
-
-      <Flex w="100%" justifyContent="space-between" flexWrap="wrap">
-        <Flex flex={0.5} p="20px" w="100%" direction="column">
+      <Flex justifyContent="space-between">
+        <Flex flex={0.5} p="20px" direction="column">
           <Text
             fontWeight="800"
             fontFamily="Inter"
@@ -293,9 +293,8 @@ export const Project = () => {
           </Text>
           <Text>{data?.launchpad_project?.description_project}</Text>
         </Flex>
-
-        <Flex w="100%" direction="column" className="md:flex-[0.9]">
-          <Card flex={0.9} w="100%">
+        <Flex direction="column" flex={0.9}>
+          <Card flex={0.9}>
             <Flex direction="column" flex={1}>
               <GradientText
                 fontWeight="800"
@@ -315,7 +314,7 @@ export const Project = () => {
                 {data?.launchpad_project?.project_name}
               </Text>
 
-              <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
+              <Flex my="30px" gap="5px" direction="column">
                 <Text>
                   Balance - {priceTokenBalance || "0"}{" "}
                   {data?.launchpad_project?.price_token_info?.symbol}
@@ -352,7 +351,6 @@ export const Project = () => {
                   onClick={() => onJoinProject(tickets)}
                   justifyContent="space-between"
                   w="100%"
-                  maxWidth="380px"
                 >
                   Join Project
                   <WalletIcon />
@@ -378,13 +376,10 @@ export const Project = () => {
           </If>
         </Flex>
       </Flex>
-
       <Box
         bg={jumpGradient}
         p="30px"
         display="flex"
-        flexWrap="wrap"
-        gap={5}
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}

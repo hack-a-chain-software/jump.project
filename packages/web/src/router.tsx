@@ -32,13 +32,7 @@ function Router() {
     <Flex flex={1} bg={gradientBackground}>
       <BrowserRouter>
         <Header />
-
-        <Flex
-          w="100vw"
-          className="md:w-[calc(100vw-120px)]"
-          ml="auto"
-          minH="100vh"
-        >
+        <Grid w="100%" ml="120px" minH="100vh" templateColumns="1fr">
           <Nav />
           <Routes>
             <Route path="/" element={<Navigate to={routes.home} />} />
@@ -52,7 +46,7 @@ function Router() {
               element={<NFTStakingProject />}
             />
           </Routes>
-        </Flex>
+        </Grid>
       </BrowserRouter>
 
       <Toaster position="top-center" />

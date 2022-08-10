@@ -1,7 +1,8 @@
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { ArrowRightIcon } from "@/assets/svg";
-import { ModalImageDialog, Button } from "@/components";
-import { Flex, Text, useMediaQuery, Image } from "@chakra-ui/react";
+import { ModalImageDialog, Button, If } from "@/components";
+import { Flex, Text, Grid, Image } from "@chakra-ui/react";
+import { WalletConnection } from "near-api-js";
 import { Token } from "@near/ts";
 import { useWalletSelector } from "@/context/wallet-selector";
 
@@ -18,7 +19,6 @@ export function NFTUnstakeModal({
 }) {
   const { unstake } = useNftStaking();
   const { selector, accountId } = useWalletSelector();
-  const [isMobile] = useMediaQuery("(max-width: 810px)");
 
   return (
     <ModalImageDialog
@@ -54,11 +54,11 @@ export function NFTUnstakeModal({
           Unstake all selected NFT's?
         </Text>
 
-        <Flex
+        <Grid
+          templateColumns="repeat(1, 1fr)"
           rowGap="12px"
+          maxHeight="370px"
           overflow="auto"
-          flexDirection="column"
-          maxHeight={isMobile ? "calc(100vh - 200px)" : "370px"}
         >
           {selected &&
             selected.map(({ metadata }, i) => (
@@ -79,7 +79,7 @@ export function NFTUnstakeModal({
                 />
               </Flex>
             ))}
-        </Flex>
+        </Grid>
       </Flex>
     </ModalImageDialog>
   );

@@ -55,8 +55,8 @@ export function TokenAccordion({
       key={"nft-staking-token-accordion" + token_id}
     >
       <Flex width="100%" flexDirection="column">
-        <Flex width="100%" className="flex-col lg:flex-row" gap="20px">
-          <Flex width="309px" height="298px" flexShrink="0">
+        <Flex width="100%">
+          <Flex width="309px" height="298px">
             <Image
               width="100%"
               height="100%"
@@ -67,11 +67,10 @@ export function TokenAccordion({
 
           <Flex
             flexGrow="1"
-            minHeight="298px"
+            height="298px"
+            marginLeft="20px"
             padding="3px"
             borderRadius="25px"
-            maxWidth="100%"
-            flexWrap="wrap"
             background={useColorModeValue("transparent", jumpGradient)}
           >
             <Flex
@@ -108,10 +107,10 @@ export function TokenAccordion({
                   </Text>
                 </Flex>
 
-                <Flex gap="15px" width="100%" flexWrap="wrap">
+                <Flex gap="15px" width="100%">
                   {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
                     <ValueBox
-                      className="md:min-w-[250px]"
+                      minWidth="250px"
                       borderColor={glassyWhiteOpaque}
                       title={name + " Rewards"}
                       color="white"
@@ -136,22 +135,18 @@ export function TokenAccordion({
           borderRadius="20px"
           minHeight="90px"
           alignItems="center"
-          padding="12px 32px"
-          flexWrap="wrap"
+          padding="0px 32px"
           margin="22px 0px 36px 0px"
-          gap="12px"
           opacity={hasWithdrawPenalty ? 1 : 0}
         >
-          <Flex flexShrink="0" className="mx-auto lg:mx-0">
-            <InfoIcon color="white" />
-          </Flex>
+          <InfoIcon color="white" />
 
           <Text
             color="white"
             fontSize="20px"
             fontWeight="400"
             lineHeight="24px"
-            className="text-center lg:text-left"
+            marginLeft="16px"
           >
             This NFT is subject to an early withdraw penalty of{" "}
             {withdrawPenalty}, wait until

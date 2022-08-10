@@ -7,7 +7,6 @@ import {
   Text,
   ModalContentProps,
   Box,
-  useMediaQuery,
 } from "@chakra-ui/react";
 import { CloseIcon } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
@@ -43,7 +42,6 @@ export function ModalImageDialog({
   children?: React.ReactNode;
 }) {
   const { jumpGradient } = useTheme();
-  const [isMobile] = useMediaQuery("(max-width: 810px)");
   return (
     <Modal
       closeOnEsc={!closeLocked}
@@ -52,7 +50,6 @@ export function ModalImageDialog({
       isCentered
       isOpen={isOpen}
       onClose={onClose}
-      size={isMobile ? "full" : "md"}
     >
       <ModalOverlay
         backdropFilter={shouldBlurBackdrop ? "blur(20px)" : ""}
@@ -62,9 +59,8 @@ export function ModalImageDialog({
         id="content"
         flexDirection="row"
         bg="transparent"
-        minW={isMobile ? "auto" : minW}
-        minH={isMobile ? "auto" : minH}
-        overflow="hidden"
+        minW={minW}
+        minH={minH}
         borderRadius={modalRadius}
         {...modalContentProps}
       >
@@ -74,19 +70,16 @@ export function ModalImageDialog({
           p="6px"
           display="flex"
           borderRadius={25}
-          overflow="hidden"
-          maxWidth="100vw"
         >
           <ModalBody
             p="30px"
             pl="40px"
-            position="relative"
             bg={bg || jumpGradient}
             overflowY="scroll"
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
           >
-            <Flex direction="column" height="100%">
+            <Flex direction="column">
               <Text
                 as="h1"
                 mt="10px"
@@ -109,8 +102,17 @@ export function ModalImageDialog({
                 {footer}
               </Flex>
             </Flex>
-
-            {isMobile && (
+          </ModalBody>
+          <ModalBody
+            id="info-image"
+            borderRadius={`0 ${modalRadius}px ${modalRadius}px 0`}
+            borderColor={bg}
+            borderWidth={0}
+            backgroundSize="cover"
+            backgroundPosition="center center"
+            backgroundImage={image}
+          >
+            {!closeLocked && (
               <Flex
                 cursor="pointer"
                 onClick={onClose}
@@ -130,37 +132,6 @@ export function ModalImageDialog({
               </Flex>
             )}
           </ModalBody>
-          {!isMobile && (
-            <ModalBody
-              id="info-image"
-              borderRadius={`0 ${modalRadius}px ${modalRadius}px 0`}
-              borderColor={bg}
-              borderWidth={0}
-              backgroundSize="cover"
-              backgroundPosition="center center"
-              backgroundImage={image}
-            >
-              {!closeLocked && (
-                <Flex
-                  cursor="pointer"
-                  onClick={onClose}
-                  position="absolute"
-                  top="30px"
-                  right="30px"
-                  w="40px"
-                  h="40px"
-                  alignItems="center"
-                  justifyContent="center"
-                  bg="rgba(255,255,255,0.2)"
-                  borderRadius={6}
-                  backdropFilter="blur(10px)"
-                  color="white"
-                >
-                  <CloseIcon />
-                </Flex>
-              )}
-            </ModalBody>
-          )}
         </Box>
       </ModalContent>
     </Modal>

@@ -11,5 +11,3 @@ export * from "./info";
 export * from "./arrow-right";
 export * from "./jump-big-white";
 export * from "./lock";
-export * from "./menu";
-export * from "./logout";
