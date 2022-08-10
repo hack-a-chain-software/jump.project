@@ -86,7 +86,6 @@ export function WalletSelectorModal(props: {}) {
       >
         <ModalBody
           bg={jumpGradient}
-          overflowY="scroll"
           overflow="hidden"
           borderRadius={modalRadius}
           padding="34px"

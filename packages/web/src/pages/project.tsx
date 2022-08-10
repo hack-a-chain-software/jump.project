@@ -241,7 +241,7 @@ export const Project = () => {
         className="flex-col lg:flex-row"
         overflow="hidden"
       >
-        <Card flex={1} flexGrow="1">
+        <Card flex={1.4}>
           <Flex direction="column">
             <Flex alignItems="center">
               <div>
@@ -287,25 +287,26 @@ export const Project = () => {
                 </Text>
               </div>
             </Flex>
+
+            <Flex
+              direction="column"
+              w="100%"
+              justifyContent="space-between"
+              flexWrap="wrap"
+            >
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="40px"
+                as="h1"
+              >
+                Description
+              </Text>
+              <Text>{data?.launchpad_project?.description_project}</Text>
+            </Flex>
           </Flex>
         </Card>
-
-        <ProjectStats tabs={tabs} />
-      </Flex>
-
-      <Flex w="100%" justifyContent="space-between" flexWrap="wrap">
-        <Flex flex={0.5} p="20px" w="100%" direction="column">
-          <Text
-            fontWeight="800"
-            fontFamily="Inter"
-            letterSpacing="-0.05em"
-            fontSize="40px"
-            as="h1"
-          >
-            Description
-          </Text>
-          <Text>{data?.launchpad_project?.description_project}</Text>
-        </Flex>
 
         <Flex w="100%" direction="column" className="md:flex-[0.9]">
           <Card flex={0.9} w="100%">
@@ -391,6 +392,8 @@ export const Project = () => {
           </If>
         </Flex>
       </Flex>
+
+      <ProjectStats tabs={tabs} />
 
       <Box
         bg={jumpGradient}

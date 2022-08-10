@@ -83,7 +83,6 @@ export function ModalImageDialog({
             pl="40px"
             position="relative"
             bg={bg || jumpGradient}
-            overflowY="scroll"
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
           >

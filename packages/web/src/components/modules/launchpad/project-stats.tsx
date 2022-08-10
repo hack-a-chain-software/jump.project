@@ -25,7 +25,7 @@ export function ProjectStats({ tabs }: { tabs: Tabs }) {
   const [current, setCurrent] = useState<string>(Object.keys(tabs).at(0) || "");
 
   return (
-    <Card flex={1} flexGrow="1.9" w="100%" maxWidth={isMobile ? "100%" : "65%"}>
+    <Card flex={1} w="100%" maxWidth="100%">
       <Flex w="100%" flexDirection="column" gap={4}>
         <Flex w="100%" gap={1} flexWrap="wrap" justifyContent="space-between">
           <Flex direction="column">
