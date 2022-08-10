@@ -144,8 +144,8 @@ export function Home() {
                     Level {level}
                   </Text>
                   <Text>
-                    Stake more {amountToNextLevel / 1000000000000000000} to next
-                    Level
+                    Stake more {Number(amountToNextLevel) / 1000000000000000000}{" "}
+                    to next Level
                   </Text>
                 </Flex>
               </Flex>
