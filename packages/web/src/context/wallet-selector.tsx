@@ -51,8 +51,7 @@ export const WalletSelectorContextProvider: React.FC<
 
   const init = useCallback(async () => {
     const _selector = await setupWalletSelector({
-      network: "testnet",
-      debug: true,
+      network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
       modules: [
         setupSender(),
         // setupLedger(),

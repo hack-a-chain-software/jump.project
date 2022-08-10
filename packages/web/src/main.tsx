@@ -19,7 +19,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ApolloProvider client={client}>
       <ChakraProvider theme={theme}>
-        <ProviderNear environment={NearEnvironment.TestNet}>
+        <ProviderNear
+          environment={import.meta.env.VITE_NEAR_NETWORK || "testnet"}
+        >
           <WalletSelectorContextProvider>
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
             <Router />
