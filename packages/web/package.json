@@ -20,6 +20,7 @@
     "@near/apollo": "*",
     "@near/contracts": "*",
     "@near/ts": "*",
+    "@tailwindcss/forms": "^0.5.2",
     "@types/bn.js": "^5.1.0",
     "@types/ramda": "^0.28.14",
     "@types/yup": "^0.29.14",

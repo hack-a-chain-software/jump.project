@@ -17,7 +17,7 @@ import {
 } from "../assets/svg";
 import { Button, Card, GradientText, If, PageContainer } from "../components";
 import { BackButton } from "../components/shared/back-button";
-import { ProgressBar } from "../components/shared/progress-bar";
+import { ProjectStats } from "@/components";
 import { useTheme } from "../hooks/theme";
 import { useNearQuery } from "react-near";
 import { useTokenBalance } from "@/hooks/modules/token";
@@ -157,6 +157,96 @@ export const Project = () => {
     ]
   );
 
+  const tabs = useMemo(() => {
+    return {
+      price: {
+        name: "Price",
+        items: [
+          {
+            label: "Total raise (in price token)",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Project tokens for sale",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Allocation size",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "How many allocations you can still buy",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "How many allocations you already bought",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Total allocations bought / total allocations",
+            value: "0",
+            description: "",
+          },
+        ],
+      },
+      vesting: {
+        name: "Vesting and Dates",
+        items: [
+          {
+            label: "Start sale date",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Start sale phase 2 date",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "End sale date",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "DEX Launch date",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Vesting initial release %",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Vesting cliff release %",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Vesting final release %",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Vesting cliff start date",
+            value: "0",
+            description: "",
+          },
+          {
+            label: "Vesting cliff end date",
+            value: "0",
+            description: "",
+          },
+        ],
+      },
+    };
+  }, []);
+
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
@@ -164,8 +254,9 @@ export const Project = () => {
         gap={5}
         justifyContent="space-between"
         className="flex-col lg:flex-row"
+        overflow="hidden"
       >
-        <Card flex={0.5} flexGrow="1">
+        <Card flex={1} flexGrow="1">
           <Flex direction="column">
             <Flex alignItems="center">
               <div>
@@ -214,70 +305,7 @@ export const Project = () => {
           </Flex>
         </Card>
 
-        <Card flex={1} flexGrow="1.9">
-          <Flex direction="column">
-            <Text
-              color="white"
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="24px"
-              mb="-20px"
-              as="h1"
-            >
-              Project
-            </Text>
-            <Text
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="50px"
-              as="h1"
-            >
-              Stats
-            </Text>
-            <Flex flexWrap="wrap" justifyContent="space-between" gap="30px">
-              <Flex direction="column">
-                <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
-                  <GradientText lineHeight={1}>
-                    {Number(
-                      data?.launchpad_project
-                        ?.total_amount_sale_project_tokens || 0
-                    ) *
-                      10 ** -(metadataProjectToken?.decimals || 0)}
-                    <Text as="strong" fontSize={12}>
-                      {data?.launchpad_project?.project_token_info?.symbol}
-                    </Text>
-                  </GradientText>
-                </Text>
-                <Text fontSize={16}>Total Raise</Text>
-              </Flex>
-              <Flex direction="column">
-                <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
-                  <GradientText lineHeight={1}>
-                    {finalPrice}{" "}
-                    {data?.launchpad_project?.price_token_info?.symbol}
-                  </GradientText>
-                </Text>
-                <Text fontSize={16}>Allocation per ticket</Text>
-              </Flex>
-              <Flex direction="column">
-                <Text letterSpacing="-0,03em" fontWeight="bold" fontSize={24}>
-                  <GradientText lineHeight={1}>
-                    {data?.launchpad_project?.allocations_sold}
-                    <Text as="strong" fontSize={12}>
-                      Tickets
-                    </Text>
-                  </GradientText>
-                </Text>
-                <Text fontSize={16}>Total Allocations Sold</Text>
-              </Flex>
-            </Flex>
-            <Flex flex={1} pt="10px">
-              <ProgressBar done={80} />
-            </Flex>
-          </Flex>
-        </Card>
+        <ProjectStats tabs={tabs} />
       </Flex>
 
       <Flex w="100%" justifyContent="space-between" flexWrap="wrap">
