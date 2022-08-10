@@ -33,7 +33,7 @@ export function NFTStakingUserRewards({
         Your Position:
       </Text>
 
-      <Flex gap={3} gridTemplateColumns="1fr 1fr" flexWrap="wrap">
+      <Flex gap={3} flexWrap="wrap">
         <If
           fallback={
             <>
@@ -56,7 +56,9 @@ export function NFTStakingUserRewards({
                 <ValueBox
                   key={"user-rewards-" + index}
                   flex="1"
-                  height="139px"
+                  flexGrow="1"
+                  alignItems="stretch"
+                  maxHeight="max-content"
                   title={`Your ${name} Rewards`}
                   value={
                     accountId

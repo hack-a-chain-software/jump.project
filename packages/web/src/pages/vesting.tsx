@@ -87,75 +87,73 @@ export const Vesting = () => {
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
         content={
-          <>
-            <Flex gap="1.25rem" flexWrap="wrap">
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Locked"
-                  value={
-                    accountId
-                      ? `${formatNumber(
-                          investorInfo?.totalLocked || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="All amount locked"
-                />
-              </Skeleton>
+          <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Locked"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalLocked || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="All amount locked"
+              />
+            </Skeleton>
 
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Unlocked"
-                  value={
-                    accountId
-                      ? `${formatNumber(
-                          investorInfo?.totalUnlocked || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="Unlocked amount"
-                />
-              </Skeleton>
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Unlocked"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalUnlocked || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="Unlocked amount"
+              />
+            </Skeleton>
 
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Withdrawn"
-                  value={
-                    accountId
-                      ? `${formatNumber(
-                          investorInfo?.totalWithdrawn || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="Total quantity "
-                />
-              </Skeleton>
-            </Flex>
-          </>
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Withdrawn"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalWithdrawn || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="Total quantity "
+              />
+            </Skeleton>
+          </Flex>
         }
       />
 

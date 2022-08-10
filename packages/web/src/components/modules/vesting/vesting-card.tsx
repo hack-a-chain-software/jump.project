@@ -129,7 +129,13 @@ export function VestingCard(
             </Flex>
           </Flex>
 
-          <Flex gap={5} alignItems="center" flexWrap="wrap">
+          <Flex
+            gap={5}
+            alignItems="center"
+            flexGrow="1"
+            maxWidth="840px"
+            flexWrap="wrap"
+          >
             <ValueBox
               minWidth="250px"
               borderColor={glassyWhiteOpaque}

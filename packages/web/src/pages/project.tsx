@@ -160,7 +160,11 @@ export const Project = () => {
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
-      <Flex gap={5} justifyContent="space-between" flexWrap="wrap">
+      <Flex
+        gap={5}
+        justifyContent="space-between"
+        className="flex-col lg:flex-row"
+      >
         <Card flex={0.5} flexGrow="1">
           <Flex direction="column">
             <Flex alignItems="center">
@@ -210,7 +214,7 @@ export const Project = () => {
           </Flex>
         </Card>
 
-        <Card flex={1} flexGrow="2">
+        <Card flex={1} flexGrow="1.9">
           <Flex direction="column">
             <Text
               color="white"
@@ -290,7 +294,7 @@ export const Project = () => {
           <Text>{data?.launchpad_project?.description_project}</Text>
         </Flex>
 
-        <Flex w="100%" direction="column" flex={0.9}>
+        <Flex w="100%" direction="column" className="md:flex-[0.9]">
           <Card flex={0.9} w="100%">
             <Flex direction="column" flex={1}>
               <GradientText

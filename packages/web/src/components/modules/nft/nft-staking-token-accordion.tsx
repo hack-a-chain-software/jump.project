@@ -136,18 +136,22 @@ export function TokenAccordion({
           borderRadius="20px"
           minHeight="90px"
           alignItems="center"
-          padding="0px 32px"
+          padding="12px 32px"
+          flexWrap="wrap"
           margin="22px 0px 36px 0px"
+          gap="12px"
           opacity={hasWithdrawPenalty ? 1 : 0}
         >
-          <InfoIcon color="white" />
+          <Flex flexShrink="0" className="mx-auto lg:mx-0">
+            <InfoIcon color="white" />
+          </Flex>
 
           <Text
             color="white"
             fontSize="20px"
             fontWeight="400"
             lineHeight="24px"
-            marginLeft="16px"
+            className="text-center lg:text-left"
           >
             This NFT is subject to an early withdraw penalty of{" "}
             {withdrawPenalty}, wait until
