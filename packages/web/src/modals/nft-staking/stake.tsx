@@ -85,6 +85,7 @@ export function NFTStakeModal({
               flexWrap="wrap"
               maxHeight="320px"
               overflow="auto"
+              className="jdx-content"
             >
               {data &&
                 data.map(({ metadata, token_id }, i) => (
