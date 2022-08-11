@@ -421,6 +421,8 @@ export const Project = () => {
                   data?.launchpad_project?.discord as string
                 )
               }
+              cursor="pointer"
+              className="hover:bg-white hover:text-black"
             >
               <DiscordIcon />
             </Flex>
@@ -439,6 +441,8 @@ export const Project = () => {
                   data?.launchpad_project?.twitter as string
                 )
               }
+              cursor="pointer"
+              className="hover:bg-white hover:text-black"
             >
               <TwitterIcon />
             </Flex>
@@ -457,6 +461,8 @@ export const Project = () => {
                   data?.launchpad_project?.telegram as string
                 )
               }
+              cursor="pointer"
+              className="hover:bg-white hover:text-black"
             >
               <TelegramIcon />
             </Flex>
@@ -476,6 +482,8 @@ export const Project = () => {
                   data?.launchpad_project?.website as string
                 )
               }
+              cursor="pointer"
+              className="hover:bg-white hover:text-black"
             >
               <WebIcon />
             </Flex>
@@ -494,6 +502,8 @@ export const Project = () => {
                   data?.launchpad_project?.whitepaper as string
                 )
               }
+              cursor="pointer"
+              className="hover:bg-white hover:text-black"
             >
               <WhitepaperIcon />
             </Flex>
