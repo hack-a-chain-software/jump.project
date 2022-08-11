@@ -49,7 +49,7 @@ export function NFTUnstakeModal({
       }
       shouldBlurBackdrop
     >
-      <Flex marginBottom="75px" w="100%" direction="column">
+      <Flex w="100%" direction="column">
         <Text marginTop="-12px" marginBottom="12px">
           Unstake all selected NFT's?
         </Text>
@@ -57,8 +57,8 @@ export function NFTUnstakeModal({
         <Flex
           rowGap="12px"
           overflow="auto"
+          maxHeight="370px"
           flexDirection="column"
-          maxHeight={isMobile ? "calc(100vh - 200px)" : "370px"}
         >
           {selected &&
             selected.map(({ metadata }, i) => (

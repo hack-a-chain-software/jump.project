@@ -77,7 +77,7 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
         flex={1}
         flexDirection="column"
         alignItems="start"
-        justifyContent="center"
+        // justifyContent="center"
         h="100%"
       >
         <Text

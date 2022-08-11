@@ -253,9 +253,8 @@ export const Staking = () => {
         title="Understanding Staking"
         onClose={onClose}
         footer={
-          <Button bg="white" color="black" w="100%">
+          <Button bg="white" color="black" px="12px" className="px-[12px]">
             Read More on Docs
-            <ArrowRightIcon />
           </Button>
         }
         shouldBlurBackdrop

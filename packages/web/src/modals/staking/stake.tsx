@@ -79,7 +79,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
         flex={1}
         flexDirection="column"
         alignItems="start"
-        justifyContent="center"
+        // justifyContent="center"
         h="100%"
       >
         <Text

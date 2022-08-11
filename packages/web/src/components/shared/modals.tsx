@@ -54,7 +54,7 @@ export function ModalImageDialog({
       isOpen={isOpen}
       onClose={onClose}
       scrollBehavior="outside"
-      size={isMobile ? "full" : "md"}
+      size={isMobile ? "md" : "md"}
     >
       <ModalOverlay
         backdropFilter={shouldBlurBackdrop ? "blur(20px)" : ""}
@@ -67,7 +67,7 @@ export function ModalImageDialog({
         minW={isMobile ? "auto" : minW}
         minH={isMobile ? "auto" : minH}
         overflow="hidden"
-        borderRadius={modalRadius}
+        borderRadius={isMobile ? "0px" : modalRadius}
         {...modalContentProps}
       >
         <Box
@@ -99,13 +99,7 @@ export function ModalImageDialog({
               </Text>
 
               {children}
-              <Flex
-                p="10px"
-                position="absolute"
-                right="51%"
-                bottom="20px"
-                left="20px"
-              >
+              <Flex width="max-content" bottom="20px" mt="12px">
                 {footer}
               </Flex>
             </Flex>
