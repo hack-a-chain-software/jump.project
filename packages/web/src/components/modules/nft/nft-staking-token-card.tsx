@@ -17,6 +17,9 @@ export function TokenCard({
       width="309px"
       height="298px"
       position="relative"
+      _hover={{
+        opacity: 0.6,
+      }}
     >
       <Image
         width="100%"
