@@ -4,7 +4,8 @@ import {
   ModalBody,
   ModalOverlay,
   ModalContent,
-  Grid,
+  Box,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useTheme } from "../../hooks/theme";
 
@@ -19,7 +20,7 @@ import { WalletModuleItem } from "./submodules/wallet-module-item";
 const modalRadius = 20;
 
 export function WalletSelectorModal(props: {}) {
-  const { jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
 
   const { selector, showModal, toggleModal } = useWalletSelector();
 
@@ -45,7 +46,7 @@ export function WalletSelectorModal(props: {}) {
     try {
       console.log(module);
 
-      const { deprecated, available } = module.metadata;
+      const { available } = module.metadata;
 
       if (module.type === "injected" && !available) {
         return;
@@ -85,32 +86,37 @@ export function WalletSelectorModal(props: {}) {
         overflow="hidden"
       >
         <ModalBody
-          bg={jumpGradient}
           overflow="hidden"
           borderRadius={modalRadius}
-          padding="34px"
           width="max-content"
           minWidth="max-content"
+          bg={jumpGradient}
+          padding="0"
         >
-          <Flex marginBottom="24px">
-            <GradientText
-              mb="-5px"
-              fontWeight="800"
-              fontSize={24}
-              color="white"
-            >
-              Connect Wallet
-            </GradientText>
-          </Flex>
-          <Flex flexDirection="column" className="space-y-[12px]">
-            {modules.map((module) => (
-              <WalletModuleItem
-                {...module.metadata}
-                key={"wallet-selector-modal-module" + module.id}
-                onClick={() => handleWalletClick(module)}
-              />
-            ))}
-          </Flex>
+          <Box
+            padding="34px"
+            bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+          >
+            <Flex marginBottom="24px">
+              <GradientText
+                mb="-5px"
+                fontWeight="800"
+                fontSize={24}
+                color="white"
+              >
+                Connect Wallet
+              </GradientText>
+            </Flex>
+            <Flex flexDirection="column" className="space-y-[12px]">
+              {modules.map((module) => (
+                <WalletModuleItem
+                  {...module.metadata}
+                  key={"wallet-selector-modal-module" + module.id}
+                  onClick={() => handleWalletClick(module)}
+                />
+              ))}
+            </Flex>
+          </Box>
         </ModalBody>
       </ModalContent>
     </Modal>

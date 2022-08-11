@@ -8,6 +8,7 @@ import {
   ModalContentProps,
   Box,
   useMediaQuery,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { CloseIcon } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
@@ -42,7 +43,7 @@ export function ModalImageDialog({
   closeLocked?: boolean;
   children?: React.ReactNode;
 }) {
-  const { jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhiteOpaque, gradientBoxTopCard } = useTheme();
   const [isMobile] = useMediaQuery("(max-width: 810px)");
   return (
     <Modal
@@ -71,20 +72,19 @@ export function ModalImageDialog({
       >
         <Box
           w="100%"
-          bg={jumpGradient}
-          p="6px"
           display="flex"
           borderRadius={25}
           overflow="hidden"
           maxWidth="100vw"
+          bg={jumpGradient}
         >
           <ModalBody
-            p="30px"
-            pl="40px"
+            p="36px"
+            pl="46px"
             position="relative"
-            bg={bg || jumpGradient}
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
+            bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
           >
             <Flex direction="column" height="100%">
               <Text

@@ -24,8 +24,6 @@ export function ProjectStats({
   stats: Stats;
   description: string;
 }) {
-  const { glassyWhiteOpaque } = useTheme();
-
   return (
     <Card flex={1} w="100%">
       <Flex gap={8} width="100%" className="flex-col xl:flex-row">

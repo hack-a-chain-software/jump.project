@@ -61,7 +61,7 @@ export function NFTStakeModal({
       shouldBlurBackdrop
     >
       <Flex marginBottom="75px" w="100%" direction="column">
-        <Text marginTop="-12px" marginBottom="12px">
+        <Text color="white" marginTop="-12px" marginBottom="12px">
           please select your nft from the wallet
         </Text>
 
