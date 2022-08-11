@@ -46,7 +46,6 @@ export function VestingCard(
   return (
     <Box
       color="white"
-      cursor="pointer"
       p="3px"
       background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
@@ -83,7 +82,7 @@ export function VestingCard(
           gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
-          <Flex userSelect="none" direction="column">
+          <Flex direction="column">
             <Flex
               padding="9px 20px"
               background="white"
