@@ -193,39 +193,39 @@ export const Project = () => {
         items: [
           {
             label: "Start sale date",
-            value: "100,00",
+            value: "2022/05/05",
           },
           {
             label: "Start sale phase 2 date",
-            value: "100,00",
+            value: "2022/07/07",
           },
           {
             label: "End sale date",
-            value: "100,00",
+            value: "2022/09/09",
           },
           {
             label: "DEX Launch date",
-            value: "100,00",
+            value: "2022/10/10",
           },
           {
             label: "Vesting initial release %",
-            value: "100,00",
+            value: "100%",
           },
           {
             label: "Vesting cliff release %",
-            value: "100,00",
+            value: "100%",
           },
           {
             label: "Vesting final release %",
-            value: "100,00",
+            value: "99%",
           },
           {
             label: "Vesting cliff start date",
-            value: "100,00",
+            value: "2022/11/11",
           },
           {
             label: "Vesting cliff end date",
-            value: "100,00",
+            value: "2022/12/12",
           },
         ],
       },
