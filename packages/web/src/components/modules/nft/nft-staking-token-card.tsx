@@ -66,8 +66,9 @@ export function TokenCard({
             fontWeight="400"
             fontFamily="Inter"
             marginBottom="-3px"
+            className="line-clamp-1"
           >
-            {metadata.description}
+            {metadata.title}
           </Text>
 
           <Text
@@ -76,8 +77,9 @@ export function TokenCard({
             fontSize="16px"
             fontWeight="500"
             fontFamily="Inter"
+            className="line-clamp-2"
           >
-            {metadata.title}
+            {metadata.description}
           </Text>
         </Flex>
 

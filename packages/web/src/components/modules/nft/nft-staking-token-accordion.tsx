@@ -95,7 +95,7 @@ export function TokenAccordion({
                     fontWeight="700"
                     letterSpacing="-0.03em"
                   >
-                    {metadata.description}
+                    {metadata.title}
                   </Text>
 
                   <Text
@@ -104,7 +104,7 @@ export function TokenAccordion({
                     fontWeight="600"
                     lineHeight="29px"
                   >
-                    {metadata.title}
+                    {metadata.description}
                   </Text>
                 </Flex>
 

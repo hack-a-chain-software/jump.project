@@ -70,7 +70,7 @@ export function WalletSelectorModal(props: {}) {
     <Modal
       closeOnEsc
       closeOnOverlayClick
-      blockScrollOnMount={false}
+      blockScrollOnMount={true}
       isCentered
       isOpen={showModal}
       onClose={() => toggleModal()}
