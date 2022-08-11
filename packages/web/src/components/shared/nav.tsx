@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from "@chakra-ui/react";
+import { Flex, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
 import { navRoutes, routes } from "../../routes";
 
@@ -37,36 +37,45 @@ export const Nav = () => {
         pb="100px"
       >
         {navRoutes.map((e) => (
-          <Flex
-            alignItems="center"
-            w="80px"
-            minH="80px"
-            cursor={enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"}
-            transition="0.3s"
-            onClick={() =>
-              enabledRoutes.includes(e.route) ? navigate(e.route) : null
-            }
-            userSelect="none"
-            justifyContent="center"
+          <Tooltip
+            isDisabled={enabledRoutes.includes(e.route)}
             key={e.route}
-            direction="column"
+            hasArrow
+            label="Coming soon"
+            placement="right"
           >
-            <Text
-              userSelect="none"
-              textAlign="center"
-              display="flex"
+            <Flex
               alignItems="center"
-              flexDirection="column"
-              fontSize="12px"
-              pt={2}
-              opacity={
-                window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
+              w="80px"
+              minH="80px"
+              cursor={
+                enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"
               }
+              transition="0.3s"
+              onClick={() =>
+                enabledRoutes.includes(e.route) ? navigate(e.route) : null
+              }
+              userSelect="none"
+              justifyContent="center"
+              direction="column"
             >
-              {e.icon}
-              {e.title}
-            </Text>
-          </Flex>
+              <Text
+                userSelect="none"
+                textAlign="center"
+                display="flex"
+                alignItems="center"
+                flexDirection="column"
+                fontSize="12px"
+                pt={2}
+                opacity={
+                  window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
+                }
+              >
+                {e.icon}
+                {e.title}
+              </Text>
+            </Flex>
+          </Tooltip>
         ))}
       </Stack>
     </Flex>
