@@ -234,10 +234,12 @@ export function Home() {
             {data?.launchpad_projects.data?.map((e) => (
               <Tr
                 cursor="pointer"
+                borderRadius="20px"
                 onClick={() => navigate(`/launchpad/${e?.listing_id}`)}
                 key={e?.listing_id}
+                className="hover:bg-[rgba(255,255,255,0.5)]"
               >
-                <Td>
+                <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                   <Image
                     borderRadius={100}
                     w={30}
@@ -251,7 +253,9 @@ export function Home() {
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
-                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td borderTopRightRadius="16px" borderBottomRightRadius="16px">
+                  {e?.liquidity_pool_price_tokens}
+                </Td>
               </Tr>
             ))}
           </Tbody>
