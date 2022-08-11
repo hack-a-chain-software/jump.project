@@ -157,34 +157,34 @@ export const Project = () => {
     ]
   );
 
-  const tabs = useMemo(() => {
+  const stats = useMemo(() => {
     return {
       price: {
         name: "Price",
         items: [
           {
             label: "Total raise (in price token)",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Project tokens for sale",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Allocation size",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "How many allocations you can still buy",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "How many allocations you already bought",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Total allocations bought / total allocations",
-            value: "0",
+            value: "100,00",
           },
         ],
       },
@@ -193,39 +193,39 @@ export const Project = () => {
         items: [
           {
             label: "Start sale date",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Start sale phase 2 date",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "End sale date",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "DEX Launch date",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Vesting initial release %",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Vesting cliff release %",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Vesting final release %",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Vesting cliff start date",
-            value: "0",
+            value: "100,00",
           },
           {
             label: "Vesting cliff end date",
-            value: "0",
+            value: "100,00",
           },
         ],
       },
@@ -241,159 +241,142 @@ export const Project = () => {
         className="flex-col lg:flex-row"
         overflow="hidden"
       >
-        <Card flex={1.4}>
-          <Flex direction="column">
-            <Flex alignItems="center">
-              <div>
-                <Flex alignItems="center" gap={3}>
-                  <Image
-                    w="50px"
-                    h="50px"
-                    mb="5px"
-                    src={
-                      data?.launchpad_project?.project_token_info?.image || ""
-                    }
-                  />
+        <Flex direction="column" flex={1.4}>
+          <Card>
+            <Flex direction="column">
+              <Flex alignItems="center">
+                <div>
+                  <Flex alignItems="center" gap={3}>
+                    <Image
+                      w="50px"
+                      h="50px"
+                      mb="5px"
+                      src={
+                        data?.launchpad_project?.project_token_info?.image || ""
+                      }
+                    />
+                    <Text
+                      fontWeight="800"
+                      fontFamily="Inter"
+                      letterSpacing="-0.06em"
+                      fontSize="30px"
+                      as="h1"
+                      color="white"
+                    >
+                      {finalPrice}{" "}
+                      {data?.launchpad_project?.price_token_info?.symbol}
+                    </Text>
+                  </Flex>
+
                   <Text
                     fontWeight="800"
                     fontFamily="Inter"
-                    letterSpacing="-0.06em"
-                    fontSize="30px"
+                    letterSpacing="-0.05em"
+                    fontSize="40px"
                     as="h1"
-                    color="white"
                   >
-                    {finalPrice}{" "}
-                    {data?.launchpad_project?.price_token_info?.symbol}
+                    {data?.launchpad_project?.project_name}
                   </Text>
-                </Flex>
-
-                <Text
-                  fontWeight="800"
-                  fontFamily="Inter"
-                  letterSpacing="-0.05em"
-                  fontSize="40px"
-                  as="h1"
-                >
-                  {data?.launchpad_project?.project_name}
-                </Text>
-                <Text
-                  fontWeight="500"
-                  fontFamily="Inter"
-                  letterSpacing="-0.05em"
-                  fontSize="20px"
-                  as="h1"
-                >
-                  {data?.launchpad_project?.description_token}
-                </Text>
-              </div>
-            </Flex>
-
-            <Flex
-              direction="column"
-              w="100%"
-              justifyContent="space-between"
-              flexWrap="wrap"
-            >
-              <Text
-                fontWeight="800"
-                fontFamily="Inter"
-                letterSpacing="-0.05em"
-                fontSize="40px"
-                as="h1"
-              >
-                Description
-              </Text>
-              <Text>{data?.launchpad_project?.description_project}</Text>
-            </Flex>
-          </Flex>
-        </Card>
-
-        <Flex w="100%" direction="column" className="md:flex-[0.9]">
-          <Card flex={0.9} w="100%">
-            <Flex direction="column" flex={1}>
-              <GradientText
-                fontWeight="800"
-                letterSpacing="-0,03em"
-                fontSize={24}
-              >
-                Join Project
-              </GradientText>
-              <Text
-                fontWeight="800"
-                fontFamily="Inter"
-                letterSpacing="-0.05em"
-                fontSize="50px"
-                marginTop="-20px"
-                as="h1"
-              >
-                {data?.launchpad_project?.project_name}
-              </Text>
-
-              <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
-                <Text>
-                  Balance - {priceTokenBalance || "0"}{" "}
-                  {data?.launchpad_project?.price_token_info?.symbol}
-                </Text>
-                <Input
-                  value={tickets}
-                  type="number"
-                  onChange={(e) => setTickets(Number(e.target.value))}
-                  bg="white"
-                  color="black"
-                  placeholder="Tickets"
-                  variant="filled"
-                  _hover={{ bg: "white" }}
-                  _focus={{ bg: "white" }}
-                />
-                <Text>
-                  You have{" "}
-                  {Number(totalAllowanceData) -
-                    Number(investorAllocation.allocationsBought)}{" "}
-                  tickets available to deposit
-                </Text>
+                  <Text
+                    fontWeight="500"
+                    fontFamily="Inter"
+                    letterSpacing="-0.05em"
+                    fontSize="20px"
+                    as="h1"
+                  >
+                    {data?.launchpad_project?.description_token}
+                  </Text>
+                </div>
               </Flex>
-
-              <If
-                condition={!!accountId}
-                fallback={
-                  <Flex justifyContent="space-between" w="100%">
-                    Connect Wallet
-                    <WalletIcon />
-                  </Flex>
-                }
-              >
-                <Button
-                  onClick={() => onJoinProject(tickets)}
-                  justifyContent="space-between"
-                  w="100%"
-                  maxWidth="380px"
-                >
-                  Join Project
-                  <WalletIcon />
-                </Button>
-              </If>
             </Flex>
           </Card>
-          <If
-            condition={new BN(investorAllocation.totalTokensBought).gt(
-              new BN(0)
-            )}
-          >
-            <Card mt="15px">
+
+          <Card mt="15px">
+            <Button
+              disabled={
+                !new BN(investorAllocation.totalTokensBought).gt(new BN(0))
+              }
+              onClick={() => retrieveTokens()}
+              justifyContent="space-between"
+              w="100%"
+            >
+              Retrieve Tokens
+              <WalletIcon />
+            </Button>
+          </Card>
+        </Flex>
+
+        <Card flex={0.9} w="100%">
+          <Flex direction="column" flex={1}>
+            <GradientText
+              fontWeight="800"
+              letterSpacing="-0,03em"
+              fontSize={24}
+            >
+              Join Project
+            </GradientText>
+            <Text
+              fontWeight="800"
+              fontFamily="Inter"
+              letterSpacing="-0.05em"
+              fontSize="50px"
+              marginTop="-20px"
+              as="h1"
+            >
+              {data?.launchpad_project?.project_name}
+            </Text>
+
+            <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
+              <Text>
+                Balance - {priceTokenBalance || "0"}{" "}
+                {data?.launchpad_project?.price_token_info?.symbol}
+              </Text>
+              <Input
+                value={tickets}
+                type="number"
+                onChange={(e) => setTickets(Number(e.target.value))}
+                bg="white"
+                color="black"
+                placeholder="Tickets"
+                variant="filled"
+                _hover={{ bg: "white" }}
+                _focus={{ bg: "white" }}
+              />
+              <Text>
+                You have{" "}
+                {Number(totalAllowanceData) -
+                  Number(investorAllocation.allocationsBought)}{" "}
+                tickets available to deposit
+              </Text>
+            </Flex>
+
+            <If
+              condition={!!accountId}
+              fallback={
+                <Flex justifyContent="space-between" w="100%">
+                  Connect Wallet
+                  <WalletIcon />
+                </Flex>
+              }
+            >
               <Button
-                onClick={() => retrieveTokens()}
+                onClick={() => onJoinProject(tickets)}
                 justifyContent="space-between"
                 w="100%"
+                maxWidth="380px"
               >
-                Retrieve Tokens
+                Join Project
                 <WalletIcon />
               </Button>
-            </Card>
-          </If>
-        </Flex>
+            </If>
+          </Flex>
+        </Card>
       </Flex>
 
-      <ProjectStats tabs={tabs} />
+      <ProjectStats
+        description={data?.launchpad_project?.description_project || ""}
+        stats={stats}
+      />
 
       <Box
         bg={jumpGradient}

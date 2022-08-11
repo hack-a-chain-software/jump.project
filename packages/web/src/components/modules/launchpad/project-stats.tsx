@@ -1,15 +1,13 @@
-import { useState } from "react";
-import { Tabs } from "./submodules";
 import { motion } from "framer-motion";
 import { useTheme } from "@/hooks/theme";
 import { Card, ValueBox } from "@/components";
-import { Flex, Text, useMediaQuery } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 
-interface Tabs {
-  [key: string]: tab;
+interface Stats {
+  [key: string]: table;
 }
 
-export interface tab {
+export interface table {
   name: string;
   items: Item[];
 }
@@ -19,66 +17,113 @@ export interface Item {
   value: string;
 }
 
-export function ProjectStats({ tabs }: { tabs: Tabs }) {
+export function ProjectStats({
+  stats,
+  description,
+}: {
+  stats: Stats;
+  description: string;
+}) {
   const { glassyWhiteOpaque } = useTheme();
-  const [isMobile] = useMediaQuery("(max-width: 1024px)");
-  const [current, setCurrent] = useState<string>(Object.keys(tabs).at(0) || "");
 
   return (
-    <Card flex={1} w="100%" maxWidth="100%">
-      <Flex w="100%" flexDirection="column" gap={4}>
-        <Flex w="100%" gap={1} flexWrap="wrap" justifyContent="space-between">
-          <Flex direction="column">
-            <Text
-              color="white"
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="24px"
-              mb="-20px"
-              as="h1"
-            >
-              Project
-            </Text>
-            <Text
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="50px"
-              as="h1"
-            >
-              Stats
-            </Text>
-          </Flex>
+    <Card flex={1} w="100%">
+      <Flex gap={8} width="100%" className="flex-col xl:flex-row">
+        <Flex flexGrow={1} flexWrap="wrap" direction="column" flexShrink="5">
+          <Text
+            fontWeight="800"
+            fontFamily="Inter"
+            letterSpacing="-0.05em"
+            fontSize="40px"
+            as="h1"
+          >
+            About
+          </Text>
 
-          <Tabs
-            tabs={tabs}
-            current={current}
-            change={(key: string) => setCurrent(key)}
-          />
+          <Text children={description} />
         </Flex>
 
-        <motion.div
-          animate={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          transition={{ duration: 0.55 }}
-          key={"launchpad-project-stats-" + current}
+        <Flex
+          flexGrow={5}
+          flexDirection="column"
+          className="lg:min-w-[800px]"
+          gap={4}
         >
-          <Flex
-            key={current}
-            className="max-w-full space-x-[12px] overflow-x-auto"
-          >
-            {tabs[current].items.map(({ label, value }, index) => (
-              <ValueBox
-                title={label}
-                value={value}
-                height="114px"
-                borderColor={glassyWhiteOpaque}
-                key={"project-stats-" + current + index}
-              />
-            ))}
+          <Flex w="100%" gap={1} flexWrap="wrap" justifyContent="space-between">
+            <Flex direction="column">
+              <Text
+                color="white"
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="24px"
+                mb="-20px"
+                as="h1"
+              >
+                Project
+              </Text>
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="50px"
+                as="h1"
+              >
+                Stats
+              </Text>
+            </Flex>
           </Flex>
-        </motion.div>
+
+          <Flex
+            gap={5}
+            width="100%"
+            className="flex-col md:flex-row md:space-x-[12px]"
+          >
+            {Object.keys(stats).map((key) => {
+              const table = stats[key];
+
+              return (
+                <Flex
+                  flex="1"
+                  key={`project-stats-table-${key}`}
+                  flexDirection="column"
+                  width="100%"
+                >
+                  <Flex marginBottom="12px">
+                    <Text
+                      color="white"
+                      fontWeight="800"
+                      fontFamily="Inter"
+                      letterSpacing="-0.05em"
+                      fontSize="24px"
+                      as="h1"
+                      children={table.name}
+                    />
+                  </Flex>
+
+                  <Flex flexDirection="column" width="100%" gap={2}>
+                    {table.items.map(({ label, value }, index) => (
+                      <Flex
+                        key={`project-stats-table-${key}-${index}`}
+                        justifyContent="space-between"
+                        className="flex-col lg:flex-row"
+                        bg={
+                          index % 2 === 0
+                            ? "rgba(255,255,255,0.10)"
+                            : "transparent"
+                        }
+                      >
+                        <Text children={label} fontWeight="800" />
+
+                        <Text children={value} />
+                      </Flex>
+                    ))}
+                  </Flex>
+                </Flex>
+              );
+            })}
+          </Flex>
+        </Flex>
       </Flex>
     </Card>
   );
