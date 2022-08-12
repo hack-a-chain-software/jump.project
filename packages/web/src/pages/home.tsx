@@ -1,4 +1,5 @@
 import BN from "bn.js";
+import { useState } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import {
   useViewInvestor,
@@ -22,7 +23,7 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useLaunchpadConenctionQuery } from "@near/apollo";
+import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { Button, Card, Select, TopCard } from "../components";
@@ -38,7 +39,7 @@ export function Home() {
   const navigate = useNavigate();
   const { accountId, selector } = useWalletSelector();
 
-  const investor = useViewInvestor(accountId as string);
+  const investor = useViewInvestor(accountId!);
   const totalAllocations = useViewTotalEstimatedInvestorAllowance(
     accountId as string
   );
@@ -46,7 +47,7 @@ export function Home() {
 
   const launchpadSettings = useViewLaunchpadSettings();
 
-  const { refetch, data, loading, error } = useLaunchpadConenctionQuery({
+  const { data: { launchpad_projects } = {} } = useLaunchpadConenctionQuery({
     variables: {
       limit: 10,
     },
@@ -84,14 +85,86 @@ export function Home() {
 
   const upgradeLevel = () => {
     const formattedLevel = level + 1;
-    increaseMembership(formattedLevel, accountId as string, selector);
+    increaseMembership(formattedLevel, accountId!, selector);
   };
 
   const downgradeLevel = () => {
     const formattedLevel = level - 1;
-    decreaseMembership(formattedLevel, accountId as string, selector);
-    increaseMembership(formattedLevel, accountId as string, selector);
+    decreaseMembership(formattedLevel, accountId!, selector);
+    increaseMembership(formattedLevel, accountId!, selector);
   };
+
+  const [filterMine, setMine] = useState("");
+  const [filterStatus, setStatus] = useState("");
+  const [filterVisibility, setVisibility] = useState("");
+  const [filterSearch, setSearch] = useState("");
+
+  // TODO: fazer isso no nível de graphql
+  type ListingStatus =
+    | "unfunded"
+    | "funded"
+    | "sale_finalized"
+    | "pool_created"
+    | "pool_project_token_sent"
+    | "pool_price_token_sent"
+    | "liquidity_pool_finalized"
+    | "cancelled";
+  type ProjectStatus = "open" | "closed";
+  // TODO: validar isso pelo amor de deus
+  const projectStatusMap: Record<ListingStatus, ProjectStatus> = {
+    unfunded: "open",
+    funded: "open",
+    sale_finalized: "open",
+    pool_created: "open",
+    pool_project_token_sent: "open",
+    pool_price_token_sent: "open",
+    liquidity_pool_finalized: "closed",
+    cancelled: "closed",
+  };
+
+  type Filter = {
+    filter: string;
+    test: (project: LaunchpadListing, filter: string) => boolean;
+  };
+
+  const items = useMemo(() => {
+    const filter: Filter[] = [
+      {
+        filter: filterStatus,
+        test: (project, filter) =>
+          filter === projectStatusMap[project.status as ProjectStatus],
+      },
+      {
+        filter: filterSearch,
+        test: (project, filter) =>
+          [
+            project.project_token, // Address
+            project.project_token_info?.name,
+            project.project_name,
+          ].some((field) => field?.includes(filter)),
+      },
+      // {
+      //   filter: filterVisibility,
+      //   field: ''
+      // },
+      // {
+      //   filter: filterMine,
+      //   field: ''
+      // }
+    ];
+
+    return launchpad_projects?.data?.filter((project) =>
+      filter.every(
+        ({ filter, test }) => !filter || (project && test(project, filter))
+      )
+    );
+  }, [
+    filterMine,
+    filterStatus,
+    filterSearch,
+    filterVisibility,
+    launchpad_projects,
+  ]);
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
@@ -185,20 +258,30 @@ export function Home() {
 
       <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
         <Flex gap="4" flexGrow="1" flexWrap="wrap">
-          <Select placeholder="Status">
-            <option value="ALL">All</option>
-            <option value="OPEN">Open</option>
-            <option value="CLOSED">Closed</option>
+          <Select
+            placeholder="Status"
+            onChange={(event) => setStatus(event?.target?.value)}
+          >
+            <option value="">All</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
           </Select>
-          <Select placeholder="Visibility">
-            <option value="PRIVATE">Private</option>
-            <option value="CLOSED">Closed</option>
+          <Select
+            placeholder="Visibility"
+            onChange={(event) => setVisibility(event?.target?.value)}
+          >
+            <option value="private">Private</option>
+            <option value="closed">Closed</option>
           </Select>
-          <Select placeholder="Mine Only">
+          <Select
+            placeholder="Mine Only"
+            onChange={(event) => setMine(event?.target?.value)}
+          >
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </Select>
         </Flex>
+
         <Flex className="md:max-w-[330px]" w="100%">
           <Input
             borderWidth="2px"
@@ -212,6 +295,7 @@ export function Home() {
             }}
             outline="none"
             px="20px"
+            onInput={(event) => setSearch(event?.target?.value)}
           />
         </Flex>
       </Flex>
@@ -231,7 +315,7 @@ export function Home() {
             </Tr>
           </Thead>
           <Tbody>
-            {data?.launchpad_projects.data?.map((e) => (
+            {items?.map((e) => (
               <Tr
                 cursor="pointer"
                 borderRadius="20px"
@@ -253,8 +337,12 @@ export function Home() {
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
                 <Td>{e?.liquidity_pool_price_tokens}</Td>
-                <Td borderTopRightRadius="16px" borderBottomRightRadius="16px">
-                  {e?.liquidity_pool_price_tokens}
+                <Td
+                  borderTopRightRadius="16px"
+                  borderBottomRightRadius="16px"
+                  className="first-letter:uppercase"
+                >
+                  {e?.status}
                 </Td>
               </Tr>
             ))}
