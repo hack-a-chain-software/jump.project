@@ -26,16 +26,13 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "yarn prettier --config .prettierrc --write **/*.{ts,tsx}",
-      "git add ."
+      "yarn prettier --config .prettierrc --write **/*.{ts,tsx}"
     ],
     "*.{js,jsx}": [
-      "yarn prettier --config .prettierrc --write **/*.{js,jsx}",
-      "git add ."
+      "yarn prettier --config .prettierrc --write **/*.{js,jsx}"
     ],
     "*.rs": [
-      "sh ./format_rust.sh",
-      "git add ."
+      "sh ./format_rust.sh"
     ]
   },
   "workspaces": {

@@ -2,6 +2,7 @@ import { useColorModeValue } from "@chakra-ui/react";
 
 export const useTheme = () => {
   return {
+    blackAndWhite: useColorModeValue("black", "white"),
     gradientBackground: useColorModeValue(
       "radial-gradient(41.57% 98.54% at 58.43% 41.55%, #FFFFFF 0%, #FEEFFF 100%)",
       "radial-gradient(40.33% 70.37% at 60.65% 14.31%, #340000 0%, #21002F 100%)"
