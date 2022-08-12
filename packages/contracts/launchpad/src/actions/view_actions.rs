@@ -37,7 +37,11 @@ impl Contract {
         None => {
           let membership_level =
             investor.get_current_membership_level(&self.contract_settings.tiers_minimum_tokens);
-          self.contract_settings.tiers_entitled_allocations[membership_level as usize - 1]
+          if membership_level == 0 {
+            U64(0)
+          } else {
+            self.contract_settings.tiers_entitled_allocations[membership_level as usize - 1]
+          }
         }
       }
     } else {
