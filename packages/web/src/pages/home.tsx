@@ -309,27 +309,23 @@ export function Home() {
       <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
         <Flex gap="4" flexGrow="1" flexWrap="wrap">
           <Select
+            value={filterStatus}
             placeholder="Status"
-            onChange={(event) => setStatus(event?.target?.value)}
-          >
-            <option value="">All</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-          </Select>
+            items={["open", "closed"]}
+            onChange={(value: string) => setStatus(value)}
+          />
           <Select
+            value={filterVisibility}
             placeholder="Visibility"
-            onChange={(event) => setVisibility(event?.target?.value)}
-          >
-            <option value="private">Private</option>
-            <option value="closed">Closed</option>
-          </Select>
+            items={["private", "closed"]}
+            onChange={(value: string) => setVisibility(value)}
+          />
           <Select
+            value={filterMine}
             placeholder="Mine Only"
-            onChange={(event) => setMine(event?.target?.value)}
-          >
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Select>
+            items={["yes", "no"]}
+            onChange={(value: string) => setMine(value)}
+          />
         </Flex>
 
         <Flex className="md:max-w-[330px]" w="100%">
