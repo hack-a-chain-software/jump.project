@@ -25,6 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
+import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
 import { Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
@@ -38,6 +39,8 @@ import { useWalletSelector } from "@/context/wallet-selector";
 export function Home() {
   const navigate = useNavigate();
   const { accountId, selector } = useWalletSelector();
+
+  const { darkPurpleOpaque, glassyWhite } = useTheme();
 
   const investor = useViewInvestor(accountId!);
   const totalAllocations = useViewTotalEstimatedInvestorAllowance(
@@ -375,7 +378,9 @@ export function Home() {
                   navigate(`/launchpad/${e?.listing_id}`);
                 }}
                 key={e?.listing_id}
-                className="hover:bg-[rgba(255,255,255,0.5)]"
+                _hover={{
+                  bg: useColorModeValue(darkPurpleOpaque, glassyWhite),
+                }}
               >
                 <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                   <Skeleton
