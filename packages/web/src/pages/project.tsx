@@ -3,7 +3,7 @@ import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
-import { Box, Flex, Image, Input, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Input, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -187,11 +187,11 @@ export const Project = () => {
           },
           {
             label: "Project tokens for sale",
-            value: launchpad_project?.total_amount_sale_project_tokens,
+            value: launchpad_project?.total_amount_sale_project_tokens!,
           },
           {
             label: "Allocation size",
-            value: launchpad_project?.token_allocation_size,
+            value: launchpad_project?.token_allocation_size!,
           },
           {
             label: "How many allocations you can still buy",
@@ -254,117 +254,172 @@ export const Project = () => {
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
-      <Flex
-        gap={5}
-        justifyContent="space-between"
-        className="flex-col lg:flex-row"
-        overflow="hidden"
-      >
-        <Flex direction="column" flex={1.4}>
-          <Card>
-            <Flex direction="column">
-              <Flex alignItems="center">
-                <div>
-                  <Flex alignItems="center" gap={3}>
-                    <Image
-                      w="50px"
-                      h="50px"
-                      mb="5px"
-                      src={launchpad_project?.project_token_info?.image || ""}
-                    />
-                    <Text
-                      fontWeight="800"
-                      fontFamily="Inter"
-                      letterSpacing="-0.06em"
-                      fontSize="30px"
-                      as="h1"
-                      color="white"
-                    >
-                      {finalPrice} {launchpad_project?.price_token_info?.symbol}
-                    </Text>
-                  </Flex>
 
-                  <Text
-                    fontWeight="800"
-                    fontFamily="Inter"
-                    letterSpacing="-0.05em"
-                    fontSize="40px"
-                    as="h1"
-                  >
-                    {launchpad_project?.project_name}
-                  </Text>
-                  <Text
-                    fontWeight="500"
-                    fontFamily="Inter"
-                    letterSpacing="-0.05em"
-                    fontSize="20px"
-                    as="h1"
-                  >
-                    {launchpad_project?.description_token}
-                  </Text>
-                </div>
-              </Flex>
+      <div className="grid grid-cols-12 gap-4">
+        <Card className="col-span-12 lg:col-span-6">
+          <Flex className="flex-col space-y-[8px] w-full">
+            <Flex alignItems="center" mb="5px" gap={3}>
+              <Skeleton
+                className="w-[50px] h-[50px] rounded-full"
+                isLoaded={!isLoading}
+              >
+                <Image
+                  className="w-[50px] h-[50px]"
+                  src={launchpad_project?.project_token_info?.image || ""}
+                />
+              </Skeleton>
+
+              <Skeleton
+                className="min-w-[200px] rounded-[16px]"
+                isLoaded={!isLoading}
+              >
+                <Text
+                  fontWeight="800"
+                  fontFamily="Inter"
+                  letterSpacing="-0.06em"
+                  fontSize="30px"
+                  as="h1"
+                  color="white"
+                >
+                  {finalPrice} {launchpad_project?.price_token_info?.symbol}
+                </Text>
+              </Skeleton>
             </Flex>
-          </Card>
-
-          <Card mt="15px">
-            <Button
-              disabled={
-                !new BN(investorAllocation.totalTokensBought).gt(new BN(0))
-              }
-              onClick={() => retrieveTokens()}
-              justifyContent="space-between"
-              w="100%"
+            <Skeleton
+              className="w-full rounded-[16px] min-h-[60px]"
+              isLoaded={!isLoading}
             >
-              Retrieve Tokens
-              <WalletIcon />
-            </Button>
-          </Card>
-        </Flex>
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="40px"
+                as="h1"
+              >
+                {launchpad_project?.project_name}
+              </Text>
+            </Skeleton>
 
-        <Card flex={0.9} w="100%">
-          <Flex direction="column" flex={1}>
+            <Skeleton
+              className="w-full rounded-[16px] min-h-[30px]"
+              isLoaded={!isLoading}
+            >
+              <Text
+                fontWeight="500"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="20px"
+                as="h1"
+              >
+                {launchpad_project?.description_token}
+              </Text>
+            </Skeleton>
+          </Flex>
+        </Card>
+
+        <Card className="w-full col-span-12 lg:col-span-6 xl:col-span-3">
+          <Flex className="flex-col space-y-[12px] h-full w-full">
+            <Text
+              fontWeight="800"
+              fontFamily="Inter"
+              letterSpacing="-0.05em"
+              fontSize="40px"
+              as="h1"
+            >
+              About
+            </Text>
+
+            <Skeleton
+              className="w-full min-h-[48px] rounded-[16px]"
+              isLoaded={!isLoading}
+            >
+              <Text children={launchpad_project?.description_project} />
+            </Skeleton>
+          </Flex>
+        </Card>
+
+        <Card className="col-span-12 lg:col-span-6 xl:col-span-3">
+          <Flex className="flex-col space-y-[12px] h-full w-full">
             <GradientText
               fontWeight="800"
               letterSpacing="-0,03em"
               fontSize={24}
             >
-              Join Project
+              User Area
             </GradientText>
-            <Text
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.05em"
-              fontSize="50px"
-              marginTop="-20px"
-              as="h1"
-            >
-              {launchpad_project?.project_name}
-            </Text>
 
-            <Flex my="30px" gap="5px" direction="column" maxWidth="380px">
-              <Text>
-                Balance - {priceTokenBalance || "0"}{" "}
-                {launchpad_project?.price_token_info?.symbol}
+            <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
+              <Button
+                disabled={
+                  !new BN(investorAllocation.totalTokensBought).gt(new BN(0))
+                }
+                onClick={() => retrieveTokens()}
+                justifyContent="space-between"
+                w="100%"
+              >
+                Retrieve Tokens
+                <WalletIcon />
+              </Button>
+            </Skeleton>
+          </Flex>
+        </Card>
+
+        <Card className="col-span-12 lg:col-span-6 xl:col-span-4">
+          <Flex direction="column" flex={1} gap={1} className="h-full">
+            <Skeleton isLoaded={!isLoading} className="rounded-[16px]">
+              <GradientText
+                fontWeight="800"
+                letterSpacing="-0,03em"
+                fontSize={24}
+              >
+                Join Project
+              </GradientText>
+            </Skeleton>
+
+            <Skeleton
+              isLoaded={!isLoading}
+              className="w-full min-h-[55px] rounded-[16px]"
+            >
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="50px"
+                marginTop="-20px"
+                as="h1"
+              >
+                {launchpad_project?.project_name}
               </Text>
-              <Input
-                value={tickets}
-                type="number"
-                onChange={(e) => setTickets(Number(e.target.value))}
-                bg="white"
-                color="black"
-                placeholder="Tickets"
-                variant="filled"
-                _hover={{ bg: "white" }}
-                _focus={{ bg: "white" }}
-              />
-              <Text>
-                You have{" "}
-                {Number(totalAllowanceData) -
-                  Number(investorAllocation.allocationsBought)}{" "}
-                tickets available to deposit
-              </Text>
-            </Flex>
+            </Skeleton>
+
+            <Skeleton
+              isLoaded={!isLoading}
+              className="h-[92.5px] rounded-[16px] my-[30px]"
+            >
+              <Flex gap="5px" direction="column" maxWidth="380px">
+                <Text>
+                  Balance - {priceTokenBalance || "0"}{" "}
+                  {launchpad_project?.price_token_info?.symbol}
+                </Text>
+                <Input
+                  value={tickets}
+                  type="number"
+                  onChange={(e) => setTickets(Number(e.target.value))}
+                  bg="white"
+                  color="black"
+                  placeholder="Tickets"
+                  variant="filled"
+                  _hover={{ bg: "white" }}
+                  _focus={{ bg: "white" }}
+                />
+                <Text>
+                  You have{" "}
+                  {Number(totalAllowanceData) -
+                    Number(investorAllocation.allocationsBought)}{" "}
+                  tickets available to deposit
+                </Text>
+              </Flex>
+            </Skeleton>
 
             <If
               condition={!!accountId}
@@ -375,24 +430,26 @@ export const Project = () => {
                 </Flex>
               }
             >
-              <Button
-                onClick={() => onJoinProject(tickets)}
-                justifyContent="space-between"
-                w="100%"
-                maxWidth="380px"
+              <Skeleton
+                isLoaded={!isLoading}
+                className="w-full min-h-[60px] rounded-[16px]"
               >
-                Join Project
-                <WalletIcon />
-              </Button>
+                <Button
+                  onClick={() => onJoinProject(tickets)}
+                  justifyContent="space-between"
+                  w="100%"
+                  maxWidth="380px"
+                >
+                  Join Project
+                  <WalletIcon />
+                </Button>
+              </Skeleton>
             </If>
           </Flex>
         </Card>
-      </Flex>
 
-      <ProjectStats
-        description={launchpad_project?.description_project || ""}
-        stats={stats}
-      />
+        <ProjectStats stats={stats} />
+      </div>
 
       <Box
         bg={jumpGradient}

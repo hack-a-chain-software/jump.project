@@ -132,6 +132,10 @@ export function Home() {
   };
 
   const items = useMemo(() => {
+    if (!launchpad_projects) {
+      return [...Array(1)];
+    }
+
     const filter: Filter[] = [
       {
         filter: filterStatus,
@@ -215,20 +219,9 @@ export function Home() {
 
         <Card minWidth="315px" className="lg:flex-grow lg:max-w-[400px]">
           <Flex w="100%" h="100%" flexDirection="column">
-            <Skeleton
-              width="auto"
-              borderRadius="18px"
-              endColor="rgba(255,255,255,0.3)"
-              isLoaded={isLoaded}
-            >
-              <Text
-                justifyContent="space-between"
-                fontSize={22}
-                fontWeight="900"
-              >
-                Member Area
-              </Text>
-            </Skeleton>
+            <Text justifyContent="space-between" fontSize={22} fontWeight="900">
+              Member Area
+            </Text>
 
             <Stack gap={1}>
               <Skeleton
@@ -376,30 +369,86 @@ export function Home() {
               <Tr
                 cursor="pointer"
                 borderRadius="20px"
-                onClick={() => navigate(`/launchpad/${e?.listing_id}`)}
+                onClick={() => {
+                  if (!e) {
+                    return;
+                  }
+
+                  navigate(`/launchpad/${e?.listing_id}`);
+                }}
                 key={e?.listing_id}
                 className="hover:bg-[rgba(255,255,255,0.5)]"
               >
                 <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
-                  <Image
-                    borderRadius={100}
-                    w={30}
-                    h={30}
-                    src={e.project_token_info?.image || ""}
-                  />
+                  <Skeleton
+                    className="w-[30px] h-[30px] rounded-full"
+                    isLoaded={!!e?.project_token_info?.image}
+                  >
+                    <Image
+                      src={e?.project_token_info?.image || ""}
+                      className="w-[30px] h-[30px] rounded-full"
+                    />
+                  </Skeleton>
                 </Td>
-                <Td>{e?.project_token_info?.name}</Td>
-                <Td>{e?.fee_price_tokens}</Td>
-                <Td>{e?.liquidity_pool_price_tokens}</Td>
-                <Td>{e?.liquidity_pool_price_tokens}</Td>
-                <Td>{e?.liquidity_pool_price_tokens}</Td>
-                <Td>{e?.liquidity_pool_price_tokens}</Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.project_token_info?.name}
+                  >
+                    {e?.project_token_info?.name}
+                  </Skeleton>
+                </Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.fee_price_tokens}
+                  >
+                    {e?.fee_price_tokens}
+                  </Skeleton>
+                </Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.liquidity_pool_price_tokens}
+                  >
+                    {e?.liquidity_pool_price_tokens}
+                  </Skeleton>
+                </Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.liquidity_pool_price_tokens}
+                  >
+                    {e?.liquidity_pool_price_tokens}
+                  </Skeleton>
+                </Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.liquidity_pool_price_tokens}
+                  >
+                    {e?.liquidity_pool_price_tokens}
+                  </Skeleton>
+                </Td>
+                <Td>
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.liquidity_pool_price_tokens}
+                  >
+                    {e?.liquidity_pool_price_tokens}
+                  </Skeleton>
+                </Td>
                 <Td
                   borderTopRightRadius="16px"
                   borderBottomRightRadius="16px"
                   className="first-letter:uppercase"
                 >
-                  {e?.status}
+                  <Skeleton
+                    className="w-full h-[22.5px] rounded-full"
+                    isLoaded={!!e?.status}
+                  >
+                    {e?.status}
+                  </Skeleton>
                 </Td>
               </Tr>
             ))}
