@@ -57,13 +57,13 @@ export function Select({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="cursor-pointer shadow-lg rounded-[15px] cursor-pointer">
+              <Listbox.Options className="cursor-pointer shadow-lg cursor-pointer">
                 <Flex
                   bg={jumpGradient}
-                  className="absolute z-10 mt-1 w-full max-h-60 overflow-auto focus:outline-none cursor-pointer shadow-lg p-[2px] rounded-[17px]"
+                  className="absolute z-10 mt-1 w-full max-h-60 overflow-auto focus:outline-none cursor-pointer shadow-lg p-[2px] rounded-[17px] overflow-hidden"
                 >
                   <Flex
-                    className="flex-col w-full rounded-[15px]"
+                    className="flex-col w-full rounded-[15px] overflow-hidden"
                     bg={useColorModeValue(gradientBackground, "#21002F")}
                   >
                     {items.map((item) => (
@@ -78,7 +78,7 @@ export function Select({
                               bg: useColorModeValue(darkPurple, "white"),
                               color: useColorModeValue("white", "black"),
                             }}
-                            className="cursor-default select-none relative py-2 pl-3 pr-9 cursor-pointer rounded-[17px]"
+                            className="cursor-default select-none relative py-2 pl-3 pr-9 cursor-pointer"
                           >
                             <Flex className="block truncate first-letter:uppercase cursor-pointer">
                               {item}
