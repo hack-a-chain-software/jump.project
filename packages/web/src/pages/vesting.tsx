@@ -14,8 +14,6 @@ import { useTheme } from "@/hooks/theme";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
-import { useNearQuery } from "react-near";
-import { JUMP_TOKEN } from "@/env/contract";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 
@@ -73,22 +71,12 @@ export const Vesting = () => {
     });
   }, [filter, vestings]);
 
-  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
-    useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: JUMP_TOKEN,
-      variables: {
-        account_id: accountId!,
-      },
-      poolInterval: 1000 * 60,
-      skip: !accountId,
-    });
-
   const isLoading = useMemo(() => {
     if (!accountId) {
       return false;
     }
 
-    return isEmpty(investorInfo) && !loadingBaseTokenBalance;
+    return isEmpty(investorInfo);
   }, [investorInfo, accountId]);
 
   return (
