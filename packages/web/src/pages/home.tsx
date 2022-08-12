@@ -133,7 +133,7 @@ export function Home() {
 
   const items = useMemo(() => {
     if (!launchpad_projects) {
-      return [...Array(1)];
+      return [...Array(2)];
     }
 
     const filter: Filter[] = [
