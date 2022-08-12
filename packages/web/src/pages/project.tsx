@@ -52,13 +52,8 @@ export const Project = () => {
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(accountId!, id!);
 
-  const {
-    data: totalAllowanceData = "0",
-    loading: loadingTotalAllowance,
-    error,
-  } = useViewTotalEstimatedInvestorAllowance(accountId!);
-
-  console.log(error);
+  const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
+    useViewTotalEstimatedInvestorAllowance(accountId!);
 
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(launchpadProject?.price_token!, accountId!);

@@ -1,4 +1,5 @@
 import BN from "bn.js";
+import isEmpty from "lodash/isEmpty";
 import { useEffect, useState } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import {
@@ -29,7 +30,7 @@ import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import { Button, Card, Select, TopCard } from "../components";
+import { If, Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { formatNumber } from "@near/ts";
@@ -49,8 +50,8 @@ export function Home() {
 
   const investor = useViewInvestor(accountId!);
 
-  const { error, data: totalAllowanceData = "0" } =
-    useViewTotalEstimatedInvestorAllowance(accountId!);
+  // const { error, data: totalAllowanceData = "0" } = useViewTotalEstimatedInvestorAllowance(accountId!);
+  const totalAllowanceData = "0";
 
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
@@ -317,95 +318,76 @@ export function Home() {
               <Th>Status</Th>
             </Tr>
           </Thead>
+
           <Tbody>
-            {(launchpadProjects ?? []).map((e, index) => (
-              <Tr
-                cursor="pointer"
-                borderRadius="20px"
-                onClick={() => {
-                  if (!e) {
-                    return;
-                  }
-                  navigate(`/launchpad/${e?.listing_id}`);
-                }}
-                key={`launchpad-project-${e?.listing_id}-${index}`}
-                _hover={{
-                  bg: tableHover,
-                }}
-              >
-                <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
-                  <Skeleton
-                    className="w-[30px] h-[30px] rounded-full"
-                    isLoaded={!!e?.project_token_info?.image}
-                  >
+            <If
+              condition={!isEmpty(launchpadProjects)}
+              fallback={
+                <Tr>
+                  <Td>
+                    <Skeleton className="w-[30px] h-[30px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                </Tr>
+              }
+            >
+              {(launchpadProjects ?? []).map((e, index) => (
+                <Tr
+                  cursor="pointer"
+                  borderRadius="20px"
+                  onClick={() => {
+                    if (!e) {
+                      return;
+                    }
+                    navigate(`/launchpad/${e?.listing_id}`);
+                  }}
+                  key={`launchpad-project-${e?.listing_id}-${index}`}
+                  _hover={{
+                    bg: tableHover,
+                  }}
+                >
+                  <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                     <Image
                       src={e?.project_token_info?.image || ""}
                       className="w-[30px] h-[30px] rounded-full"
                     />
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.project_token_info?.name}
-                  >
-                    {e?.project_token_info?.name}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.fee_price_tokens}
-                  >
-                    {e?.fee_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td
-                  borderTopRightRadius="16px"
-                  borderBottomRightRadius="16px"
-                  className="first-letter:uppercase"
-                >
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.status}
+                  </Td>
+                  <Td>{e?.project_token_info?.name}</Td>
+                  <Td>{e?.fee_price_tokens}</Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td
+                    borderTopRightRadius="16px"
+                    borderBottomRightRadius="16px"
+                    className="first-letter:uppercase"
                   >
                     {e?.status}
-                  </Skeleton>
-                </Td>
-              </Tr>
-            ))}
+                  </Td>
+                </Tr>
+              ))}
+            </If>
           </Tbody>
         </Table>
       </TableContainer>
