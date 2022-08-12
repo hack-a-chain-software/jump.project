@@ -4,7 +4,6 @@ import {
   useViewInvestor,
   useViewLaunchpadSettings,
   useViewTotalEstimatedInvestorAllowance,
-  useXTokenBalance,
 } from "@/hooks/modules/launchpad";
 import {
   Box,
@@ -21,6 +20,7 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  Skeleton,
 } from "@chakra-ui/react";
 import { useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
@@ -93,6 +93,10 @@ export function Home() {
     increaseMembership(formattedLevel, accountId as string, selector);
   };
 
+  const isLoaded = useMemo(() => {
+    return !!launchpadSettings.data;
+  }, [launchpadSettings.data, investor.data]);
+
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
       <Flex gap={5} className="flex-col lg:flex-row">
@@ -102,82 +106,135 @@ export function Home() {
           bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
         >
-          <Box
-            bg="white"
-            p="10px"
-            px="15px"
-            maxW="200px"
-            alignItems="center"
-            justifyContent="center"
-            display="flex"
-            borderRadius="30px"
+          <Skeleton
             mt="20px"
-            color="black"
-            fontWeight="semibold"
+            width="100%"
+            height="42px"
+            maxWidth="200px"
+            borderRadius="30px"
+            endColor="rgba(255,255,255,0.3)"
+            isLoaded={!accountId || !!(investor.data && launchpadSettings.data)}
           >
-            {!accountId
-              ? "Connect your wallet"
-              : investor.data
-              ? `${
-                  launchpadSettings.data?.tiers_entitled_allocations[
-                    !level ? 0 : level - 1
-                  ] || 0
-                } Tickets Available`
-              : `${totalAllocations.data || 0} Tickets Available`}
-          </Box>
+            <Box
+              bg="white"
+              p="10px"
+              px="15px"
+              maxW="200px"
+              alignItems="center"
+              justifyContent="center"
+              display="flex"
+              borderRadius="30px"
+              color="black"
+              fontWeight="semibold"
+            >
+              {!accountId
+                ? "Connect your wallet"
+                : investor.data
+                ? `${
+                    launchpadSettings.data?.tiers_entitled_allocations[
+                      !level ? 0 : level - 1
+                    ] || 0
+                  } Tickets Available`
+                : `${totalAllocations.data || 0} Tickets Available`}
+            </Box>
+          </Skeleton>
         </TopCard>
 
         <Card minWidth="315px" className="lg:flex-grow lg:max-w-[400px]">
           <Flex w="100%" h="100%" flexDirection="column">
-            <Text justifyContent="space-between" fontSize={22} fontWeight="900">
-              Member Area
-            </Text>
+            <Skeleton
+              width="auto"
+              borderRadius="18px"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={isLoaded}
+            >
+              <Text
+                justifyContent="space-between"
+                fontSize={22}
+                fontWeight="900"
+              >
+                Member Area
+              </Text>
+            </Skeleton>
+
             <Stack gap={1}>
-              <Flex direction="column" flex={1} mt={5}>
-                <Flex
-                  mb="5px"
-                  flexWrap="wrap"
-                  justifyContent="space-between"
-                  flex={1}
-                >
-                  <Text fontSize={18} fontWeight="semibold">
-                    Level {level}
-                  </Text>
-                  <Text>
-                    Stake more {Number(amountToNextLevel) / 1000000000000000000}{" "}
-                    to next Level
-                  </Text>
+              <Skeleton
+                mt={5}
+                flex={1}
+                width="100%"
+                borderRadius="18px"
+                isLoaded={isLoaded}
+                endColor="rgba(255,255,255,0.3)"
+              >
+                <Flex direction="column" flex={1} mt={5}>
+                  <Flex
+                    mb="5px"
+                    flexWrap="wrap"
+                    justifyContent="space-between"
+                    flex={1}
+                  >
+                    <Text fontSize={18} fontWeight="semibold">
+                      Level {level}
+                    </Text>
+                    <Text>
+                      Stake more{" "}
+                      {Number(amountToNextLevel) / 1000000000000000000} to next
+                      Level
+                    </Text>
+                  </Flex>
                 </Flex>
-              </Flex>
-              <Button
-                bg="transparent"
-                border="1px solid white"
-                color="white"
-                onClick={downgradeLevel}
-                justifyContent="space-between"
-                disabled={!level}
+              </Skeleton>
+
+              <Skeleton
+                mt={5}
+                flex={1}
+                width="100%"
+                borderRadius="18px"
+                isLoaded={isLoaded}
+                endColor="rgba(255,255,255,0.3)"
               >
-                Downgrade Level
-                {!!level ? <WalletIcon /> : <LockIcon />}
-              </Button>
-              <Button
-                onClick={upgradeLevel}
-                disabled={
-                  (launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
-                  level
-                }
-                bg="white"
-                color="black"
-                justifyContent="space-between"
+                <Button
+                  w="100%"
+                  bg="transparent"
+                  border="1px solid white"
+                  color="white"
+                  onClick={downgradeLevel}
+                  justifyContent="space-between"
+                  disabled={!level}
+                >
+                  Downgrade Level
+                  {!!level ? <WalletIcon /> : <LockIcon />}
+                </Button>
+              </Skeleton>
+
+              <Skeleton
+                mt={5}
+                flex={1}
+                width="100%"
+                borderRadius="18px"
+                isLoaded={isLoaded}
+                endColor="rgba(255,255,255,0.3)"
               >
-                Upgrade Level
-                {(launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
-                level ? (
-                  <LockIcon />
-                ) : (
-                  <WalletIcon />
-                )}
-              </Button>
+                <Button
+                  w="100%"
+                  onClick={upgradeLevel}
+                  disabled={
+                    (launchpadSettings.data?.tiers_minimum_tokens.length ||
+                      0) <= level
+                  }
+                  bg="white"
+                  color="black"
+                  justifyContent="space-between"
+                >
+                  Upgrade Level
+                  {(launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
+                  level ? (
+                    <LockIcon />
+                  ) : (
+                    <WalletIcon />
+                  )}
+                </Button>
+              </Skeleton>
             </Stack>
           </Flex>
         </Card>
@@ -244,7 +301,7 @@ export function Home() {
                     borderRadius={100}
                     w={30}
                     h={30}
-                    src={e?.project_token_info?.image || ""}
+                    src={e.project_token_info?.image || ""}
                   />
                 </Td>
                 <Td>{e?.project_token_info?.name}</Td>
