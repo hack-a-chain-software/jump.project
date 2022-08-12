@@ -8,6 +8,7 @@ import {
   ModalContentProps,
   Box,
   useMediaQuery,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { CloseIcon } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
@@ -42,17 +43,18 @@ export function ModalImageDialog({
   closeLocked?: boolean;
   children?: React.ReactNode;
 }) {
-  const { jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhiteOpaque, gradientBoxTopCard } = useTheme();
   const [isMobile] = useMediaQuery("(max-width: 810px)");
   return (
     <Modal
       closeOnEsc={!closeLocked}
       closeOnOverlayClick={!closeLocked}
-      blockScrollOnMount={false}
+      blockScrollOnMount={true}
       isCentered
       isOpen={isOpen}
       onClose={onClose}
-      size={isMobile ? "full" : "md"}
+      scrollBehavior="outside"
+      size={isMobile ? "md" : "md"}
     >
       <ModalOverlay
         backdropFilter={shouldBlurBackdrop ? "blur(20px)" : ""}
@@ -65,26 +67,24 @@ export function ModalImageDialog({
         minW={isMobile ? "auto" : minW}
         minH={isMobile ? "auto" : minH}
         overflow="hidden"
-        borderRadius={modalRadius}
+        borderRadius={isMobile ? "0px" : modalRadius}
         {...modalContentProps}
       >
         <Box
           w="100%"
-          bg={jumpGradient}
-          p="6px"
           display="flex"
           borderRadius={25}
           overflow="hidden"
           maxWidth="100vw"
+          bg={jumpGradient}
         >
           <ModalBody
-            p="30px"
-            pl="40px"
+            p="36px"
+            pl="46px"
             position="relative"
-            bg={bg || jumpGradient}
-            overflowY="scroll"
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
+            bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
           >
             <Flex direction="column" height="100%">
               <Text
@@ -99,13 +99,7 @@ export function ModalImageDialog({
               </Text>
 
               {children}
-              <Flex
-                p="10px"
-                position="absolute"
-                right="51%"
-                bottom="20px"
-                left="20px"
-              >
+              <Flex width="max-content" bottom="20px" mt="12px">
                 {footer}
               </Flex>
             </Flex>

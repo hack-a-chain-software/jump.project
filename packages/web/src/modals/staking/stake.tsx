@@ -75,13 +75,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
         </Button>
       }
     >
-      <Flex
-        flex={1}
-        flexDirection="column"
-        alignItems="start"
-        justifyContent="center"
-        h="100%"
-      >
+      <Flex flex={1} flexDirection="column" alignItems="start" h="100%">
         <Text
           letterSpacing="-0.03em"
           fontWeight="semibold"

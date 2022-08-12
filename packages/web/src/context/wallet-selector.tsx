@@ -53,9 +53,13 @@ export const WalletSelectorContextProvider: React.FC<
     const _selector = await setupWalletSelector({
       network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
       modules: [
-        setupSender(),
+        setupSender({
+          iconUrl: "/assets/sender-icon.png",
+        }),
         // setupLedger(),
-        setupNearWallet(),
+        setupNearWallet({
+          iconUrl: "/assets/near-wallet-icon.png",
+        }),
       ],
     });
 

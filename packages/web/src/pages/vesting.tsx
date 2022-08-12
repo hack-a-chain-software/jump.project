@@ -170,12 +170,11 @@ export const Vesting = () => {
         <>
           <Flex justifyContent="space-between">
             <Select
-              onChange={(event) => setFilter(event?.target?.value)}
+              value={filter}
               placeholder="Filter"
-            >
-              <option value="completed">Completed</option>
-              <option value="runing">Runing</option>
-            </Select>
+              items={["completed", "runing"]}
+              onChange={(value: string) => setFilter(value)}
+            />
 
             <Flex maxW="330px">
               <GradientButton

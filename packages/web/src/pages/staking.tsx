@@ -1,8 +1,7 @@
-import { Box, Flex, Grid, Stack, Text, useDisclosure } from "@chakra-ui/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { Box, Flex, Text, Skeleton, useDisclosure } from "@chakra-ui/react";
+import { useCallback, useMemo } from "react";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../assets/svg";
-import { ArrowRightIcon } from "../assets/svg/arrow-right";
 import {
   Button,
   GradientText,
@@ -11,7 +10,7 @@ import {
   ValueBox,
   Card,
 } from "../components";
-import { X_JUMP_TOKEN } from "../env/contract";
+import { X_JUMP_TOKEN, JUMP_TOKEN } from "../env/contract";
 import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";
@@ -33,31 +32,40 @@ export const Staking = () => {
   const { accountId, selector } = useWalletSelector();
   const { stakeXToken, burnXToken } = useStaking();
 
-  const { data = { base_token: "1", x_token: "1" } } = useNearQuery<TokenRatio>(
-    "view_token_ratio",
-    {
-      contract: X_JUMP_TOKEN,
-      poolInterval: 1000 * 60,
-      debug: true,
-      onCompleted: (res) => console.log(res),
-      onError(err) {
-        console.log(err);
-      },
-    }
-  );
+  const {
+    data = { base_token: "1", x_token: "1" },
+    loading: loadingTokenRatio,
+  } = useNearQuery<TokenRatio>("view_token_ratio", {
+    contract: X_JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    debug: true,
+    onCompleted: (res) => console.log(res),
+    onError(err) {
+      console.log(err);
+    },
+  });
 
-  const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
-    "ft_balance_of",
-    {
-      contract: X_JUMP_TOKEN,
+  const { data: balance = "0", loading: loadingBalance } = useNearQuery<
+    string,
+    { account_id: string }
+  >("ft_balance_of", {
+    contract: X_JUMP_TOKEN,
+    variables: {
+      account_id: accountId as string,
+    },
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+  });
+
+  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
+    useNearQuery<string, { account_id: string }>("ft_balance_of", {
+      contract: JUMP_TOKEN,
       variables: {
         account_id: accountId as string,
       },
       poolInterval: 1000 * 60,
       skip: !accountId,
-      debug: true,
-    }
-  );
+    });
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
@@ -88,6 +96,10 @@ export const Staking = () => {
       console.log(error);
     }
   }, []);
+
+  const isLoading = useMemo(() => {
+    return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
+  }, [loadingBalance, loadingTokenRatio]);
 
   return (
     <PageContainer>
@@ -128,33 +140,44 @@ export const Staking = () => {
               gap={3}
               mt={2}
             >
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                h="144px"
-                w="100%"
-                mt={2}
-                value="0 JUMP"
-                title="Estimated Rewards"
-                bottomText="Per Week"
-              />
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                h="144px"
-                mt={2}
-                w="100%"
-                value={`${balanceXToken} JUMP`}
-                title="Staked"
-                bottomText="Your Staked JUMP"
-              />
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                h="144px"
-                mt={2}
-                w="100%"
-                value={`${tokenRatio}%`}
-                title="APR"
-                bottomText="Earnings Per Year"
-              />
+              <Skeleton
+                isLoaded={!isLoading}
+                className="w-full h-[144px] mt-2 rounded-[20px]"
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  value="0 JUMP"
+                  title="Estimated Rewards"
+                  bottomText="Per Week"
+                  className="h-full w-full"
+                />
+              </Skeleton>
+
+              <Skeleton
+                isLoaded={!isLoading}
+                className="w-full h-[144px] mt-2 rounded-[20px]"
+              >
+                <ValueBox
+                  title="Staked"
+                  className="h-full w-full"
+                  bottomText="Your Staked JUMP"
+                  borderColor={glassyWhiteOpaque}
+                  value={`${balanceXToken} JUMP`}
+                />
+              </Skeleton>
+
+              <Skeleton
+                isLoaded={!isLoading}
+                className="w-full h-[144px] mt-2 rounded-[20px]"
+              >
+                <ValueBox
+                  title="APR"
+                  value={`${tokenRatio}%`}
+                  className="h-full w-full"
+                  bottomText="Earnings Per Year"
+                  borderColor={glassyWhiteOpaque}
+                />
+              </Skeleton>
             </Flex>
           </Flex>
         </Card>
@@ -180,43 +203,52 @@ export const Staking = () => {
                 staking to earn passive income as an investor.
               </Text>
             </div>
-            <Flex direction="column" gap={1} width="100%">
-              <Button
-                color="white"
-                border="1px solid white"
-                bg="transparent"
-                maxWidth="100%"
-                justifyContent="space-between"
-                onClick={withdrawDisclosure.onOpen}
-              >
-                <Flex
-                  w="100%"
-                  alignItems="center"
+            <Flex direction="column" gap={4} width="100%">
+              <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
+                <Button
+                  color="black"
+                  border="1px solid white"
+                  bg="white"
                   justifyContent="space-between"
-                  className="flex md:hidden"
+                  maxWidth="100%"
+                  width="100%"
+                  onClick={stakingDisclosure.onOpen}
+                  disabled={!baseTokenBalance || baseTokenBalance === "0"}
                 >
-                  Unstake <WalletIcon />
-                </Flex>
+                  Stake <WalletIcon />
+                </Button>
+              </Skeleton>
 
-                <Flex
-                  w="100%"
-                  alignItems="center"
+              <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
+                <Button
+                  color="white"
+                  border="1px solid white"
+                  bg="transparent"
+                  maxWidth="100%"
+                  width="100%"
                   justifyContent="space-between"
-                  className="hidden md:flex"
+                  onClick={withdrawDisclosure.onOpen}
+                  disabled={!balance || balance === "0"}
                 >
-                  Unstake and Claim Rewards <WalletIcon />
-                </Flex>
-              </Button>
-              <Button
-                color="black"
-                border="1px solid white"
-                bg="white"
-                justifyContent="space-between"
-                maxWidth="100%"
-                onClick={stakingDisclosure.onOpen}
-              >
-                Stake <WalletIcon />
-              </Button>
+                  <Flex
+                    w="100%"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    className="flex md:hidden"
+                  >
+                    Unstake <WalletIcon />
+                  </Flex>
+
+                  <Flex
+                    w="100%"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    className="hidden md:flex"
+                  >
+                    Unstake and Claim Rewards <WalletIcon />
+                  </Flex>
+                </Button>
+              </Skeleton>
             </Flex>
           </Flex>
         </Card>
@@ -253,9 +285,8 @@ export const Staking = () => {
         title="Understanding Staking"
         onClose={onClose}
         footer={
-          <Button bg="white" color="black" w="100%">
+          <Button bg="white" color="black" px="12px" className="px-[12px]">
             Read More on Docs
-            <ArrowRightIcon />
           </Button>
         }
         shouldBlurBackdrop

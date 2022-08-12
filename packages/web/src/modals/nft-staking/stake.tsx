@@ -60,13 +60,13 @@ export function NFTStakeModal({
       }
       shouldBlurBackdrop
     >
-      <Flex marginBottom="75px" w="100%" direction="column">
-        <Text marginTop="-12px" marginBottom="12px">
+      <Flex w="100%" direction="column">
+        <Text color="white" marginTop="-12px" marginBottom="12px">
           please select your nft from the wallet
         </Text>
 
         {loading ? (
-          <Flex height="370px" alignItems="center" justifyContent="center">
+          <Flex height="320px" alignItems="center" justifyContent="center">
             <Spinner size="xl" />
           </Flex>
         ) : (
@@ -80,11 +80,12 @@ export function NFTStakeModal({
               </Flex>
             }
           >
-            <Grid
-              templateColumns="repeat(1, 1fr)"
+            <Flex
               rowGap="12px"
-              maxHeight="370px"
+              flexWrap="wrap"
+              maxHeight="320px"
               overflow="auto"
+              className="jdx-content"
             >
               {data &&
                 data.map(({ metadata, token_id }, i) => (
@@ -129,7 +130,7 @@ export function NFTStakeModal({
                     )}
                   </Flex>
                 ))}
-            </Grid>
+            </Flex>
           </If>
         )}
       </Flex>

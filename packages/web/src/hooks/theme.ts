@@ -15,5 +15,6 @@ export const useTheme = () => {
     darkPurple: "#21002F",
     glassyWhite: "rgba(255,255,255,0.10)",
     glassyWhiteOpaque: "rgba(255,255,255,0.40)",
+    darkPurpleOpaque: "rgba(33,0,47, 0.20)",
   };
 };
