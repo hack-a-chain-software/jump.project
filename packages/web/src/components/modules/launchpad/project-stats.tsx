@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
-import { useTheme } from "@/hooks/theme";
-import { Card, ValueBox } from "@/components";
-import { Flex, Text } from "@chakra-ui/react";
+import { Card } from "@/components";
+import { Flex, Text, Skeleton } from "@chakra-ui/react";
 
 interface Stats {
   [key: string]: table;
@@ -17,7 +15,13 @@ export interface Item {
   value: string;
 }
 
-export function ProjectStats({ stats }: { stats: Stats }) {
+export function ProjectStats({
+  stats,
+  isLoading,
+}: {
+  stats: Stats;
+  isLoading: boolean;
+}) {
   return (
     <Card className="col-span-12 xl:col-span-8">
       <Flex flexGrow={5} flexDirection="column" gap={4}>
@@ -75,20 +79,25 @@ export function ProjectStats({ stats }: { stats: Stats }) {
 
                 <Flex flexDirection="column" width="100%" gap={2}>
                   {table.items.map(({ label, value }, index) => (
-                    <Flex
+                    <Skeleton
+                      className="rounded-[16px]"
+                      isLoaded={!isLoading}
                       key={`project-stats-table-${key}-${index}`}
-                      justifyContent="space-between"
-                      className="flex-col lg:flex-row"
-                      bg={
-                        index % 2 === 0
-                          ? "rgba(255,255,255,0.10)"
-                          : "transparent"
-                      }
                     >
-                      <Text children={label} fontWeight="800" />
+                      <Flex
+                        justifyContent="space-between"
+                        className="flex-col lg:flex-row"
+                        bg={
+                          index % 2 === 0
+                            ? "rgba(255,255,255,0.10)"
+                            : "transparent"
+                        }
+                      >
+                        <Text children={label} fontWeight="800" />
 
-                      <Text children={value} />
-                    </Flex>
+                        <Text children={value} />
+                      </Flex>
+                    </Skeleton>
                   ))}
                 </Flex>
               </Flex>

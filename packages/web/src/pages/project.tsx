@@ -385,7 +385,8 @@ export const Project = () => {
                 fontFamily="Inter"
                 letterSpacing="-0.05em"
                 fontSize="50px"
-                marginTop="-20px"
+                marginTop="-8px"
+                lineHeight="50px"
                 as="h1"
               >
                 {launchpad_project?.project_name}
@@ -448,7 +449,7 @@ export const Project = () => {
           </Flex>
         </Card>
 
-        <ProjectStats stats={stats} />
+        <ProjectStats isLoading={isLoading} stats={stats} />
       </div>
 
       <Box
