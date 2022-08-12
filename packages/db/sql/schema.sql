@@ -31,6 +31,7 @@ create table if not exists listings (
     project_owner text,
     project_token text not null,
     price_token text not null, 
+    public boolean,
 
     open_sale_1_timestamp timestamptz,
     open_sale_2_timestamp timestamptz,
