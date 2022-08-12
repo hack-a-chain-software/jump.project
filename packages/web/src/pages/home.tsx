@@ -48,43 +48,38 @@ export function Home() {
   );
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
-  const launchpadSettings = useViewLaunchpadSettings();
+  const { data: launchpadSettings } = useViewLaunchpadSettings();
 
-  const { data: { launchpad_projects } = {} } = useLaunchpadConenctionQuery({
-    variables: {
-      limit: 10,
-    },
-  });
+  const { data: { launchpad_projects: launchpadProjects } = {} } =
+    useLaunchpadConenctionQuery({
+      variables: {
+        limit: 10,
+      },
+    });
+
+  const stakedTokens = useMemo(
+    () => new BN(investor.data?.staked_token ?? "0"),
+    [investor.data?.staked_token]
+  );
+
+  const minimumTokens = useMemo(
+    () => launchpadSettings?.tiers_minimum_tokens.map((t) => new BN(t)),
+    [launchpadSettings]
+  );
 
   const level = useMemo(() => {
-    const find = (launchpadSettings.data?.tiers_minimum_tokens || [])
-      .map((minTokens, i) => ({
-        minTokens,
-        level: i++,
-      }))
-      .filter((e) => {
-        return new BN(e.minTokens).lte(
-          new BN(investor.data?.staked_token || "0")
-        );
-      }) as any;
+    const metLevels = minimumTokens?.filter((tokenAmount) =>
+      tokenAmount.lte(stakedTokens)
+    );
 
-    return find.length || 0;
-  }, [
-    launchpadSettings.data?.tiers_minimum_tokens,
-    investor.data?.staked_token,
-  ]);
+    return metLevels?.length ?? 0;
+  }, [minimumTokens, stakedTokens]);
 
   const amountToNextLevel = useMemo(() => {
-    if (launchpadSettings?.data?.tiers_minimum_tokens[level]) {
-      return new BN(launchpadSettings?.data?.tiers_minimum_tokens[level])
-        .sub(new BN(investor?.data?.staked_token || "0"))
-        .toString();
-    }
-    return "0";
-  }, [
-    launchpadSettings.data?.tiers_minimum_tokens,
-    investor.data?.staked_token,
-  ]);
+    return minimumTokens?.[level]
+      ? minimumTokens[level]!.sub(stakedTokens)
+      : new BN(0);
+  }, [minimumTokens, stakedTokens]);
 
   const upgradeLevel = () => {
     const formattedLevel = level + 1;
@@ -98,8 +93,8 @@ export function Home() {
   };
 
   const isLoaded = useMemo(() => {
-    return !!launchpadSettings.data;
-  }, [launchpadSettings.data, investor.data]);
+    return !!launchpadSettings;
+  }, [launchpadSettings, investor.data]);
 
   const [filterMine, setMine] = useState("");
   const [filterStatus, setStatus] = useState("");
@@ -119,7 +114,7 @@ export function Home() {
   type ProjectStatus = "open" | "closed";
   // TODO: validar isso pelo amor de deus
   const projectStatusMap: Record<ListingStatus, ProjectStatus> = {
-    unfunded: "open",
+    unfunded: "open", // ignore
     funded: "open",
     sale_finalized: "open",
     pool_created: "open",
@@ -135,7 +130,7 @@ export function Home() {
   };
 
   const items = useMemo(() => {
-    if (!launchpad_projects) {
+    if (!launchpadProjects) {
       return [...Array(2)];
     }
 
@@ -164,7 +159,7 @@ export function Home() {
       // }
     ];
 
-    return launchpad_projects?.data?.filter((project) =>
+    return launchpadProjects?.data?.filter((project) =>
       filter.every(
         ({ filter, test }) => !filter || (project && test(project, filter))
       )
@@ -174,7 +169,7 @@ export function Home() {
     filterStatus,
     filterSearch,
     filterVisibility,
-    launchpad_projects,
+    launchpadProjects,
   ]);
 
   return (
@@ -193,7 +188,7 @@ export function Home() {
             maxWidth="200px"
             borderRadius="30px"
             endColor="rgba(255,255,255,0.3)"
-            isLoaded={!accountId || !!(investor.data && launchpadSettings.data)}
+            isLoaded={!accountId || !!(investor.data && launchpadSettings)}
           >
             <Box
               bg="white"
@@ -211,9 +206,7 @@ export function Home() {
                 ? "Connect your wallet"
                 : investor.data
                 ? `${
-                    launchpadSettings.data?.tiers_entitled_allocations[
-                      !level ? 0 : level - 1
-                    ] || 0
+                    launchpadSettings?.tiers_entitled_allocations[level] ?? 0
                   } Tickets Available`
                 : `${totalAllocations.data || 0} Tickets Available`}
             </Box>
@@ -245,10 +238,13 @@ export function Home() {
                     <Text fontSize={18} fontWeight="semibold">
                       Level {level}
                     </Text>
+                    {/* TODO: make sure this is right */}
                     <Text>
                       Stake more{" "}
-                      {Number(amountToNextLevel) / 1000000000000000000} to next
-                      Level
+                      {amountToNextLevel
+                        .div(new BN("1000000000000000000"))
+                        .toString() + " "}
+                      to next Level
                     </Text>
                   </Flex>
                 </Flex>
@@ -285,18 +281,18 @@ export function Home() {
                 endColor="rgba(255,255,255,0.3)"
               >
                 <Button
-                  w="100%"
                   onClick={upgradeLevel}
                   disabled={
-                    (launchpadSettings.data?.tiers_minimum_tokens.length ||
-                      0) <= level
+                    (launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
+                    level
                   }
+                  w="100%"
                   bg="white"
                   color="black"
                   justifyContent="space-between"
                 >
                   Upgrade Level
-                  {(launchpadSettings.data?.tiers_minimum_tokens.length || 0) <=
+                  {(launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
                   level ? (
                     <LockIcon />
                   ) : (
@@ -357,12 +353,13 @@ export function Home() {
             <Tr>
               <Th>Image</Th>
               <Th>Name</Th>
-              <Th>Price</Th>
-              <Th>Access</Th>
-              <Th>Max Allocation</Th>
-              <Th>Raise Size</Th>
-              <Th>Filled</Th>
-              <Th>Status</Th>
+              <Th>Price</Th>{" "}
+              {/* allocation_price / allocation_size (price token symbol) */}
+              <Th>Access</Th> {/* public / private */}
+              <Th>Max Allocation</Th> {/* view_investor_allowance */}
+              <Th>Raise Size</Th> {/* project_tokens_sold * price / size */}
+              <Th>Filled</Th> {/* sold / total */}
+              <Th>Status</Th> {/* status mapeado */}
             </Tr>
           </Thead>
           <Tbody>

@@ -176,7 +176,6 @@ export const Project = () => {
   }, [launchpad_project]);
 
   const stats = useMemo(() => {
-    console.log({ aaa: launchpad_project?.price_token });
     return {
       price: {
         name: "Price",
@@ -195,15 +194,15 @@ export const Project = () => {
           },
           {
             label: "How many allocations you can still buy",
-            value: "100,00",
+            value: "100,00", // view_investor_allowance(listing_id)
           },
           {
             label: "How many allocations you already bought",
-            value: "100,00",
+            value: "100,00", // view_investor_allocation(listing_id)
           },
           {
             label: "Total allocations bought / total allocations",
-            value: "100,00",
+            value: "100,00", // listing.allocations_sold / total_...
           },
         ],
       },
@@ -236,7 +235,7 @@ export const Project = () => {
           },
           {
             label: "Vesting final release %",
-            value: "99%", // TODO
+            value: "99%", // 100 - instant - cliff
           },
           {
             label: "Vesting cliff launchpad_project date",
