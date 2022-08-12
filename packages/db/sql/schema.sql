@@ -27,6 +27,7 @@ create type listing_status as enum (
 
 create table if not exists listings (
     listing_id numeric(21) primary key,
+    public boolean,
     status listing_status not null,
     project_owner text,
     project_token text not null,

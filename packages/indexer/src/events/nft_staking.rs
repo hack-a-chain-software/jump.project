@@ -1,7 +1,7 @@
 use super::Event;
 use crate::pool::PgPooledConnection;
 use crate::types::json_types::{U128, U64};
-use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
+use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId, NftCollection, FungibleTokenId};
 use crate::types::AccountId;
 use crate::events::launchpad::{U64toUTC};
 use async_trait::async_trait;

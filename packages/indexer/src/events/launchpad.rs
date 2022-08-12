@@ -1,6 +1,6 @@
 use crate::pool::PgPooledConnection;
 use crate::types::json_types::{U128, U64};
-use crate::types::listing::{Listing, ListingStatus, SalePhase};
+use crate::types::listing::{Listing, ListingStatus, ListingType, SalePhase};
 use crate::types::AccountId;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
@@ -138,10 +138,16 @@ impl Event for LaunchpadEvent {
                     Listing::V1(listing) => listing,
                 };
 
+                let public = match listing_data.listing_type {
+                    ListingType::Public => true,
+                    ListingType::Private => false
+                };
+
                 conn.execute(
                     "
                     insert into listings (
                         listing_id,
+                        public,
                         status,
                         project_owner,
                         project_token,
@@ -168,11 +174,12 @@ impl Event for LaunchpadEvent {
                     )
                     values (
                         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
-                        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+                        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
                     )
                 ",
                     &[
                         &U64toDecimal(listing_data.listing_id),
+                        &public,
                         &listing_data.status,
                         &listing_data.project_owner,
                         &listing_data.project_token.to_string(),

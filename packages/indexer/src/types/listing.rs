@@ -43,12 +43,19 @@ pub enum ListingStatus {
     Cancelled,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ListingType {
+    Public,
+    Private,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ListingV1 {
     pub listing_id: U64,
     pub project_owner: AccountId,
     pub project_token: FungibleToken,
     pub price_token: FungibleToken,
+    pub listing_type: ListingType,
     pub open_sale_1_timestamp: U64,
     pub open_sale_2_timestamp: U64,
     pub final_sale_2_timestamp: U64,
