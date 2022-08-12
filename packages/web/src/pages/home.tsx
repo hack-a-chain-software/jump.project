@@ -23,6 +23,7 @@ import {
   useColorModeValue,
   Skeleton,
 } from "@chakra-ui/react";
+import { JUMP_TOKEN } from "@/env/contract";
 import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
@@ -30,6 +31,7 @@ import { useNavigate } from "react-router";
 import { Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { useNearQuery } from "react-near";
 
 /**
  * @route - '/'
@@ -43,9 +45,7 @@ export function Home() {
   const { darkPurpleOpaque, glassyWhite } = useTheme();
 
   const investor = useViewInvestor(accountId!);
-  const totalAllocations = useViewTotalEstimatedInvestorAllowance(
-    accountId as string
-  );
+  const totalAllocations = useViewTotalEstimatedInvestorAllowance(accountId!);
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const { data: launchpadSettings } = useViewLaunchpadSettings();
@@ -92,9 +92,20 @@ export function Home() {
     increaseMembership(formattedLevel, accountId!, selector);
   };
 
+  //todo: confirmar base token
+  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
+    useNearQuery<string, { account_id: string }>("ft_balance_of", {
+      contract: JUMP_TOKEN,
+      variables: {
+        account_id: accountId!,
+      },
+      poolInterval: 1000 * 60,
+      skip: !accountId,
+    });
+
   const isLoaded = useMemo(() => {
-    return !!launchpadSettings;
-  }, [launchpadSettings, investor.data]);
+    return !!launchpadSettings && !loadingBaseTokenBalance;
+  }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
 
   const [filterMine, setMine] = useState("");
   const [filterStatus, setStatus] = useState("");
@@ -188,7 +199,7 @@ export function Home() {
             maxWidth="200px"
             borderRadius="30px"
             endColor="rgba(255,255,255,0.3)"
-            isLoaded={!accountId || !!(investor.data && launchpadSettings)}
+            isLoaded={!accountId || isLoaded}
           >
             <Box
               bg="white"
@@ -284,7 +295,7 @@ export function Home() {
                   onClick={upgradeLevel}
                   disabled={
                     (launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
-                    level
+                      level || baseTokenBalance === "0"
                   }
                   w="100%"
                   bg="white"
@@ -353,7 +364,7 @@ export function Home() {
             <Tr>
               <Th>Image</Th>
               <Th>Name</Th>
-              <Th>Price</Th>{" "}
+              <Th>Price</Th>
               {/* allocation_price / allocation_size (price token symbol) */}
               <Th>Access</Th> {/* public / private */}
               <Th>Max Allocation</Th> {/* view_investor_allowance */}
@@ -363,7 +374,7 @@ export function Home() {
             </Tr>
           </Thead>
           <Tbody>
-            {items?.map((e) => (
+            {items?.map((e, index) => (
               <Tr
                 cursor="pointer"
                 borderRadius="20px"
@@ -371,10 +382,9 @@ export function Home() {
                   if (!e) {
                     return;
                   }
-
                   navigate(`/launchpad/${e?.listing_id}`);
                 }}
-                key={e?.listing_id}
+                key={`launchpad-project-${e?.listing_id}-${index}`}
                 _hover={{
                   bg: useColorModeValue(darkPurpleOpaque, glassyWhite),
                 }}

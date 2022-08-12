@@ -13,6 +13,8 @@ import {
   ContractData,
 } from "@/stores/vesting-store";
 import { BuyFastPass } from "@/modals";
+import { useNearQuery } from "react-near";
+import { JUMP_TOKEN } from "@/env/contract";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function VestingCard(
@@ -42,6 +44,18 @@ export function VestingCard(
   const { withdraw } = useVestingStore();
 
   const [showFastPass, setShowFastPass] = useState(false);
+
+  const { data: baseTokenBalance } = useNearQuery<
+    string,
+    { account_id: string }
+  >("ft_balance_of", {
+    contract: JUMP_TOKEN,
+    variables: {
+      account_id: accountId!,
+    },
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+  });
 
   return (
     <Box
@@ -165,7 +179,9 @@ export function VestingCard(
               justifyContent="space-between"
             >
               <Button
-                disabled={props.fast_pass}
+                disabled={
+                  props.fast_pass || baseTokenBalance === "0" || !accountId
+                }
                 onClick={() => setShowFastPass(true)}
               >
                 <Flex
@@ -187,7 +203,7 @@ export function VestingCard(
               <Button
                 disabled={
                   Number(props.available_to_withdraw) <=
-                  Math.pow(10, props.token?.decimals || 0)
+                    Math.pow(10, props.token?.decimals || 0) || !accountId
                 }
                 onClick={() =>
                   withdraw([String(props.id)], accountId as string, selector)

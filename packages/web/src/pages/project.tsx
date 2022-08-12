@@ -404,6 +404,7 @@ export const Project = () => {
                 <Input
                   value={tickets}
                   type="number"
+                  disabled={!accountId || priceTokenBalance === "0"}
                   onChange={(e) => setTickets(Number(e.target.value))}
                   bg="white"
                   color="black"
@@ -424,10 +425,15 @@ export const Project = () => {
             <If
               condition={!!accountId}
               fallback={
-                <Flex justifyContent="space-between" w="100%">
+                <Button
+                  disabled={true}
+                  onClick={() => onJoinProject(tickets)}
+                  justifyContent="space-between"
+                  w="100%"
+                  maxWidth="380px"
+                >
                   Connect Wallet
-                  <WalletIcon />
-                </Flex>
+                </Button>
               }
             >
               <Skeleton

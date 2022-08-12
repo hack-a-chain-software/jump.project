@@ -10,7 +10,7 @@ import {
   ValueBox,
   Card,
 } from "../components";
-import { X_JUMP_TOKEN } from "../env/contract";
+import { X_JUMP_TOKEN, JUMP_TOKEN } from "../env/contract";
 import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";
@@ -55,8 +55,17 @@ export const Staking = () => {
     },
     poolInterval: 1000 * 60,
     skip: !accountId,
-    debug: true,
   });
+
+  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
+    useNearQuery<string, { account_id: string }>("ft_balance_of", {
+      contract: JUMP_TOKEN,
+      variables: {
+        account_id: accountId as string,
+      },
+      poolInterval: 1000 * 60,
+      skip: !accountId,
+    });
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
@@ -89,7 +98,7 @@ export const Staking = () => {
   }, []);
 
   const isLoading = useMemo(() => {
-    return loadingBalance && loadingTokenRatio;
+    return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
   }, [loadingBalance, loadingTokenRatio]);
 
   return (
@@ -194,7 +203,7 @@ export const Staking = () => {
                 staking to earn passive income as an investor.
               </Text>
             </div>
-            <Flex direction="column" gap={1} width="100%">
+            <Flex direction="column" gap={4} width="100%">
               <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
                 <Button
                   color="black"
@@ -204,6 +213,7 @@ export const Staking = () => {
                   maxWidth="100%"
                   width="100%"
                   onClick={stakingDisclosure.onOpen}
+                  disabled={!baseTokenBalance || baseTokenBalance === "0"}
                 >
                   Stake <WalletIcon />
                 </Button>
@@ -218,6 +228,7 @@ export const Staking = () => {
                   width="100%"
                   justifyContent="space-between"
                   onClick={withdrawDisclosure.onOpen}
+                  disabled={!balance || balance === "0"}
                 >
                   <Flex
                     w="100%"
