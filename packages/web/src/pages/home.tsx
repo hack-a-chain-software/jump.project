@@ -345,7 +345,9 @@ export function Home() {
             }}
             outline="none"
             px="20px"
-            onInput={(event) => setSearch(event?.target?.value)}
+            onInput={(event) =>
+              setSearch((event.target as HTMLInputElement).value)
+            }
           />
         </Flex>
       </Flex>
