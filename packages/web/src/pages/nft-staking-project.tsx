@@ -17,13 +17,13 @@ import {
   NFTStakingUserActions,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
-import { WalletConnection } from "near-api-js";
-import { useNftStaking, Token } from "../stores/nft-staking-store";
-import { useNearContractsAndWallet } from "@/context/near";
+import { useNftStaking } from "../stores/nft-staking-store";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
+import { Token } from "@near/ts";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -36,8 +36,7 @@ export function NFTStakingProject() {
 
   const { fetchUserTokens, tokens, loading } = useNftStaking();
 
-  const { wallet, isFullyConnected, connectWallet } =
-    useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
   const [selected, setSelected] = useState<Token[]>([]);
 
@@ -52,9 +51,7 @@ export function NFTStakingProject() {
   };
 
   const toggleUnstakeModal = () => {
-    if (!isFullyConnected) {
-      connectWallet();
-
+    if (!accountId) {
       return;
     }
 
@@ -69,11 +66,11 @@ export function NFTStakingProject() {
 
   useEffect(() => {
     (async () => {
-      if (isFullyConnected) {
-        await fetchUserTokens(wallet as WalletConnection, collection);
+      if (accountId) {
+        await fetchUserTokens(selector, accountId, collection);
       }
     })();
-  }, [isFullyConnected]);
+  }, [accountId]);
 
   const { data: { staking } = {} } = useQuery(StakingProjectDocument, {
     variables: {
@@ -98,17 +95,25 @@ export function NFTStakingProject() {
         rewards={staking?.rewards}
       />
 
-      <Flex flex={1} direction="row">
+      <Flex
+        flex={1}
+        direction="row"
+        flexWrap="wrap"
+        className="flex-col md:flex-row"
+        gap={12}
+      >
         <NFTStakingUserRewards rewards={staking?.rewards} />
 
         <NFTStakingUserActions />
       </Flex>
 
-      <If condition={!!isFullyConnected && !isEmpty(tokens) && !loading}>
+      <If condition={!isEmpty(tokens) && !loading}>
         <Flex
           paddingTop="66px"
           alignItems="center"
           justifyContent="space-between"
+          flexWrap="wrap"
+          gap={5}
         >
           <Flex>
             <Text fontSize="24px" fontWeight="700">

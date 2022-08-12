@@ -11,18 +11,16 @@ import {
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
-import { useNearQuery } from "react-near";
-import { useNearContractsAndWallet } from "@/context/near";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import { formatNumber } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
-import { WalletConnection } from "near-api-js";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
 
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
   const [filter, setFilter] = useState("");
 
@@ -35,24 +33,16 @@ export const Vesting = () => {
     loading,
   } = useVestingStore();
 
-  const { data: storage } = useNearQuery("storage_balance_of", {
-    contract: "jump_token.testnet",
-    variables: {
-      account_id: wallet?.getAccountId(),
-    },
-    skip: !isFullyConnected,
-  });
-
   useEffect(() => {
     (async () => {
-      if (!isFullyConnected) {
+      if (!accountId) {
         return;
       }
 
-      await getVestings(wallet as WalletConnection);
-      await getInvestorInfo(wallet as WalletConnection);
+      await getVestings(selector, accountId);
+      await getInvestorInfo(selector);
     })();
-  }, [isFullyConnected]);
+  }, [accountId]);
 
   const filtered = useMemo(() => {
     if (!filter) {
@@ -82,12 +72,12 @@ export const Vesting = () => {
   }, [filter, vestings]);
 
   const isLoading = useMemo(() => {
-    if (!isFullyConnected) {
+    if (!accountId) {
       return false;
     }
 
     return isEmpty(investorInfo);
-  }, [investorInfo, isFullyConnected]);
+  }, [investorInfo, accountId]);
 
   return (
     <PageContainer>
@@ -97,81 +87,79 @@ export const Vesting = () => {
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
         content={
-          <>
-            <Flex className="space-x-[1.25rem]">
-              <Skeleton
-                height="114px"
-                minWidth="240px"
-                borderRadius={20}
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Locked"
-                  value={
-                    isFullyConnected
-                      ? `${formatNumber(
-                          investorInfo?.totalLocked || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="All amount locked"
-                />
-              </Skeleton>
+          <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Locked"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalLocked || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="All amount locked"
+              />
+            </Skeleton>
 
-              <Skeleton
-                height="114px"
-                minWidth="240px"
-                borderRadius={20}
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Unlocked"
-                  value={
-                    isFullyConnected
-                      ? `${formatNumber(
-                          investorInfo?.totalUnlocked || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="Unlocked amount"
-                />
-              </Skeleton>
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Unlocked"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalUnlocked || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="Unlocked amount"
+              />
+            </Skeleton>
 
-              <Skeleton
-                height="114px"
-                minWidth="240px"
-                borderRadius={20}
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Withdrawn"
-                  value={
-                    isFullyConnected
-                      ? `${formatNumber(
-                          investorInfo?.totalWithdrawn || 0,
-                          investorInfo?.token?.decimals || 0
-                        )} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
-                  }
-                  bottomText="Total quantity "
-                />
-              </Skeleton>
-            </Flex>
-          </>
+            <Skeleton
+              height="114px"
+              borderRadius={20}
+              className="md:min-w-[240px]"
+              endColor="rgba(255,255,255,0.3)"
+              isLoaded={!isLoading}
+            >
+              <ValueBox
+                borderColor={glassyWhiteOpaque}
+                title="Total Withdrawn"
+                value={
+                  accountId
+                    ? `${formatNumber(
+                        investorInfo?.totalWithdrawn || 0,
+                        investorInfo?.token?.decimals || 0
+                      )} ${investorInfo?.token?.symbol}`
+                    : "Connect Wallet"
+                }
+                bottomText="Total quantity "
+              />
+            </Skeleton>
+          </Flex>
         }
       />
 
       <If
         fallback={
-          isFullyConnected
+          accountId
             ? !loading && <Empty text="No vestings available" />
             : loading && (
                 <Empty text="You must be logged in to view all vestings" />
@@ -182,12 +170,11 @@ export const Vesting = () => {
         <>
           <Flex justifyContent="space-between">
             <Select
-              onChange={(event) => setFilter(event?.target?.value)}
+              value={filter}
               placeholder="Filter"
-            >
-              <option value="completed">Completed</option>
-              <option value="runing">Runing</option>
-            </Select>
+              items={["completed", "runing"]}
+              onChange={(value: string) => setFilter(value)}
+            />
 
             <Flex maxW="330px">
               <GradientButton
@@ -202,8 +189,8 @@ export const Vesting = () => {
                         );
                       })
                       .map(({ id }) => String(id)),
-                    storage,
-                    wallet as WalletConnection
+                    accountId as string,
+                    selector
                   );
                 }}
                 justifyContent="center"

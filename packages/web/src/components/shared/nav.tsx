@@ -1,13 +1,5 @@
-import {
-  Flex,
-  Stack,
-  Text,
-  useColorMode,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Flex, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { JumpIcon } from "../../assets/svg/jump-logo";
-import { useTheme } from "../../hooks/theme";
 import { navRoutes, routes } from "../../routes";
 
 const enabledRoutes = [
@@ -22,7 +14,7 @@ export const Nav = () => {
 
   return (
     <Flex
-      h="100vh"
+      minH="100vh"
       w="120px"
       zIndex="1"
       bg="transparent"
@@ -32,12 +24,10 @@ export const Nav = () => {
       bottom="0px"
       flexDirection="column"
       alignItems="center"
-      pt="40px"
+      pt="121px"
       gap="25px"
+      className="hidden md:flex"
     >
-      <Flex>
-        <JumpIcon />
-      </Flex>
       <Stack
         display="flex"
         flex={1}
@@ -47,36 +37,45 @@ export const Nav = () => {
         pb="100px"
       >
         {navRoutes.map((e) => (
-          <Flex
-            alignItems="center"
-            w="80px"
-            minH="80px"
-            cursor={enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"}
-            transition="0.3s"
-            onClick={() =>
-              enabledRoutes.includes(e.route) ? navigate(e.route) : null
-            }
-            userSelect="none"
-            justifyContent="center"
+          <Tooltip
+            isDisabled={enabledRoutes.includes(e.route)}
             key={e.route}
-            direction="column"
+            hasArrow
+            label="Coming soon"
+            placement="right"
           >
-            <Text
-              userSelect="none"
-              textAlign="center"
-              display="flex"
+            <Flex
               alignItems="center"
-              flexDirection="column"
-              fontSize="12px"
-              pt={2}
-              opacity={
-                window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
+              w="80px"
+              minH="80px"
+              cursor={
+                enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"
               }
+              transition="0.3s"
+              onClick={() =>
+                enabledRoutes.includes(e.route) ? navigate(e.route) : null
+              }
+              userSelect="none"
+              justifyContent="center"
+              direction="column"
             >
-              {e.icon}
-              {e.title}
-            </Text>
-          </Flex>
+              <Text
+                userSelect="none"
+                textAlign="center"
+                display="flex"
+                alignItems="center"
+                flexDirection="column"
+                fontSize="12px"
+                pt={2}
+                opacity={
+                  window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
+                }
+              >
+                {e.icon}
+                {e.title}
+              </Text>
+            </Flex>
+          </Tooltip>
         ))}
       </Stack>
     </Flex>

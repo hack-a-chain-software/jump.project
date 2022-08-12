@@ -1,177 +1,97 @@
 import create from "zustand";
-import { Contract, WalletConnection } from "near-api-js";
 import {
-  getTransactionObject,
-  Transaction,
+  viewFunction,
+  getTransaction,
   executeMultipleTransactions,
 } from "@/tools";
-import { NearContractViewCall } from "@near/ts";
-
-export interface Token {
-  balance?: any;
-  id?: string;
-  token_id: string;
-  owner_id: string;
-  stakedAt?: number;
-  metadata: Metadata;
-  approved_account_ids: ApprovedAccountIds;
-}
-
-export interface StakedNFT {
-  token_id: [TokenId, string];
-  owner_id: string;
-  staked_timestamp: number;
-}
-
-export interface TokenId {
-  type: string;
-  account_id: string;
-}
-
-export interface Metadata {
-  title: string;
-  description: any;
-  media: string;
-  media_hash: any;
-  copies: number;
-  issued_at: any;
-  expires_at: any;
-  starts_at: any;
-  updated_at: any;
-  extra: any;
-  reference: any;
-  reference_hash: any;
-}
-
-export interface ApprovedAccountIds {}
-
-export interface CollectionMetaResponse {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  base_uri: string;
-}
-
-export interface StakingToken {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  decimals: number;
-  perMonth: string;
-  account_id: string;
-}
-
-export interface TokenId {
-  type: string;
-  account_id: string;
-}
-
-interface CollectionContract extends Contract {
-  nft_token: NearContractViewCall<{ token_id: string }, Token>;
-  nft_metadata: NearContractViewCall<any, CollectionMetaResponse>;
-}
-
-interface NFTStakingContract extends Contract {
-  storage_balance_of: NearContractViewCall<{ account_id: string }, any>;
-  view_staked: NearContractViewCall<
-    { account_id: string; collection: { account_id: string; type: string } },
-    string[]
-  >;
-  view_staked_nft_balance: NearContractViewCall<
-    { nft_id: [{ type: string; account_id: string }, string] },
-    any
-  >;
-  view_staked_nft: NearContractViewCall<
-    { nft_id: [{ type: string; account_id: string }, string] },
-    StakedNFT
-  >;
-}
+import { Token, Transaction } from "@near/ts";
+import type { WalletSelector } from "@near-wallet-selector/core";
 
 export const useNftStaking = create<{
   loading: boolean;
   tokens: Token[];
   fetchUserTokens: (
-    connection: WalletConnection,
+    connection: WalletSelector,
+    account: string,
     collection: string
   ) => Promise<void>;
   stake: (
-    connection: WalletConnection,
+    connection: WalletSelector,
+    account: string,
     collection: string,
     tokenId: string
   ) => Promise<void>;
   unstake: (
-    connection: WalletConnection,
+    connection: WalletSelector,
+    account: string,
     tokens: string[],
     collection: string,
     rewards: any
   ) => Promise<void>;
   getTokenStorage: (
-    token: string,
-    connection: WalletConnection
+    connection: WalletSelector,
+    account: string,
+    token: string
   ) => Promise<any>;
 }>((set, get) => ({
   tokens: [],
   loading: false,
 
-  fetchUserTokens: async (connection, collection) => {
+  fetchUserTokens: async (connection, account, collection) => {
     set({
       loading: true,
     });
 
-    const stakingContract = new Contract(
-      connection.account(),
-      import.meta.env.VITE_NFT_STAKING_CONTRACT,
-      {
-        viewMethods: [
-          "view_staked",
-          "view_guardians",
-          "view_staked_nft",
-          "view_staked_nft_balance",
-        ],
-        changeMethods: [],
-      }
-    ) as NFTStakingContract;
-
-    const collectionContract = new Contract(connection.account(), collection, {
-      viewMethods: ["nft_token"],
-      changeMethods: [],
-    }) as CollectionContract;
+    console.log(connection);
 
     try {
-      const staked = await stakingContract.view_staked({
-        account_id: connection.getAccountId(),
-        collection: {
-          type: "NFTContract",
-          account_id: collection,
-        },
-      });
+      const staked = await viewFunction(
+        connection,
+        import.meta.env.VITE_NFT_STAKING_CONTRACT,
+        "view_staked",
+        {
+          account_id: account,
+          collection: {
+            type: "NFTContract",
+            account_id: collection,
+          },
+        }
+      );
 
       const tokens: Token[] = [];
 
       for (let i = 0; i < staked.length; i++) {
-        const balance = await stakingContract.view_staked_nft_balance({
-          nft_id: [
-            {
-              type: "NFTContract",
-              account_id: collection,
-            },
-            staked[i],
-          ],
-        });
+        const balance = await viewFunction(
+          connection,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "view_staked_nft_balance",
+          {
+            nft_id: [
+              {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              staked[i],
+            ],
+          }
+        );
 
-        const { staked_timestamp } = await stakingContract.view_staked_nft({
-          nft_id: [
-            {
-              type: "NFTContract",
-              account_id: collection,
-            },
-            staked[i],
-          ],
-        });
+        const { staked_timestamp } = await viewFunction(
+          connection,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "view_staked_nft",
+          {
+            nft_id: [
+              {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              staked[i],
+            ],
+          }
+        );
 
-        const token = await collectionContract.nft_token({
+        const token = await viewFunction(connection, collection, "nft_token", {
           token_id: staked[i],
         });
 
@@ -194,21 +114,25 @@ export const useNftStaking = create<{
     }
   },
 
-  stake: async (connection, collection, tokenId) => {
+  stake: async (connection, account, collection, tokenId) => {
+    const wallet = await connection.wallet();
+
     const transactions: Transaction[] = [];
 
     const stakingStorage = await get().getTokenStorage(
-      import.meta.env.VITE_NFT_STAKING_CONTRACT,
-      connection
+      connection,
+      account,
+      import.meta.env.VITE_NFT_STAKING_CONTRACT
     );
 
     if (!stakingStorage || stakingStorage?.available < "0.10") {
       transactions.push(
-        getTransactionObject(
+        getTransaction(
+          account,
           import.meta.env.VITE_NFT_STAKING_CONTRACT,
           "storage_deposit",
           {
-            account_id: connection?.getAccountId(),
+            account_id: account,
             registration_only: false,
           },
           "0.25"
@@ -217,7 +141,7 @@ export const useNftStaking = create<{
     }
 
     transactions.push(
-      getTransactionObject(collection, "nft_transfer_call", {
+      getTransaction(account, collection, "nft_transfer_call", {
         receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
         token_id: tokenId,
         approval_id: null,
@@ -228,15 +152,18 @@ export const useNftStaking = create<{
       })
     );
 
-    executeMultipleTransactions(transactions, connection as WalletConnection);
+    executeMultipleTransactions(transactions, wallet);
   },
 
-  unstake: async (connection, tokens, collection, balance) => {
+  unstake: async (connection, account, tokens, collection, balance) => {
+    const wallet = await connection.wallet();
+
     const transactions: any = [];
 
     tokens.forEach((item) => {
       transactions.push(
-        getTransactionObject(
+        getTransaction(
+          account,
           import.meta.env.VITE_NFT_STAKING_CONTRACT,
           "unstake",
           {
@@ -257,15 +184,16 @@ export const useNftStaking = create<{
         continue;
       }
 
-      const storage = await get().getTokenStorage(key, connection);
+      const storage = await get().getTokenStorage(connection, account, key);
 
       if (!storage) {
         transactions.push(
-          getTransactionObject(
+          getTransaction(
+            account,
             key,
             "storage_deposit",
             {
-              account_id: connection?.getAccountId(),
+              account_id: account,
               registration_only: false,
             },
             "0.10"
@@ -280,7 +208,8 @@ export const useNftStaking = create<{
       }
 
       transactions.push(
-        getTransactionObject(
+        getTransaction(
+          account,
           import.meta.env.VITE_NFT_STAKING_CONTRACT,
           "withdraw_reward",
           {
@@ -294,18 +223,13 @@ export const useNftStaking = create<{
       );
     }
 
-    executeMultipleTransactions(transactions, connection as WalletConnection);
+    executeMultipleTransactions(transactions, wallet);
   },
 
-  getTokenStorage: async (token, connection) => {
-    const contract = new Contract(connection.account(), token, {
-      viewMethods: ["storage_balance_of"],
-      changeMethods: [],
-    }) as NFTStakingContract;
-
+  getTokenStorage: async (connection, account, token) => {
     try {
-      return await contract?.storage_balance_of({
-        account_id: connection?.getAccountId(),
+      return await await viewFunction(connection, token, "storage_balance_of", {
+        account_id: account,
       });
     } catch (e) {
       return;

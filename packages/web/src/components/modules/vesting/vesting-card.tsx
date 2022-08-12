@@ -6,16 +6,16 @@ import { WalletIcon } from "@/assets/svg";
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
 import { formatNumber } from "@near/ts";
-import { useNearQuery } from "react-near";
 import {
   useVestingStore,
   Vesting,
   Token,
   ContractData,
 } from "@/stores/vesting-store";
-import { WalletConnection } from "near-api-js";
 import { BuyFastPass } from "@/modals";
-import { useNearContractsAndWallet } from "@/context/near";
+import { useNearQuery } from "react-near";
+import { JUMP_TOKEN } from "@/env/contract";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function VestingCard(
   props: Vesting & BoxProps & { token: Token; contractData: ContractData }
@@ -39,24 +39,27 @@ export function VestingCard(
     return Math.round(current / base);
   }, [props.start_timestamp, props.vesting_duration]);
 
-  const { wallet, isFullyConnected } = useNearContractsAndWallet();
+  const { accountId, selector } = useWalletSelector();
 
-  const { withdraw, fastPass } = useVestingStore();
-
-  const { data: storage } = useNearQuery("storage_balance_of", {
-    contract: import.meta.env.VITE_BASE_TOKEN,
-    variables: {
-      account_id: wallet?.getAccountId(),
-    },
-    skip: !isFullyConnected,
-  });
+  const { withdraw } = useVestingStore();
 
   const [showFastPass, setShowFastPass] = useState(false);
+
+  const { data: baseTokenBalance } = useNearQuery<
+    string,
+    { account_id: string }
+  >("ft_balance_of", {
+    contract: JUMP_TOKEN,
+    variables: {
+      account_id: accountId!,
+    },
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+  });
 
   return (
     <Box
       color="white"
-      cursor="pointer"
       p="3px"
       background={useColorModeValue("transparent", jumpGradient)}
       borderRadius="26px"
@@ -89,14 +92,17 @@ export function VestingCard(
           w="100%"
           p="40px"
           borderRadius="24px"
+          flexWrap="wrap"
+          gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
         >
-          <Flex userSelect="none" direction="column">
+          <Flex direction="column">
             <Flex
               padding="9px 20px"
               background="white"
               rounded="30px"
               width="max-content"
+              maxW="100%"
             >
               <Text color="black" fontSize="14px" fontWeight="700">
                 {`Total amount - ${formatNumber(
@@ -112,7 +118,7 @@ export function VestingCard(
               </Text>
 
               <Text
-                w="500px"
+                maxW="500px"
                 fontSize="30px"
                 fontWeight="800"
                 letterSpacing="-0.03em"
@@ -136,7 +142,13 @@ export function VestingCard(
             </Flex>
           </Flex>
 
-          <Flex gap={5} alignItems="center">
+          <Flex
+            gap={5}
+            alignItems="center"
+            flexGrow="1"
+            maxWidth="840px"
+            flexWrap="wrap"
+          >
             <ValueBox
               minWidth="250px"
               borderColor={glassyWhiteOpaque}
@@ -160,13 +172,16 @@ export function VestingCard(
             />
 
             <Flex
-              width="300px"
+              w="100%"
+              maxW="300px"
               height="133px"
               flexDirection="column"
               justifyContent="space-between"
             >
               <Button
-                disabled={props.fast_pass}
+                disabled={
+                  props.fast_pass || baseTokenBalance === "0" || !accountId
+                }
                 onClick={() => setShowFastPass(true)}
               >
                 <Flex
@@ -188,14 +203,10 @@ export function VestingCard(
               <Button
                 disabled={
                   Number(props.available_to_withdraw) <=
-                  Math.pow(10, props.token?.decimals || 0)
+                    Math.pow(10, props.token?.decimals || 0) || !accountId
                 }
                 onClick={() =>
-                  withdraw(
-                    [String(props.id)],
-                    storage,
-                    wallet as WalletConnection
-                  )
+                  withdraw([String(props.id)], accountId as string, selector)
                 }
               >
                 <Flex
@@ -215,7 +226,6 @@ export function VestingCard(
       <BuyFastPass
         onClose={() => setShowFastPass(false)}
         isOpen={showFastPass}
-        storage={storage}
         token={props.token}
         vestingId={props.id || ""}
         passCost={Number(props.contractData.fast_pass_cost)}

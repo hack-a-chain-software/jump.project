@@ -1,105 +1,64 @@
 import create from "zustand";
-import { WalletConnection, Contract } from "near-api-js";
+import { Transaction } from "@near/ts";
 import toast from "react-hot-toast";
-import { ConnectWallet } from "@/components/modules/toasts";
 import {
-  FtOnTransfer,
-  NearContractViewCall,
-  NearMutableContractCall,
-} from "@near/ts";
-import { executeMultipleTransactions, Transaction } from "@/tools";
-import { NearConstants } from "@/constants";
-
-export interface StakingContract extends Contract {
-  ft_on_transfer: FtOnTransfer;
-  burn_x_token: NearMutableContractCall<{ quantity_to_burn: string }>;
-
-  storage_deposit: NearMutableContractCall<{
-    account_id: string | null;
-    registration_only: boolean | null;
-  }>;
-  storage_balance_of: NearContractViewCall<
-    {
-      account_id: string;
-    },
-    {
-      total: string;
-      available: string;
-    }
-  >;
-}
+  getTransaction,
+  getTokenStorage,
+  executeMultipleTransactions,
+} from "@/tools";
+import type { WalletSelector } from "@near-wallet-selector/core";
 
 export const useStaking = create<{
-  contract: StakingContract | null;
-  connection: WalletConnection | null;
-  init: (connection: WalletConnection) => Promise<void>;
-  stakeXToken: (amount: string) => Promise<void>;
-  burnXToken: (amount: string) => Promise<void>;
-}>((set, get) => ({
-  contract: null,
-  connection: null,
-  /** @description - initializes the store with the contract instance and the wallet connection */
-  async init(connection) {
-    try {
-      set({
-        connection,
-        contract: new Contract(
-          connection.account(),
-          import.meta.env.VITE_STAKING_CONTRACT,
-          {
-            viewMethods: ["storage_balance_of"],
-            changeMethods: ["ft_on_transfer", "burn_x_token"],
-          }
-        ) as StakingContract,
-      });
-    } catch (error) {
-      console.warn("Staking Init Warning", error);
-    }
-  },
+  stakeXToken: (
+    amount: string,
+    accountId: string,
+    connection: WalletSelector
+  ) => Promise<void>;
+  burnXToken: (
+    amount: string,
+    accountId: string,
+    connection: WalletSelector
+  ) => Promise<void>;
+}>(() => ({
   /** @description - stakes tokens into the contract and sends the deposit to pay storage fees */
-  async stakeXToken(amount) {
+  async stakeXToken(amount, accountId, connection) {
     const transactions: Transaction[] = [];
-    const { contract, connection } = get();
-    try {
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
 
-      const stakingStorage = await contract.storage_balance_of({
-        account_id: get().connection?.getAccountId(),
-      });
+    try {
+      const stakingStorage = await getTokenStorage(
+        connection,
+        accountId,
+        import.meta.env.VITE_STAKING_CONTRACT
+      );
 
       if (!stakingStorage) {
-        transactions.push({
-          receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            import.meta.env.VITE_STAKING_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: get().connection?.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
+          "ft_transfer_call",
           {
-            methodName: "ft_transfer_call",
-            args: {
-              receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
-              amount,
-              memo: null,
-              msg: "mint",
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
+            amount,
+            memo: null,
+            msg: "mint",
+          }
+        )
+      );
 
       await executeMultipleTransactions(transactions, connection);
     } catch (error) {
@@ -107,46 +66,40 @@ export const useStaking = create<{
     }
   },
   /** @description - unstakes tokens from the contract to the user wallet */
-  async burnXToken(amount) {
+  async burnXToken(amount, accountId, connection) {
     const transactions: Transaction[] = [];
     try {
-      const { connection, contract } = get();
-      if (!connection || !contract) {
-        return console.warn(toast((t) => <ConnectWallet t={t} />));
-      }
-
-      const stakingStorage = await contract.storage_balance_of({
-        account_id: get().connection?.getAccountId(),
-      });
+      const stakingStorage = await getTokenStorage(
+        connection,
+        accountId,
+        import.meta.env.VITE_STAKING_CONTRACT
+      );
 
       if (!stakingStorage) {
-        transactions.push({
-          receiverId: import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
-          functionCalls: [
+        transactions.push(
+          getTransaction(
+            accountId,
+            import.meta.env.VITE_STAKING_CONTRACT,
+            "storage_deposit",
             {
-              methodName: "storage_deposit",
-              args: {
-                account_id: get().connection?.getAccountId(),
-                registration_only: false,
-              },
-              amount: "0.25",
+              account_id: accountId,
+              registration_only: false,
             },
-          ],
-        });
+            "0.25"
+          )
+        );
       }
 
-      transactions.push({
-        receiverId: import.meta.env.VITE_STAKING_CONTRACT,
-        functionCalls: [
+      transactions.push(
+        getTransaction(
+          accountId,
+          import.meta.env.VITE_STAKING_CONTRACT,
+          "burn_x_token",
           {
-            methodName: "burn_x_token",
-            args: {
-              quantity_to_burn: amount,
-            },
-            gas: NearConstants.AttachedGas,
-          },
-        ],
-      });
+            quantity_to_burn: amount,
+          }
+        )
+      );
 
       await executeMultipleTransactions(transactions, connection);
 

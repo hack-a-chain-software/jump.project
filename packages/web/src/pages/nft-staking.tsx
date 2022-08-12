@@ -1,4 +1,4 @@
-import { Image, Stack } from "@chakra-ui/react";
+import { Image, Stack, useColorModeValue } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
 import {
   If,
@@ -10,6 +10,7 @@ import {
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { useMemo } from "react";
+import { useTheme } from "@/hooks/theme";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 const collectionImages = [
@@ -21,6 +22,8 @@ const collectionImages = [
 
 export const NFTStaking = () => {
   const navigate = useNavigate();
+
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
 
   const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
@@ -69,6 +72,13 @@ export const NFTStaking = () => {
                     `/nft-staking/${window.btoa(staking?.collection_id)}`
                   )
                 }
+                _hover={{
+                  opacity: useColorModeValue(0.9, 0.7),
+                  background: useColorModeValue(
+                    jumpGradient,
+                    glassyWhiteOpaque
+                  ),
+                }}
                 logo={staking?.collection_meta?.image}
                 name={staking?.collection_meta?.name}
                 rewards={staking?.rewards}

@@ -1,10 +1,9 @@
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { ArrowRightIcon } from "@/assets/svg";
-import { ModalImageDialog, Button, If } from "@/components";
-import { useNearContractsAndWallet } from "@/context/near";
-import { Flex, Text, Grid, Image } from "@chakra-ui/react";
-import { WalletConnection } from "near-api-js";
-import { Token } from "@/stores/nft-staking-store";
+import { ModalImageDialog, Button } from "@/components";
+import { Flex, Text, useMediaQuery, Image } from "@chakra-ui/react";
+import { Token } from "@near/ts";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTUnstakeModal({
   selected,
@@ -18,7 +17,8 @@ export function NFTUnstakeModal({
   onClose: () => void;
 }) {
   const { unstake } = useNftStaking();
-  const { wallet } = useNearContractsAndWallet();
+  const { selector, accountId } = useWalletSelector();
+  const [isMobile] = useMediaQuery("(max-width: 810px)");
 
   return (
     <ModalImageDialog
@@ -32,7 +32,8 @@ export function NFTUnstakeModal({
         <Button
           onClick={() =>
             unstake(
-              wallet as WalletConnection,
+              selector,
+              accountId as string,
               selected.map((item) => item.token_id),
               collection,
               selected[0].balance
@@ -48,16 +49,16 @@ export function NFTUnstakeModal({
       }
       shouldBlurBackdrop
     >
-      <Flex marginBottom="75px" w="100%" direction="column">
+      <Flex w="100%" direction="column">
         <Text marginTop="-12px" marginBottom="12px">
           Unstake all selected NFT's?
         </Text>
 
-        <Grid
-          templateColumns="repeat(1, 1fr)"
+        <Flex
           rowGap="12px"
-          maxHeight="370px"
           overflow="auto"
+          maxHeight="370px"
+          flexDirection="column"
         >
           {selected &&
             selected.map(({ metadata }, i) => (
@@ -78,7 +79,7 @@ export function NFTUnstakeModal({
                 />
               </Flex>
             ))}
-        </Grid>
+        </Flex>
       </Flex>
     </ModalImageDialog>
   );

@@ -4,7 +4,7 @@ import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
 import { formatNumber } from "@near/ts";
-import { Token, StakingToken } from "@/stores/nft-staking-store";
+import { Token, StakingToken } from "@near/ts";
 import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { format, isBefore, addMilliseconds } from "date-fns";
@@ -41,11 +41,14 @@ export function TokenAccordion({
   }, [staked, endPenalty, token_id]);
 
   const withdrawPenalty = useMemo(() => {
-    const denom = new BN("10000000000000000000000");
+    // check new value -> 10_000_000_000_000_000_000_000
+    const denom = new BN("10000000000");
     const penaltyBN = new BN(penalty);
 
     return penaltyBN.div(denom).toString() + "%";
   }, [rewards, token_id, penalty]);
+
+  console.log(withdrawPenalty);
 
   return (
     <motion.div
@@ -55,8 +58,8 @@ export function TokenAccordion({
       key={"nft-staking-token-accordion" + token_id}
     >
       <Flex width="100%" flexDirection="column">
-        <Flex width="100%">
-          <Flex width="309px" height="298px">
+        <Flex width="100%" className="flex-col lg:flex-row" gap="20px">
+          <Flex width="309px" height="298px" flexShrink="0">
             <Image
               width="100%"
               height="100%"
@@ -67,10 +70,11 @@ export function TokenAccordion({
 
           <Flex
             flexGrow="1"
-            height="298px"
-            marginLeft="20px"
+            minHeight="298px"
             padding="3px"
             borderRadius="25px"
+            maxWidth="100%"
+            flexWrap="wrap"
             background={useColorModeValue("transparent", jumpGradient)}
           >
             <Flex
@@ -94,7 +98,7 @@ export function TokenAccordion({
                     fontWeight="700"
                     letterSpacing="-0.03em"
                   >
-                    {metadata.description}
+                    {metadata.title}
                   </Text>
 
                   <Text
@@ -103,14 +107,14 @@ export function TokenAccordion({
                     fontWeight="600"
                     lineHeight="29px"
                   >
-                    {metadata.title}
+                    {metadata.description}
                   </Text>
                 </Flex>
 
-                <Flex gap="15px" width="100%">
+                <Flex gap="15px" width="100%" flexWrap="wrap">
                   {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
                     <ValueBox
-                      minWidth="250px"
+                      className="md:min-w-[250px]"
                       borderColor={glassyWhiteOpaque}
                       title={name + " Rewards"}
                       color="white"
@@ -135,18 +139,22 @@ export function TokenAccordion({
           borderRadius="20px"
           minHeight="90px"
           alignItems="center"
-          padding="0px 32px"
+          padding="12px 32px"
+          flexWrap="wrap"
           margin="22px 0px 36px 0px"
+          gap="12px"
           opacity={hasWithdrawPenalty ? 1 : 0}
         >
-          <InfoIcon color="white" />
+          <Flex flexShrink="0" className="mx-auto lg:mx-0">
+            <InfoIcon color="white" />
+          </Flex>
 
           <Text
             color="white"
             fontSize="20px"
             fontWeight="400"
             lineHeight="24px"
-            marginLeft="16px"
+            className="text-center lg:text-left"
           >
             This NFT is subject to an early withdraw penalty of{" "}
             {withdrawPenalty}, wait until

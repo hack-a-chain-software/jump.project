@@ -7,6 +7,8 @@ import {
   Text,
   ModalContentProps,
   Box,
+  useMediaQuery,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { CloseIcon } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
@@ -41,15 +43,18 @@ export function ModalImageDialog({
   closeLocked?: boolean;
   children?: React.ReactNode;
 }) {
-  const { jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhiteOpaque, gradientBoxTopCard } = useTheme();
+  const [isMobile] = useMediaQuery("(max-width: 810px)");
   return (
     <Modal
       closeOnEsc={!closeLocked}
       closeOnOverlayClick={!closeLocked}
-      blockScrollOnMount={false}
+      blockScrollOnMount={true}
       isCentered
       isOpen={isOpen}
       onClose={onClose}
+      scrollBehavior="outside"
+      size={isMobile ? "md" : "md"}
     >
       <ModalOverlay
         backdropFilter={shouldBlurBackdrop ? "blur(20px)" : ""}
@@ -59,27 +64,29 @@ export function ModalImageDialog({
         id="content"
         flexDirection="row"
         bg="transparent"
-        minW={minW}
-        minH={minH}
-        borderRadius={modalRadius}
+        minW={isMobile ? "auto" : minW}
+        minH={isMobile ? "auto" : minH}
+        overflow="hidden"
+        borderRadius={isMobile ? "0px" : modalRadius}
         {...modalContentProps}
       >
         <Box
           w="100%"
-          bg={jumpGradient}
-          p="6px"
           display="flex"
           borderRadius={25}
+          overflow="hidden"
+          maxWidth="100vw"
+          bg={jumpGradient}
         >
           <ModalBody
-            p="30px"
-            pl="40px"
-            bg={bg || jumpGradient}
-            overflowY="scroll"
+            p="36px"
+            pl="46px"
+            position="relative"
             overflow="hidden"
             borderRadius={`${modalRadius}px 0 0 ${modalRadius}px`}
+            bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
           >
-            <Flex direction="column">
+            <Flex direction="column" height="100%">
               <Text
                 as="h1"
                 mt="10px"
@@ -92,27 +99,12 @@ export function ModalImageDialog({
               </Text>
 
               {children}
-              <Flex
-                p="10px"
-                position="absolute"
-                right="51%"
-                bottom="20px"
-                left="20px"
-              >
+              <Flex width="max-content" bottom="20px" mt="12px">
                 {footer}
               </Flex>
             </Flex>
-          </ModalBody>
-          <ModalBody
-            id="info-image"
-            borderRadius={`0 ${modalRadius}px ${modalRadius}px 0`}
-            borderColor={bg}
-            borderWidth={0}
-            backgroundSize="cover"
-            backgroundPosition="center center"
-            backgroundImage={image}
-          >
-            {!closeLocked && (
+
+            {isMobile && (
               <Flex
                 cursor="pointer"
                 onClick={onClose}
@@ -132,6 +124,37 @@ export function ModalImageDialog({
               </Flex>
             )}
           </ModalBody>
+          {!isMobile && (
+            <ModalBody
+              id="info-image"
+              borderRadius={`0 ${modalRadius}px ${modalRadius}px 0`}
+              borderColor={bg}
+              borderWidth={0}
+              backgroundSize="cover"
+              backgroundPosition="center center"
+              backgroundImage={image}
+            >
+              {!closeLocked && (
+                <Flex
+                  cursor="pointer"
+                  onClick={onClose}
+                  position="absolute"
+                  top="30px"
+                  right="30px"
+                  w="40px"
+                  h="40px"
+                  alignItems="center"
+                  justifyContent="center"
+                  bg="rgba(255,255,255,0.2)"
+                  borderRadius={6}
+                  backdropFilter="blur(10px)"
+                  color="white"
+                >
+                  <CloseIcon />
+                </Flex>
+              )}
+            </ModalBody>
+          )}
         </Box>
       </ModalContent>
     </Modal>

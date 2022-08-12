@@ -1,7 +1,7 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
 import { InfoIcon, CheckIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
-import { Token } from "@/stores/nft-staking-store";
+import { Token } from "@near/ts";
 
 export function TokenCard({
   select,
@@ -17,6 +17,9 @@ export function TokenCard({
       width="309px"
       height="298px"
       position="relative"
+      _hover={{
+        opacity: 0.6,
+      }}
     >
       <Image
         width="100%"
@@ -66,8 +69,9 @@ export function TokenCard({
             fontWeight="400"
             fontFamily="Inter"
             marginBottom="-3px"
+            className="line-clamp-1"
           >
-            {metadata.description}
+            {metadata.title}
           </Text>
 
           <Text
@@ -76,8 +80,9 @@ export function TokenCard({
             fontSize="16px"
             fontWeight="500"
             fontFamily="Inter"
+            className="line-clamp-2"
           >
-            {metadata.title}
+            {metadata.description}
           </Text>
         </Flex>
 
