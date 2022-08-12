@@ -64,6 +64,12 @@ export const Project = () => {
   const { data: metadataProjectToken, loading: isProjectTokenLoading } =
     useTokenMetadata(launchpadProject?.project_token!);
 
+  const allocationsAvailable = useMemo(() => {
+    return new BN(totalAllowanceData).sub(
+      new BN(investorAllocation.allocationsBought ?? "0")
+    );
+  }, [totalAllowanceData, investorAllocation.allocationsBought]);
+
   const finalPrice = useMemo(() => {
     if (!metadataPriceToken?.decimals && launchpadProject) {
       return "0";
@@ -421,13 +427,7 @@ export const Project = () => {
                   _focus={{ bg: "white" }}
                 />
                 <Text>
-                  You can buy{" "}
-                  {formatNumber(
-                    new BN(totalAllowanceData).sub(
-                      new BN(investorAllocation.allocationsBought ?? "0")
-                    ),
-                    0
-                  ) + " "}
+                  You can buy {formatNumber(allocationsAvailable, 0) + " "}
                   allocations
                 </Text>
               </Flex>

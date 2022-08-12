@@ -60,7 +60,9 @@ export const useStaking = create<{
         )
       );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
       return console.error(toast.error(`Stake Error: ${error}`));
     }
@@ -101,7 +103,9 @@ export const useStaking = create<{
         )
       );
 
-      await executeMultipleTransactions(transactions, connection);
+      const wallet = await connection.wallet();
+
+      await executeMultipleTransactions(transactions, wallet);
 
       toast.success("Staking Complete");
     } catch (error) {
