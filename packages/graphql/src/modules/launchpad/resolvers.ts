@@ -11,7 +11,6 @@ import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
-import { ApolloError } from "apollo-server";
 
 export default {
   LaunchpadListing: {
