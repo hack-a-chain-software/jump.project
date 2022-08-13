@@ -67,6 +67,7 @@ export type LaunchpadListingKeySpecifier = (
   | "project_owner"
   | "project_token"
   | "project_token_info"
+  | "public"
   | "status"
   | "telegram"
   | "token_allocation_price"
@@ -103,6 +104,7 @@ export type LaunchpadListingFieldPolicy = {
   project_owner?: FieldPolicy<any> | FieldReadFunction<any>;
   project_token?: FieldPolicy<any> | FieldReadFunction<any>;
   project_token_info?: FieldPolicy<any> | FieldReadFunction<any>;
+  public?: FieldPolicy<any> | FieldReadFunction<any>;
   status?: FieldPolicy<any> | FieldReadFunction<any>;
   telegram?: FieldPolicy<any> | FieldReadFunction<any>;
   token_allocation_price?: FieldPolicy<any> | FieldReadFunction<any>;
@@ -188,12 +190,14 @@ export type NFTStakingRewardFieldPolicy = {
   symbol?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type ProjectTokenInfoKeySpecifier = (
+  | "decimals"
   | "image"
   | "name"
   | "symbol"
   | ProjectTokenInfoKeySpecifier
 )[];
 export type ProjectTokenInfoFieldPolicy = {
+  decimals?: FieldPolicy<any> | FieldReadFunction<any>;
   image?: FieldPolicy<any> | FieldReadFunction<any>;
   name?: FieldPolicy<any> | FieldReadFunction<any>;
   symbol?: FieldPolicy<any> | FieldReadFunction<any>;

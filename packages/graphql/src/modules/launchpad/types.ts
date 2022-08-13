@@ -6,6 +6,7 @@ export default gql`
     image: String
     name: String
     symbol: String
+    decimals: String
   }
 
   # SQL Table
@@ -29,6 +30,7 @@ export default gql`
   type LaunchpadListing {
     # SQL Fields
     listing_id: ID!
+    public: Boolean!
     project_owner: ID!
     project_token: ID!
     price_token: String
