@@ -116,7 +116,7 @@ export const useLaunchpadStore = create<{
 
       transactions.push(
         getTransaction(accountId, priceToken, "ft_transfer_call", {
-          receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
+          receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
           amount,
           memo: null,
           msg: JSON.stringify({

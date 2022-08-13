@@ -22,7 +22,7 @@ import { ProjectStats } from "@/components";
 import { useTheme } from "../hooks/theme";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { formatNumber } from "@near/ts";
+import { formatNumber, getRawAmount } from "@near/ts";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
@@ -130,9 +130,10 @@ export const Project = () => {
       }
     },
     [
+      1,
+      accountId,
       launchpadProject?.project_token,
       launchpadProject?.token_allocation_price,
-      1,
     ]
   );
 
@@ -186,7 +187,7 @@ export const Project = () => {
           {
             label: "How many allocations you already bought",
             value: accountId
-              ? investorAllocation.allocationsBought!
+              ? investorAllocation.allocationsBought ?? 0
               : CONNECT_WALLET_MESSAGE,
           },
           {

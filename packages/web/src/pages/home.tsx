@@ -2,6 +2,7 @@ import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
 import { useEffect, useState } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
+import { addMilliseconds, isBefore } from "date-fns";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -25,7 +26,7 @@ import {
   useColorModeValue,
   Skeleton,
 } from "@chakra-ui/react";
-import { JUMP_TOKEN } from "@/env/contract";
+import { X_JUMP_TOKEN } from "@/env/contract";
 import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
@@ -33,7 +34,7 @@ import { useNavigate } from "react-router";
 import { If, Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { formatNumber } from "@near/ts";
+import { formatFraction, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
 /**
@@ -50,8 +51,8 @@ export function Home() {
 
   const investor = useViewInvestor(accountId!);
 
-  // const { error, data: totalAllowanceData = "0" } = useViewTotalEstimatedInvestorAllowance(accountId!);
-  const totalAllowanceData = "0";
+  const { error, data: totalAllowanceData = "0" } =
+    useViewTotalEstimatedInvestorAllowance(accountId!);
 
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
@@ -67,15 +68,6 @@ export function Home() {
       limit: 10,
     },
   });
-
-  /*
-    allocation_price / allocation_size (price token symbol)
-    <Th>Access</Th> public / private
-    <Th>Max Allocation</Th> view_investor_allowance
-    <Th>Raise Size</Th> project_tokens_sold * price / size
-    <Th>Filled</Th> sold / total
-    <Th>Status</Th> status mapeado
-  */
 
   const [filterMine, setMine] = useState("");
   const [filterStatus, setStatus] = useState("");
@@ -117,10 +109,9 @@ export function Home() {
     increaseMembership(formattedLevel, accountId!, selector);
   };
 
-  //todo: confirmar base token
   const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
     useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: JUMP_TOKEN,
+      contract: X_JUMP_TOKEN,
       variables: {
         account_id: accountId!,
       },
@@ -128,9 +119,26 @@ export function Home() {
       skip: !accountId,
     });
 
+  const isDisabled = useMemo(() => {
+    return new BN(baseTokenBalance ?? "0").lt(amountToNextLevel);
+  }, [baseTokenBalance, amountToNextLevel]);
+
   const isLoaded = useMemo(() => {
     return !!launchpadSettings && !loadingBaseTokenBalance;
   }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
+
+  const isLocked = useMemo(() => {
+    const now = new Date();
+
+    const lastCheck = new Date(Number(investor?.data?.last_check!) / 1000000);
+
+    const endAt = addMilliseconds(
+      lastCheck,
+      Number(launchpadSettings?.token_lock_period) / 1000000
+    );
+
+    return isBefore(now, endAt);
+  }, [investor?.data, launchpadSettings]);
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
@@ -165,7 +173,7 @@ export function Home() {
               {!accountId
                 ? "Connect your wallet"
                 : formatNumber(new BN(totalAllowanceData ?? "0"), 0) +
-                  " allocations"}
+                  " Allocations"}
             </Box>
           </Skeleton>
         </TopCard>
@@ -222,7 +230,7 @@ export function Home() {
                   color="white"
                   onClick={downgradeLevel}
                   justifyContent="space-between"
-                  disabled={!level}
+                  disabled={!level || isLocked}
                 >
                   Downgrade Level
                   {!!level ? <WalletIcon /> : <LockIcon />}
@@ -239,10 +247,7 @@ export function Home() {
               >
                 <Button
                   onClick={upgradeLevel}
-                  disabled={
-                    (launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
-                      level || baseTokenBalance === "0"
-                  }
+                  disabled={isDisabled || !accountId}
                   w="100%"
                   bg="white"
                   color="black"
@@ -372,11 +377,54 @@ export function Home() {
                       className="w-[30px] h-[30px] rounded-full"
                     />
                   </Td>
-                  <Td>{e?.project_token_info?.name}</Td>
-                  <Td>{e?.fee_price_tokens}</Td>
+                  <Td>
+                    {/*
+                      allocation_price / allocation_size (price token symbol)
+                      <Th>Max Allocation</Th> view_investor_allowance
+                      <Th>Raise Size</Th> total * price / size in USDT
+                      <Th>Filled</Th> sold / total
+                      <Th>Status</Th> status mapeado
+                  */}
+                    {e?.project_token_info?.name}
+                  </Td>
+                  <Td>
+                    {formatFraction(
+                      {
+                        value: new BN(e?.token_allocation_price ?? 0),
+                        decimals: new BN(e?.price_token_info?.decimals ?? 0),
+                      },
+                      {
+                        value: new BN(e?.token_allocation_size ?? 0),
+                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
+                      },
+                      {
+                        maximumFractionDigits: 2,
+                        unit: ` ${e?.price_token_info?.symbol ?? ""}`,
+                      }
+                    )}
+                  </Td>
+                  <Td>{e?.public ? "Public" : "Private"}</Td>
                   <Td>{e?.liquidity_pool_price_tokens}</Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>
+                    {formatFraction(
+                      {
+                        value: new BN(e?.token_allocation_price ?? 0).mul(
+                          new BN(e?.total_amount_sale_project_tokens ?? 1)
+                        ),
+                        decimals: new BN(
+                          e?.project_token_info?.decimals ?? 0
+                        ).add(new BN(e?.price_token_info?.decimals ?? 0)),
+                      },
+                      {
+                        value: new BN(e?.token_allocation_size ?? 0),
+                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
+                      },
+                      {
+                        maximumFractionDigits: 0,
+                        unit: e?.price_token_info?.symbol ?? "",
+                      }
+                    )}
+                  </Td>
                   <Td>{e?.liquidity_pool_price_tokens}</Td>
                   <Td
                     borderTopRightRadius="16px"

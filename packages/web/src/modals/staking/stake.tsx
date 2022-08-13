@@ -4,6 +4,7 @@ import { JUMP_TOKEN } from "@/env/contract";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
+import { formatNumber } from "@near/ts";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
 import { useWalletSelector } from "@/context/wallet-selector";
@@ -102,10 +103,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance:{" "}
-          {new BN(balanceJump || 0)
-            .mul(new BN(10 ** -(jumpMetadata?.decimals || 0)))
-            .toString()}{" "}
+          Balance: {formatNumber(new BN(balanceJump), jumpMetadata?.decimals!)}{" "}
           JUMP
         </Text>
       </Flex>
