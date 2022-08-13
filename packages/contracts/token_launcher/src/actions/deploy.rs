@@ -1,0 +1,166 @@
+use std::convert::TryInto;
+use near_sdk::{Balance, self, Gas, PromiseOrValue, Promise, is_promise_success, serde_json::json};
+use crate::*;
+use crate::errors::{ERR_101, ERR_102, ERR_103, ERR_104, ERR_105, ERR_106};
+use near_sdk::serde_json::value::Value;
+
+use events::event_contract_deploy;
+
+const NO_DEPOSIT: Balance = 0;
+const BASE: Gas = Gas(100_000_000_000_000);
+const CALLBACK_GAS: Gas = Gas(BASE.0 * 2);
+const CALLBACK: &str = "callback";
+// TODO:
+// - CALLBACK FUNCTION
+
+#[near_bindgen]
+impl Contract {
+  ///Verifies if the selected contract meets the conditions to be deployed
+  ///Calls the deploy function that has usafe methods
+  #[payable]
+  pub fn deploy_new_contract(
+    &mut self,
+    contract_to_be_deployed: String,
+    deploy_prefix: String,
+    args: Value,
+  ) {
+    let deploy_address = create_deploy_address(deploy_prefix);
+
+    //verify if contract is already on deployed contract list
+    if let Some(_value) = self
+      .deployed_contracts
+      .get(&deploy_address.clone().try_into().unwrap())
+    {
+      panic!("{}", ERR_101)
+    }
+    //verify if contract size does not exceed max allowed on near
+    assert!(
+      deploy_address.len() < 64,
+      "{}{}",
+      ERR_102,
+      env::current_account_id()
+    );
+
+    let binary = self.binaries.get(&contract_to_be_deployed).expect(ERR_103);
+
+    let contract_hash_58: Base58CryptoHash = binary.contract_hash.into();
+
+    let storage_cost =
+      self.storage_cost.get(&contract_hash_58).expect(ERR_103).0 * env::storage_byte_cost();
+
+    //verify that user payed enough storage
+    assert!(
+      env::attached_deposit() >= (storage_cost + binary.deployment_cost.0),
+      "{}{}{}",
+      ERR_104,
+      (storage_cost + binary.deployment_cost.0),
+      " N "
+    );
+
+    let deploy_address_ac: AccountId = deploy_address.to_string().try_into().unwrap();
+    //insert into lupmap
+    self
+      .deployed_contracts
+      .insert(&deploy_address_ac, &contract_to_be_deployed);
+
+    //Deploy the contract
+    deploy_contract(deploy_address, args, binary, contract_to_be_deployed);
+
+    //Contract will only be added to
+  }
+
+  /// Callback after a contract was deployed
+  /// refunds the attached deposit on deploy fail
+  /// log deploy event to chain
+  #[private]
+  pub fn callback(
+    &mut self,
+    deploy_address: AccountId,
+    type_of_contract: String,
+  ) -> PromiseOrValue<bool> {
+    if is_promise_success() {
+      //Log the sucessfull deployment
+      event_contract_deploy(deploy_address, type_of_contract, "Success".to_string());
+      PromiseOrValue::Value(true)
+    } else {
+      //Remove the contract address from deployed_contracts
+      self.deployed_contracts.remove(&deploy_address);
+      //Log the failed deployement
+      event_contract_deploy(deploy_address, type_of_contract, "Fail".to_string());
+      //return the attached deposit to the account that signed the deploy
+      Promise::new(env::predecessor_account_id()).transfer(env::attached_deposit());
+      PromiseOrValue::Value(false)
+    }
+  }
+}
+
+/// Low level function used to deploy contract
+/// Uses sys methods to load a contract to a register
+/// Deploys the contract that was loaded on the register
+pub fn deploy_contract(
+  deploy_address: String,
+  args: Value,
+  binary: Binary,
+  contract_to_be_deployed: String,
+) {
+  let attached_deposit = env::attached_deposit();
+  let encoded_args = near_sdk::serde_json::to_vec(&args).expect(ERR_105);
+  let factory_account_id = env::current_account_id().as_bytes().to_vec();
+  let code_hash = binary.contract_hash;
+  let init_fn = binary.init_fn_name;
+  let callback_args = near_sdk::serde_json::to_vec(
+    &json!({ "deploy_address": deploy_address, "type_of_contract":contract_to_be_deployed }),
+  )
+  .expect("Failed to serialize callback args");
+
+  unsafe {
+    // Check that such contract exists.
+    assert_eq!(
+      sys::storage_has_key(code_hash.len() as _, code_hash.as_ptr() as _),
+      1,
+      "{}",
+      ERR_106
+    );
+    // Load input (wasm code) into register 0.
+    sys::storage_read(code_hash.len() as _, code_hash.as_ptr() as _, 0);
+    // schedule a Promise tx to account_id
+    let promise_id =
+      sys::promise_batch_create(deploy_address.len() as _, deploy_address.as_ptr() as _);
+    // create account first.
+    sys::promise_batch_action_create_account(promise_id);
+    // transfer attached deposit.
+    sys::promise_batch_action_transfer(promise_id, &attached_deposit as *const u128 as _);
+    // deploy contract (code is taken from register 0).
+    sys::promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
+    // call `new` with given arguments.
+    sys::promise_batch_action_function_call(
+      promise_id,
+      init_fn.len() as _,
+      init_fn.as_ptr() as _,
+      encoded_args.len() as _,
+      encoded_args.as_ptr() as _,
+      &NO_DEPOSIT as *const u128 as _,
+      BASE.0,
+    );
+    // attach callback to the factory.
+    let _ = sys::promise_then(
+      promise_id,
+      factory_account_id.len() as _,
+      factory_account_id.as_ptr() as _,
+      CALLBACK.len() as _,
+      CALLBACK.as_ptr() as _,
+      callback_args.len() as _,
+      callback_args.as_ptr() as _,
+      &NO_DEPOSIT as *const u128 as _,
+      CALLBACK_GAS.0,
+    );
+    // attach callback to the factory.
+    // add
+    sys::promise_return(promise_id);
+  }
+}
+
+pub fn create_deploy_address(prefix: String) -> String {
+  let contract_account = env::current_account_id();
+  format!("{}.{}", prefix, contract_account,)
+}

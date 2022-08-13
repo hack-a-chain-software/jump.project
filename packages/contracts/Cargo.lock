@@ -786,6 +786,7 @@ dependencies = [
  "near-sdk-macros 4.0.0",
  "near-sys",
  "near-vm-logic 0.13.0",
+ "once_cell",
  "serde",
  "serde_json",
  "wee_alloc",
@@ -1413,6 +1414,14 @@ version = "1.0.0"
 dependencies = [
  "modified-contract-standards",
  "near-sdk 3.1.0",
+]
+
+[[package]]
+name = "token_launcher"
+version = "1.0.0"
+dependencies = [
+ "near-contract-standards",
+ "near-sdk 4.0.0",
 ]
 
 [[package]]
