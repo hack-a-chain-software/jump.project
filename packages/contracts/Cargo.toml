@@ -13,7 +13,8 @@ members = [
   "./testnet_faucet",
   "./x_token",
   "./locked_token",
-  "./launchpad"
+  "./launchpad",
+  "./token_launcher"
 ]
 
 [profile.release]
