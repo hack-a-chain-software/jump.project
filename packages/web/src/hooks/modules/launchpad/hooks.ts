@@ -28,54 +28,11 @@ export const useViewInvestor = (account_id: string) => {
   });
 };
 
-export const useViewInvestorAllocation = (
-  account_id: string,
-  listing_id: string
-) => {
-  const {
-    data = [],
-    loading,
-    error,
-    refetch,
-  } = useNearQuery<[string, string]>("view_investor_allocation", {
-    ...defaultLPOptions,
-    skip: !account_id,
-    variables: {
-      listing_id,
-      account_id,
-    },
-  });
-
-  return {
-    loading,
-    error,
-    refetch,
-    data: {
-      allocationsBought: data[0] || "0",
-      totalTokensBought: data[1] || "0",
-    },
-  };
-};
-
 export const useViewVestedAllocations = (
   account_id: string,
   listing_id: string
 ) => {
   return useNearQuery<string>("view_vested_allocations", {
-    ...defaultLPOptions,
-    skip: !account_id,
-    variables: {
-      listing_id,
-      account_id,
-    },
-  });
-};
-
-export const useViewInvestorAllowance = (
-  account_id: string,
-  listing_id: string
-) => {
-  return useNearQuery<string>("view_investor_allowance", {
     ...defaultLPOptions,
     skip: !account_id,
     variables: {
@@ -116,4 +73,59 @@ export const useXTokenBalance = (wallet: string) => {
     poolInterval: 1000 * 60,
     debug: true,
   });
+};
+
+export const useTokenMetadata = (account_id: string) => {
+  return useNearQuery<{ decimals: number }, { account_id: string }>(
+    "ft_metadata",
+    {
+      contract: account_id!,
+      poolInterval: 1000 * 60,
+      skip: !account_id,
+      debug: true,
+    }
+  );
+};
+
+export const useViewInvestorAllowance = (
+  account_id: string,
+  listing_id: string
+) => {
+  return useNearQuery<string>("view_investor_allowance", {
+    ...defaultLPOptions,
+    skip: !account_id,
+    variables: {
+      listing_id,
+      account_id,
+    },
+  });
+};
+
+export const useViewInvestorAllocation = (
+  account_id: string,
+  listing_id: string
+) => {
+  const {
+    data = [],
+    loading,
+    error,
+    refetch,
+  } = useNearQuery<[string, string]>("view_investor_allocation", {
+    ...defaultLPOptions,
+    skip: !account_id,
+    variables: {
+      listing_id,
+      account_id,
+    },
+  });
+
+  return {
+    loading,
+    error,
+    refetch,
+    data: {
+      allocationsBought: data[0],
+      totalTokensBought: data[1],
+    },
+  };
 };

@@ -1,9 +1,12 @@
 import BN from "bn.js";
-import { useState } from "react";
+import isEmpty from "lodash/isEmpty";
+import { useEffect, useState } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
+import { addMilliseconds, isBefore } from "date-fns";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
+  useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import {
@@ -23,14 +26,15 @@ import {
   useColorModeValue,
   Skeleton,
 } from "@chakra-ui/react";
-import { JUMP_TOKEN } from "@/env/contract";
+import { X_JUMP_TOKEN } from "@/env/contract";
 import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import { Button, Card, Select, TopCard } from "../components";
+import { If, Button, Card, Select, TopCard } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { formatFraction, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
 /**
@@ -42,20 +46,33 @@ export function Home() {
   const navigate = useNavigate();
   const { accountId, selector } = useWalletSelector();
 
-  const { darkPurpleOpaque, glassyWhite } = useTheme();
+  const { darkPurpleOpaque, glassyWhite, blackAndWhite } = useTheme();
+  const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
 
   const investor = useViewInvestor(accountId!);
-  const totalAllocations = useViewTotalEstimatedInvestorAllowance(accountId!);
+
+  const { error, data: totalAllowanceData = "0" } =
+    useViewTotalEstimatedInvestorAllowance(accountId!);
+
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const { data: launchpadSettings } = useViewLaunchpadSettings();
 
-  const { data: { launchpad_projects: launchpadProjects } = {} } =
-    useLaunchpadConenctionQuery({
-      variables: {
-        limit: 10,
-      },
-    });
+  const {
+    data: {
+      launchpad_projects: { data: launchpadProjects } = { data: [] },
+    } = {},
+    refetch,
+  } = useLaunchpadConenctionQuery({
+    variables: {
+      limit: 10,
+    },
+  });
+
+  const [filterMine, setMine] = useState("");
+  const [filterStatus, setStatus] = useState("");
+  const [filterVisibility, setVisibility] = useState("");
+  const [filterSearch, setSearch] = useState("");
 
   const stakedTokens = useMemo(
     () => new BN(investor.data?.staked_token ?? "0"),
@@ -92,10 +109,9 @@ export function Home() {
     increaseMembership(formattedLevel, accountId!, selector);
   };
 
-  //todo: confirmar base token
   const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
     useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: JUMP_TOKEN,
+      contract: X_JUMP_TOKEN,
       variables: {
         account_id: accountId!,
       },
@@ -103,85 +119,26 @@ export function Home() {
       skip: !accountId,
     });
 
+  const isDisabled = useMemo(() => {
+    return new BN(baseTokenBalance ?? "0").lt(amountToNextLevel);
+  }, [baseTokenBalance, amountToNextLevel]);
+
   const isLoaded = useMemo(() => {
     return !!launchpadSettings && !loadingBaseTokenBalance;
   }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
 
-  const [filterMine, setMine] = useState("");
-  const [filterStatus, setStatus] = useState("");
-  const [filterVisibility, setVisibility] = useState("");
-  const [filterSearch, setSearch] = useState("");
+  const isLocked = useMemo(() => {
+    const now = new Date();
 
-  // TODO: fazer isso no nível de graphql
-  type ListingStatus =
-    | "unfunded"
-    | "funded"
-    | "sale_finalized"
-    | "pool_created"
-    | "pool_project_token_sent"
-    | "pool_price_token_sent"
-    | "liquidity_pool_finalized"
-    | "cancelled";
-  type ProjectStatus = "open" | "closed";
-  // TODO: validar isso pelo amor de deus
-  const projectStatusMap: Record<ListingStatus, ProjectStatus> = {
-    unfunded: "open", // ignore
-    funded: "open",
-    sale_finalized: "open",
-    pool_created: "open",
-    pool_project_token_sent: "open",
-    pool_price_token_sent: "open",
-    liquidity_pool_finalized: "closed",
-    cancelled: "closed",
-  };
+    const lastCheck = new Date(Number(investor?.data?.last_check!) / 1000000);
 
-  type Filter = {
-    filter: string;
-    test: (project: LaunchpadListing, filter: string) => boolean;
-  };
-
-  const items = useMemo(() => {
-    if (!launchpadProjects) {
-      return [...Array(2)];
-    }
-
-    const filter: Filter[] = [
-      {
-        filter: filterStatus,
-        test: (project, filter) =>
-          filter === projectStatusMap[project.status as ProjectStatus],
-      },
-      {
-        filter: filterSearch,
-        test: (project, filter) =>
-          [
-            project.project_token, // Address
-            project.project_token_info?.name,
-            project.project_name,
-          ].some((field) => field?.includes(filter)),
-      },
-      // {
-      //   filter: filterVisibility,
-      //   field: ''
-      // },
-      // {
-      //   filter: filterMine,
-      //   field: ''
-      // }
-    ];
-
-    return launchpadProjects?.data?.filter((project) =>
-      filter.every(
-        ({ filter, test }) => !filter || (project && test(project, filter))
-      )
+    const endAt = addMilliseconds(
+      lastCheck,
+      Number(launchpadSettings?.token_lock_period) / 1000000
     );
-  }, [
-    filterMine,
-    filterStatus,
-    filterSearch,
-    filterVisibility,
-    launchpadProjects,
-  ]);
+
+    return isBefore(now, endAt);
+  }, [investor?.data, launchpadSettings]);
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
@@ -215,11 +172,8 @@ export function Home() {
             >
               {!accountId
                 ? "Connect your wallet"
-                : investor.data
-                ? `${
-                    launchpadSettings?.tiers_entitled_allocations[level] ?? 0
-                  } Tickets Available`
-                : `${totalAllocations.data || 0} Tickets Available`}
+                : formatNumber(new BN(totalAllowanceData ?? "0"), 0) +
+                  " Allocations"}
             </Box>
           </Skeleton>
         </TopCard>
@@ -276,7 +230,7 @@ export function Home() {
                   color="white"
                   onClick={downgradeLevel}
                   justifyContent="space-between"
-                  disabled={!level}
+                  disabled={!level || isLocked}
                 >
                   Downgrade Level
                   {!!level ? <WalletIcon /> : <LockIcon />}
@@ -293,10 +247,7 @@ export function Home() {
               >
                 <Button
                   onClick={upgradeLevel}
-                  disabled={
-                    (launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
-                      level || baseTokenBalance === "0"
-                  }
+                  disabled={isDisabled || !accountId}
                   w="100%"
                   bg="white"
                   color="black"
@@ -347,7 +298,7 @@ export function Home() {
             borderRadius={15}
             placeholder="Search by Pool Name, Token, Address"
             _placeholder={{
-              color: useColorModeValue("black", "white"),
+              color: blackAndWhite,
             }}
             outline="none"
             px="20px"
@@ -365,103 +316,126 @@ export function Home() {
               <Th>Image</Th>
               <Th>Name</Th>
               <Th>Price</Th>
-              {/* allocation_price / allocation_size (price token symbol) */}
-              <Th>Access</Th> {/* public / private */}
-              <Th>Max Allocation</Th> {/* view_investor_allowance */}
-              <Th>Raise Size</Th> {/* project_tokens_sold * price / size */}
-              <Th>Filled</Th> {/* sold / total */}
-              <Th>Status</Th> {/* status mapeado */}
+              <Th>Access</Th>
+              <Th>Max Allocation</Th>
+              <Th>Raise Size</Th>
+              <Th>Filled</Th>
+              <Th>Status</Th>
             </Tr>
           </Thead>
+
           <Tbody>
-            {items?.map((e, index) => (
-              <Tr
-                cursor="pointer"
-                borderRadius="20px"
-                onClick={() => {
-                  if (!e) {
-                    return;
-                  }
-                  navigate(`/launchpad/${e?.listing_id}`);
-                }}
-                key={`launchpad-project-${e?.listing_id}-${index}`}
-                _hover={{
-                  bg: useColorModeValue(darkPurpleOpaque, glassyWhite),
-                }}
-              >
-                <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
-                  <Skeleton
-                    className="w-[30px] h-[30px] rounded-full"
-                    isLoaded={!!e?.project_token_info?.image}
-                  >
+            <If
+              condition={!isEmpty(launchpadProjects)}
+              fallback={
+                <Tr>
+                  <Td>
+                    <Skeleton className="w-[30px] h-[30px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                  <Td>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                </Tr>
+              }
+            >
+              {(launchpadProjects ?? []).map((e, index) => (
+                <Tr
+                  cursor="pointer"
+                  borderRadius="20px"
+                  onClick={() => {
+                    if (!e) {
+                      return;
+                    }
+                    navigate(`/launchpad/${e?.listing_id}`);
+                  }}
+                  key={`launchpad-project-${e?.listing_id}-${index}`}
+                  _hover={{
+                    bg: tableHover,
+                  }}
+                >
+                  <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                     <Image
                       src={e?.project_token_info?.image || ""}
                       className="w-[30px] h-[30px] rounded-full"
                     />
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.project_token_info?.name}
-                  >
+                  </Td>
+                  <Td>
+                    {/*
+                      allocation_price / allocation_size (price token symbol)
+                      <Th>Max Allocation</Th> view_investor_allowance
+                      <Th>Raise Size</Th> total * price / size in USDT
+                      <Th>Filled</Th> sold / total
+                      <Th>Status</Th> status mapeado
+                  */}
                     {e?.project_token_info?.name}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.fee_price_tokens}
-                  >
-                    {e?.fee_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td>
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.liquidity_pool_price_tokens}
-                  >
-                    {e?.liquidity_pool_price_tokens}
-                  </Skeleton>
-                </Td>
-                <Td
-                  borderTopRightRadius="16px"
-                  borderBottomRightRadius="16px"
-                  className="first-letter:uppercase"
-                >
-                  <Skeleton
-                    className="w-full h-[22.5px] rounded-full"
-                    isLoaded={!!e?.status}
+                  </Td>
+                  <Td>
+                    {formatFraction(
+                      {
+                        value: new BN(e?.token_allocation_price ?? 0),
+                        decimals: new BN(e?.price_token_info?.decimals ?? 0),
+                      },
+                      {
+                        value: new BN(e?.token_allocation_size ?? 0),
+                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
+                      },
+                      {
+                        maximumFractionDigits: 2,
+                        unit: ` ${e?.price_token_info?.symbol ?? ""}`,
+                      }
+                    )}
+                  </Td>
+                  <Td>{e?.public ? "Public" : "Private"}</Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>
+                    {formatFraction(
+                      {
+                        value: new BN(e?.token_allocation_price ?? 0).mul(
+                          new BN(e?.total_amount_sale_project_tokens ?? 1)
+                        ),
+                        decimals: new BN(
+                          e?.project_token_info?.decimals ?? 0
+                        ).add(new BN(e?.price_token_info?.decimals ?? 0)),
+                      },
+                      {
+                        value: new BN(e?.token_allocation_size ?? 0),
+                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
+                      },
+                      {
+                        maximumFractionDigits: 0,
+                        unit: e?.price_token_info?.symbol ?? "",
+                      }
+                    )}
+                  </Td>
+                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td
+                    borderTopRightRadius="16px"
+                    borderBottomRightRadius="16px"
+                    className="first-letter:uppercase"
                   >
                     {e?.status}
-                  </Skeleton>
-                </Td>
-              </Tr>
-            ))}
+                  </Td>
+                </Tr>
+              ))}
+            </If>
           </Tbody>
         </Table>
       </TableContainer>

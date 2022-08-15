@@ -11,24 +11,29 @@ import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
-import { ApolloError } from "apollo-server";
 
 export default {
   LaunchpadListing: {
     async project_token_info({ project_token }: LaunchpadListing) {
-      const { name, icon, symbol } = await findTokenMetadata(project_token);
+      const { name, icon, symbol, decimals } = await findTokenMetadata(
+        project_token
+      );
       return {
         name,
         image: icon,
         symbol,
+        decimals,
       };
     },
     async price_token_info({ price_token }: LaunchpadListing) {
-      const { name, icon, symbol } = await findTokenMetadata(price_token);
+      const { name, icon, symbol, decimals } = await findTokenMetadata(
+        price_token
+      );
       return {
         name,
         image: icon,
         symbol,
+        decimals,
       };
     },
     async allocation(

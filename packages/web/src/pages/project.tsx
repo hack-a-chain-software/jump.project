@@ -1,5 +1,6 @@
 import BN from "bn.js";
 import {
+  useViewInvestorAllowance,
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
@@ -19,11 +20,12 @@ import { Button, Card, GradientText, If, PageContainer } from "../components";
 import { BackButton } from "../components/shared/back-button";
 import { ProjectStats } from "@/components";
 import { useTheme } from "../hooks/theme";
-import { useNearQuery } from "react-near";
-import { useTokenBalance } from "@/hooks/modules/token";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { formatNumber } from "@near/ts";
+import { formatNumber, getRawAmount } from "@near/ts";
+import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
+
+const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
 /**
  * @description - Launchpad project details page
@@ -33,71 +35,51 @@ export const Project = () => {
   const [tickets, setTickets] = useState(0);
   const { id } = useParams();
 
+  const { buyTickets, withdrawAllocations } = useLaunchpadStore();
   const { accountId, selector } = useWalletSelector();
 
-  const { data: { launchpad_project } = {}, loading } =
+  const { data: { launchpad_project: launchpadProject } = {}, loading } =
     useLaunchPadProjectQuery({
       variables: {
         accountId: accountId as string,
-        projectId: id || "",
+        projectId: id ?? "",
       },
     });
+
+  const { data: investorAllowance, loading: loadingAllowance } =
+    useViewInvestorAllowance(accountId!, id!);
 
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(accountId!, id!);
 
-  const navigate = useNavigate();
-
-  const { jumpGradient } = useTheme();
-
   const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
     useViewTotalEstimatedInvestorAllowance(accountId!);
 
-  const navigateToExternalURL = (uri: string) => {
-    window.open(uri);
-  };
-
-  const { buyTickets, withdrawAllocations } = useLaunchpadStore();
-
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
-    useTokenBalance(launchpad_project?.price_token!, accountId!);
+    useTokenBalance(launchpadProject?.price_token!, accountId!);
 
   const { data: metadataPriceToken, loading: isPriceTokenMetadataLoading } =
-    useNearQuery<
-      {
-        decimals: number;
-      },
-      { account_id: string }
-    >("ft_metadata", {
-      contract: launchpad_project?.price_token!,
-      poolInterval: 1000 * 60,
-      skip: !launchpad_project?.price_token,
-      debug: true,
-    });
+    useTokenMetadata(launchpadProject?.price_token!);
 
   const { data: metadataProjectToken, loading: isProjectTokenLoading } =
-    useNearQuery<
-      {
-        decimals: number;
-      },
-      { account_id: string }
-    >("ft_metadata", {
-      contract: launchpad_project?.project_token as string,
-      poolInterval: 1000 * 60,
-      skip: !launchpad_project?.project_token,
-      debug: true,
-    });
+    useTokenMetadata(launchpadProject?.project_token!);
+
+  const allocationsAvailable = useMemo(() => {
+    return new BN(totalAllowanceData).sub(
+      new BN(investorAllocation.allocationsBought ?? "0")
+    );
+  }, [totalAllowanceData, investorAllocation.allocationsBought]);
 
   const finalPrice = useMemo(() => {
-    if (!metadataPriceToken?.decimals && launchpad_project) {
-      return 0;
+    if (!metadataPriceToken?.decimals && launchpadProject) {
+      return "0";
     }
 
-    return Number(
-      Number(launchpad_project?.token_allocation_price || 0) *
-        10 ** -(metadataPriceToken?.decimals || 0)
+    return formatNumber(
+      new BN(launchpadProject?.token_allocation_price ?? "0"),
+      metadataPriceToken?.decimals!
     );
-  }, [launchpad_project, metadataPriceToken?.decimals]);
+  }, [launchpadProject, metadataPriceToken?.decimals]);
 
   const isLoading = useMemo(
     () =>
@@ -106,7 +88,8 @@ export const Project = () => {
       isProjectTokenLoading ||
       loadingTotalAllowance ||
       loading ||
-      loadingPriceTokenBalance,
+      loadingPriceTokenBalance ||
+      loadingAllowance,
     [
       loadingAllocation,
       isPriceTokenMetadataLoading,
@@ -114,17 +97,15 @@ export const Project = () => {
       loadingTotalAllowance,
       loading,
       loadingPriceTokenBalance,
+      loadingAllowance,
     ]
   );
 
   const retrieveTokens = () => {
-    if (
-      typeof launchpad_project?.listing_id &&
-      launchpad_project?.price_token
-    ) {
+    if (typeof launchpadProject?.listing_id && launchpadProject?.price_token) {
       withdrawAllocations(
-        launchpad_project.price_token,
-        launchpad_project.listing_id,
+        launchpadProject.price_token,
+        launchpadProject.listing_id,
         accountId as string,
         selector
       );
@@ -134,24 +115,25 @@ export const Project = () => {
   const onJoinProject = useCallback(
     (amount: number) => {
       if (
-        typeof launchpad_project?.listing_id &&
-        launchpad_project?.price_token
+        typeof launchpadProject?.listing_id &&
+        launchpadProject?.price_token
       ) {
         buyTickets(
           new BN(amount)
-            .mul(new BN(launchpad_project.token_allocation_price || 0))
+            .mul(new BN(launchpadProject.token_allocation_price || 0))
             .toString(),
-          launchpad_project.price_token,
-          launchpad_project.listing_id,
-          accountId as string,
+          launchpadProject.price_token,
+          launchpadProject.listing_id,
+          accountId!,
           selector
         );
       }
     },
     [
-      launchpad_project?.project_token,
-      launchpad_project?.token_allocation_price,
       1,
+      accountId,
+      launchpadProject?.project_token,
+      launchpadProject?.token_allocation_price,
     ]
   );
 
@@ -166,14 +148,14 @@ export const Project = () => {
       total_amount_sale_project_tokens = "",
       token_allocation_price = "",
       token_allocation_size = "",
-    } = launchpad_project || {};
+    } = launchpadProject || {};
 
     const totalAmount = new BN(total_amount_sale_project_tokens!);
     const allocationPrice = new BN(token_allocation_price!);
     const allocationSize = new BN(token_allocation_size || "1");
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
-  }, [launchpad_project]);
+  }, [launchpadProject]);
 
   const stats = useMemo(() => {
     return {
@@ -186,23 +168,39 @@ export const Project = () => {
           },
           {
             label: "Project tokens for sale",
-            value: launchpad_project?.total_amount_sale_project_tokens!,
+            value: formatNumber(
+              new BN(launchpadProject?.total_amount_sale_project_tokens ?? "0"),
+              metadataProjectToken?.decimals ?? 0
+            ),
           },
           {
             label: "Allocation size",
-            value: launchpad_project?.token_allocation_size!,
+            value: formatNumber(
+              new BN(launchpadProject?.token_allocation_size ?? "0"),
+              metadataProjectToken?.decimals ?? 0
+            ),
           },
           {
             label: "How many allocations you can still buy",
-            value: "100,00", // view_investor_allowance(listing_id)
+            value: accountId ? investorAllowance! : CONNECT_WALLET_MESSAGE,
           },
           {
             label: "How many allocations you already bought",
-            value: "100,00", // view_investor_allocation(listing_id)
+            value: accountId
+              ? investorAllocation.allocationsBought ?? 0
+              : CONNECT_WALLET_MESSAGE,
           },
           {
             label: "Total allocations bought / total allocations",
-            value: "100,00", // listing.allocations_sold / total_...
+            value:
+              formatNumber(
+                new BN(launchpadProject?.allocations_sold ?? "0").div(
+                  new BN(
+                    launchpadProject?.total_amount_sale_project_tokens ?? "1"
+                  )
+                ),
+                metadataProjectToken?.decimals ?? 0
+              ) + "%",
           },
         ],
       },
@@ -211,44 +209,58 @@ export const Project = () => {
         items: [
           {
             label: "Start sale date",
-            value: formatDate(launchpad_project?.open_sale_1_timestamp!),
+            value: formatDate(launchpadProject?.open_sale_1_timestamp!),
           },
           {
             label: "Start sale phase 2 date",
-            value: formatDate(launchpad_project?.open_sale_2_timestamp!),
+            value: formatDate(launchpadProject?.open_sale_2_timestamp!),
           },
           {
             label: "End sale date",
-            value: formatDate(launchpad_project?.final_sale_2_timestamp!),
+            value: formatDate(launchpadProject?.final_sale_2_timestamp!),
           },
           {
             label: "DEX Launch date",
-            value: formatDate(launchpad_project?.liquidity_pool_timestamp!), // TODO
+            value: formatDate(launchpadProject?.liquidity_pool_timestamp!), // TODO
           },
           {
             label: "Vesting initial release %",
-            value: launchpad_project?.fraction_instant_release + "%",
+            value: launchpadProject?.fraction_instant_release + "%",
           },
           {
             label: "Vesting cliff release %",
-            value: launchpad_project?.fraction_cliff_release + "%",
+            value: launchpadProject?.fraction_cliff_release + "%",
           },
           {
             label: "Vesting final release %",
-            value: "99%", // 100 - instant - cliff
+            value:
+              100 -
+              Number.parseInt(
+                launchpadProject?.fraction_instant_release || "0"
+              ) -
+              Number.parseInt(launchpadProject?.fraction_cliff_release || "0") +
+              "%",
           },
           {
-            label: "Vesting cliff launchpad_project date",
-            value: formatDate(launchpad_project?.cliff_timestamp!),
+            label: "Vesting cliff launchpadProject date",
+            value: formatDate(launchpadProject?.cliff_timestamp!),
           },
           {
             label: "Vesting cliff end date",
-            value: formatDate(launchpad_project?.end_cliff_timestamp!),
+            value: formatDate(launchpadProject?.end_cliff_timestamp!),
           },
         ],
       },
     };
-  }, [launchpad_project]);
+  }, [launchpadProject, metadataPriceToken, metadataProjectToken]);
+
+  const navigate = useNavigate();
+
+  const navigateToExternalURL = (uri: string) => {
+    window.open(uri);
+  };
+
+  const { jumpGradient } = useTheme();
 
   return (
     <PageContainer>
@@ -264,7 +276,7 @@ export const Project = () => {
               >
                 <Image
                   className="w-[50px] h-[50px]"
-                  src={launchpad_project?.project_token_info?.image || ""}
+                  src={launchpadProject?.project_token_info?.image || ""}
                 />
               </Skeleton>
 
@@ -280,7 +292,7 @@ export const Project = () => {
                   as="h1"
                   color="white"
                 >
-                  {finalPrice} {launchpad_project?.price_token_info?.symbol}
+                  {finalPrice} {launchpadProject?.price_token_info?.symbol}
                 </Text>
               </Skeleton>
             </Flex>
@@ -295,7 +307,7 @@ export const Project = () => {
                 fontSize="40px"
                 as="h1"
               >
-                {launchpad_project?.project_name}
+                {launchpadProject?.project_name}
               </Text>
             </Skeleton>
 
@@ -310,7 +322,7 @@ export const Project = () => {
                 fontSize="20px"
                 as="h1"
               >
-                {launchpad_project?.description_token}
+                {launchpadProject?.description_token}
               </Text>
             </Skeleton>
           </Flex>
@@ -332,7 +344,7 @@ export const Project = () => {
               className="w-full min-h-[48px] rounded-[16px]"
               isLoaded={!isLoading}
             >
-              <Text children={launchpad_project?.description_project} />
+              <Text children={launchpadProject?.description_project} />
             </Skeleton>
           </Flex>
         </Card>
@@ -350,7 +362,9 @@ export const Project = () => {
             <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
               <Button
                 disabled={
-                  !new BN(investorAllocation.totalTokensBought).gt(new BN(0))
+                  !new BN(investorAllocation?.totalTokensBought ?? 0).gt(
+                    new BN(0)
+                  )
                 }
                 onClick={() => retrieveTokens()}
                 justifyContent="space-between"
@@ -388,7 +402,7 @@ export const Project = () => {
                 lineHeight="50px"
                 as="h1"
               >
-                {launchpad_project?.project_name}
+                {launchpadProject?.project_name}
               </Text>
             </Skeleton>
 
@@ -399,7 +413,7 @@ export const Project = () => {
               <Flex gap="5px" direction="column" maxWidth="380px">
                 <Text>
                   Balance - {priceTokenBalance || "0"}{" "}
-                  {launchpad_project?.price_token_info?.symbol}
+                  {launchpadProject?.price_token_info?.symbol}
                 </Text>
                 <Input
                   value={tickets}
@@ -414,10 +428,8 @@ export const Project = () => {
                   _focus={{ bg: "white" }}
                 />
                 <Text>
-                  You have{" "}
-                  {Number(totalAllowanceData) -
-                    Number(investorAllocation.allocationsBought)}{" "}
-                  tickets available to deposit
+                  You can buy {formatNumber(allocationsAvailable, 0) + " "}
+                  allocations
                 </Text>
               </Flex>
             </Skeleton>
@@ -486,7 +498,7 @@ export const Project = () => {
           </Text>
         </Flex>
         <Flex color="white" gap={1}>
-          <If condition={!!launchpad_project?.discord}>
+          <If condition={!!launchpadProject?.discord}>
             <Flex
               w="40px"
               h="40px"
@@ -495,14 +507,14 @@ export const Project = () => {
               bg="black"
               p="3px"
               borderRadius={10}
-              onClick={() => navigateToExternalURL(launchpad_project?.discord!)}
+              onClick={() => navigateToExternalURL(launchpadProject?.discord!)}
               cursor="pointer"
               className="hover:bg-white hover:text-black"
             >
               <DiscordIcon />
             </Flex>
           </If>
-          <If condition={!!launchpad_project?.twitter}>
+          <If condition={!!launchpadProject?.twitter}>
             <Flex
               w="40px"
               h="40px"
@@ -512,7 +524,7 @@ export const Project = () => {
               p="3px"
               borderRadius={10}
               onClick={() =>
-                navigateToExternalURL(launchpad_project?.twitter as string)
+                navigateToExternalURL(launchpadProject?.twitter as string)
               }
               cursor="pointer"
               className="hover:bg-white hover:text-black"
@@ -520,7 +532,7 @@ export const Project = () => {
               <TwitterIcon />
             </Flex>
           </If>
-          <If condition={!!launchpad_project?.telegram}>
+          <If condition={!!launchpadProject?.telegram}>
             <Flex
               w="40px"
               h="40px"
@@ -530,7 +542,7 @@ export const Project = () => {
               p="3px"
               borderRadius={10}
               onClick={() =>
-                navigateToExternalURL(launchpad_project?.telegram as string)
+                navigateToExternalURL(launchpadProject?.telegram as string)
               }
               cursor="pointer"
               className="hover:bg-white hover:text-black"
@@ -539,7 +551,7 @@ export const Project = () => {
             </Flex>
           </If>
 
-          <If condition={!!launchpad_project?.website}>
+          <If condition={!!launchpadProject?.website}>
             <Flex
               w="40px"
               h="40px"
@@ -549,7 +561,7 @@ export const Project = () => {
               p="3px"
               borderRadius={10}
               onClick={() =>
-                navigateToExternalURL(launchpad_project?.website as string)
+                navigateToExternalURL(launchpadProject?.website as string)
               }
               cursor="pointer"
               className="hover:bg-white hover:text-black"
@@ -557,7 +569,7 @@ export const Project = () => {
               <WebIcon />
             </Flex>
           </If>
-          <If condition={!!launchpad_project?.whitepaper}>
+          <If condition={!!launchpadProject?.whitepaper}>
             <Flex
               w="40px"
               h="40px"
@@ -567,7 +579,7 @@ export const Project = () => {
               p="3px"
               borderRadius={10}
               onClick={() =>
-                navigateToExternalURL(launchpad_project?.whitepaper as string)
+                navigateToExternalURL(launchpadProject?.whitepaper as string)
               }
               cursor="pointer"
               className="hover:bg-white hover:text-black"
