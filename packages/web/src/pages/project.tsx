@@ -187,7 +187,7 @@ export const Project = () => {
           {
             label: "How many allocations you already bought",
             value: accountId
-              ? investorAllocation.allocationsBought ?? 0
+              ? investorAllocation.allocationsBought ?? "0"
               : CONNECT_WALLET_MESSAGE,
           },
           {
