@@ -98,20 +98,30 @@ export default {
           SELECT * 
           FROM (SELECT * FROM "listings" WHERE account_id = $1) AS l
           INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-          INNER JOIN "allocations" a ON(l.listing_id = a.listing_id)
+          INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)
         `
-        : `SELECT * FROM "listings" AS l
-        INNER JOIN "listings_metadata" AS m
-        ON(l.listing_id = m.listing_id)`;
+        : `
+          SELECT * FROM "listings" AS l
+          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
+        `;
 
-      if (
-        filters.status &&
-        ImportantStatusFilters.includes(filters.status as string)
-      ) {
+      if (filters.status && ImportantStatusFilters.includes(filters.status)) {
         sqlQuery +=
           (filters.showMineOnly ? " AND " : " WHERE ") +
           queriesPerStatus[filters.status];
       }
+
+      /*
+      if (filters.search) {
+        sqlQuery += (
+              
+        );
+      }
+
+      if (filters.visibility) {
+        sqlQuery += ();
+      }
+      */
 
       return createPageableQuery(
         sqlQuery,
