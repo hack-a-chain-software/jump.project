@@ -14,7 +14,6 @@ export const Nav = () => {
 
   return (
     <Flex
-      // minH="100vh"
       w="140px"
       left="0px"
       top="120px"
