@@ -4,8 +4,8 @@ import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
-import { addMilliseconds, isBefore } from "date-fns";
-import { Box, Flex, Image, Input, Text, Skeleton } from "@chakra-ui/react";
+import { isBefore } from "date-fns";
+import { Box, Flex, Image, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -33,8 +33,6 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { formatNumber } from "@near/ts";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
 
-const CONNECT_WALLET_MESSAGE = "Connect wallet";
-
 /**
  * @description - Launchpad project details page
  * @name Project
@@ -54,9 +52,6 @@ export const Project = () => {
       },
     });
 
-  const { data: investorAllowance, loading: loadingAllowance } =
-    useViewInvestorAllowance(accountId!, id!);
-
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(accountId!, id!);
 
@@ -68,9 +63,6 @@ export const Project = () => {
 
   const { data: metadataPriceToken, loading: isPriceTokenMetadataLoading } =
     useTokenMetadata(launchpadProject?.price_token!);
-
-  const { data: metadataProjectToken, loading: isProjectTokenLoading } =
-    useTokenMetadata(launchpadProject?.project_token!);
 
   const allocationsAvailable = useMemo(() => {
     return new BN(totalAllowanceData).sub(
@@ -93,19 +85,13 @@ export const Project = () => {
     () =>
       loadingAllocation ||
       isPriceTokenMetadataLoading ||
-      isProjectTokenLoading ||
       loadingTotalAllowance ||
-      loading ||
-      loadingPriceTokenBalance ||
-      loadingAllowance,
+      loading,
     [
       loadingAllocation,
       isPriceTokenMetadataLoading,
-      isProjectTokenLoading,
       loadingTotalAllowance,
       loading,
-      loadingPriceTokenBalance,
-      loadingAllowance,
     ]
   );
 
@@ -160,12 +146,12 @@ export const Project = () => {
     return isBefore(startSale, now);
   }, [launchpadProject]);
 
-  const isEndSale = useMemo(() => {
+  const enabledSale = useMemo(() => {
     const now = new Date();
 
     const endAt = new Date(Number(launchpadProject?.final_sale_2_timestamp!));
 
-    return isBefore(endAt, now);
+    return isBefore(now, endAt);
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
@@ -177,119 +163,6 @@ export const Project = () => {
   const hasTicketsAmount = useMemo(() => {
     return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
-
-  const totalRaise = useMemo(() => {
-    const {
-      total_amount_sale_project_tokens = "",
-      token_allocation_price = "",
-      token_allocation_size = "",
-    } = launchpadProject || {};
-
-    const totalAmount = new BN(total_amount_sale_project_tokens!);
-    const allocationPrice = new BN(token_allocation_price!);
-    const allocationSize = new BN(token_allocation_size || "1");
-
-    return totalAmount.mul(allocationPrice).div(allocationSize);
-  }, [launchpadProject]);
-
-  const stats = useMemo(() => {
-    return {
-      price: {
-        name: "Price",
-        items: [
-          {
-            label: "Total raise (in price token)",
-            value: formatNumber(totalRaise, metadataPriceToken?.decimals ?? 0),
-          },
-          {
-            label: "Project tokens for sale",
-            value: formatNumber(
-              new BN(launchpadProject?.total_amount_sale_project_tokens ?? "0"),
-              metadataProjectToken?.decimals ?? 0
-            ),
-          },
-          {
-            label: "Allocation size",
-            value: formatNumber(
-              new BN(launchpadProject?.token_allocation_size ?? "0"),
-              metadataProjectToken?.decimals ?? 0
-            ),
-          },
-          {
-            label: "How many allocations you can still buy",
-            value: accountId ? investorAllowance! : CONNECT_WALLET_MESSAGE,
-          },
-          {
-            label: "How many allocations you already bought",
-            value: accountId
-              ? investorAllocation.allocationsBought ?? "0"
-              : CONNECT_WALLET_MESSAGE,
-          },
-          {
-            label: "Total allocations bought / total allocations",
-            value:
-              formatNumber(
-                new BN(launchpadProject?.allocations_sold ?? "0").div(
-                  new BN(
-                    launchpadProject?.total_amount_sale_project_tokens ?? "1"
-                  )
-                ),
-                metadataProjectToken?.decimals ?? 0
-              ) + "%",
-          },
-        ],
-      },
-      vesting: {
-        name: "Vesting",
-        items: [
-          {
-            label: "Start sale date",
-            value: formatDate(launchpadProject?.open_sale_1_timestamp!),
-          },
-          {
-            label: "Start sale phase 2 date",
-            value: formatDate(launchpadProject?.open_sale_2_timestamp!),
-          },
-          {
-            label: "End sale date",
-            value: formatDate(launchpadProject?.final_sale_2_timestamp!),
-          },
-          {
-            label: "DEX Launch date",
-            value: formatDate(launchpadProject?.liquidity_pool_timestamp!), // TODO
-          },
-          {
-            label: "Vesting initial release %",
-            value: launchpadProject?.fraction_instant_release + "%",
-          },
-          {
-            label: "Vesting cliff release %",
-            value: launchpadProject?.fraction_cliff_release + "%",
-          },
-          {
-            label: "Vesting final release %",
-            value:
-              100 -
-              Number?.parseInt(
-                launchpadProject?.fraction_instant_release || "0"
-              ) -
-              Number?.parseInt(
-                launchpadProject?.fraction_cliff_release || "0"
-              ) +
-              "%",
-          },
-          {
-            label: "Vesting cliff launchpadProject date",
-            value: formatDate(launchpadProject?.cliff_timestamp!),
-          },
-          {
-            label: "Vesting cliff end date",
-            value: formatDate(launchpadProject?.end_cliff_timestamp!),
-          },
-        ],
-      },
-    };
-  }, [launchpadProject, metadataPriceToken, metadataProjectToken]);
 
   const navigate = useNavigate();
 
@@ -399,7 +272,7 @@ export const Project = () => {
             <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
               <Button
                 disabled={
-                  isEndSale || investorAllocation.allocationsBought === "0"
+                  enabledSale || investorAllocation.allocationsBought === "0"
                 }
                 onClick={() => retrieveTokens()}
                 justifyContent="space-between"
@@ -414,10 +287,7 @@ export const Project = () => {
 
         <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative">
           <If condition={!enabledSales}>
-            <Flex
-              // bg={glassyWhite}
-              className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col"
-            >
+            <Flex className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col">
               <Text
                 fontWeight="800"
                 fontFamily="Inter"
@@ -528,7 +398,7 @@ export const Project = () => {
                   Join{" "}
                   {tickets > 0 ? (
                     <Fragment>
-                      For{" "}
+                      For:{" "}
                       {formatNumber(
                         ticketsAmount,
                         new BN(launchpadProject?.price_token_info?.decimals!)
@@ -545,7 +415,7 @@ export const Project = () => {
           </Flex>
         </Card>
 
-        <ProjectStats isLoading={isLoading} stats={stats} />
+        <ProjectStats launchpadProject={launchpadProject} />
       </div>
 
       <Box

@@ -1,5 +1,14 @@
+import BN from "bn.js";
+import { useMemo } from "react";
 import { Card } from "@/components";
+import { formatNumber } from "@near/ts";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
+import {
+  useViewInvestorAllowance,
+  useViewInvestorAllocation,
+} from "@/hooks/modules/launchpad";
+import { useTokenMetadata } from "@/hooks/modules/token";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 interface Stats {
   [key: string]: table;
@@ -15,13 +24,156 @@ export interface Item {
   value: string;
 }
 
-export function ProjectStats({
-  stats,
-  isLoading,
-}: {
-  stats: Stats;
-  isLoading: boolean;
-}) {
+const CONNECT_WALLET_MESSAGE = "Connect wallet";
+
+export function ProjectStats({ launchpadProject }: { launchpadProject: any }) {
+  const { accountId } = useWalletSelector();
+
+  const { data: investorAllocation, loading: loadingAllocation } =
+    useViewInvestorAllocation(accountId!, launchpadProject?.listing_id!);
+
+  const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
+    useTokenMetadata(launchpadProject?.price_token!);
+
+  const { data: investorAllowance, loading: loadingAllowance } =
+    useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
+
+  const { data: metadataProjectToken, loading: loadingProjectToken } =
+    useTokenMetadata(launchpadProject?.project_token!);
+
+  const formatDate = (start_timestamp?: string) => {
+    const date = new Date(Number(start_timestamp ?? "0"));
+
+    return date.toLocaleDateString();
+  };
+
+  const totalRaise = useMemo(() => {
+    const {
+      total_amount_sale_project_tokens = "",
+      token_allocation_price = "",
+      token_allocation_size = "",
+    } = launchpadProject || {};
+
+    const totalAmount = new BN(total_amount_sale_project_tokens!);
+    const allocationPrice = new BN(token_allocation_price!);
+    const allocationSize = new BN(token_allocation_size || "1");
+
+    return totalAmount.mul(allocationPrice).div(allocationSize);
+  }, [launchpadProject]);
+
+  const isLoading = useMemo(() => {
+    return (
+      loadingAllocation ||
+      laodingPriceTokenMetadata ||
+      loadingAllowance ||
+      loadingProjectToken
+    );
+  }, [
+    loadingAllocation,
+    laodingPriceTokenMetadata,
+    loadingAllowance,
+    loadingProjectToken,
+  ]);
+
+  const stats = useMemo(() => {
+    return {
+      price: {
+        name: "Price",
+        items: [
+          {
+            label: "Total raise (in price token)",
+            value: formatNumber(totalRaise, metadataPriceToken?.decimals ?? 0),
+          },
+          {
+            label: "Project tokens for sale",
+            value: formatNumber(
+              new BN(launchpadProject?.total_amount_sale_project_tokens ?? "0"),
+              metadataProjectToken?.decimals ?? 0
+            ),
+          },
+          {
+            label: "Allocation size",
+            value: formatNumber(
+              new BN(launchpadProject?.token_allocation_size ?? "0"),
+              metadataProjectToken?.decimals ?? 0
+            ),
+          },
+          {
+            label: "How many allocations you can still buy",
+            value: accountId ? investorAllowance! : CONNECT_WALLET_MESSAGE,
+          },
+          {
+            label: "How many allocations you already bought",
+            value: accountId
+              ? investorAllocation.allocationsBought ?? "0"
+              : CONNECT_WALLET_MESSAGE,
+          },
+          {
+            label: "Total allocations bought / total allocations",
+            value:
+              formatNumber(
+                new BN(launchpadProject?.allocations_sold ?? "0").div(
+                  new BN(
+                    launchpadProject?.total_amount_sale_project_tokens ?? "1"
+                  )
+                ),
+                metadataProjectToken?.decimals ?? 0
+              ) + "%",
+          },
+        ],
+      },
+      vesting: {
+        name: "Vesting",
+        items: [
+          {
+            label: "Start sale date",
+            value: formatDate(launchpadProject?.open_sale_1_timestamp!),
+          },
+          {
+            label: "Start sale phase 2 date",
+            value: formatDate(launchpadProject?.open_sale_2_timestamp!),
+          },
+          {
+            label: "End sale date",
+            value: formatDate(launchpadProject?.final_sale_2_timestamp!),
+          },
+          {
+            label: "DEX Launch date",
+            value: formatDate(launchpadProject?.liquidity_pool_timestamp!), // TODO
+          },
+          {
+            label: "Vesting initial release %",
+            value: launchpadProject?.fraction_instant_release + "%",
+          },
+          {
+            label: "Vesting cliff release %",
+            value: launchpadProject?.fraction_cliff_release + "%",
+          },
+          {
+            label: "Vesting final release %",
+            value:
+              100 -
+              Number?.parseInt(
+                launchpadProject?.fraction_instant_release || "0"
+              ) -
+              Number?.parseInt(
+                launchpadProject?.fraction_cliff_release || "0"
+              ) +
+              "%",
+          },
+          {
+            label: "Vesting cliff launchpadProject date",
+            value: formatDate(launchpadProject?.cliff_timestamp!),
+          },
+          {
+            label: "Vesting cliff end date",
+            value: formatDate(launchpadProject?.end_cliff_timestamp!),
+          },
+        ],
+      },
+    };
+  }, [launchpadProject, metadataPriceToken, metadataProjectToken]);
+
   return (
     <Card className="col-span-12 xl:col-span-8">
       <Flex flexGrow={5} flexDirection="column" gap={4}>
