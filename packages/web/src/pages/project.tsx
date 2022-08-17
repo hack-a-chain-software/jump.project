@@ -4,9 +4,10 @@ import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
+import { addMilliseconds, isBefore } from "date-fns";
 import { Box, Flex, Image, Input, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
-import { useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   DiscordIcon,
@@ -16,13 +17,20 @@ import {
   WebIcon,
   WhitepaperIcon,
 } from "../assets/svg";
-import { Button, Card, GradientText, If, PageContainer } from "../components";
+import {
+  Button,
+  Card,
+  GradientText,
+  If,
+  PageContainer,
+  NumberInput,
+} from "../components";
 import { BackButton } from "../components/shared/back-button";
 import { ProjectStats } from "@/components";
 import { useTheme } from "../hooks/theme";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { formatNumber, getRawAmount } from "@near/ts";
+import { formatNumber } from "@near/ts";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
@@ -143,6 +151,25 @@ export const Project = () => {
     return date.toLocaleDateString();
   };
 
+  const enabledSales = useMemo(() => {
+    const now = new Date();
+    const startSale = new Date(
+      Number(launchpadProject?.open_sale_1_timestamp!)
+    );
+
+    return isBefore(startSale, now);
+  }, [launchpadProject]);
+
+  const ticketsAmount = useMemo(() => {
+    return new BN(launchpadProject?.token_allocation_price!).mul(
+      new BN(tickets.toString())
+    );
+  }, [tickets]);
+
+  const hasTicketsAmount = useMemo(() => {
+    return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
+  }, [ticketsAmount, priceTokenBalance]);
+
   const totalRaise = useMemo(() => {
     const {
       total_amount_sale_project_tokens = "",
@@ -235,10 +262,12 @@ export const Project = () => {
             label: "Vesting final release %",
             value:
               100 -
-              Number.parseInt(
+              Number?.parseInt(
                 launchpadProject?.fraction_instant_release || "0"
               ) -
-              Number.parseInt(launchpadProject?.fraction_cliff_release || "0") +
+              Number?.parseInt(
+                launchpadProject?.fraction_cliff_release || "0"
+              ) +
               "%",
           },
           {
@@ -260,7 +289,7 @@ export const Project = () => {
     window.open(uri);
   };
 
-  const { jumpGradient } = useTheme();
+  const { jumpGradient, glassyWhite } = useTheme();
 
   return (
     <PageContainer>
@@ -377,7 +406,35 @@ export const Project = () => {
           </Flex>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-6 xl:col-span-4">
+        <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative">
+          <If condition={enabledSales}>
+            <Flex
+              // bg={glassyWhite}
+              className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col"
+            >
+              <Text
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="24px"
+                as="h1"
+              >
+                Await start sales
+              </Text>
+
+              <Text
+                color="white"
+                fontWeight="800"
+                fontFamily="Inter"
+                letterSpacing="-0.05em"
+                fontSize="24px"
+                mb="-20px"
+                as="h1"
+                children={formatDate(launchpadProject?.open_sale_1_timestamp!)}
+              />
+            </Flex>
+          </If>
+
           <Flex direction="column" flex={1} gap={1} className="h-full">
             <Skeleton isLoaded={!isLoading} className="rounded-[16px]">
               <GradientText
@@ -411,24 +468,26 @@ export const Project = () => {
               className="h-[92.5px] rounded-[16px] my-[30px]"
             >
               <Flex gap="5px" direction="column" maxWidth="380px">
-                <Text>
-                  Balance - {priceTokenBalance || "0"}{" "}
-                  {launchpadProject?.price_token_info?.symbol}
-                </Text>
-                <Input
+                <Flex flexWrap="wrap" justifyContent="space-between">
+                  <Text>
+                    Your Balance:{" "}
+                    {formatNumber(
+                      new BN(priceTokenBalance ?? "0"),
+                      launchpadProject?.price_token_info?.decimals!
+                    )}{" "}
+                    {launchpadProject?.price_token_info?.symbol}
+                  </Text>
+                </Flex>
+
+                <NumberInput
+                  min={0}
                   value={tickets}
-                  type="number"
-                  disabled={!accountId || priceTokenBalance === "0"}
-                  onChange={(e) => setTickets(Number(e.target.value))}
-                  bg="white"
-                  color="black"
-                  placeholder="Tickets"
-                  variant="filled"
-                  _hover={{ bg: "white" }}
-                  _focus={{ bg: "white" }}
+                  max={allocationsAvailable.toNumber()}
+                  onChange={(value) => setTickets(value || 0)}
                 />
+
                 <Text>
-                  You can buy {formatNumber(allocationsAvailable, 0) + " "}
+                  You can buy: {formatNumber(allocationsAvailable, 0) + " "}
                   allocations
                 </Text>
               </Flex>
@@ -457,8 +516,22 @@ export const Project = () => {
                   justifyContent="space-between"
                   w="100%"
                   maxWidth="380px"
+                  bg={hasTicketsAmount ? "white" : "#EB5757"}
+                  isDisabled={!hasTicketsAmount || tickets === 0}
                 >
-                  Join Project
+                  Join{" "}
+                  {tickets > 0 ? (
+                    <Fragment>
+                      For{" "}
+                      {formatNumber(
+                        ticketsAmount,
+                        new BN(launchpadProject?.price_token_info?.decimals!)
+                      )}{" "}
+                      {launchpadProject?.price_token_info?.symbol}
+                    </Fragment>
+                  ) : (
+                    "Project"
+                  )}
                   <WalletIcon />
                 </Button>
               </Skeleton>
