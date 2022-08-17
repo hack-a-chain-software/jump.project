@@ -407,7 +407,7 @@ export const Project = () => {
         </Card>
 
         <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative">
-          <If condition={enabledSales}>
+          <If condition={!enabledSales}>
             <Flex
               // bg={glassyWhite}
               className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col"
