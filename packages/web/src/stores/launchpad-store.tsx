@@ -39,7 +39,7 @@ export const useLaunchpadStore = create<{
     account: string,
     token: string
   ) => Promise<any>;
-}>((set, get) => ({
+}>((_, get) => ({
   async withdrawAllocations(listing_id, project_token, accountId, connection) {
     try {
       const projectTokenStorageBalance = get().getTokenStorage(
@@ -72,8 +72,7 @@ export const useLaunchpadStore = create<{
           "withdraw_allocations",
           {
             listing_id,
-          },
-          "0.25"
+          }
         )
       );
 

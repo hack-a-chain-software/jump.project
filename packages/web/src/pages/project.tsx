@@ -112,9 +112,9 @@ export const Project = () => {
   const retrieveTokens = () => {
     if (typeof launchpadProject?.listing_id && launchpadProject?.price_token) {
       withdrawAllocations(
-        launchpadProject.price_token,
         launchpadProject.listing_id,
-        accountId as string,
+        launchpadProject.price_token,
+        accountId!,
         selector
       );
     }
@@ -158,6 +158,14 @@ export const Project = () => {
     );
 
     return isBefore(startSale, now);
+  }, [launchpadProject]);
+
+  const isEndSale = useMemo(() => {
+    const now = new Date();
+
+    const endAt = new Date(Number(launchpadProject?.final_sale_2_timestamp!));
+
+    return isBefore(endAt, now);
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
@@ -289,7 +297,7 @@ export const Project = () => {
     window.open(uri);
   };
 
-  const { jumpGradient, glassyWhite } = useTheme();
+  const { jumpGradient } = useTheme();
 
   return (
     <PageContainer>
@@ -391,9 +399,7 @@ export const Project = () => {
             <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
               <Button
                 disabled={
-                  !new BN(investorAllocation?.totalTokensBought ?? 0).gt(
-                    new BN(0)
-                  )
+                  isEndSale || investorAllocation.allocationsBought === "0"
                 }
                 onClick={() => retrieveTokens()}
                 justifyContent="space-between"

@@ -2,6 +2,8 @@ import { utils, providers } from "near-api-js";
 import type { CodeResult } from "near-api-js/lib/providers/provider";
 import { Transaction } from "@near/ts";
 
+export const AttachedGas = "300000000000000";
+
 export const executeMultipleTransactions = async (
   transactions: Transaction[],
   wallet: any
@@ -25,8 +27,8 @@ export const getTransaction = (
         params: {
           methodName: method,
           args,
-          gas: "300000000000000",
-          deposit: utils.format.parseNearAmount(amount) || "1",
+          gas: AttachedGas,
+          deposit: amount ? utils.format.parseNearAmount(amount)! : "1",
         },
       },
     ],
