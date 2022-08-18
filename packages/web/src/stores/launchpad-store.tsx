@@ -5,6 +5,7 @@ import create from "zustand";
 import {
   viewFunction,
   getTransaction,
+  getTokenStorage,
   executeMultipleTransactions,
 } from "@/tools";
 import { Transaction } from "@near/ts";
@@ -34,21 +35,16 @@ export const useLaunchpadStore = create<{
     accountId: string,
     connection: WalletSelector
   ): Promise<void>;
-  getTokenStorage: (
-    connection: WalletSelector,
-    account: string,
-    token: string
-  ) => Promise<any>;
-}>((set, get) => ({
+}>((_) => ({
   async withdrawAllocations(listing_id, project_token, accountId, connection) {
     try {
-      const projectTokenStorageBalance = get().getTokenStorage(
+      const transactions: Transaction[] = [];
+
+      const projectTokenStorageBalance = await getTokenStorage(
         connection,
         accountId,
         project_token
       );
-
-      const transactions: Transaction[] = [];
 
       if (!projectTokenStorageBalance) {
         transactions.push(
@@ -72,8 +68,7 @@ export const useLaunchpadStore = create<{
           "withdraw_allocations",
           {
             listing_id,
-          },
-          "0.25"
+          }
         )
       );
 
@@ -93,7 +88,7 @@ export const useLaunchpadStore = create<{
     try {
       const transactions: Transaction[] = [];
 
-      const launchpadStorage = await get().getTokenStorage(
+      const launchpadStorage = await getTokenStorage(
         connection,
         accountId,
         import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT
@@ -107,7 +102,7 @@ export const useLaunchpadStore = create<{
             "storage_deposit",
             {
               account_id: accountId,
-              registration_only: false,
+              registration_only: true,
             },
             "0.25"
           )
@@ -116,7 +111,7 @@ export const useLaunchpadStore = create<{
 
       transactions.push(
         getTransaction(accountId, priceToken, "ft_transfer_call", {
-          receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
+          receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
           amount,
           memo: null,
           msg: JSON.stringify({
@@ -203,7 +198,7 @@ export const useLaunchpadStore = create<{
     try {
       const transactions: Transaction[] = [];
 
-      const stakingStorageBalance = await get().getTokenStorage(
+      const stakingStorageBalance = await getTokenStorage(
         connection,
         accountId,
         import.meta.env.VITE_STAKING_CONTRACT
@@ -261,16 +256,6 @@ export const useLaunchpadStore = create<{
       return console.error(
         toast.error(`Error While Decreasing Membership: ${error}`)
       );
-    }
-  },
-
-  getTokenStorage: async (connection, account, token) => {
-    try {
-      return await await viewFunction(connection, token, "storage_balance_of", {
-        account_id: account,
-      });
-    } catch (e) {
-      return;
     }
   },
 }));

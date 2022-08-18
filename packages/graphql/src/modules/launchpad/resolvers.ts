@@ -11,24 +11,29 @@ import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
-import { ApolloError } from "apollo-server";
 
 export default {
   LaunchpadListing: {
     async project_token_info({ project_token }: LaunchpadListing) {
-      const { name, icon, symbol } = await findTokenMetadata(project_token);
+      const { name, icon, symbol, decimals } = await findTokenMetadata(
+        project_token
+      );
       return {
         name,
         image: icon,
         symbol,
+        decimals,
       };
     },
     async price_token_info({ price_token }: LaunchpadListing) {
-      const { name, icon, symbol } = await findTokenMetadata(price_token);
+      const { name, icon, symbol, decimals } = await findTokenMetadata(
+        price_token
+      );
       return {
         name,
         image: icon,
         symbol,
+        decimals,
       };
     },
     async allocation(
@@ -93,20 +98,30 @@ export default {
           SELECT * 
           FROM (SELECT * FROM "listings" WHERE account_id = $1) AS l
           INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-          INNER JOIN "allocations" a ON(l.listing_id = a.listing_id)
+          INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)
         `
-        : `SELECT * FROM "listings" AS l
-        INNER JOIN "listings_metadata" AS m
-        ON(l.listing_id = m.listing_id)`;
+        : `
+          SELECT * FROM "listings" AS l
+          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
+        `;
 
-      if (
-        filters.status &&
-        ImportantStatusFilters.includes(filters.status as string)
-      ) {
+      if (filters.status && ImportantStatusFilters.includes(filters.status)) {
         sqlQuery +=
           (filters.showMineOnly ? " AND " : " WHERE ") +
           queriesPerStatus[filters.status];
       }
+
+      /*
+      if (filters.search) {
+        sqlQuery += (
+              
+        );
+      }
+
+      if (filters.visibility) {
+        sqlQuery += ();
+      }
+      */
 
       return createPageableQuery(
         sqlQuery,

@@ -11,7 +11,6 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
-import { setupLedger } from "@near-wallet-selector/ledger";
 
 interface WalletSelectorContextValue {
   selector: WalletSelector;
@@ -87,8 +86,6 @@ export const WalletSelectorContextProvider: React.FC<
         distinctUntilChanged()
       )
       .subscribe((nextAccounts) => {
-        console.log("Accounts Update", nextAccounts);
-
         setAccounts(nextAccounts);
       });
 

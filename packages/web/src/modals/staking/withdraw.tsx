@@ -4,6 +4,7 @@ import { X_JUMP_TOKEN } from "@/env/contract";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
+import { formatNumber } from "@near/ts";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
 import { useWalletSelector } from "@/context/wallet-selector";
@@ -29,16 +30,14 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
     }
   );
 
-  const { data: jumpMetadata, loading } = useNearQuery<
+  const { data: jumpMetadata, loading } = useNearQuery<{ decimals: number }>(
+    "ft_metadata",
     {
-      decimals: number;
-    },
-    { account_id: string }
-  >("ft_metadata", {
-    contract: X_JUMP_TOKEN,
-    poolInterval: 1000 * 60,
-    debug: true,
-  });
+      contract: X_JUMP_TOKEN,
+      poolInterval: 1000 * 60,
+      debug: true,
+    }
+  );
 
   const { values, setFieldValue, handleSubmit, isSubmitting } = useFormik({
     onSubmit: async (values) => {
@@ -100,10 +99,7 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance:{" "}
-          {new BN(balance || 0)
-            .mul(new BN(10 ** -(jumpMetadata?.decimals || 0)))
-            .toString()}{" "}
+          Balance: {formatNumber(new BN(balance), jumpMetadata?.decimals!)}{" "}
           xJUMP
         </Text>
       </Flex>

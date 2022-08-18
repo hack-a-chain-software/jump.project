@@ -14,28 +14,17 @@ export const Nav = () => {
 
   return (
     <Flex
-      minH="100vh"
-      w="120px"
-      zIndex="1"
-      bg="transparent"
-      position="fixed"
+      // minH="100vh"
+      w="140px"
       left="0px"
-      top="0px"
-      bottom="0px"
-      flexDirection="column"
-      alignItems="center"
+      top="120px"
       pt="121px"
       gap="25px"
-      className="hidden md:flex"
+      bg="transparent"
+      position="sticky"
+      className="hidden md:flex sticky top-1 h-max"
     >
-      <Stack
-        display="flex"
-        flex={1}
-        gap="10px"
-        alignItems="center"
-        justifyContent="center"
-        pb="100px"
-      >
+      <Stack flex={1} gap="10px" display="flex" alignItems="center">
         {navRoutes.map((e) => (
           <Tooltip
             isDisabled={enabledRoutes.includes(e.route)}

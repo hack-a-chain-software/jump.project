@@ -1,6 +1,7 @@
 query LaunchPadProject($projectId: ID!, $accountId: ID!) {
   launchpad_project(project_id: $projectId) {
     listing_id
+    public
     project_owner
     project_token
     price_token
@@ -33,12 +34,14 @@ query LaunchPadProject($projectId: ID!, $accountId: ID!) {
       name
       image
       symbol
+      decimals
     }
     dex_id
     price_token_info {
-      image
       name
+      image
       symbol
+      decimals
     }
     allocation(account_id: $accountId) {
       account_id

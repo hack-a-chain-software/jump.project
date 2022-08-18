@@ -17,6 +17,8 @@ import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
 import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
+import BN from "bn.js";
+import { formatNumber, getValueWithDecimals } from "@near/ts";
 
 interface TokenRatio {
   x_token: string;
@@ -45,6 +47,11 @@ export const Staking = () => {
     },
   });
 
+  // amount of tokens that jump will deposit every month
+  // this is an alternative while there is no track record
+  // of yield to extrapolate from
+  const jumpYearlyDistributionCompromise = "10000000000000000000";
+
   const { data: balance = "0", loading: loadingBalance } = useNearQuery<
     string,
     { account_id: string }
@@ -67,6 +74,15 @@ export const Staking = () => {
       skip: !accountId,
     });
 
+  const { data: jumpMetadata } = useNearQuery<{
+    decimals: number;
+  }>("ft_metadata", {
+    contract: JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+    debug: true,
+  });
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
   const withdrawDisclosure = useDisclosure();
@@ -75,27 +91,41 @@ export const Staking = () => {
 
   const balanceXToken = useMemo(() => balance || "0", [balance]);
 
-  const tokenRatio = useMemo(() => {
-    return Number(data.base_token) / Number(data.x_token);
-  }, [data.base_token, data.x_token]);
+  const getAmountRaw = (amount) => {
+    const decimals = new BN(jumpMetadata?.decimals! + "");
 
-  const submitStaking = useCallback(async (amount: string) => {
-    try {
-      await stakeXToken(amount, accountId as string, selector);
-      toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+    const denom = new BN("10").pow(decimals);
 
-  const submitWithdraw = useCallback(async (amount: string) => {
-    try {
-      await burnXToken(amount, accountId as string, selector);
-      toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+    return new BN(amount).mul(denom).toString();
+  };
+
+  const submitStaking = useCallback(
+    async (amount: string) => {
+      const deposit = getAmountRaw(amount);
+
+      try {
+        await stakeXToken(deposit, accountId!, selector);
+        toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [accountId, jumpMetadata]
+  );
+
+  const submitWithdraw = useCallback(
+    async (amount: string) => {
+      const withdraw = getAmountRaw(amount);
+
+      try {
+        await burnXToken(amount, accountId!, selector);
+        toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [accountId, jumpMetadata]
+  );
 
   const isLoading = useMemo(() => {
     return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
@@ -146,9 +176,21 @@ export const Staking = () => {
               >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
-                  value="0 JUMP"
-                  title="Estimated Rewards"
-                  bottomText="Per Week"
+                  value={`${getValueWithDecimals(
+                    new BN("1000000000")
+                      .mul(new BN(data.base_token))
+                      .div(new BN(data.x_token)),
+                    9,
+                    2
+                  )} JUMP`}
+                  title="xJUMP Value"
+                  bottomText={`1 JUMP = ${getValueWithDecimals(
+                    new BN("1000000000")
+                      .mul(new BN(data.x_token))
+                      .div(new BN(data.base_token)),
+                    9,
+                    2
+                  )} xJUMP`}
                   className="h-full w-full"
                 />
               </Skeleton>
@@ -158,11 +200,21 @@ export const Staking = () => {
                 className="w-full h-[144px] mt-2 rounded-[20px]"
               >
                 <ValueBox
-                  title="Staked"
+                  title="You own"
                   className="h-full w-full"
-                  bottomText="Your Staked JUMP"
+                  bottomText={`worth ${getValueWithDecimals(
+                    new BN(balanceXToken)
+                      .mul(new BN(data.base_token))
+                      .div(new BN(data.x_token)),
+                    jumpMetadata?.decimals!,
+                    2
+                  )} JUMP`}
                   borderColor={glassyWhiteOpaque}
-                  value={`${balanceXToken} JUMP`}
+                  value={`${getValueWithDecimals(
+                    new BN(balanceXToken),
+                    jumpMetadata?.decimals!,
+                    2
+                  )} xJUMP`}
                 />
               </Skeleton>
 
@@ -172,7 +224,14 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="APR"
-                  value={`${tokenRatio}%`}
+                  value={`${getValueWithDecimals(
+                    new BN(jumpYearlyDistributionCompromise)
+                      .mul(new BN("100"))
+                      .mul(new BN("1000000000"))
+                      .div(new BN(data.base_token)),
+                    9,
+                    2
+                  )}%`}
                   className="h-full w-full"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}

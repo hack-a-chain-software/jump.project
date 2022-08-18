@@ -76,6 +76,7 @@ export type LaunchpadListing = {
   project_owner: Scalars["ID"];
   project_token: Scalars["ID"];
   project_token_info?: Maybe<ProjectTokenInfo>;
+  public: Scalars["Boolean"];
   status?: Maybe<Scalars["String"]>;
   telegram?: Maybe<Scalars["String"]>;
   token_allocation_price?: Maybe<Scalars["String"]>;
@@ -141,6 +142,7 @@ export type NftStakingReward = {
 
 export type ProjectTokenInfo = {
   __typename?: "ProjectTokenInfo";
+  decimals?: Maybe<Scalars["String"]>;
   image?: Maybe<Scalars["String"]>;
   name?: Maybe<Scalars["String"]>;
   symbol?: Maybe<Scalars["String"]>;
@@ -253,6 +255,7 @@ export type LaunchpadConenctionQuery = {
     data?: Array<{
       __typename?: "LaunchpadListing";
       listing_id: string;
+      public: boolean;
       project_owner: string;
       project_token: string;
       price_token?: string | null;
@@ -276,15 +279,17 @@ export type LaunchpadConenctionQuery = {
       dex_id?: string | null;
       project_token_info?: {
         __typename?: "ProjectTokenInfo";
-        image?: string | null;
         name?: string | null;
+        image?: string | null;
         symbol?: string | null;
+        decimals?: string | null;
       } | null;
       price_token_info?: {
         __typename?: "ProjectTokenInfo";
-        image?: string | null;
         name?: string | null;
+        image?: string | null;
         symbol?: string | null;
+        decimals?: string | null;
       } | null;
     } | null> | null;
   };
@@ -300,6 +305,7 @@ export type LaunchPadProjectQuery = {
   launchpad_project?: {
     __typename?: "LaunchpadListing";
     listing_id: string;
+    public: boolean;
     project_owner: string;
     project_token: string;
     price_token?: string | null;
@@ -334,12 +340,14 @@ export type LaunchPadProjectQuery = {
       name?: string | null;
       image?: string | null;
       symbol?: string | null;
+      decimals?: string | null;
     } | null;
     price_token_info?: {
       __typename?: "ProjectTokenInfo";
-      image?: string | null;
       name?: string | null;
+      image?: string | null;
       symbol?: string | null;
+      decimals?: string | null;
     } | null;
     allocation?: {
       __typename?: "InvestorAllocation";
@@ -502,6 +510,7 @@ export const LaunchpadConenctionDocument = gql`
       hasNextPage
       data {
         listing_id
+        public
         project_owner
         project_token
         price_token
@@ -515,14 +524,16 @@ export const LaunchpadConenctionDocument = gql`
         liquidity_pool_project_tokens
         allocations_sold
         project_token_info {
-          image
           name
+          image
           symbol
+          decimals
         }
         price_token_info {
-          image
           name
+          image
           symbol
+          decimals
         }
         status
         fee_liquidity_tokens
@@ -596,6 +607,7 @@ export const LaunchPadProjectDocument = gql`
   query LaunchPadProject($projectId: ID!, $accountId: ID!) {
     launchpad_project(project_id: $projectId) {
       listing_id
+      public
       project_owner
       project_token
       price_token
@@ -628,12 +640,14 @@ export const LaunchPadProjectDocument = gql`
         name
         image
         symbol
+        decimals
       }
       dex_id
       price_token_info {
-        image
         name
+        image
         symbol
+        decimals
       }
       allocation(account_id: $accountId) {
         account_id

@@ -1,7 +1,7 @@
 import { LaunchpadFilters } from "@/types";
 
 export enum ListingStatuses {
-  Funded = "Funded", // Open or Waiting
+  Funded = "Funded", // Open or Waiting or Ended
   SaleFinalized = "SaleFinalized", // Ended
   PoolCreated = "PoolCreated", // Ended
   PoolProjectTokenSent = "PoolProjectTokenSent", // Ended
