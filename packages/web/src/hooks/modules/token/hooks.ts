@@ -1,12 +1,11 @@
 import { useNearQuery } from "react-near";
+import { tokenMetadata } from "@/interfaces";
 
 export function useTokenMetadata(token_id: string) {
-  return useNearQuery<{
-    decimals: number;
-  }>("ft_metadata", {
+  return useNearQuery<tokenMetadata>("ft_metadata", {
     contract: token_id,
     poolInterval: 1000 * 60,
-    debug: true,
+    skip: !token_id,
   });
 }
 
@@ -17,7 +16,6 @@ export function useTokenBalance(token_id: string, account_id: string) {
       account_id,
     },
     poolInterval: 1000 * 60,
-    skip: !account_id,
-    debug: true,
+    skip: !account_id || !token_id,
   });
 }
