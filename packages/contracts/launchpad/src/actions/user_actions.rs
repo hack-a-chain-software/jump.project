@@ -19,7 +19,6 @@ impl Contract {
     let listing_id = listing_id.0;
     let account_id = env::predecessor_account_id();
     let mut listing = self.internal_get_listing(listing_id);
-    listing.update_treasury_after_sale();
     let mut investor = self.internal_get_investor(&account_id).expect(ERR_004);
     // figure if cliff has already passed
     let investor_allocations = investor.allocation_count.get(&listing_id).expect(ERR_302);
@@ -38,7 +37,9 @@ impl Contract {
       .expect(ERR_302);
     self.internal_update_investor(&account_id, investor);
 
-    listing.withdraw_investor_funds(tokens_to_withdraw, account_id)
+    let promise = listing.withdraw_investor_funds(tokens_to_withdraw, account_id);
+    self.internal_update_listing(listing_id, listing);
+    promise
   }
 
   #[payable]
