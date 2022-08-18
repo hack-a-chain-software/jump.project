@@ -18,12 +18,10 @@ export function ProjectUserArea({
   launchpadProject,
   vestedAllocations,
   investorAllocation,
-  metadataPriceToken,
   metadataProjectToken,
 }: {
   isLoading: boolean;
   vestedAllocations: string;
-  metadataPriceToken: tokenMetadata;
   launchpadProject: launchpadProject;
   metadataProjectToken: tokenMetadata;
   investorAllocation: investorAllocation;
@@ -43,16 +41,6 @@ export function ProjectUserArea({
   const decimals = useMemo(() => {
     return new BN(metadataProjectToken?.decimals ?? "0");
   }, [metadataProjectToken]);
-
-  const priceTokenDecimals = useMemo(() => {
-    return new BN(metadataPriceToken?.decimals ?? "0");
-  }, [metadataPriceToken]);
-
-  const totalVested = useMemo(() => {
-    return new BN(launchpadProject?.token_allocation_price!).mul(
-      new BN(investorAllocation.allocationsBought ?? "0")
-    );
-  }, [metadataPriceToken]);
 
   const claimedAmount = useMemo(() => {
     return new BN(investorAllocation.totalTokensBought!);
@@ -89,12 +77,6 @@ export function ProjectUserArea({
         </GradientText>
 
         <div className="flex-col">
-          <div>
-            <span className="text-[18px] font-[800] tracking-[-0.05em]">
-              Vested
-            </span>
-          </div>
-
           <div className="flex space-x-[4px]">
             <div>
               <span className="text-[18px] font-[600] tracking-[-0.05em]">
@@ -107,30 +89,6 @@ export function ProjectUserArea({
                 {investorAllocation.allocationsBought}
               </span>
             </div>
-          </div>
-
-          <div className="flex space-x-[4px]">
-            <div>
-              <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                Total amount:
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {formatNumber(
-                  totalVested,
-                  priceTokenDecimals,
-                  metadataPriceToken?.symbol!
-                )}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-[12px]">
-            <span className="text-[18px] font-[800] tracking-[-0.05em]">
-              Rewards
-            </span>
           </div>
 
           <div className="flex space-x-[4px]">
