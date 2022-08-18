@@ -1,4 +1,4 @@
-import BN from "BN.js";
+import BN from "bn.js";
 import { useMemo } from "react";
 import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
