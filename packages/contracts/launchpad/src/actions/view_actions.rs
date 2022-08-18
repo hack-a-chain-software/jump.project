@@ -22,17 +22,21 @@ impl Contract {
       match listing_id {
         Some(listing_id) => {
           let listing = self.internal_get_listing(listing_id.0);
-          let current_sale_phase = listing.get_current_sale_phase();
-          let previous_allocations_bought = investor
-            .allocation_count
-            .get(&listing.listing_id)
-            .unwrap_or((0, 0));
-          U64(self.check_investor_allowance(
-            &investor,
-            &current_sale_phase,
-            previous_allocations_bought.0,
-            &listing,
-          ))
+          let current_sale_phase_opt = listing.get_current_sale_phase_no_panic();
+          if let Some(current_sale_phase) = current_sale_phase_opt {
+            let previous_allocations_bought = investor
+              .allocation_count
+              .get(&listing.listing_id)
+              .unwrap_or((0, 0));
+            U64(self.check_investor_allowance(
+              &investor,
+              &current_sale_phase,
+              previous_allocations_bought.0,
+              &listing,
+            ))
+          } else {
+            U64(0)
+          }
         }
         None => {
           let membership_level =
