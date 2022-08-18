@@ -226,7 +226,7 @@ export const useNftStaking = create<{
 
   getTokenStorage: async (connection, account, token) => {
     try {
-      return await await viewFunction(connection, token, "storage_balance_of", {
+      return await viewFunction(connection, token, "storage_balance_of", {
         account_id: account,
       });
     } catch (e) {

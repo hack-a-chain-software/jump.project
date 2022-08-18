@@ -6,17 +6,22 @@ const LOCALE = [...navigator.languages];
 
 export const formatNumber = (
   value: number | BN,
-  decimals: number | string | BN
+  decimals: number | string | BN,
+  suffix: string = ""
 ) => {
   const number =
     value instanceof BN
       ? getValueWithoutDecimals(value, decimals)
       : value / 10 ** Number(decimals);
 
-  return number.toLocaleString(LOCALE, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+  return (
+    number.toLocaleString(LOCALE, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }) +
+    " " +
+    suffix
+  );
 };
 
 export const getValueWithDecimals = (

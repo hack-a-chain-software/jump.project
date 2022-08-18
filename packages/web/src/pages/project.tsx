@@ -119,6 +119,8 @@ export const Project = () => {
           launchpadProject={launchpadProject!}
           vestedAllocations={vestedAllocations!}
           investorAllocation={investorAllocation}
+          metadataPriceToken={metadataPriceToken!}
+          metadataProjectToken={metadataProjectToken!}
         />
 
         <ProjectAllocations

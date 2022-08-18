@@ -1,22 +1,31 @@
 import BN from "bn.js";
 import { useMemo } from "react";
 import { isBefore } from "date-fns";
+import { formatNumber } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Flex, Skeleton } from "@chakra-ui/react";
 import { Card, GradientText, Button } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
-import { launchpadProject, investorAllocation } from "@/interfaces";
+import {
+  launchpadProject,
+  investorAllocation,
+  tokenMetadata,
+} from "@/interfaces";
 
 export function ProjectUserArea({
   isLoading,
   launchpadProject,
   vestedAllocations,
   investorAllocation,
+  metadataPriceToken,
+  metadataProjectToken,
 }: {
   isLoading: boolean;
   vestedAllocations: string;
+  metadataPriceToken: tokenMetadata;
   launchpadProject: launchpadProject;
+  metadataProjectToken: tokenMetadata;
   investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
@@ -31,11 +40,41 @@ export function ProjectUserArea({
     return isBefore(now, endAt);
   }, [launchpadProject]);
 
+  const decimals = useMemo(() => {
+    return new BN(metadataProjectToken?.decimals ?? "0");
+  }, [metadataProjectToken]);
+
+  const priceTokenDecimals = useMemo(() => {
+    return new BN(metadataPriceToken?.decimals ?? "0");
+  }, [metadataPriceToken]);
+
+  const totalVested = useMemo(() => {
+    return new BN(launchpadProject?.token_allocation_price!).mul(
+      new BN(investorAllocation.allocationsBought ?? "0")
+    );
+  }, [metadataPriceToken]);
+
+  const claimedAmount = useMemo(() => {
+    return new BN(investorAllocation.totalTokensBought!);
+  }, [investorAllocation]);
+
+  const unlockedAmount = useMemo(() => {
+    return new BN(vestedAllocations);
+  }, [vestedAllocations]);
+
+  const totalAmount = useMemo(() => {
+    return formatNumber(
+      claimedAmount.add(unlockedAmount),
+      decimals,
+      metadataProjectToken?.symbol!
+    );
+  }, [claimedAmount, unlockedAmount]);
+
   const retrieveTokens = () => {
     if (typeof launchpadProject?.listing_id && launchpadProject?.price_token) {
       withdrawAllocations(
         launchpadProject.listing_id,
-        launchpadProject.price_token,
+        launchpadProject.project_token,
         accountId!,
         selector
       );
@@ -49,47 +88,99 @@ export function ProjectUserArea({
           User Area
         </GradientText>
 
-        <div className="flex">
+        <div className="flex-col">
           <div>
-            <span>Allocations:</span>
-          </div>
-
-          <div>
-            <span>{investorAllocation.allocationsBought}</span>
-          </div>
-        </div>
-
-        <div className="flex">
-          <div>
-            <span>Total amount:</span>
-          </div>
-
-          <div>
-            <span>
-              {new BN(vestedAllocations!)
-                .add(new BN(investorAllocation.totalTokensBought!))
-                .toString()}
+            <span className="text-[18px] font-[800] tracking-[-0.05em]">
+              Vested
             </span>
           </div>
-        </div>
 
-        <div className="flex">
-          <div>
-            <span>Unlocked amount:</span>
+          <div className="flex space-x-[4px]">
+            <div>
+              <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                Allocations:
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                {investorAllocation.allocationsBought}
+              </span>
+            </div>
           </div>
 
-          <div>
-            <span>{vestedAllocations}</span>
-          </div>
-        </div>
+          <div className="flex space-x-[4px]">
+            <div>
+              <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                Total amount:
+              </span>
+            </div>
 
-        <div className="flex">
-          <div>
-            <span>Claimed amount:</span>
+            <div>
+              <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                {formatNumber(
+                  totalVested,
+                  priceTokenDecimals,
+                  metadataPriceToken?.symbol!
+                )}
+              </span>
+            </div>
           </div>
 
-          <div>
-            <span>{investorAllocation.totalTokensBought}</span>
+          <div className="mt-[12px]">
+            <span className="text-[18px] font-[800] tracking-[-0.05em]">
+              Rewards
+            </span>
+          </div>
+
+          <div className="flex space-x-[4px]">
+            <div>
+              <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                Total amount:
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                {totalAmount}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex space-x-[4px]">
+            <div>
+              <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                Unlocked amount:
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                {formatNumber(
+                  unlockedAmount,
+                  decimals,
+                  metadataProjectToken?.symbol!
+                )}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex space-x-[4px]">
+            <div>
+              <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                Claimed amount:
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                {formatNumber(
+                  claimedAmount,
+                  decimals,
+                  metadataProjectToken?.symbol!
+                )}
+              </span>
+            </div>
           </div>
         </div>
 

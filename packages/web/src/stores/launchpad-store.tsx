@@ -46,10 +46,7 @@ export const useLaunchpadStore = create<{
         project_token
       );
 
-      if (
-        !projectTokenStorageBalance ||
-        projectTokenStorageBalance?.available < "0.05"
-      ) {
+      if (!projectTokenStorageBalance) {
         transactions.push(
           getTransaction(
             accountId,
@@ -76,7 +73,7 @@ export const useLaunchpadStore = create<{
       );
 
       const wallet = await connection.wallet();
-      // console.log(transactions);
+
       await executeMultipleTransactions(transactions, wallet);
 
       toast.success(
@@ -105,7 +102,7 @@ export const useLaunchpadStore = create<{
             "storage_deposit",
             {
               account_id: accountId,
-              registration_only: false,
+              registration_only: true,
             },
             "0.25"
           )

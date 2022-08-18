@@ -64,7 +64,7 @@ export const viewFunction = async (
 
 export const getTokenStorage = async (connection, account, token) => {
   try {
-    return await await viewFunction(connection, token, "storage_balance_of", {
+    return await viewFunction(connection, token, "storage_balance_of", {
       account_id: account,
     });
   } catch (e) {
