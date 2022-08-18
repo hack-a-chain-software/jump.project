@@ -8,11 +8,6 @@ export const formatNumber = (
   value: number | BN,
   decimals: number | string | BN
 ) => {
-  console.log({
-    value,
-    decimals,
-  });
-
   const number =
     value instanceof BN
       ? getValueWithoutDecimals(value, decimals)

@@ -42,8 +42,6 @@ export const useNftStaking = create<{
       loading: true,
     });
 
-    console.log(connection);
-
     try {
       const staked = await viewFunction(
         connection,

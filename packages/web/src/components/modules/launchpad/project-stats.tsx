@@ -3,43 +3,26 @@ import { useMemo } from "react";
 import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
-import {
-  useViewInvestorAllowance,
-  useViewInvestorAllocation,
-} from "@/hooks/modules/launchpad";
-import { useTokenMetadata } from "@/hooks/modules/token";
 import { useWalletSelector } from "@/context/wallet-selector";
-
-interface Stats {
-  [key: string]: table;
-}
-
-export interface table {
-  name: string;
-  items: Item[];
-}
-
-export interface Item {
-  label: string;
-  value: string;
-}
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
-export function ProjectStats({ launchpadProject }: { launchpadProject: any }) {
+export function ProjectStats({
+  isLoading,
+  launchpadProject,
+  investorAllowance,
+  investorAllocation,
+  metadataPriceToken,
+  metadataProjectToken,
+}: {
+  isLoading: boolean;
+  launchpadProject: any;
+  investorAllocation: any;
+  investorAllowance: any;
+  metadataPriceToken: any;
+  metadataProjectToken: any;
+}) {
   const { accountId } = useWalletSelector();
-
-  const { data: investorAllocation, loading: loadingAllocation } =
-    useViewInvestorAllocation(accountId!, launchpadProject?.listing_id!);
-
-  const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
-    useTokenMetadata(launchpadProject?.price_token!);
-
-  const { data: investorAllowance, loading: loadingAllowance } =
-    useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
-
-  const { data: metadataProjectToken, loading: loadingProjectToken } =
-    useTokenMetadata(launchpadProject?.project_token!);
 
   const formatDate = (start_timestamp?: string) => {
     const date = new Date(Number(start_timestamp ?? "0"));
@@ -60,20 +43,6 @@ export function ProjectStats({ launchpadProject }: { launchpadProject: any }) {
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [launchpadProject]);
-
-  const isLoading = useMemo(() => {
-    return (
-      loadingAllocation ||
-      laodingPriceTokenMetadata ||
-      loadingAllowance ||
-      loadingProjectToken
-    );
-  }, [
-    loadingAllocation,
-    laodingPriceTokenMetadata,
-    loadingAllowance,
-    loadingProjectToken,
-  ]);
 
   const stats = useMemo(() => {
     return {
