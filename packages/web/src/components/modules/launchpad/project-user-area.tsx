@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import { useMemo } from "react";
 import { isBefore } from "date-fns";
 import { WalletIcon } from "@/assets/svg";
@@ -5,15 +6,18 @@ import { Flex, Skeleton } from "@chakra-ui/react";
 import { Card, GradientText, Button } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { launchpadProject, investorAllocation } from "@/interfaces";
 
 export function ProjectUserArea({
   isLoading,
   launchpadProject,
+  vestedAllocations,
   investorAllocation,
 }: {
   isLoading: boolean;
-  launchpadProject: any;
-  investorAllocation: any;
+  vestedAllocations: string;
+  launchpadProject: launchpadProject;
+  investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
 
@@ -44,6 +48,50 @@ export function ProjectUserArea({
         <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
           User Area
         </GradientText>
+
+        <div className="flex">
+          <div>
+            <span>Allocations:</span>
+          </div>
+
+          <div>
+            <span>{investorAllocation.allocationsBought}</span>
+          </div>
+        </div>
+
+        <div className="flex">
+          <div>
+            <span>Total amount:</span>
+          </div>
+
+          <div>
+            <span>
+              {new BN(vestedAllocations!)
+                .add(new BN(investorAllocation.totalTokensBought!))
+                .toString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex">
+          <div>
+            <span>Unlocked amount:</span>
+          </div>
+
+          <div>
+            <span>{vestedAllocations}</span>
+          </div>
+        </div>
+
+        <div className="flex">
+          <div>
+            <span>Claimed amount:</span>
+          </div>
+
+          <div>
+            <span>{investorAllocation.totalTokensBought}</span>
+          </div>
+        </div>
 
         <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
           <Button

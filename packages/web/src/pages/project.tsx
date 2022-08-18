@@ -22,6 +22,7 @@ import {
   ProjectAllocations,
 } from "@/components";
 import {
+  useViewVestedAllocations,
   useViewInvestorAllowance,
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
@@ -63,6 +64,9 @@ export const Project = () => {
   const { data: metadataProjectToken, loading: loadingProjectToken } =
     useTokenMetadata(launchpadProject?.project_token!);
 
+  const { data: vestedAllocations, loading: loadingVestedAllocations } =
+    useViewVestedAllocations(accountId!, launchpadProject?.listing_id!);
+
   const { data: investorAllowance, loading: loadingAllowance } =
     useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
 
@@ -80,6 +84,7 @@ export const Project = () => {
       loadingTotalAllowance ||
       loadingLaunchpadProject ||
       loadingPriceTokenBalance ||
+      loadingVestedAllocations ||
       laodingPriceTokenMetadata,
     [
       loadingAllowance,
@@ -88,6 +93,7 @@ export const Project = () => {
       loadingTotalAllowance,
       loadingLaunchpadProject,
       loadingPriceTokenBalance,
+      loadingVestedAllocations,
       laodingPriceTokenMetadata,
     ]
   );
@@ -110,7 +116,8 @@ export const Project = () => {
 
         <ProjectUserArea
           isLoading={isLoading}
-          launchpadProject={launchpadProject}
+          launchpadProject={launchpadProject!}
+          vestedAllocations={vestedAllocations!}
           investorAllocation={investorAllocation}
         />
 

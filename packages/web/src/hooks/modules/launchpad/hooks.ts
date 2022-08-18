@@ -33,7 +33,7 @@ export const useViewVestedAllocations = (
 ) => {
   return useNearQuery<string>("view_vested_allocations", {
     ...defaultLPOptions,
-    skip: !account_id,
+    skip: !account_id || !listing_id,
     variables: {
       listing_id,
       account_id,
