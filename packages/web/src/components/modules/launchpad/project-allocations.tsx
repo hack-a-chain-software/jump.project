@@ -6,6 +6,7 @@ import { Fragment, useMemo, useState, useCallback } from "react";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { launchpadProject, investorAllocation } from "@/interfaces";
 import { Card, If, GradientText, NumberInput, Button } from "@/components";
 
 export function ProjectAllocations({
@@ -16,10 +17,10 @@ export function ProjectAllocations({
   investorAllocation,
 }: {
   isLoading: boolean;
-  launchpadProject: any;
-  totalAllowanceData: any;
-  investorAllocation: any;
-  priceTokenBalance: any;
+  priceTokenBalance: string;
+  totalAllowanceData: string;
+  launchpadProject: launchpadProject;
+  investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
   const { buyTickets } = useLaunchpadStore();

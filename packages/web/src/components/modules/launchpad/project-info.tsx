@@ -2,6 +2,7 @@ import BN from "BN.js";
 import { useMemo } from "react";
 import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
+import { tokenMetadata, launchpadProject } from "@/interfaces";
 import { Flex, Skeleton, Image, Text } from "@chakra-ui/react";
 
 export function ProjectInfo({
@@ -10,8 +11,8 @@ export function ProjectInfo({
   metadataPriceToken,
 }: {
   isLoading: boolean;
-  launchpadProject: any;
-  metadataPriceToken: any;
+  launchpadProject: launchpadProject;
+  metadataPriceToken: tokenMetadata;
 }) {
   const finalPrice = useMemo(() => {
     if (!metadataPriceToken?.decimals && launchpadProject) {

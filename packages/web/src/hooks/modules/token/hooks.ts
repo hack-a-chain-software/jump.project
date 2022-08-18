@@ -1,9 +1,8 @@
 import { useNearQuery } from "react-near";
+import { tokenMetadata } from "@/interfaces";
 
 export function useTokenMetadata(token_id: string) {
-  return useNearQuery<{
-    decimals: number;
-  }>("ft_metadata", {
+  return useNearQuery<tokenMetadata>("ft_metadata", {
     contract: token_id,
     poolInterval: 1000 * 60,
     skip: !token_id,

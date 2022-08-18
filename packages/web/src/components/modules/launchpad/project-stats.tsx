@@ -4,6 +4,11 @@ import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
+import {
+  launchpadProject,
+  investorAllocation,
+  tokenMetadata,
+} from "@/interfaces";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
@@ -16,11 +21,11 @@ export function ProjectStats({
   metadataProjectToken,
 }: {
   isLoading: boolean;
-  launchpadProject: any;
-  investorAllocation: any;
-  investorAllowance: any;
-  metadataPriceToken: any;
-  metadataProjectToken: any;
+  investorAllowance: string;
+  metadataPriceToken: tokenMetadata;
+  launchpadProject: launchpadProject;
+  metadataProjectToken: tokenMetadata;
+  investorAllocation: investorAllocation;
 }) {
   const { accountId } = useWalletSelector();
 

@@ -99,13 +99,13 @@ export const Project = () => {
       <div className="grid grid-cols-12 gap-4">
         <ProjectInfo
           isLoading={isLoading}
-          launchpadProject={launchpadProject}
-          metadataPriceToken={metadataPriceToken}
+          launchpadProject={launchpadProject!}
+          metadataPriceToken={metadataPriceToken!}
         />
 
         <ProjectAbout
           isLoading={isLoading}
-          launchpadProject={launchpadProject}
+          launchpadProject={launchpadProject!}
         />
 
         <ProjectUserArea
@@ -116,19 +116,19 @@ export const Project = () => {
 
         <ProjectAllocations
           isLoading={isLoading}
-          launchpadProject={launchpadProject}
-          priceTokenBalance={priceTokenBalance}
-          totalAllowanceData={totalAllowanceData}
-          investorAllocation={investorAllocation}
+          launchpadProject={launchpadProject!}
+          priceTokenBalance={priceTokenBalance!}
+          totalAllowanceData={totalAllowanceData!}
+          investorAllocation={investorAllocation!}
         />
 
         <ProjectStats
           isLoading={isLoading}
-          launchpadProject={launchpadProject}
-          investorAllowance={investorAllowance}
-          investorAllocation={investorAllocation}
-          metadataPriceToken={metadataPriceToken}
-          metadataProjectToken={metadataProjectToken}
+          launchpadProject={launchpadProject!}
+          investorAllowance={investorAllowance!}
+          investorAllocation={investorAllocation!}
+          metadataPriceToken={metadataPriceToken!}
+          metadataProjectToken={metadataProjectToken!}
         />
       </div>
 
