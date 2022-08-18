@@ -49,10 +49,10 @@ export const Project = () => {
     loading: loadingLaunchpadProject,
   } = useLaunchPadProjectQuery({
     variables: {
-      accountId: accountId!,
+      accountId: accountId ?? "",
       projectId: id ?? "",
     },
-    skip: !accountId || !id,
+    skip: !id,
   });
 
   const { data: investorAllocation, loading: loadingAllocation } =

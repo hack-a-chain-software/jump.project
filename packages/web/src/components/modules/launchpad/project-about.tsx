@@ -23,8 +23,8 @@ export function ProjectAbout({
         </Text>
 
         <Skeleton
-          className="w-full min-h-[48px] rounded-[16px]"
           isLoaded={!isLoading}
+          className="w-full min-h-[48px] rounded-[16px]"
         >
           <Text children={launchpadProject?.description_project} />
         </Skeleton>

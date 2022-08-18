@@ -13,6 +13,8 @@ import {
   tokenMetadata,
 } from "@/interfaces";
 
+const CONNECT_WALLET_MESSAGE = "Connect wallet";
+
 export function ProjectUserArea({
   isLoading,
   launchpadProject,
@@ -76,8 +78,11 @@ export function ProjectUserArea({
           User Area
         </GradientText>
 
-        <div className="flex-col">
-          <div className="flex space-x-[4px]">
+        <div className="flex-col space-y-[4px]">
+          <Skeleton
+            isLoaded={!isLoading}
+            className="flex space-x-[4px] rounded-[16px]"
+          >
             <div>
               <span className="text-[18px] font-[600] tracking-[-0.05em]">
                 Allocations:
@@ -86,12 +91,17 @@ export function ProjectUserArea({
 
             <div>
               <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {investorAllocation.allocationsBought}
+                {accountId
+                  ? investorAllocation.allocationsBought
+                  : CONNECT_WALLET_MESSAGE}
               </span>
             </div>
-          </div>
+          </Skeleton>
 
-          <div className="flex space-x-[4px]">
+          <Skeleton
+            isLoaded={!isLoading}
+            className="flex space-x-[4px] rounded-[16px]"
+          >
             <div>
               <span className="text-[18px] font-[600] tracking-[-0.05em]">
                 Total amount:
@@ -100,12 +110,15 @@ export function ProjectUserArea({
 
             <div>
               <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {totalAmount}
+                {accountId ? totalAmount : CONNECT_WALLET_MESSAGE}
               </span>
             </div>
-          </div>
+          </Skeleton>
 
-          <div className="flex space-x-[4px]">
+          <Skeleton
+            isLoaded={!isLoading}
+            className="flex space-x-[4px] rounded-[16px]"
+          >
             <div>
               <span className="text-[18px] font-[600] tracking-[-0.05em]">
                 Unlocked amount:
@@ -114,16 +127,21 @@ export function ProjectUserArea({
 
             <div>
               <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {formatNumber(
-                  unlockedAmount,
-                  decimals,
-                  metadataProjectToken?.symbol!
-                )}
+                {accountId
+                  ? formatNumber(
+                      unlockedAmount,
+                      decimals,
+                      metadataProjectToken?.symbol!
+                    )
+                  : CONNECT_WALLET_MESSAGE}
               </span>
             </div>
-          </div>
+          </Skeleton>
 
-          <div className="flex space-x-[4px]">
+          <Skeleton
+            isLoaded={!isLoading}
+            className="flex space-x-[4px] rounded-[16px]"
+          >
             <div>
               <span className="text-[18px] font-[600] tracking-[-0.05em]">
                 Claimed amount:
@@ -132,14 +150,16 @@ export function ProjectUserArea({
 
             <div>
               <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {formatNumber(
-                  claimedAmount,
-                  decimals,
-                  metadataProjectToken?.symbol!
-                )}
+                {accountId
+                  ? formatNumber(
+                      claimedAmount,
+                      decimals,
+                      metadataProjectToken?.symbol!
+                    )
+                  : CONNECT_WALLET_MESSAGE}
               </span>
             </div>
-          </div>
+          </Skeleton>
         </div>
 
         <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
