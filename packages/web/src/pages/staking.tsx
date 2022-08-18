@@ -18,7 +18,7 @@ import { WithdrawModal } from "../modals/staking/withdraw";
 import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
 import BN from "bn.js";
-import { formatNumber, getValueWithDecimals } from "@near/ts";
+import { BigDecimalFloat } from "@near/ts";
 
 interface TokenRatio {
   x_token: string;
@@ -176,21 +176,28 @@ export const Staking = () => {
               >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
-                  value={`${getValueWithDecimals(
-                    new BN("1000000000")
-                      .mul(new BN(data.base_token))
-                      .div(new BN(data.x_token)),
-                    9,
-                    2
-                  )} JUMP`}
+                  value={new BigDecimalFloat(
+                    new BN(data.base_token)
+                  ).formatQuotient(
+                    new BigDecimalFloat(new BN(data.x_token)),
+                    new BN(9),
+                    {
+                      unit: "JUMP",
+                      formatOptions: { maximumFractionDigits: 2 },
+                    }
+                  )}
                   title="xJUMP Value"
-                  bottomText={`1 JUMP = ${getValueWithDecimals(
-                    new BN("1000000000")
-                      .mul(new BN(data.x_token))
-                      .div(new BN(data.base_token)),
-                    9,
-                    2
-                  )} xJUMP`}
+                  bottomText={
+                    "1 JUMP = " +
+                    new BigDecimalFloat(new BN(data.base_token)).formatQuotient(
+                      new BigDecimalFloat(new BN(data.x_token)),
+                      new BN(9),
+                      {
+                        unit: "xJUMP",
+                        formatOptions: { maximumFractionDigits: 2 },
+                      }
+                    )
+                  }
                   className="h-full w-full"
                 />
               </Skeleton>
@@ -202,19 +209,40 @@ export const Staking = () => {
                 <ValueBox
                   title="You own"
                   className="h-full w-full"
-                  bottomText={`worth ${getValueWithDecimals(
-                    new BN(balanceXToken)
-                      .mul(new BN(data.base_token))
-                      .div(new BN(data.x_token)),
-                    jumpMetadata?.decimals!,
-                    2
-                  )} JUMP`}
+                  bottomText={
+                    "worth " +
+                    new BigDecimalFloat(
+                      new BN(balanceXToken).mul(new BN(data.base_token)),
+                      new BN(jumpMetadata?.decimals ?? 0)
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(data.x_token)),
+                      new BN(5),
+                      {
+                        unit: "JUMP",
+                        formatOptions: { maximumFractionDigits: 2 },
+                      }
+                    )
+                  }
                   borderColor={glassyWhiteOpaque}
-                  value={`${getValueWithDecimals(
-                    new BN(balanceXToken),
-                    jumpMetadata?.decimals!,
-                    2
-                  )} xJUMP`}
+                  value={
+                    /*
+                     *     TODO: create another format function that encapsulates unit logic so we don't
+                     * have to use the quotient by 1 just in order to declaratively get unit suffixes.
+                     * Maybe hack the Intl.NumberFormatOptions unit field so we can use toLocaleString
+                     * for this purpose?
+                     */
+                    new BigDecimalFloat(
+                      new BN(balanceXToken),
+                      new BN(jumpMetadata?.decimals ?? 0)
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(1)),
+                      new BN(0),
+                      {
+                        unit: "xJUMP",
+                        formatOptions: { maximumFractionDigits: 2 },
+                      }
+                    )
+                  }
                 />
               </Skeleton>
 
@@ -224,14 +252,17 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="APR"
-                  value={`${getValueWithDecimals(
-                    new BN(jumpYearlyDistributionCompromise)
-                      .mul(new BN("100"))
-                      .mul(new BN("1000000000"))
-                      .div(new BN(data.base_token)),
-                    9,
-                    2
-                  )}%`}
+                  value={
+                    new BigDecimalFloat(
+                      new BN(jumpYearlyDistributionCompromise).mul(
+                        new BN("100")
+                      )
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(data.base_token)),
+                      new BN(9),
+                      { formatOptions: { maximumFractionDigits: 2 } }
+                    ) + "%" // TODO: refactor so unit logic can apply to %?
+                  }
                   className="h-full w-full"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}
