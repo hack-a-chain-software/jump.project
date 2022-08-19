@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
 import BN from "bn.js";
 import { BigDecimalFloat } from "@near/ts";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 interface TokenRatio {
   x_token: string;
@@ -131,6 +132,10 @@ export const Staking = () => {
     return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
   }, [loadingBalance, loadingTokenRatio]);
 
+  const jumpExponent = useMemo(() => {
+    return new BN(jumpMetadata?.decimals ?? 0).neg();
+  }, [jumpMetadata]);
+
   return (
     <PageContainer>
       <Flex gap={4} w="100%" flexWrap="wrap">
@@ -177,24 +182,31 @@ export const Staking = () => {
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   value={new BigDecimalFloat(
-                    new BN(data.base_token)
+                    new BN(data.base_token),
+                    jumpExponent
                   ).formatQuotient(
-                    new BigDecimalFloat(new BN(data.x_token)),
+                    new BigDecimalFloat(new BN(data.x_token), jumpExponent),
                     new BN(9),
                     {
                       unit: "JUMP",
-                      formatOptions: { maximumFractionDigits: 2 },
+                      formatOptions: CURRENCY_FORMAT_OPTIONS,
                     }
                   )}
                   title="xJUMP Value"
                   bottomText={
                     "1 JUMP = " +
-                    new BigDecimalFloat(new BN(data.base_token)).formatQuotient(
-                      new BigDecimalFloat(new BN(data.x_token)),
+                    new BigDecimalFloat(
+                      new BN(data.x_token),
+                      jumpExponent
+                    ).formatQuotient(
+                      new BigDecimalFloat(
+                        new BN(data.base_token),
+                        jumpExponent
+                      ),
                       new BN(9),
                       {
                         unit: "xJUMP",
-                        formatOptions: { maximumFractionDigits: 2 },
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
                       }
                     )
                   }
@@ -213,13 +225,13 @@ export const Staking = () => {
                     "worth " +
                     new BigDecimalFloat(
                       new BN(balanceXToken).mul(new BN(data.base_token)),
-                      new BN(jumpMetadata?.decimals ?? 0)
+                      jumpExponent.mul(new BN(2))
                     ).formatQuotient(
-                      new BigDecimalFloat(new BN(data.x_token)),
-                      new BN(5),
+                      new BigDecimalFloat(new BN(data.x_token), jumpExponent),
+                      new BN(9),
                       {
                         unit: "JUMP",
-                        formatOptions: { maximumFractionDigits: 2 },
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
                       }
                     )
                   }
@@ -233,15 +245,19 @@ export const Staking = () => {
                      */
                     new BigDecimalFloat(
                       new BN(balanceXToken),
-                      new BN(jumpMetadata?.decimals ?? 0)
+                      jumpExponent
                     ).formatQuotient(
                       new BigDecimalFloat(new BN(1)),
                       new BN(0),
                       {
                         unit: "xJUMP",
-                        formatOptions: { maximumFractionDigits: 2 },
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
                       }
                     )
+                    /*
+                     *
+                     *
+                     */
                   }
                 />
               </Skeleton>
@@ -260,7 +276,7 @@ export const Staking = () => {
                     ).formatQuotient(
                       new BigDecimalFloat(new BN(data.base_token)),
                       new BN(9),
-                      { formatOptions: { maximumFractionDigits: 2 } }
+                      { formatOptions: CURRENCY_FORMAT_OPTIONS }
                     ) + "%" // TODO: refactor so unit logic can apply to %?
                   }
                   className="h-full w-full"

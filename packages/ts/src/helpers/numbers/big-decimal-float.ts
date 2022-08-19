@@ -1,7 +1,11 @@
 import BN from "bn.js";
 import { MAX_NUM } from "./constants";
 
-type FormatQuotientOptions = {
+// TODO: test this
+export type BigDecimalFloatFormatOptions = Intl.NumberFormatOptions &
+  BigIntToLocaleStringOptions;
+
+export type FormatQuotientOptions = {
   precision?: BN;
   /* unit
    *     Note that the unit field in this type is not the same as the one present inside formatOptions.
@@ -9,8 +13,13 @@ type FormatQuotientOptions = {
    * separated by a whitespace character from the formatted output, so we can use it for token symbols.
    */
   unit?: string;
-  formatOptions: Intl.NumberFormatOptions;
+  formatOptions: BigDecimalFloatFormatOptions;
 };
+
+const toSafeNumber = (a: BN) =>
+  a.gt(MAX_NUM)
+    ? BigInt(a.toString()) // I don't like it either
+    : a.toNumber();
 
 /* BigDecimalFloat
  *     A type that simulates a float but with BigNumber-typed (arbitrary-size) mantissa and 10 as the exponent base instead of 2.
@@ -24,33 +33,31 @@ export class BigDecimalFloat {
 
   toLocaleString(
     locale: Intl.LocalesArgument,
-    options: Intl.NumberFormatOptions
+    options: BigDecimalFloatFormatOptions
   ): string {
     const base = new BN(10).pow(this.exponent.abs());
     const div = this.mantissa.div(base);
     const mod = this.mantissa.mod(base);
 
-    const wholePart = (
-      div.gt(MAX_NUM)
-        ? BigInt(div.toString()) // I don't like it either
-        : div.toNumber()
-    ).toLocaleString(locale); // TODO: options
-
-    if (this.mantissa.gte(base)) {
-      return wholePart;
+    if (mod.eq(new BN(0))) {
+      return toSafeNumber(div).toLocaleString(locale, options);
     }
+
+    const wholePart = toSafeNumber(div).toLocaleString(locale);
 
     /*
      *     Considering the base is always a power of 10, this could be done without loss of precision
      * by avoiding division and instead operating on the base-10 string representation, but I don't
      * know how to use the locale functionality of the browser
+     *
+     *     In order to have round-down (trim-digits) instead of round-close, change the next line of code to:
+     * const roundFloat = Math.floor(100 * mod.toNumber() / base.toNumber()) / 100;
+     * Or even change 100 to another power of 10 based on format options.
      */
-    const fractPart = (mod.toNumber() / base.toNumber()).toLocaleString(
-      locale,
-      options
-    );
+    const roundFloat = mod.toNumber() / base.toNumber();
+    const fractPart = roundFloat.toLocaleString(locale, options);
 
-    return fractPart.replace("0[,.]", wholePart);
+    return wholePart + fractPart.slice(1);
   }
 
   /* adjustDecimalPoint
@@ -117,5 +124,12 @@ export class BigDecimalFloat {
 
   clone(): BigDecimalFloat {
     return new BigDecimalFloat(this.mantissa.clone(), this.exponent.clone());
+  }
+
+  debug() {
+    return {
+      mantissa: this.mantissa.toString(),
+      exponent: this.exponent.toString(),
+    };
   }
 }
