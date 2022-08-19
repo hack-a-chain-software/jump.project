@@ -85,43 +85,33 @@ export function Home() {
   } = useLaunchpadConenctionQuery({
     variables: {
       limit: PAGINATE_LIMIT,
+      accountId: accountId || "",
     },
   });
 
-  const onBottom = () =>
-    window.innerHeight + window.scrollY >= document.body.scrollHeight - 0.5;
+  const fetchMoreItems = useCallback(async () => {
+    setLoadingItems(!loadingItems);
 
-  interface Args {
-    limit?: number | undefined;
-    offset?: number | undefined;
-  }
+    if (loadingProjects || !hasNextPage) {
+      return;
+    }
 
-  const fetchMoreItems = useCallback(
-    async (args?: Args) => {
-      setLoadingItems(!loadingItems);
-
-      if (loadingProjects || !hasNextPage || !onBottom()) {
-        return;
-      }
-
-      await fetchMore({
-        variables: {
-          limit: PAGINATE_LIMIT,
-          ...args,
-        },
-      });
-
-      setLoadingItems(!loadingItems);
-    },
-    [loadingItems, hasNextPage, loadingProjects]
-  );
-
-  useEffect(() => {
-    document.onscroll = () =>
-      fetchMoreItems({
+    await fetchMore({
+      variables: {
+        limit: PAGINATE_LIMIT,
+        accountId: accountId || "",
         offset: (launchpadProjects ?? []).length,
-      });
-  }, [launchpadProjects]);
+      },
+    });
+
+    setLoadingItems(!loadingItems);
+  }, [
+    loadingItems,
+    hasNextPage,
+    loadingProjects,
+    accountId,
+    launchpadProjects,
+  ]);
 
   const stakedTokens = useMemo(
     () => new BN(investor.data?.staked_token ?? "0"),
@@ -523,9 +513,11 @@ export function Home() {
         </Table>
       </TableContainer>
 
-      {loadingItems && (
+      {hasNextPage && !loadingProjects && (
         <Flex className="flex items-center justify-center">
-          <LoadingIndicator />
+          <Button className="w-[168px]" onClick={() => fetchMoreItems()}>
+            {loadingItems ? <LoadingIndicator /> : "Load more items"}
+          </Button>
         </Flex>
       )}
     </Flex>
