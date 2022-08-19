@@ -23,7 +23,7 @@ export function Button({
       px="20px"
       py="30px"
       gap="12px"
-      fontSize="14px"
+      fontSize="16px"
       fontFamily="Inter"
       alignItems="center"
       fontWeight="semibold"

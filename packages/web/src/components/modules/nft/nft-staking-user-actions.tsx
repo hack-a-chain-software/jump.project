@@ -98,7 +98,12 @@ export function NFTStakingUserActions(props: any) {
               >
                 Interact with Your Position
               </Text>
-              <Text mt="-10px" fontWeight="semibold" color="white">
+              <Text
+                mt="-10px"
+                fontWeight="semibold"
+                fontSize={18}
+                color="white"
+              >
                 This is the area wher you can interact with the Staking as a
                 Investor
               </Text>

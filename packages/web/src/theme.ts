@@ -20,5 +20,12 @@ export const theme = extendTheme({
     },
     darkerGrey: "#1E1E1E",
   },
+  styles: {
+    global: {
+      body: {
+        fontSize: "16px",
+      },
+    },
+  },
   config,
 });

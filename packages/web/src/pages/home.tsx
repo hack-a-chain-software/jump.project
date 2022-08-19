@@ -250,7 +250,7 @@ export function Home() {
                           Level {level}
                         </Text>
 
-                        <Text>
+                        <Text fontSize={18}>
                           Stake more{" "}
                           {amountToNextLevel
                             .div(new BN("1000000000000000000"))
@@ -346,6 +346,7 @@ export function Home() {
             maxW="100%"
             w="100%"
             value={filterSearch}
+            fontSize={16}
             borderRadius={15}
             placeholder="Search by Pool Name, Token, Address"
             _placeholder={{

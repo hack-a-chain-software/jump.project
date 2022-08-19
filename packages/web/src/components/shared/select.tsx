@@ -41,7 +41,7 @@ export function Select({
                   bg={useColorModeValue(gradientBackground, "#21002F")}
                   className="cursor-pointer w-full items-center justify-between min-w-[110px] p-[12px] h-[60px] rounded-[15px]"
                 >
-                  <span className="first-letter:uppercase truncate pl-[15px] pr-[30px]">
+                  <span className="first-letter:uppercase truncate pl-[15px] pr-[30px] text-[16px]">
                     {value || placeholder}
                   </span>
 

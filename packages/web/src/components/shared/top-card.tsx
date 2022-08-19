@@ -73,7 +73,7 @@ export const TopCard = ({
           <Text
             fontWeight="bold"
             letterSpacing="-0.03em"
-            fontSize="16px"
+            fontSize="18px"
             maxW="500px"
             zIndex="2"
             position="relative"
