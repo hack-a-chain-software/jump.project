@@ -41,9 +41,8 @@ export const Staking = () => {
     contract: X_JUMP_TOKEN,
     poolInterval: 1000 * 60,
     debug: true,
-    onCompleted: (res) => console.log(res),
     onError(err) {
-      console.log(err);
+      console.warn(err);
     },
   });
 
@@ -107,7 +106,7 @@ export const Staking = () => {
         await stakeXToken(deposit, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]
@@ -121,7 +120,7 @@ export const Staking = () => {
         await burnXToken(amount, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]

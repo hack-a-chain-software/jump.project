@@ -44,8 +44,6 @@ export function WalletSelectorModal(props: {}) {
 
   const handleWalletClick = async (module: ModuleState) => {
     try {
-      // console.log(module);
-
       const { available } = module.metadata;
 
       if (module.type === "injected" && !available) {

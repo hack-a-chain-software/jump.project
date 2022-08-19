@@ -44,7 +44,7 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
       try {
         await _onSubmit(values);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       } finally {
         rest.onClose();
       }
