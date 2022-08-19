@@ -60,14 +60,6 @@ export function formatFraction(
   denominator: UnitAwareBN,
   { maximumFractionDigits = 2, unit = "" }: FormatFractionOptions
 ) {
-  // console.log({
-  //   maximumFractionDigits,
-  //   numeratorV: numerator.value.toString(),
-  //   numeratorD: numerator.decimals.toString(),
-  //   denominatorV: denominator.value.toString(),
-  //   denominatorD: denominator.decimals.toString(),
-  // });
-
   const delta = BN.min(numerator.decimals.sub(denominator.decimals), new BN(0));
 
   const exponent = new BN(maximumFractionDigits).add(delta.neg());
