@@ -43,7 +43,7 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { BigDecimalFloat, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
-const PAGINATE_LIMIT = 10;
+const PAGINATE_LIMIT = 30;
 
 /**
  * @route - '/'
