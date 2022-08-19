@@ -116,7 +116,7 @@ export function Home() {
           offset: (launchpadProjects ?? []).length,
         },
       });
-  }, [loadingProjects, launchpadProjects]);
+  }, [launchpadProjects]);
 
   const stakedTokens = useMemo(
     () => new BN(investor.data?.staked_token ?? "0"),
