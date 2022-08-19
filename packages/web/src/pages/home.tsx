@@ -66,6 +66,7 @@ export function Home() {
   } = useLaunchpadConenctionQuery({
     variables: {
       limit: 10,
+      accountId: accountId!,
     },
   });
 
@@ -404,7 +405,7 @@ export function Home() {
                     )}
                   </Td>
                   <Td>{e?.public ? "Public" : "Private"}</Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>{e?.allocation?.total_quantity ?? 0}</Td>
                   <Td>
                     {new BigDecimalFloat(
                       new BN(e?.token_allocation_price ?? 0).mul(
@@ -425,7 +426,25 @@ export function Home() {
                       }
                     )}
                   </Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>
+                    {
+                      new BigDecimalFloat(
+                        new BN(e?.allocations_sold ?? 0).mul(
+                          new BN(e?.total_amount_sale_project_tokens ?? 0)
+                        ),
+                        new BN(e?.project_token_info?.decimals ?? 0)
+                          .neg()
+                          .add(new BN(2)) // %
+                      ).formatQuotient(
+                        new BigDecimalFloat(
+                          new BN(e?.token_allocation_size ?? 0),
+                          new BN(e?.project_token_info?.decimals ?? 0)
+                        ),
+                        new BN(5),
+                        { formatOptions: { maximumFractionDigits: 2 } }
+                      ) + "%" // TODO: refactor so unit logic can apply to %?
+                    }
+                  </Td>
                   <Td
                     borderTopRightRadius="16px"
                     borderBottomRightRadius="16px"

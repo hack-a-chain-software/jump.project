@@ -237,6 +237,7 @@ export type InvestorInfoQuery = {
 };
 
 export type LaunchpadConenctionQueryVariables = Exact<{
+  accountId: Scalars["ID"];
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
   status?: InputMaybe<StatusEnum>;
@@ -290,6 +291,11 @@ export type LaunchpadConenctionQuery = {
         image?: string | null;
         symbol?: string | null;
         decimals?: string | null;
+      } | null;
+      allocation?: {
+        __typename?: "InvestorAllocation";
+        total_quantity?: string | null;
+        total_allocation?: string | null;
       } | null;
     } | null> | null;
   };
@@ -491,6 +497,7 @@ export type InvestorInfoQueryResult = Apollo.QueryResult<
 >;
 export const LaunchpadConenctionDocument = gql`
   query LaunchpadConenction(
+    $accountId: ID!
     $limit: Int
     $offset: Int
     $status: StatusEnum
@@ -544,6 +551,10 @@ export const LaunchpadConenctionDocument = gql`
         fraction_instant_release
         liquidity_pool_price_tokens
         dex_id
+        allocation(account_id: $accountId) {
+          total_quantity
+          total_allocation
+        }
       }
     }
   }
@@ -561,6 +572,7 @@ export const LaunchpadConenctionDocument = gql`
  * @example
  * const { data, loading, error } = useLaunchpadConenctionQuery({
  *   variables: {
+ *      accountId: // value for 'accountId'
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
  *      status: // value for 'status'
@@ -570,7 +582,7 @@ export const LaunchpadConenctionDocument = gql`
  * });
  */
 export function useLaunchpadConenctionQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     LaunchpadConenctionQuery,
     LaunchpadConenctionQueryVariables
   >
