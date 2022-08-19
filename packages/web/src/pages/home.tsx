@@ -1,12 +1,11 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { addMilliseconds, isBefore } from "date-fns";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
-  useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import {
@@ -27,11 +26,11 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { X_JUMP_TOKEN } from "@/env/contract";
-import { LaunchpadListing, useLaunchpadConenctionQuery } from "@near/apollo";
+import { useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import { If, Button, Card, Select, TopCard } from "../components";
+import { If, Button, Card, Select, TopCard, Paginate } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { formatFraction, formatNumber } from "@near/ts";
@@ -51,7 +50,7 @@ export function Home() {
 
   const investor = useViewInvestor(accountId!);
 
-  const { error, data: totalAllowanceData = "0" } =
+  const { data: totalAllowanceData = "0" } =
     useViewTotalEstimatedInvestorAllowance(accountId!);
 
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
@@ -60,12 +59,15 @@ export function Home() {
 
   const {
     data: {
-      launchpad_projects: { data: launchpadProjects } = { data: [] },
+      launchpad_projects: { data: launchpadProjects, hasNextPage } = {
+        data: [],
+      },
     } = {},
-    refetch,
+    fetchMore,
+    loading: loadingProjects,
   } = useLaunchpadConenctionQuery({
     variables: {
-      limit: 10,
+      limit: 1,
     },
   });
 
@@ -140,6 +142,26 @@ export function Home() {
     return isBefore(now, endAt);
   }, [investor?.data, launchpadSettings]);
 
+  useEffect(() => {
+    document.onscroll = () => {
+      if (loadingProjects || !hasNextPage) {
+        return;
+      }
+
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.scrollHeight - 0.5
+      ) {
+        fetchMore({
+          variables: {
+            limit: 1,
+            offset: (launchpadProjects ?? []).length,
+          },
+        });
+      }
+    };
+  }, [loadingProjects, launchpadProjects, hasNextPage]);
+
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
       <Flex gap={5} className="flex-col lg:flex-row">
@@ -200,17 +222,23 @@ export function Home() {
                     justifyContent="space-between"
                     flex={1}
                   >
-                    <Text fontSize={18} fontWeight="semibold">
-                      Level {level}
-                    </Text>
-                    {/* TODO: make sure this is right */}
-                    <Text>
-                      Stake more{" "}
-                      {amountToNextLevel
-                        .div(new BN("1000000000000000000"))
-                        .toString() + " "}
-                      to next Level
-                    </Text>
+                    {accountId ? (
+                      <>
+                        <Text fontSize={18} fontWeight="semibold">
+                          Level {level}
+                        </Text>
+
+                        <Text>
+                          Stake more{" "}
+                          {amountToNextLevel
+                            .div(new BN("1000000000000000000"))
+                            .toString() + " "}
+                          to next Level
+                        </Text>
+                      </>
+                    ) : (
+                      "Connect Wallet"
+                    )}
                   </Flex>
                 </Flex>
               </Skeleton>
@@ -230,7 +258,7 @@ export function Home() {
                   color="white"
                   onClick={downgradeLevel}
                   justifyContent="space-between"
-                  disabled={!level || isLocked}
+                  disabled={!level || isLocked || !accountId}
                 >
                   Downgrade Level
                   {!!level ? <WalletIcon /> : <LockIcon />}
@@ -295,6 +323,7 @@ export function Home() {
             h="60px"
             maxW="100%"
             w="100%"
+            value={filterSearch}
             borderRadius={15}
             placeholder="Search by Pool Name, Token, Address"
             _placeholder={{
@@ -312,7 +341,7 @@ export function Home() {
       <TableContainer borderWidth="2px" px="20px" py="20px" borderRadius={20}>
         <Table size="lg" variant="unstyled">
           <Thead>
-            <Tr>
+            <Tr fontSize="18px">
               <Th>Image</Th>
               <Th>Name</Th>
               <Th>Price</Th>
@@ -359,6 +388,7 @@ export function Home() {
               {(launchpadProjects ?? []).map((e, index) => (
                 <Tr
                   cursor="pointer"
+                  fontSize="18px"
                   borderRadius="20px"
                   onClick={() => {
                     if (!e) {
@@ -374,7 +404,7 @@ export function Home() {
                   <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                     <Image
                       src={e?.project_token_info?.image || ""}
-                      className="w-[30px] h-[30px] rounded-full"
+                      className="w-[36px] h-[36px] rounded-full"
                     />
                   </Td>
                   <Td>

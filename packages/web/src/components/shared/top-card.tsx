@@ -62,7 +62,7 @@ export const TopCard = ({
               <Text
                 fontWeight="800"
                 fontFamily="Inter"
-                letterSpacing="-0.05em"
+                letterSpacing="0"
                 fontSize="50px"
                 as="h1"
               >
@@ -94,7 +94,14 @@ export const TopCard = ({
           </Flex>
         )}
 
-        <Flex position="absolute" zIndex="1" right="-60px" bottom="-60px">
+        <Flex
+          position="absolute"
+          zIndex="1"
+          right="0"
+          bottom="0"
+          maxH="100%"
+          overflow="hidden"
+        >
           {jumpLogo && <JumpBigWhite />}
         </Flex>
       </Box>

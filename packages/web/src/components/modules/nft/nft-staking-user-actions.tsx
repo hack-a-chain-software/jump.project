@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { NFTStakeModal, NFTUnstakeModal } from "@/modals";
 import { useNftStaking } from "@/stores/nft-staking-store";
-import { GradientButton, GradientText } from "@/components/shared";
+import { Button, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
 
@@ -103,20 +103,18 @@ export function NFTStakingUserActions(props: any) {
                 Investor
               </Text>
               <Stack mt="50px" gap={1}>
-                <GradientButton
+                <Button
                   onClick={() => toggleStakeModal()}
-                  bg={useColorModeValue("white", darkPurple)}
                   justifyContent="space-between"
                 >
                   Stake NFT <WalletIcon />
-                </GradientButton>
-                <GradientButton
+                </Button>
+                <Button
                   onClick={() => toggleUnstakeModal()}
-                  bg={useColorModeValue("white", darkPurple)}
                   justifyContent="space-between"
                 >
                   Unstake All NFTs <WalletIcon />
-                </GradientButton>
+                </Button>
               </Stack>
             </Box>
           </Box>

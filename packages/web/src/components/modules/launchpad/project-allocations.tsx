@@ -83,9 +83,13 @@ export function ProjectAllocations({
     return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
 
+  // const isEndSale = useMemo(() => {
+
+  // }, []);
+
   return (
     <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative">
-      <If condition={!enabledSales}>
+      <If condition={!enabledSales && !isLoading}>
         <Flex className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col">
           <Text
             fontWeight="800"

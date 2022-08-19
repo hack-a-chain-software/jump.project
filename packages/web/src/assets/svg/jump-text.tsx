@@ -20,8 +20,8 @@ export const JumpTextIcon = (props: React.SVGProps<SVGSVGElement>) => {
           y2="15"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#761BA0" />
-          <stop offset="1" stopColor="#D63A2F" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="white" />
         </linearGradient>
       </defs>
     </svg>

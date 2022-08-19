@@ -46,6 +46,7 @@ export function NFTStakingCard(
           borderRadius="24px"
           gap={5}
           bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+          // className="backdrop-blur-[10px] bg-black bg-opacity-[0.05] backdrop-blur-[15px]"
         >
           <Flex
             minHeight="165px"
@@ -123,6 +124,7 @@ export function NFTStakingCard(
                   flex="1"
                   bottomText="Per Month"
                   key={"nft-staking-rewards" + i}
+                  className="W-full"
                 />
               ))}
             </Flex>
