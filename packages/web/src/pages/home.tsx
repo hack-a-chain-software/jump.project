@@ -1,6 +1,5 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import debounce from "lodash/debounce";
 import { useState, useEffect, useCallback } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { addMilliseconds, isBefore } from "date-fns";
@@ -44,7 +43,7 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { formatFraction, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
-const PAGINATE_LIMITE = 1;
+const PAGINATE_LIMIT = 10;
 
 /**
  * @route - '/'
@@ -85,7 +84,7 @@ export function Home() {
     loading: loadingProjects,
   } = useLaunchpadConenctionQuery({
     variables: {
-      limit: PAGINATE_LIMITE,
+      limit: PAGINATE_LIMIT,
     },
   });
 
@@ -107,7 +106,7 @@ export function Home() {
 
       await fetchMore({
         variables: {
-          limit: PAGINATE_LIMITE,
+          limit: PAGINATE_LIMIT,
           ...args,
         },
       });
