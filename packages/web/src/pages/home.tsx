@@ -1,5 +1,6 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
+import debounce from "lodash/debounce";
 import { useState, useEffect, useCallback } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { addMilliseconds, isBefore } from "date-fns";
@@ -91,19 +92,27 @@ export function Home() {
   const onBottom = () =>
     window.innerHeight + window.scrollY >= document.body.scrollHeight - 0.5;
 
+  interface Args {
+    limit?: number | undefined;
+    offset?: number | undefined;
+  }
+
   const fetchMoreItems = useCallback(
-    async (args) => {
-      if (loadingProjects || !hasNextPage) {
+    async (args?: Args) => {
+      setLoadingItems(!loadingItems);
+
+      if (loadingProjects || !hasNextPage || !onBottom()) {
         return;
       }
 
+      await fetchMore({
+        variables: {
+          limit: PAGINATE_LIMITE,
+          ...args,
+        },
+      });
+
       setLoadingItems(!loadingItems);
-
-      if (onBottom()) {
-        await fetchMore(args);
-
-        setLoadingItems(!loadingItems);
-      }
     },
     [loadingItems, hasNextPage, loadingProjects]
   );
@@ -111,10 +120,7 @@ export function Home() {
   useEffect(() => {
     document.onscroll = () =>
       fetchMoreItems({
-        variables: {
-          limit: PAGINATE_LIMITE,
-          offset: (launchpadProjects ?? []).length,
-        },
+        offset: (launchpadProjects ?? []).length,
       });
   }, [launchpadProjects]);
 
