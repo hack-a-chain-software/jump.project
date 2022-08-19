@@ -30,12 +30,6 @@ export const client = new Client({
           launchpad_projects: {
             keyArgs: false,
             merge(existing, incoming) {
-              console.log(existing, incoming);
-
-              if (incoming.data.length === 0) {
-                return existing;
-              }
-
               return {
                 ...incoming,
                 data: [...(existing?.data || []), ...incoming.data],
