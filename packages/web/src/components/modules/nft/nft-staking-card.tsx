@@ -21,23 +21,23 @@ export function NFTStakingCard(
 
   const { colorMode } = useColorMode();
 
+  const cardGradient = useColorModeValue("transparent", jumpGradient);
+  const cardBg = useColorModeValue(jumpGradient, gradientBoxTopCard);
+  const cardOpacity = useColorModeValue(glassyWhiteOpaque, "transparent");
+
   return (
     <Box
       color="white"
       cursor="pointer"
       p="3px"
-      background={useColorModeValue("transparent", jumpGradient)}
+      background={cardGradient}
       borderRadius="26px"
       {...(R.omit(
         ["name", "logo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
     >
-      <Box
-        w="100%"
-        bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
-        borderRadius="24px"
-      >
+      <Box w="100%" bg={cardBg} borderRadius="24px">
         <Box
           display="flex"
           flexWrap="wrap"
@@ -48,7 +48,7 @@ export function NFTStakingCard(
           p="40px"
           borderRadius="24px"
           gap={5}
-          bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+          bg={cardOpacity}
           className={
             colorMode === "dark"
               ? "bg-black bg-opacity-[0.05] backdrop-blur-lg"
