@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { addMilliseconds, isBefore } from "date-fns";
 import {
@@ -43,16 +43,26 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { formatFraction, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
+const PAGINATE_LIMITE = 1;
+
 /**
  * @route - '/'
  * @description - This is the landing page for the near application
  * @name Home
  */
 export function Home() {
+  const [filterMine, setMine] = useState("");
+  const [filterStatus, setStatus] = useState("");
+  const [filterVisibility, setVisibility] = useState("");
+  const [filterSearch, setSearch] = useState("");
+  const [loadingItems, setLoadingItems] = useState(false);
+
   const navigate = useNavigate();
+
   const { accountId, selector } = useWalletSelector();
 
   const { darkPurpleOpaque, glassyWhite, blackAndWhite } = useTheme();
+
   const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
 
   const investor = useViewInvestor(accountId!);
@@ -74,15 +84,39 @@ export function Home() {
     loading: loadingProjects,
   } = useLaunchpadConenctionQuery({
     variables: {
-      limit: 10,
+      limit: PAGINATE_LIMITE,
     },
   });
 
-  const [filterMine, setMine] = useState("");
-  const [filterStatus, setStatus] = useState("");
-  const [filterVisibility, setVisibility] = useState("");
-  const [filterSearch, setSearch] = useState("");
-  const [loadingMoreItems, setLoadingMoreItems] = useState(false);
+  const onBottom = () =>
+    window.innerHeight + window.scrollY >= document.body.scrollHeight - 0.5;
+
+  const fetchMoreItems = useCallback(
+    async (args) => {
+      if (loadingProjects || !hasNextPage) {
+        return;
+      }
+
+      setLoadingItems(!loadingItems);
+
+      if (onBottom()) {
+        await fetchMore(args);
+
+        setLoadingItems(!loadingItems);
+      }
+    },
+    [loadingItems, hasNextPage, loadingProjects]
+  );
+
+  useEffect(() => {
+    document.onscroll = () =>
+      fetchMoreItems({
+        variables: {
+          limit: PAGINATE_LIMITE,
+          offset: (launchpadProjects ?? []).length,
+        },
+      });
+  }, [loadingProjects, launchpadProjects]);
 
   const stakedTokens = useMemo(
     () => new BN(investor.data?.staked_token ?? "0"),
@@ -149,30 +183,6 @@ export function Home() {
 
     return isBefore(now, endAt);
   }, [investor?.data, launchpadSettings]);
-
-  useEffect(() => {
-    document.onscroll = async () => {
-      if (loadingProjects || !hasNextPage) {
-        return;
-      }
-
-      if (
-        window.innerHeight + window.scrollY >=
-        document.body.scrollHeight - 0.5
-      ) {
-        setLoadingMoreItems(true);
-
-        await fetchMore({
-          variables: {
-            limit: 10,
-            offset: (launchpadProjects ?? []).length,
-          },
-        });
-
-        setLoadingMoreItems(false);
-      }
-    };
-  }, [loadingProjects, launchpadProjects, hasNextPage]);
 
   return (
     <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
@@ -482,7 +492,7 @@ export function Home() {
         </Table>
       </TableContainer>
 
-      {loadingMoreItems && (
+      {loadingItems && (
         <Flex className="flex items-center justify-center">
           <LoadingIndicator />
         </Flex>
