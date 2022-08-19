@@ -59,7 +59,7 @@ export function Home() {
 
   const {
     data: {
-      launchpad_projects: { data: launchpadProjects, hasNextPage } = {
+      launchpad_projects: { data: launchpadProjects, hasNextPage = false } = {
         data: [],
       },
     } = {},
