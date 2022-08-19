@@ -1,8 +1,8 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, Fragment } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
-import { addMilliseconds, isBefore } from "date-fns";
+import { format, addMilliseconds, isBefore } from "date-fns";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -166,17 +166,21 @@ export function Home() {
     return !!launchpadSettings && !loadingBaseTokenBalance;
   }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
 
-  const isLocked = useMemo(() => {
-    const now = new Date();
+  const lastCheck = useMemo(() => {
+    return new Date(Number(investor?.data?.last_check!) / 1000000);
+  }, [investor?.data]);
 
-    const lastCheck = new Date(Number(investor?.data?.last_check!) / 1000000);
-
-    const endAt = addMilliseconds(
+  const endVesting = useMemo(() => {
+    return addMilliseconds(
       lastCheck,
       Number(launchpadSettings?.token_lock_period) / 1000000
     );
+  }, [launchpadSettings]);
 
-    return isBefore(now, endAt);
+  const isLocked = useMemo(() => {
+    const now = new Date();
+
+    return isBefore(now, endVesting);
   }, [investor?.data, launchpadSettings]);
 
   return (
@@ -276,28 +280,6 @@ export function Home() {
                 endColor="rgba(255,255,255,0.3)"
               >
                 <Button
-                  w="100%"
-                  bg="transparent"
-                  border="1px solid white"
-                  color="white"
-                  onClick={downgradeLevel}
-                  justifyContent="space-between"
-                  disabled={!level || isLocked || !accountId}
-                >
-                  Downgrade Level
-                  {!!level ? <WalletIcon /> : <LockIcon />}
-                </Button>
-              </Skeleton>
-
-              <Skeleton
-                mt={5}
-                flex={1}
-                width="100%"
-                borderRadius="18px"
-                isLoaded={isLoaded}
-                endColor="rgba(255,255,255,0.3)"
-              >
-                <Button
                   onClick={upgradeLevel}
                   disabled={isDisabled || !accountId}
                   w="100%"
@@ -311,6 +293,34 @@ export function Home() {
                     <LockIcon />
                   ) : (
                     <WalletIcon />
+                  )}
+                </Button>
+              </Skeleton>
+
+              <Skeleton
+                mt={5}
+                flex={1}
+                width="100%"
+                borderRadius="18px"
+                isLoaded={isLoaded}
+                endColor="rgba(255,255,255,0.3)"
+              >
+                <Button
+                  w="100%"
+                  bg="transparent"
+                  border="1px solid white"
+                  color="white"
+                  onClick={downgradeLevel}
+                  justifyContent="space-between"
+                  disabled={!level || isLocked || !accountId}
+                >
+                  {isLocked ? (
+                    `Downgrade at: ${format(endVesting, "MM/dd/yyyy")}`
+                  ) : (
+                    <Fragment>
+                      Downgrade Level
+                      {!!level ? <WalletIcon /> : <LockIcon />}
+                    </Fragment>
                   )}
                 </Button>
               </Skeleton>
