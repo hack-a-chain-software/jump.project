@@ -30,7 +30,14 @@ import { useLaunchpadConenctionQuery } from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import { If, Button, Card, Select, TopCard, Paginate } from "../components";
+import {
+  If,
+  Button,
+  Card,
+  Select,
+  TopCard,
+  LoadingIndicator,
+} from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { formatFraction, formatNumber } from "@near/ts";
@@ -67,7 +74,7 @@ export function Home() {
     loading: loadingProjects,
   } = useLaunchpadConenctionQuery({
     variables: {
-      limit: 1,
+      limit: 10,
     },
   });
 
@@ -75,6 +82,7 @@ export function Home() {
   const [filterStatus, setStatus] = useState("");
   const [filterVisibility, setVisibility] = useState("");
   const [filterSearch, setSearch] = useState("");
+  const [loadingMoreItems, setLoadingMoreItems] = useState(false);
 
   const stakedTokens = useMemo(
     () => new BN(investor.data?.staked_token ?? "0"),
@@ -143,7 +151,7 @@ export function Home() {
   }, [investor?.data, launchpadSettings]);
 
   useEffect(() => {
-    document.onscroll = () => {
+    document.onscroll = async () => {
       if (loadingProjects || !hasNextPage) {
         return;
       }
@@ -152,12 +160,16 @@ export function Home() {
         window.innerHeight + window.scrollY >=
         document.body.scrollHeight - 0.5
       ) {
-        fetchMore({
+        setLoadingMoreItems(true);
+
+        await fetchMore({
           variables: {
-            limit: 1,
+            limit: 10,
             offset: (launchpadProjects ?? []).length,
           },
         });
+
+        setLoadingMoreItems(false);
       }
     };
   }, [loadingProjects, launchpadProjects, hasNextPage]);
@@ -469,6 +481,12 @@ export function Home() {
           </Tbody>
         </Table>
       </TableContainer>
+
+      {loadingMoreItems && (
+        <Flex className="flex items-center justify-center">
+          <LoadingIndicator />
+        </Flex>
+      )}
     </Flex>
   );
 }
