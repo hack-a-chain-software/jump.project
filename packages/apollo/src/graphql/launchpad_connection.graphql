@@ -1,4 +1,5 @@
 query LaunchpadConenction(
+  $accountId: ID!
   $limit: Int
   $offset: Int
   $status: StatusEnum
@@ -52,6 +53,10 @@ query LaunchpadConenction(
       fraction_instant_release
       liquidity_pool_price_tokens
       dex_id
+      allocation(account_id: $accountId) {
+        total_quantity
+        total_allocation
+      }
     }
   }
 }

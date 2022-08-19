@@ -40,7 +40,7 @@ import {
 } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { formatFraction, formatNumber } from "@near/ts";
+import { BigDecimalFloat, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 
 const PAGINATE_LIMIT = 10;
@@ -453,44 +453,62 @@ export function Home() {
                     {e?.project_token_info?.name}
                   </Td>
                   <Td>
-                    {formatFraction(
+                    {new BigDecimalFloat(
+                      new BN(e?.token_allocation_price ?? 0),
+                      new BN(e?.price_token_info?.decimals ?? 0).neg()
+                    ).formatQuotient(
+                      new BigDecimalFloat(
+                        new BN(e?.token_allocation_size ?? 0),
+                        new BN(e?.project_token_info?.decimals ?? 0).neg()
+                      ),
+                      new BN(5),
                       {
-                        value: new BN(e?.token_allocation_price ?? 0),
-                        decimals: new BN(e?.price_token_info?.decimals ?? 0),
-                      },
-                      {
-                        value: new BN(e?.token_allocation_size ?? 0),
-                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
-                      },
-                      {
-                        maximumFractionDigits: 2,
-                        unit: ` ${e?.price_token_info?.symbol ?? ""}`,
+                        unit: e?.price_token_info?.symbol ?? "",
+                        formatOptions: { maximumFractionDigits: 2 },
                       }
                     )}
                   </Td>
                   <Td>{e?.public ? "Public" : "Private"}</Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>{e?.allocation?.total_quantity ?? 0}</Td>
                   <Td>
-                    {formatFraction(
+                    {new BigDecimalFloat(
+                      new BN(e?.token_allocation_price ?? 0).mul(
+                        new BN(e?.total_amount_sale_project_tokens ?? 1)
+                      ),
+                      new BN(e?.project_token_info?.decimals ?? 0)
+                        .add(new BN(e?.price_token_info?.decimals ?? 0))
+                        .neg()
+                    ).formatQuotient(
+                      new BigDecimalFloat(
+                        new BN(e?.token_allocation_size ?? 0),
+                        new BN(e?.project_token_info?.decimals ?? 0).neg()
+                      ),
+                      new BN(5),
                       {
-                        value: new BN(e?.token_allocation_price ?? 0).mul(
-                          new BN(e?.total_amount_sale_project_tokens ?? 1)
-                        ),
-                        decimals: new BN(
-                          e?.project_token_info?.decimals ?? 0
-                        ).add(new BN(e?.price_token_info?.decimals ?? 0)),
-                      },
-                      {
-                        value: new BN(e?.token_allocation_size ?? 0),
-                        decimals: new BN(e?.project_token_info?.decimals ?? 0),
-                      },
-                      {
-                        maximumFractionDigits: 0,
                         unit: e?.price_token_info?.symbol ?? "",
+                        formatOptions: { maximumFractionDigits: 0 },
                       }
                     )}
                   </Td>
-                  <Td>{e?.liquidity_pool_price_tokens}</Td>
+                  <Td>
+                    {
+                      new BigDecimalFloat(
+                        new BN(e?.allocations_sold ?? 0).mul(
+                          new BN(e?.total_amount_sale_project_tokens ?? 0)
+                        ),
+                        new BN(e?.project_token_info?.decimals ?? 0)
+                          .neg()
+                          .add(new BN(2)) // %
+                      ).formatQuotient(
+                        new BigDecimalFloat(
+                          new BN(e?.token_allocation_size ?? 0),
+                          new BN(e?.project_token_info?.decimals ?? 0)
+                        ),
+                        new BN(5),
+                        { formatOptions: { maximumFractionDigits: 2 } }
+                      ) + "%" // TODO: refactor so unit logic can apply to %?
+                    }
+                  </Td>
                   <Td
                     borderTopRightRadius="16px"
                     borderBottomRightRadius="16px"
