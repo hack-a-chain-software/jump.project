@@ -24,6 +24,7 @@ export const Nav = () => {
       bg="transparent"
       position="sticky"
       zIndex="19"
+      shrink={0}
       className="hidden md:flex sticky top-1 h-max"
     >
       <Stack flex={1} gap="10px" display="flex" alignItems="center">

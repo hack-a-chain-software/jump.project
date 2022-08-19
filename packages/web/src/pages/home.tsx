@@ -190,7 +190,14 @@ export function Home() {
   }, [investor?.data, launchpadSettings]);
 
   return (
-    <Flex gap="30px" direction="column" p="30px" w="100%" pt="150px">
+    <Flex
+      gap="30px"
+      direction="column"
+      p="30px"
+      w="100%"
+      overflow="hidden"
+      pt="150px"
+    >
       <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
           gradientText="Launchpad"
@@ -366,8 +373,8 @@ export function Home() {
         </Flex>
       </Flex>
 
-      <TableContainer borderWidth="2px" px="20px" py="20px" borderRadius={20}>
-        <Table size="lg" variant="unstyled">
+      <TableContainer px="20px" py="20px" borderWidth="2px" borderRadius={20}>
+        <Table size="lg" width="100%" variant="unstyled">
           <Thead>
             <Tr fontSize="18px">
               <Th>Image</Th>
