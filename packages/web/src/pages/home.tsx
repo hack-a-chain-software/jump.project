@@ -42,6 +42,8 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { BigDecimalFloat, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
+import { useTokenMetadata } from "@/hooks/modules/token";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 const PAGINATE_LIMIT = 30;
 
@@ -73,6 +75,19 @@ export function Home() {
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const { data: launchpadSettings } = useViewLaunchpadSettings();
+
+  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
+    useNearQuery<string, { account_id: string }>("ft_balance_of", {
+      contract: X_JUMP_TOKEN,
+      variables: {
+        account_id: accountId!,
+      },
+      poolInterval: 1000 * 60,
+      skip: !accountId,
+    });
+
+  const { data: baseTokenMetadata, loading: loadingProjectToken } =
+    useTokenMetadata(X_JUMP_TOKEN);
 
   const {
     data: {
@@ -137,6 +152,13 @@ export function Home() {
       : new BN(0);
   }, [minimumTokens, stakedTokens]);
 
+  const formatedAmountToNextLevel = useMemo(() => {
+    return new BigDecimalFloat(
+      amountToNextLevel,
+      new BN(baseTokenMetadata?.decimals ?? 0).neg()
+    ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS);
+  }, [baseTokenMetadata]);
+
   const upgradeLevel = () => {
     const formattedLevel = level + 1;
     increaseMembership(formattedLevel, accountId!, selector);
@@ -148,22 +170,14 @@ export function Home() {
     increaseMembership(formattedLevel, accountId!, selector);
   };
 
-  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
-    useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: X_JUMP_TOKEN,
-      variables: {
-        account_id: accountId!,
-      },
-      poolInterval: 1000 * 60,
-      skip: !accountId,
-    });
-
   const isDisabled = useMemo(() => {
     return new BN(baseTokenBalance ?? "0").lt(amountToNextLevel);
   }, [baseTokenBalance, amountToNextLevel]);
 
   const isLoaded = useMemo(() => {
-    return !!launchpadSettings && !loadingBaseTokenBalance;
+    return (
+      !!launchpadSettings && !loadingBaseTokenBalance && !loadingProjectToken
+    );
   }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
 
   const lastCheck = useMemo(() => {
@@ -256,13 +270,13 @@ export function Home() {
                           Level {level}
                         </Text>
 
-                        <Text fontSize={18}>
-                          Stake more{" "}
-                          {amountToNextLevel
-                            .div(new BN("1000000000000000000"))
-                            .toString() + " "}
-                          to next Level
-                        </Text>
+                        <Text
+                          fontSize={18}
+                          children={`Stake ${
+                            formatedAmountToNextLevel +
+                            baseTokenMetadata?.symbol
+                          } to next level`}
+                        />
                       </>
                     ) : (
                       "Connect Wallet"
