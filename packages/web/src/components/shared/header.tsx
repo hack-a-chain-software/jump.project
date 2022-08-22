@@ -15,7 +15,7 @@ export function Header() {
   const { accountId, toggleModal, signOut } = useWalletSelector();
 
   return (
-    <div className="z-10 backdrop-blur-lg pt-[30px] absolute top-0 right-0 z-2 left-0 flex items-center justify-center ml-[120px]">
+    <div className="z-10 pt-[30px] absolute top-0 right-0 z-2 left-0 flex items-center justify-center ml-[120px]">
       <Flex className="flex px-10 pb-8 items-center w-[100%] justify-between">
         <Flex alignItems="center" className="space-x-[48px]">
           <Flex className="hidden md:block">
