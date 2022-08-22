@@ -51,8 +51,8 @@ export type LaunchpadListing = {
 };
 
 export type LaunchpadFilters = {
-  status: "Open" | "Ended" | "Waiting" | "All";
-  visibility: "Private" | "Public" | "All";
-  showMineOnly: string;
+  status: "open" | "closed" | "waiting";
+  visibility: "private" | "public";
+  showMineOnly: boolean;
   search: string;
 } & PaginationFilters;

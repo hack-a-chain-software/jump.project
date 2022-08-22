@@ -9,13 +9,17 @@ export enum ListingStatuses {
   LiquidityPoolFinalized = "LiquidityPoolFinalized", // Ended
 }
 
-export const ImportantStatusFilters = ["Waiting", "Ended", "Open"];
+export const ImportantStatusFilters: LaunchpadFilters["status"][] = [
+  "waiting",
+  "closed",
+  "open",
+];
 
 export const queriesPerStatus = {
-  Waiting: `
+  waiting: `
     status = 'Funded'
     AND open_sale_1_timestamp >= CURRENT_TIMESTAMP`,
-  Ended: `
+  closed: `
     (status = 'Funded' AND final_sale_2_timestamp <= CURRENT_TIMESTAMP)
     OR status IN (
       'SaleFinalized',
@@ -24,7 +28,7 @@ export const queriesPerStatus = {
       'PoolPriceTokenSent',
       'LiquidityPoolFinalized'
     )`,
-  Open: `
+  open: `
     status = 'Funded'
     AND open_sale_1_timestamp <= CURRENT_TIMESTAMP 
     AND final_sale_2_timestamp >= CURRENT_TIMESTAMP`,

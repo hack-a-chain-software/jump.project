@@ -54,8 +54,7 @@ create table if not exists listings (
 );
 
 create table if not exists listings_metadata (
-    key_column bigserial primary key,
-    listing_id numeric(21) references listings (listing_id),
+    listing_id numeric(21) primary key references listings (listing_id),
     project_name text,
     description_token text,
     description_project text,
@@ -65,8 +64,6 @@ create table if not exists listings_metadata (
     website text,
     whitepaper text
 );
-
-alter table listings_metadata add constraint single_listing_data unique (listing_id);
 
 create table if not exists allocations (
     account_id text not null,
@@ -78,7 +75,7 @@ create table if not exists allocations (
     total_allocation numeric(21)
 );
 
-/* NFT STaking */
+/* NFT Staking */
 
 create table if not exists staking_programs (
     collection_id text primary key,

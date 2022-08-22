@@ -174,7 +174,7 @@ export type QueryLaunchpadProjectArgs = {
 export type QueryLaunchpadProjectsArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
-  showMineOnly?: InputMaybe<Scalars["String"]>;
+  showMineOnly?: InputMaybe<Scalars["Boolean"]>;
   status?: InputMaybe<StatusEnum>;
   visibility?: InputMaybe<VisibilityEnum>;
 };
@@ -201,14 +201,12 @@ export type StakedNft = {
 };
 
 export enum StatusEnum {
-  All = "All",
-  Ended = "Ended",
+  Closed = "Closed",
   Open = "Open",
   Waiting = "Waiting",
 }
 
 export enum VisibilityEnum {
-  All = "All",
   Private = "Private",
   Public = "Public",
 }
@@ -242,7 +240,7 @@ export type LaunchpadConenctionQueryVariables = Exact<{
   offset?: InputMaybe<Scalars["Int"]>;
   status?: InputMaybe<StatusEnum>;
   visibility?: InputMaybe<VisibilityEnum>;
-  showMineOnly?: InputMaybe<Scalars["String"]>;
+  showMineOnly?: InputMaybe<Scalars["Boolean"]>;
 }>;
 
 export type LaunchpadConenctionQuery = {
@@ -502,7 +500,7 @@ export const LaunchpadConenctionDocument = gql`
     $offset: Int
     $status: StatusEnum
     $visibility: VisibilityEnum
-    $showMineOnly: String
+    $showMineOnly: Boolean
   ) {
     launchpad_projects(
       limit: $limit
