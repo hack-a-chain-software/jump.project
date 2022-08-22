@@ -4,8 +4,7 @@ import { useNearQuery } from "react-near";
 const defaultLPOptions = {
   contract: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
   poolInterval: 1000 * 60,
-  onCompleted: console.log,
-  onError: console.log,
+  onError: console.warn,
 };
 
 type InvestorInfo = {

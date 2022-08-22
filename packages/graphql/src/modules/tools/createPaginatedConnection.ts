@@ -32,12 +32,18 @@ export async function createPageableQuery<
   query: string,
   sequelize: Sequelize,
   { limit = 30, offset }: Partial<PaginationFilters>,
-  parameters?: Params
+  parameters?: Params,
+  table?: string
 ): Promise<Page<P>> {
-  const totalCount = await sequelize.query<{ count: number }>(query, {
-    bind: Object.values(parameters as any) || [],
-    type: QueryTypes.SELECT,
-  });
+  const totalCount = table
+    ? await sequelize.query<{ count: number }>(
+        `SELECT COUNT(*) FROM "${table}"`,
+        {
+          bind: Object.values(parameters as any) || [],
+          type: QueryTypes.SELECT,
+        }
+      )
+    : null;
 
   let pagedQuery = query;
 
@@ -51,11 +57,11 @@ export async function createPageableQuery<
 
   return {
     data,
-    hasNextPage: totalCount[0]?.count
-      ? data.length + (offset || 0) <= totalCount[0]?.count
-      : false,
     itemsPerPage: limit,
     pageSize: data.length || 0,
-    totalCount: totalCount[0]?.count || 0,
+    totalCount: totalCount ? totalCount[0]?.count : 0,
+    hasNextPage: totalCount
+      ? totalCount[0]?.count / (data.length + (offset || 0)) > 1
+      : false,
   };
 }

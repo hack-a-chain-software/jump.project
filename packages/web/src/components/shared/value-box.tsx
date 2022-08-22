@@ -29,16 +29,17 @@ export function ValueBox({
       justifyContent="space-between"
       minW="200px"
       maxHeight="128px"
+      gap={0.5}
       {...boxProps}
     >
-      <Text fontSize="14px" letterSpacing="-0.03em" fontWeight="bold">
+      <Text fontSize="16px" letterSpacing="-0.03em" fontWeight="bold">
         {title}
       </Text>
       <Text lineHeight="28px" fontSize="28px" fontWeight="bold">
         {value}
       </Text>
       <If condition={!!bottomText}>
-        <Text fontWeight="bold" fontSize="14px" letterSpacing="-0.03em">
+        <Text fontWeight="bold" fontSize="16px" letterSpacing="-0.03em">
           {bottomText}
         </Text>
       </If>

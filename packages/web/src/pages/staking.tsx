@@ -42,9 +42,8 @@ export const Staking = () => {
     contract: X_JUMP_TOKEN,
     poolInterval: 1000 * 60,
     debug: true,
-    onCompleted: (res) => console.log(res),
     onError(err) {
-      console.log(err);
+      console.warn(err);
     },
   });
 
@@ -108,7 +107,7 @@ export const Staking = () => {
         await stakeXToken(deposit, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]
@@ -122,7 +121,7 @@ export const Staking = () => {
         await burnXToken(amount, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]
@@ -155,14 +154,14 @@ export const Staking = () => {
                   Jump
                 </GradientText>
                 <Text
-                  fontSize={40}
+                  fontSize={50}
                   mt={-4}
                   fontWeight="800"
                   letterSpacing="-0.03em"
                 >
                   Staking
                 </Text>
-                <Text maxW="300px" fontSize={16}>
+                <Text maxW="365px" fontSize={18}>
                   When you stake JUMP tokens you earn tickets to join the
                   Launchpad pools!
                 </Text>
@@ -304,7 +303,7 @@ export const Staking = () => {
               >
                 User Area
               </GradientText>
-              <Text mb="40px" maxW="500px" fontWeight="semibold" fontSize={16}>
+              <Text mb="40px" maxW="500px" fontWeight="semibold" fontSize={18}>
                 This is the user area where you can interact with the Jump
                 staking to earn passive income as an investor.
               </Text>

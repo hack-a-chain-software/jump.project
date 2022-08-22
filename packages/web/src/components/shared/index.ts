@@ -18,3 +18,4 @@ export * from "./progress-bar";
 export * from "./empty";
 export * from "./mobile-nav";
 export * from "./number-input";
+export * from "./loading-indicator";

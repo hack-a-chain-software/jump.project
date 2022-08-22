@@ -92,7 +92,7 @@ export function ProjectUserArea({
             <div>
               <span className="text-[18px] font-[500] tracking-[-0.05em]">
                 {accountId
-                  ? investorAllocation.allocationsBought
+                  ? investorAllocation.allocationsBought ?? "0"
                   : CONNECT_WALLET_MESSAGE}
               </span>
             </div>
@@ -164,9 +164,7 @@ export function ProjectUserArea({
 
         <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
           <Button
-            disabled={
-              enabledSale || investorAllocation.allocationsBought === "0"
-            }
+            disabled={enabledSale || vestedAllocations === "0" || !accountId}
             onClick={() => retrieveTokens()}
             justifyContent="space-between"
             w="100%"

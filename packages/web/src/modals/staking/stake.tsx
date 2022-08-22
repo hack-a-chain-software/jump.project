@@ -47,7 +47,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
       try {
         await _onSubmit(values);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       } finally {
         rest.onClose();
       }

@@ -1,6 +1,7 @@
 import { Flex, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
 import { navRoutes, routes } from "../../routes";
+import { JumpIcon } from "../../assets/svg/jump-logo";
 
 const enabledRoutes = [
   routes.staking,
@@ -18,13 +19,19 @@ export const Nav = () => {
       w="140px"
       left="0px"
       top="120px"
-      pt="121px"
+      pt="25px"
       gap="25px"
       bg="transparent"
       position="sticky"
+      zIndex="19"
+      shrink={0}
       className="hidden md:flex sticky top-1 h-max"
     >
       <Stack flex={1} gap="10px" display="flex" alignItems="center">
+        <Flex>
+          <JumpIcon />
+        </Flex>
+
         {navRoutes.map((e) => (
           <Tooltip
             isDisabled={enabledRoutes.includes(e.route)}
