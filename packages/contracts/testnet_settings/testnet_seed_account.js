@@ -29,114 +29,76 @@ async function testnetSeed(seededUsers) {
 
   const ownerAccount = await near.account(accountMap.ownerAccount);
 
+  async function sendTokens(tokenAccount, quantity, receiver) {
+    await ownerAccount.functionCall({
+      contractId: tokenAccount,
+      methodName: "storage_deposit",
+      args: {
+        account_id: receiver,
+        registration_only: false,
+      },
+      gas: new BN("300000000000000"),
+      attachedDeposit: new BN("1500000000000000000000000"),
+    });
+    await ownerAccount.functionCall({
+      contractId: tokenAccount,
+      methodName: "ft_transfer",
+      args: {
+        receiver_id: receiver,
+        amount: quantity,
+        memo: null,
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN("300000000000000"),
+    });
+  }
+
+  async function mintNft(nftCollection, receiver) {
+    console.log(nftCollection);
+    await ownerAccount.functionCall({
+      contractId: nftCollection,
+      methodName: "nft_mint",
+      args: {
+        receiver_id: receiver,
+      },
+      attachedDeposit: new BN("1000000000000000000000000"),
+      gas: new BN("300000000000000"),
+    });
+  }
+
   for (const seededUser of seededUsers) {
     // send usdt to invest in launchpad listings
-    const usdtQuantity = "10000000";
-    await ownerAccount.functionCall({
-      contractId: accountMap.usdtTokenAccount,
-      methodName: "storage_deposit",
-      args: {
-        account_id: seededUser,
-        registration_only: false,
-      },
-      gas: new BN("300000000000000"),
-      attachedDeposit: new BN("1500000000000000000000000"),
-    });
-    await ownerAccount.functionCall({
-      contractId: accountMap.usdtTokenAccount,
-      methodName: "ft_transfer",
-      args: {
-        receiver_id: seededUser,
-        amount: usdtQuantity,
-        memo: null,
-      },
-      attachedDeposit: new BN(1),
-      gas: new BN("300000000000000"),
-    });
-
+    await sendTokens(accountMap.usdtTokenAccount, "10000000", seededUser);
     // send jump token to be able to invest in launchpad
-    const jumpQuantity = "10000000000000000000";
-    await ownerAccount.functionCall({
-      contractId: accountMap.jumpTokenAccount,
-      methodName: "storage_deposit",
-      args: {
-        account_id: seededUser,
-        registration_only: false,
-      },
-      gas: new BN("300000000000000"),
-      attachedDeposit: new BN("1500000000000000000000000"),
-    });
-    await ownerAccount.functionCall({
-      contractId: accountMap.jumpTokenAccount,
-      methodName: "ft_transfer",
-      args: {
-        receiver_id: seededUser,
-        amount: jumpQuantity,
-        memo: null,
-      },
-      attachedDeposit: new BN(1),
-      gas: new BN("300000000000000"),
-    });
-
-    // send jump token to be able to invest in launchpad
-    const lockedjumpQuantity = "10000000000000000000";
-    await ownerAccount.functionCall({
-      contractId: accountMap.lockedTokenAccount,
-      methodName: "storage_deposit",
-      args: {
-        account_id: seededUser,
-        registration_only: false,
-      },
-      gas: new BN("300000000000000"),
-      attachedDeposit: new BN("1500000000000000000000000"),
-    });
-    await ownerAccount.functionCall({
-      contractId: accountMap.lockedTokenAccount,
-      methodName: "ft_transfer",
-      args: {
-        receiver_id: seededUser,
-        amount: lockedjumpQuantity,
-        memo: null,
-      },
-      attachedDeposit: new BN(1),
-      gas: new BN("300000000000000"),
-    });
+    await sendTokens(
+      accountMap.jumpTokenAccount,
+      "10000000000000000000",
+      seededUser
+    );
+    // send locked jump token to be able to check vesting page
+    await sendTokens(
+      accountMap.lockedTokenAccount,
+      "10000000000000000000",
+      seededUser
+    );
 
     // mint nfts
     for (let i = 0; i < 4; i++) {
-      await ownerAccount.functionCall({
-        contractId: accountMap.nftCollection1Account,
-        methodName: "nft_mint",
-        args: {
-          receiver_id: seededUser,
-        },
-        attachedDeposit: new BN("1000000000000000000000000"),
-        gas: new BN("300000000000000"),
-      });
-    }
+      await mintNft(accountMap.nftCollection1Account, seededUser);
+      await mintNft(accountMap.nftCollection2Account, seededUser);
+      await mintNft(accountMap.nftCollection3Account, seededUser);
 
-    for (let i = 0; i < 2; i++) {
-      await ownerAccount.functionCall({
-        contractId: accountMap.nftCollection2Account,
-        methodName: "nft_mint",
-        args: {
-          receiver_id: seededUser,
-        },
-        attachedDeposit: new BN("1000000000000000000000000"),
-        gas: new BN("300000000000000"),
-      });
-    }
-
-    for (let i = 0; i < 3; i++) {
-      await ownerAccount.functionCall({
-        contractId: accountMap.nftCollection3Account,
-        methodName: "nft_mint",
-        args: {
-          receiver_id: seededUser,
-        },
-        attachedDeposit: new BN("1000000000000000000000000"),
-        gas: new BN("300000000000000"),
-      });
+      await mintNft(accountMap["Good Fortune Felines"], seededUser);
+      await mintNft(accountMap["Nephilim"], seededUser);
+      await mintNft(accountMap["El Café Cartel - Gen 1"], seededUser);
+      await mintNft(accountMap["Near Tinker Union"], seededUser);
+      await mintNft(accountMap["The Dons"], seededUser);
+      await mintNft(accountMap["Near Future: Classic Art"], seededUser);
+      await mintNft(accountMap["NEARton NFT"], seededUser);
+      await mintNft(accountMap["Antisocial Ape Club"], seededUser);
+      await mintNft(accountMap["Mara"], seededUser);
+      await mintNft(accountMap["MR. BROWN"], seededUser);
+      await mintNft(accountMap["Bullish Bulls"], seededUser);
     }
   }
 }

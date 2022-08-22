@@ -39,6 +39,7 @@ async function testnetSetup() {
 
   const random_prefix = crypto.randomBytes(10).toString("hex");
   const accountMap = {
+    prefix: random_prefix,
     ownerAccount: random_prefix + "owner.testnet",
     userSampleAccount: random_prefix + "user.testnet",
     jumpTokenAccount: random_prefix + "jump_token.testnet",
@@ -510,7 +511,7 @@ async function testnetSetup() {
   const listing2LPprice = "0";
   const listing2_data = {
     project_owner: ownerAccount.accountId,
-    project_token: skywardTokenAccount.accountId,
+    project_token: jumpTokenAccount.accountId,
     price_token: usdtTokenAccount.accountId,
     listing_type: "Private",
     open_sale_1_timestamp_seconds: increaseTimeStamp(nowTimestamp, 1),
@@ -537,7 +538,7 @@ async function testnetSetup() {
     attachedDeposit: new BN(1),
   });
   await ownerAccount.functionCall({
-    contractId: skywardTokenAccount.accountId,
+    contractId: jumpTokenAccount.accountId,
     methodName: "ft_transfer_call",
     args: {
       receiver_id: launchpad.accountId,
@@ -566,7 +567,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "3000000000000000000000",
+      amount: "30000000000000000000000",
       memo: null,
       msg: JSON.stringify({ type: "OwnerDeposit" }),
     },
@@ -578,7 +579,7 @@ async function testnetSetup() {
     methodName: "ft_transfer_call",
     args: {
       receiver_id: nftStaking.accountId,
-      amount: "3000000000000000000000",
+      amount: "30000000000000000000000",
       memo: null,
       msg: JSON.stringify({ type: "OwnerDeposit" }),
     },
