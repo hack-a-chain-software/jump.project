@@ -9,7 +9,11 @@ import {
 } from "@/types";
 import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
-import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
+import {
+  ImportantStatusFilters,
+  ListingStatuses,
+  queriesPerStatus,
+} from "@/constants/statuses";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
 
 export default {
@@ -93,45 +97,65 @@ export default {
       filters: Partial<LaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
-      let sqlQuery = filters.showMineOnly
-        ? `
-          SELECT * 
-          FROM (SELECT * FROM "listings" WHERE account_id = $1) AS l
-          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-          INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)
-        `
-        : `
-          SELECT * FROM "listings" AS l
-          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-        `;
+      type FiltersMap = {
+        [K in keyof LaunchpadFilters]?: {
+          active: boolean;
+          joinClause?: string;
+          whereClause?: string;
+        };
+      };
 
-      if (filters.status && ImportantStatusFilters.includes(filters.status)) {
-        sqlQuery +=
-          (filters.showMineOnly ? " AND " : " WHERE ") +
-          queriesPerStatus[filters.status];
-      }
+      const filtersMap: FiltersMap = {
+        status: {
+          active: !!(
+            filters.status && ImportantStatusFilters.includes(filters.status)
+          ),
+          whereClause: filters.status ? queriesPerStatus[filters.status] : "",
+        },
+        showMineOnly: {
+          active: !!filters.showMineOnly,
+          joinClause:
+            'INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)',
+        },
+        visibility: {
+          active: !!filters.visibility,
+          whereClause:
+            filters.visibility == "public"
+              ? "l.public = true"
+              : "l.public = false",
+        },
+      };
 
-      /*
-      if (filters.search) {
-        sqlQuery += (
-              
-        );
-      }
+      const baseQuery =
+        'SELECT * FROM "listings" AS l INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)';
 
-      if (filters.visibility) {
-        sqlQuery += ();
-      }
-      */
+      const joinClauseStatements = Object.values(filtersMap)
+        .filter((v) => v.active && v.joinClause)
+        .map((v) => v.joinClause);
+
+      const whereClauseStatements = Object.values(filtersMap)
+        .filter((v) => v.active && v.whereClause)
+        .map((v) => v.whereClause);
+
+      const joinClause = joinClauseStatements.length
+        ? joinClauseStatements.join(" ")
+        : "";
+      const whereClause = whereClauseStatements.length
+        ? `WHERE ${whereClauseStatements.join(" AND")}`
+        : "";
+
+      const finalQuery = [baseQuery, joinClause, whereClause]
+        .filter((clause) => clause.length)
+        .join(" ");
 
       return createPageableQuery(
-        sqlQuery,
+        finalQuery,
         sequelize,
         {
           limit: filters.limit,
           offset: filters.offset,
         },
-        filters.showMineOnly ? [filters.showMineOnly] : [],
-        "listings"
+        []
       );
     },
   },

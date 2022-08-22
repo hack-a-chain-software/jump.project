@@ -4,7 +4,7 @@ query LaunchpadConenction(
   $offset: Int
   $status: StatusEnum
   $visibility: VisibilityEnum
-  $showMineOnly: String
+  $showMineOnly: Boolean
 ) {
   launchpad_projects(
     limit: $limit
