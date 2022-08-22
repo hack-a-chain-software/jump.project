@@ -22,7 +22,7 @@ export const Vesting = () => {
 
   const { accountId, selector } = useWalletSelector();
 
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState<string | null>(null);
 
   const {
     getInvestorInfo,
@@ -172,8 +172,11 @@ export const Vesting = () => {
             <Select
               value={filter}
               placeholder="Filter"
-              items={["completed", "runing"]}
-              onChange={(value: string) => setFilter(value)}
+              items={[
+                { label: "Completed", value: "completed" },
+                { label: "Runing", value: "runing" },
+              ]}
+              onChange={(value: string | null) => setFilter(value)}
             />
 
             <Flex maxW="330px">

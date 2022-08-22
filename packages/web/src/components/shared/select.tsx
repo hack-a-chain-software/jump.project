@@ -1,20 +1,25 @@
 /* This example requires Tailwind CSS v2.0+ */
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { Flex, useColorModeValue } from "@chakra-ui/react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 
-export function Select({
+interface Item<V> {
+  label: string;
+  value: V | null;
+}
+
+export function Select<V>({
   value,
   onChange,
   items,
   placeholder,
 }: {
+  items: readonly Item<V>[];
   placeholder: string;
-  value: string;
-  items: string[];
-  onChange: (string: string) => void;
+  value: V | null;
+  onChange: (value: V | null) => void;
 }) {
   const {
     jumpGradient,
@@ -24,10 +29,14 @@ export function Select({
     glassyWhiteOpaque,
   } = useTheme();
 
+  const selected = useMemo(() => {
+    return items.find((item) => item.value === value);
+  }, [value]);
+
   return (
     <Listbox
       value={value}
-      onChange={(newValue) => onChange(newValue === value ? "" : newValue)}
+      onChange={(newValue) => onChange(newValue === value ? null : newValue)}
     >
       {({ open }) => (
         <>
@@ -42,7 +51,7 @@ export function Select({
                   className="cursor-pointer w-full items-center justify-between min-w-[110px] p-[12px] h-[60px] rounded-[15px]"
                 >
                   <span className="first-letter:uppercase truncate pl-[15px] pr-[30px] text-[16px]">
-                    {value || placeholder}
+                    {selected?.label ?? placeholder}
                   </span>
 
                   <SelectorIcon className="h-[18px]" />
@@ -66,10 +75,10 @@ export function Select({
                     className="flex-col w-full rounded-[15px] overflow-hidden"
                     bg={useColorModeValue(gradientBackground, "#21002F")}
                   >
-                    {items.map((item) => (
+                    {items.map(({ label, value }) => (
                       <Listbox.Option
-                        key={"select-option-" + item}
-                        value={item}
+                        key={"select-option-" + value}
+                        value={value}
                         className="cursor-pointer overflow-hidden"
                       >
                         {({ selected }) => (
@@ -81,7 +90,7 @@ export function Select({
                             className="cursor-default select-none relative py-2 pl-3 pr-9 cursor-pointer"
                           >
                             <Flex className="block truncate first-letter:uppercase cursor-pointer">
-                              {item}
+                              {label}
                             </Flex>
 
                             {selected ? (
