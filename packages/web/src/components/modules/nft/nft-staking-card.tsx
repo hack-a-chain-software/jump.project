@@ -15,7 +15,7 @@ import { If, ValueBox } from "../../shared";
 import { formatNumber, StakingToken } from "@near/ts";
 
 export function NFTStakingCard(
-  props: BoxProps & { name: string; logo: string; rewards: StakingToken[] }
+  props: BoxProps & { name?: string; logo?: string; rewards?: StakingToken[] }
 ) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
@@ -67,19 +67,19 @@ export function NFTStakingCard(
               height="60px"
               borderRadius={30}
               endColor="rgba(255,255,255,0.3)"
-              isLoaded={!!props.logo}
+              isLoaded={!!props?.logo}
             >
-              <Image src={props.logo} w="51px" h="60px" borderRadius={30} />
+              <Image src={props?.logo} w="51px" h="60px" borderRadius={30} />
             </Skeleton>
 
             <Skeleton
               minHeight="42px"
               borderRadius={12}
-              isLoaded={!!props.name}
+              isLoaded={!!props?.name}
               endColor="rgba(255,255,255,0.3)"
             >
               <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
-                {props.name}
+                {props?.name}
               </Text>
             </Skeleton>
 
@@ -87,7 +87,7 @@ export function NFTStakingCard(
               minHeight="54px"
               borderRadius={12}
               maxWidth="500px"
-              isLoaded={!!props.name}
+              isLoaded={!!props?.name}
               endColor="rgba(255,255,255,0.3)"
             >
               <Text
@@ -97,7 +97,7 @@ export function NFTStakingCard(
                 letterSpacing="-0.03em"
               >
                 Earn {props.rewards?.map(({ symbol }) => symbol).join(", ")} as
-                rewards by staking on {props.name} staking pool
+                rewards by staking on {props?.name} staking pool
               </Text>
             </Skeleton>
           </Flex>
