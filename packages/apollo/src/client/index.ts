@@ -23,5 +23,21 @@ const authLink = setContext((_, { headers }) => {
 
 export const client = new Client({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          launchpad_projects: {
+            keyArgs: false,
+            merge(existing, incoming) {
+              return {
+                ...incoming,
+                data: [...(existing?.data || []), ...incoming.data],
+              };
+            },
+          },
+        },
+      },
+    },
+  }),
 });

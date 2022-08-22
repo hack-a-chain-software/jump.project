@@ -7,7 +7,7 @@ type Props = ButtonProps;
 export function GradientButton(props: Props) {
   const { jumpGradient } = useTheme();
   return (
-    <Box p="2px" bg={jumpGradient} borderRadius={18}>
+    <Box p="2px" h="max" bg={jumpGradient} borderRadius={18}>
       <Button
         w="100%"
         color={useColorModeValue("black", "white")}

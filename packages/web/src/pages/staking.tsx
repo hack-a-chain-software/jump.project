@@ -18,7 +18,8 @@ import { WithdrawModal } from "../modals/staking/withdraw";
 import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
 import BN from "bn.js";
-import { formatNumber, getValueWithDecimals } from "@near/ts";
+import { BigDecimalFloat } from "@near/ts";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 interface TokenRatio {
   x_token: string;
@@ -41,9 +42,8 @@ export const Staking = () => {
     contract: X_JUMP_TOKEN,
     poolInterval: 1000 * 60,
     debug: true,
-    onCompleted: (res) => console.log(res),
     onError(err) {
-      console.log(err);
+      console.warn(err);
     },
   });
 
@@ -107,7 +107,7 @@ export const Staking = () => {
         await stakeXToken(deposit, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]
@@ -121,7 +121,7 @@ export const Staking = () => {
         await burnXToken(amount, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
-        console.log(error);
+        console.warn(error);
       }
     },
     [accountId, jumpMetadata]
@@ -130,6 +130,10 @@ export const Staking = () => {
   const isLoading = useMemo(() => {
     return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
   }, [loadingBalance, loadingTokenRatio]);
+
+  const jumpExponent = useMemo(() => {
+    return new BN(jumpMetadata?.decimals ?? 0).neg();
+  }, [jumpMetadata]);
 
   return (
     <PageContainer>
@@ -150,14 +154,14 @@ export const Staking = () => {
                   Jump
                 </GradientText>
                 <Text
-                  fontSize={40}
+                  fontSize={50}
                   mt={-4}
                   fontWeight="800"
                   letterSpacing="-0.03em"
                 >
                   Staking
                 </Text>
-                <Text maxW="300px" fontSize={16}>
+                <Text maxW="365px" fontSize={18}>
                   When you stake JUMP tokens you earn tickets to join the
                   Launchpad pools!
                 </Text>
@@ -176,21 +180,35 @@ export const Staking = () => {
               >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
-                  value={`${getValueWithDecimals(
-                    new BN("1000000000")
-                      .mul(new BN(data.base_token))
-                      .div(new BN(data.x_token)),
-                    9,
-                    2
-                  )} JUMP`}
+                  value={new BigDecimalFloat(
+                    new BN(data.base_token),
+                    jumpExponent
+                  ).formatQuotient(
+                    new BigDecimalFloat(new BN(data.x_token), jumpExponent),
+                    new BN(9),
+                    {
+                      unit: "JUMP",
+                      formatOptions: CURRENCY_FORMAT_OPTIONS,
+                    }
+                  )}
                   title="xJUMP Value"
-                  bottomText={`1 JUMP = ${getValueWithDecimals(
-                    new BN("1000000000")
-                      .mul(new BN(data.x_token))
-                      .div(new BN(data.base_token)),
-                    9,
-                    2
-                  )} xJUMP`}
+                  bottomText={
+                    "1 JUMP = " +
+                    new BigDecimalFloat(
+                      new BN(data.x_token),
+                      jumpExponent
+                    ).formatQuotient(
+                      new BigDecimalFloat(
+                        new BN(data.base_token),
+                        jumpExponent
+                      ),
+                      new BN(9),
+                      {
+                        unit: "xJUMP",
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
+                      }
+                    )
+                  }
                   className="h-full w-full"
                 />
               </Skeleton>
@@ -202,19 +220,44 @@ export const Staking = () => {
                 <ValueBox
                   title="You own"
                   className="h-full w-full"
-                  bottomText={`worth ${getValueWithDecimals(
-                    new BN(balanceXToken)
-                      .mul(new BN(data.base_token))
-                      .div(new BN(data.x_token)),
-                    jumpMetadata?.decimals!,
-                    2
-                  )} JUMP`}
+                  bottomText={
+                    "worth " +
+                    new BigDecimalFloat(
+                      new BN(balanceXToken).mul(new BN(data.base_token)),
+                      jumpExponent.mul(new BN(2))
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(data.x_token), jumpExponent),
+                      new BN(9),
+                      {
+                        unit: "JUMP",
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
+                      }
+                    )
+                  }
                   borderColor={glassyWhiteOpaque}
-                  value={`${getValueWithDecimals(
-                    new BN(balanceXToken),
-                    jumpMetadata?.decimals!,
-                    2
-                  )} xJUMP`}
+                  value={
+                    /*
+                     *     TODO: create another format function that encapsulates unit logic so we don't
+                     * have to use the quotient by 1 just in order to declaratively get unit suffixes.
+                     * Maybe hack the Intl.NumberFormatOptions unit field so we can use toLocaleString
+                     * for this purpose?
+                     */
+                    new BigDecimalFloat(
+                      new BN(balanceXToken),
+                      jumpExponent
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(1)),
+                      new BN(0),
+                      {
+                        unit: "xJUMP",
+                        formatOptions: CURRENCY_FORMAT_OPTIONS,
+                      }
+                    )
+                    /*
+                     *
+                     *
+                     */
+                  }
                 />
               </Skeleton>
 
@@ -224,14 +267,17 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="APR"
-                  value={`${getValueWithDecimals(
-                    new BN(jumpYearlyDistributionCompromise)
-                      .mul(new BN("100"))
-                      .mul(new BN("1000000000"))
-                      .div(new BN(data.base_token)),
-                    9,
-                    2
-                  )}%`}
+                  value={
+                    new BigDecimalFloat(
+                      new BN(jumpYearlyDistributionCompromise).mul(
+                        new BN("100")
+                      )
+                    ).formatQuotient(
+                      new BigDecimalFloat(new BN(data.base_token)),
+                      new BN(9),
+                      { formatOptions: CURRENCY_FORMAT_OPTIONS }
+                    ) + "%" // TODO: refactor so unit logic can apply to %?
+                  }
                   className="h-full w-full"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}
@@ -257,7 +303,7 @@ export const Staking = () => {
               >
                 User Area
               </GradientText>
-              <Text mb="40px" maxW="500px" fontWeight="semibold" fontSize={16}>
+              <Text mb="40px" maxW="500px" fontWeight="semibold" fontSize={18}>
                 This is the user area where you can interact with the Jump
                 staking to earn passive income as an investor.
               </Text>

@@ -1,4 +1,16 @@
+import { useMemo } from "react";
+import { useColorMode } from "@chakra-ui/react";
+
 export const JumpTextIcon = (props: React.SVGProps<SVGSVGElement>) => {
+  const { colorMode } = useColorMode();
+
+  const colors = useMemo(() => {
+    return {
+      primary: colorMode === "light" ? "#761BA0" : "#FFFFFF",
+      secondary: colorMode === "light" ? "#D63A2F" : "#FFFFFF",
+    };
+  }, [colorMode]);
+
   return (
     <svg
       width="228"
@@ -20,8 +32,8 @@ export const JumpTextIcon = (props: React.SVGProps<SVGSVGElement>) => {
           y2="15"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#761BA0" />
-          <stop offset="1" stopColor="#D63A2F" />
+          <stop stopColor={colors.primary} />
+          <stop offset="1" stopColor={colors.secondary} />
         </linearGradient>
       </defs>
     </svg>

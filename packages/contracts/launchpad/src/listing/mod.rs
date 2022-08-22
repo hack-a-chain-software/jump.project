@@ -436,6 +436,24 @@ impl Listing {
     }
   }
 
+  pub fn get_current_sale_phase_no_panic(&self) -> Option<SalePhase> {
+    match self.status {
+      ListingStatus::Funded => {
+        let timestamp = env::block_timestamp();
+        if self.open_sale_1_timestamp <= timestamp {
+          if self.open_sale_2_timestamp <= timestamp {
+            Some(SalePhase::Phase2)
+          } else {
+            Some(SalePhase::Phase1)
+          }
+        } else {
+          None
+        }
+      }
+      _ => None
+    }
+  }
+
   pub fn buy_allocation(
     &mut self,
     price_token_amount: u128,

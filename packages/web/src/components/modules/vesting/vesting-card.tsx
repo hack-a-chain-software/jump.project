@@ -104,7 +104,7 @@ export function VestingCard(
               width="max-content"
               maxW="100%"
             >
-              <Text color="black" fontSize="14px" fontWeight="700">
+              <Text color="black" fontSize="16px" fontWeight="700">
                 {`Total amount - ${formatNumber(
                   Number(props.locked_value),
                   props?.token?.decimals || 0
@@ -113,7 +113,7 @@ export function VestingCard(
             </Flex>
 
             <Flex marginTop="10px" flexDirection="column">
-              <Text fontSize="20px" fontWeight="600" letterSpacing="-0.03em">
+              <Text fontSize="24px" fontWeight="600" letterSpacing="-0.03em">
                 {`Ends at ${format(endAt, "dd MMMM y")}`}
               </Text>
 
@@ -201,10 +201,7 @@ export function VestingCard(
               </Button>
 
               <Button
-                disabled={
-                  Number(props.available_to_withdraw) <=
-                    Math.pow(10, props.token?.decimals || 0) || !accountId
-                }
+                disabled={props.available_to_withdraw === "0" || !accountId}
                 onClick={() =>
                   withdraw([String(props.id)], accountId as string, selector)
                 }

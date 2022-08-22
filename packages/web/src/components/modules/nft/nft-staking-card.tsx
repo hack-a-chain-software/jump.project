@@ -5,6 +5,7 @@ import {
   Flex,
   Image,
   Text,
+  useColorMode,
   useColorModeValue,
   Skeleton,
 } from "@chakra-ui/react";
@@ -18,23 +19,25 @@ export function NFTStakingCard(
 ) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
+  const { colorMode } = useColorMode();
+
+  const cardGradient = useColorModeValue("transparent", jumpGradient);
+  const cardBg = useColorModeValue(jumpGradient, gradientBoxTopCard);
+  const cardOpacity = useColorModeValue(glassyWhiteOpaque, "transparent");
+
   return (
     <Box
       color="white"
       cursor="pointer"
       p="3px"
-      background={useColorModeValue("transparent", jumpGradient)}
+      background={cardGradient}
       borderRadius="26px"
       {...(R.omit(
         ["name", "logo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
     >
-      <Box
-        w="100%"
-        bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
-        borderRadius="24px"
-      >
+      <Box w="100%" bg={cardBg} borderRadius="24px">
         <Box
           display="flex"
           flexWrap="wrap"
@@ -45,7 +48,12 @@ export function NFTStakingCard(
           p="40px"
           borderRadius="24px"
           gap={5}
-          bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+          bg={cardOpacity}
+          className={
+            colorMode === "dark"
+              ? "bg-black bg-opacity-[0.05] backdrop-blur-lg"
+              : ""
+          }
         >
           <Flex
             minHeight="165px"
@@ -99,7 +107,7 @@ export function NFTStakingCard(
               <Flex flexWrap="wrap" gap={5}>
                 {[...Array(3)].map((_, i) => (
                   <Skeleton
-                    width="200px"
+                    width="210px"
                     height="114px"
                     maxWidth="200px"
                     borderRadius={20}
@@ -112,7 +120,12 @@ export function NFTStakingCard(
             }
             condition={!isEmpty(props.rewards)}
           >
-            <Flex flexWrap="wrap" gap={5}>
+            <Flex
+              flexGrow={1}
+              flexWrap="wrap"
+              gap={5}
+              className="justify-start 2xl:justify-end"
+            >
               {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
@@ -123,6 +136,7 @@ export function NFTStakingCard(
                   flex="1"
                   bottomText="Per Month"
                   key={"nft-staking-rewards" + i}
+                  className="w-full max-w-[100%] xl:max-w-[300px] min-w-[210px]"
                 />
               ))}
             </Flex>

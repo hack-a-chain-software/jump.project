@@ -42,8 +42,6 @@ export const useNftStaking = create<{
       loading: true,
     });
 
-    console.log(connection);
-
     try {
       const staked = await viewFunction(
         connection,
@@ -228,7 +226,7 @@ export const useNftStaking = create<{
 
   getTokenStorage: async (connection, account, token) => {
     try {
-      return await await viewFunction(connection, token, "storage_balance_of", {
+      return await viewFunction(connection, token, "storage_balance_of", {
         account_id: account,
       });
     } catch (e) {

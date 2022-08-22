@@ -4,9 +4,7 @@ import { useNearQuery } from "react-near";
 const defaultLPOptions = {
   contract: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
   poolInterval: 1000 * 60,
-  debug: true,
-  onCompleted: console.log,
-  onError: console.log,
+  onError: console.warn,
 };
 
 type InvestorInfo = {
@@ -34,7 +32,7 @@ export const useViewVestedAllocations = (
 ) => {
   return useNearQuery<string>("view_vested_allocations", {
     ...defaultLPOptions,
-    skip: !account_id,
+    skip: !account_id || !listing_id,
     variables: {
       listing_id,
       account_id,
@@ -71,7 +69,6 @@ export const useXTokenBalance = (wallet: string) => {
       account_id: wallet,
     },
     poolInterval: 1000 * 60,
-    debug: true,
   });
 };
 
@@ -82,7 +79,6 @@ export const useTokenMetadata = (account_id: string) => {
       contract: account_id!,
       poolInterval: 1000 * 60,
       skip: !account_id,
-      debug: true,
     }
   );
 };
@@ -93,7 +89,7 @@ export const useViewInvestorAllowance = (
 ) => {
   return useNearQuery<string>("view_investor_allowance", {
     ...defaultLPOptions,
-    skip: !account_id,
+    skip: !account_id || !listing_id,
     variables: {
       listing_id,
       account_id,
@@ -112,7 +108,7 @@ export const useViewInvestorAllocation = (
     refetch,
   } = useNearQuery<[string, string]>("view_investor_allocation", {
     ...defaultLPOptions,
-    skip: !account_id,
+    skip: !account_id || !listing_id,
     variables: {
       listing_id,
       account_id,

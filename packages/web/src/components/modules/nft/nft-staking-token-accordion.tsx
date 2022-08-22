@@ -48,8 +48,6 @@ export function TokenAccordion({
     return penaltyBN.div(denom).toString() + "%";
   }, [rewards, token_id, penalty]);
 
-  console.log(withdrawPenalty);
-
   return (
     <motion.div
       animate={{ opacity: 1 }}

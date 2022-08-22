@@ -130,7 +130,8 @@ export default {
           limit: filters.limit,
           offset: filters.offset,
         },
-        filters.showMineOnly ? [filters.showMineOnly] : []
+        filters.showMineOnly ? [filters.showMineOnly] : [],
+        "listings"
       );
     },
   },
