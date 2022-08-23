@@ -49,6 +49,7 @@ import { BigDecimalFloat, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { FolderOpenIcon } from "@heroicons/react/solid";
 
 const PAGINATE_LIMIT = 30;
 
@@ -104,8 +105,9 @@ export function Home() {
       showMineOnly: filterMine,
       visibility: filterVisibility,
       status: filterStatus,
+      search: filterSearch,
     };
-  }, [accountId, filterStatus, filterMine, filterVisibility]);
+  }, [accountId, filterStatus, filterMine, filterVisibility, filterSearch]);
 
   const {
     data: {
@@ -419,7 +421,7 @@ export function Home() {
             value={filterSearch ?? ""}
             fontSize={16}
             borderRadius={15}
-            placeholder="Search by Pool Name, Token, Address"
+            placeholder="Search by project name"
             _placeholder={{
               color: blackAndWhite,
             }}
@@ -440,7 +442,6 @@ export function Home() {
               <Th>Name</Th>
               <Th>Price</Th>
               <Th>Access</Th>
-              <Th>Max Allocation</Th>
               <Th>Raise Size</Th>
               <Th>Filled</Th>
               <Th>Status</Th>
@@ -451,32 +452,42 @@ export function Home() {
             <If
               condition={!isEmpty(launchpadProjects)}
               fallback={
-                <Tr>
-                  <Td>
-                    <Skeleton className="w-[30px] h-[30px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                </Tr>
+                loadingProjects ? (
+                  <Tr>
+                    <Td>
+                      <Skeleton className="w-[30px] h-[30px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                  </Tr>
+                ) : (
+                  <Tr>
+                    <Td colSpan={8} className="flex items-center">
+                      <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
+
+                      <span>No items available</span>
+                    </Td>
+                  </Tr>
+                )
               }
             >
               {(launchpadProjects ?? []).map((e, index) => (
@@ -500,7 +511,7 @@ export function Home() {
                       className="w-[36px] h-[36px] rounded-full"
                     />
                   </Td>
-                  <Td>{e?.project_token_info?.name}</Td>
+                  <Td>{e?.project_name}</Td>
                   <Td>
                     {new BigDecimalFloat(
                       new BN(e?.token_allocation_price ?? 0),
@@ -518,7 +529,6 @@ export function Home() {
                     )}
                   </Td>
                   <Td>{e?.public ? "Public" : "Private"}</Td>
-                  <Td>{e?.allocation?.total_quantity ?? 0}</Td>
                   <Td>
                     {new BigDecimalFloat(
                       new BN(e?.token_allocation_price ?? 0).mul(

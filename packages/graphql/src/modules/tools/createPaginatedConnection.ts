@@ -36,8 +36,10 @@ export async function createPageableQuery<
 ): Promise<Page<P>> {
   const countQuery = `SELECT COUNT(*) FROM (${query}) AS query`;
 
+  const options = { bind: parameters ?? [], type: QueryTypes.SELECT } as const;
+
   const [{ count = 0 }] = await sequelize
-    .query<{ count: number }>(countQuery, { type: QueryTypes.SELECT })
+    .query<{ count: number }>(countQuery, options)
     .catch((err) => {
       console.error(err);
       throw err;
@@ -48,15 +50,10 @@ export async function createPageableQuery<
   pagedQuery += ` LIMIT ${limit}`;
   if (offset) pagedQuery += ` OFFSET ${offset}`;
 
-  const data = await sequelize
-    .query<P>(pagedQuery, {
-      bind: parameters || [],
-      type: QueryTypes.SELECT,
-    })
-    .catch((err) => {
-      console.error(err);
-      throw err;
-    });
+  const data = await sequelize.query<P>(pagedQuery, options).catch((err) => {
+    console.error(err);
+    throw err;
+  });
 
   return {
     data,
