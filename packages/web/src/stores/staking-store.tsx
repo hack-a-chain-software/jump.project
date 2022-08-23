@@ -49,7 +49,7 @@ export const useStaking = create<{
       transactions.push(
         getTransaction(
           accountId,
-          import.meta.env.VITE_JUMP_TOKEN_CONTRACT,
+          import.meta.env.VITE_BASE_TOKEN,
           "ft_transfer_call",
           {
             receiver_id: import.meta.env.VITE_STAKING_CONTRACT,
