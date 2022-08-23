@@ -54,7 +54,7 @@ export function NFTStakeModal({
       minH="max-content"
       minW="800px"
       onClose={() => {
-        setSelected("");
+        setSelected([]);
         onClose();
       }}
       footer={
