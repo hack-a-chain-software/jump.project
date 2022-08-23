@@ -12,8 +12,10 @@ export function ReportButton() {
     <Flex
       bg={cardBg}
       onClick={() => {
-        window.location.href =
-          "https://docs.google.com/forms/d/e/1FAIpQLSdFwl4C7HKeYZxfgeZu62BakWBHBM9-WihDMJ4w2Rl2nMcV_Q/viewform";
+        window.open(
+          "https://docs.google.com/forms/d/e/1FAIpQLSdFwl4C7HKeYZxfgeZu62BakWBHBM9-WihDMJ4w2Rl2nMcV_Q/viewform",
+          "_blank"
+        );
       }}
       borderRadius="24px"
       className="fixed bottom-[24px] right-[24px] z-[9999] cursor-pointer hover:opacity-[0.95]"
