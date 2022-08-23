@@ -1,5 +1,4 @@
-import { Box, BoxProps, Text, useColorModeValue } from "@chakra-ui/react";
-import { useTheme } from "../../hooks/theme";
+import { Box, BoxProps, Text, useColorModeValue, Flex } from "@chakra-ui/react";
 import { If } from "./if";
 
 type Props = {
@@ -35,9 +34,14 @@ export function ValueBox({
       <Text fontSize="16px" letterSpacing="-0.03em" fontWeight="bold">
         {title}
       </Text>
-      <Text lineHeight="28px" fontSize="28px" fontWeight="bold">
+      <Flex
+        lineHeight="28px"
+        fontSize="28px"
+        fontWeight="bold"
+        wordBreak="break-word"
+      >
         {value}
-      </Text>
+      </Flex>
       <If condition={!!bottomText}>
         <Text fontWeight="bold" fontSize="16px" letterSpacing="-0.03em">
           {bottomText}
