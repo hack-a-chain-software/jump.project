@@ -15,8 +15,10 @@ export function ProjectAllocations({
   priceTokenBalance,
   totalAllowanceData,
   investorAllocation,
+  investorAllowance,
 }: {
   isLoading: boolean;
+  investorAllowance: string;
   priceTokenBalance: string;
   totalAllowanceData: string;
   launchpadProject: launchpadProject;
@@ -28,10 +30,8 @@ export function ProjectAllocations({
   const [tickets, setTickets] = useState(0);
 
   const allocationsAvailable = useMemo(() => {
-    return new BN(totalAllowanceData).sub(
-      new BN(investorAllocation.allocationsBought ?? "0")
-    );
-  }, [totalAllowanceData, investorAllocation.allocationsBought]);
+    return new BN(investorAllowance ?? "0");
+  }, [investorAllowance]);
 
   const onJoinProject = useCallback(
     (amount: number) => {
