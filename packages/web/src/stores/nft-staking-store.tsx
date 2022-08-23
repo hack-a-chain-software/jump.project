@@ -19,7 +19,7 @@ export const useNftStaking = create<{
     connection: WalletSelector,
     account: string,
     collection: string,
-    tokenId: string
+    tokens: string[]
   ) => Promise<void>;
   unstake: (
     connection: WalletSelector,
@@ -112,7 +112,7 @@ export const useNftStaking = create<{
     }
   },
 
-  stake: async (connection, account, collection, tokenId) => {
+  stake: async (connection, account, collection, tokens) => {
     const wallet = await connection.wallet();
 
     const transactions: Transaction[] = [];
@@ -138,17 +138,19 @@ export const useNftStaking = create<{
       );
     }
 
-    transactions.push(
-      getTransaction(account, collection, "nft_transfer_call", {
-        receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
-        token_id: tokenId,
-        approval_id: null,
-        memo: null,
-        msg: JSON.stringify({
-          type: "Stake",
-        }),
-      })
-    );
+    tokens.forEach((tokenId) => {
+      transactions.push(
+        getTransaction(account, collection, "nft_transfer_call", {
+          receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          token_id: tokenId,
+          approval_id: null,
+          memo: null,
+          msg: JSON.stringify({
+            type: "Stake",
+          }),
+        })
+      );
+    });
 
     executeMultipleTransactions(transactions, wallet);
   },
