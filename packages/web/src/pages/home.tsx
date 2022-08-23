@@ -3,6 +3,7 @@ import isEmpty from "lodash/isEmpty";
 import { useState, useCallback, Fragment, useEffect } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
+import debounce from "lodash/debounce";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -126,21 +127,21 @@ export function Home() {
   });
 
   useEffect(() => {
-    setLoadingItems(true);
+    (async () => {
+      setLoadingItems(true);
 
-    refetch({
-      ...queryVariables,
-      offset: 0,
-    });
+      await refetch({
+        ...queryVariables,
+        offset: 0,
+      });
 
-    setLoadingItems(false);
-
-    return () => {};
+      setLoadingItems(false);
+    })();
   }, [queryVariables]);
 
   const fetchMoreItems = useCallback(
     async (queryVariables: LaunchpadConenctionQueryVariables) => {
-      setLoadingItems(!loadingItems);
+      setLoadingItems(true);
 
       if (loadingProjects || !hasNextPage) {
         return;
@@ -153,7 +154,7 @@ export function Home() {
         },
       });
 
-      setLoadingItems(!loadingItems);
+      setLoadingItems(false);
     },
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
@@ -452,7 +453,7 @@ export function Home() {
             <If
               condition={!isEmpty(launchpadProjects)}
               fallback={
-                loadingProjects ? (
+                loadingProjects || loadingItems ? (
                   <Tr>
                     <Td>
                       <Skeleton className="w-[30px] h-[30px] rounded-full" />
