@@ -124,6 +124,7 @@ export const Project = () => {
 
         <ProjectAllocations
           isLoading={isLoading}
+          investorAllowance={investorAllowance!}
           launchpadProject={launchpadProject!}
           priceTokenBalance={priceTokenBalance!}
           totalAllowanceData={totalAllowanceData!}
