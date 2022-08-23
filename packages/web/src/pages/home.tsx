@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useState, useCallback, Fragment } from "react";
+import { useState, useCallback, Fragment, useEffect } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
 import {
@@ -26,7 +26,12 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { X_JUMP_TOKEN } from "@/env/contract";
-import { useLaunchpadConenctionQuery } from "@near/apollo";
+import {
+  LaunchpadConenctionQueryVariables,
+  StatusEnum,
+  useLaunchpadConenctionQuery,
+  VisibilityEnum,
+} from "@near/apollo";
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
@@ -44,6 +49,7 @@ import { BigDecimalFloat, formatNumber } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { FolderOpenIcon } from "@heroicons/react/solid";
 
 const PAGINATE_LIMIT = 30;
 
@@ -53,10 +59,12 @@ const PAGINATE_LIMIT = 30;
  * @name Home
  */
 export function Home() {
-  const [filterMine, setMine] = useState("");
-  const [filterStatus, setStatus] = useState("");
-  const [filterVisibility, setVisibility] = useState("");
-  const [filterSearch, setSearch] = useState("");
+  const [filterMine, setMine] = useState<boolean | null>(null);
+  const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
+  const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
+    null
+  );
+  const [filterSearch, setSearch] = useState<string | null>(null);
   const [loadingItems, setLoadingItems] = useState(false);
 
   const navigate = useNavigate();
@@ -89,47 +97,69 @@ export function Home() {
   const { data: baseTokenMetadata, loading: loadingProjectToken } =
     useTokenMetadata(X_JUMP_TOKEN);
 
+  const queryVariables: LaunchpadConenctionQueryVariables = useMemo(() => {
+    return {
+      limit: PAGINATE_LIMIT,
+      accountId: accountId ?? "",
+
+      showMineOnly: filterMine,
+      visibility: filterVisibility,
+      status: filterStatus,
+      search: filterSearch,
+    };
+  }, [accountId, filterStatus, filterMine, filterVisibility, filterSearch]);
+
   const {
     data: {
       launchpad_projects: { data: launchpadProjects, hasNextPage = false } = {
         data: [],
       },
     } = {},
-    fetchMore,
     loading: loadingProjects,
+    fetchMore,
+    refetch,
   } = useLaunchpadConenctionQuery({
     variables: {
       limit: PAGINATE_LIMIT,
-      accountId: accountId || "",
+      accountId: accountId ?? "",
     },
   });
 
-  const fetchMoreItems = useCallback(async () => {
-    setLoadingItems(!loadingItems);
+  useEffect(() => {
+    setLoadingItems(true);
 
-    if (loadingProjects || !hasNextPage) {
-      return;
-    }
-
-    await fetchMore({
-      variables: {
-        limit: PAGINATE_LIMIT,
-        accountId: accountId || "",
-        offset: (launchpadProjects ?? []).length,
-      },
+    refetch({
+      ...queryVariables,
+      offset: 0,
     });
 
-    setLoadingItems(!loadingItems);
-  }, [
-    loadingItems,
-    hasNextPage,
-    loadingProjects,
-    accountId,
-    launchpadProjects,
-  ]);
+    setLoadingItems(false);
+
+    return () => {};
+  }, [queryVariables]);
+
+  const fetchMoreItems = useCallback(
+    async (queryVariables: LaunchpadConenctionQueryVariables) => {
+      setLoadingItems(!loadingItems);
+
+      if (loadingProjects || !hasNextPage) {
+        return;
+      }
+
+      await fetchMore({
+        variables: {
+          ...queryVariables,
+          offset: (launchpadProjects ?? []).length,
+        },
+      });
+
+      setLoadingItems(!loadingItems);
+    },
+    [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
+  );
 
   const stakedTokens = useMemo(
-    () => new BN(investor.data?.staked_token ?? "0"),
+    () => new BN(investor.data?.staked_token ?? 0),
     [investor.data?.staked_token]
   );
 
@@ -171,7 +201,7 @@ export function Home() {
   };
 
   const isDisabled = useMemo(() => {
-    return new BN(baseTokenBalance ?? "0").lt(amountToNextLevel);
+    return new BN(baseTokenBalance ?? 0).lt(amountToNextLevel);
   }, [baseTokenBalance, amountToNextLevel]);
 
   const isLoaded = useMemo(() => {
@@ -181,13 +211,13 @@ export function Home() {
   }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
 
   const lastCheck = useMemo(() => {
-    return new Date(Number(investor?.data?.last_check!) / 1000000);
+    return new Date(Number(investor?.data?.last_check!) / 1_000_000);
   }, [investor?.data]);
 
   const endVesting = useMemo(() => {
     return addMilliseconds(
       lastCheck,
-      Number(launchpadSettings?.token_lock_period) / 1000000
+      Number(launchpadSettings?.token_lock_period) / 1_000_000
     );
   }, [launchpadSettings]);
 
@@ -236,7 +266,7 @@ export function Home() {
             >
               {!accountId
                 ? "Connect your wallet"
-                : formatNumber(new BN(totalAllowanceData ?? "0"), 0) +
+                : formatNumber(new BN(totalAllowanceData ?? 0), 0) +
                   " Allocations"}
             </Box>
           </Skeleton>
@@ -348,20 +378,37 @@ export function Home() {
           <Select
             value={filterStatus}
             placeholder="Status"
-            items={["open", "closed"]}
-            onChange={(value: string) => setStatus(value)}
+            onChange={(value: StatusEnum | null) => setStatus(value)}
+            items={
+              [
+                { label: "Open", value: StatusEnum.Open },
+                { label: "Closed", value: StatusEnum.Closed },
+              ] as const
+            }
           />
           <Select
-            value={filterVisibility}
             placeholder="Visibility"
-            items={["private", "closed"]}
-            onChange={(value: string) => setVisibility(value)}
+            value={filterVisibility}
+            onChange={(value: VisibilityEnum | null) =>
+              setVisibility(value as VisibilityEnum)
+            }
+            items={
+              [
+                { label: "Public", value: VisibilityEnum.Public },
+                { label: "Private", value: VisibilityEnum.Private },
+              ] as const
+            }
           />
           <Select
             value={filterMine}
             placeholder="Mine Only"
-            items={["yes", "no"]}
-            onChange={(value: string) => setMine(value)}
+            onChange={(value: boolean | null) => setMine(value)}
+            items={
+              [
+                { label: "Yes", value: true },
+                { label: "No", value: false },
+              ] as const
+            }
           />
         </Flex>
 
@@ -371,10 +418,10 @@ export function Home() {
             h="60px"
             maxW="100%"
             w="100%"
-            value={filterSearch}
+            value={filterSearch ?? ""}
             fontSize={16}
             borderRadius={15}
-            placeholder="Search by Pool Name, Token, Address"
+            placeholder="Search by project name"
             _placeholder={{
               color: blackAndWhite,
             }}
@@ -395,7 +442,6 @@ export function Home() {
               <Th>Name</Th>
               <Th>Price</Th>
               <Th>Access</Th>
-              <Th>Max Allocation</Th>
               <Th>Raise Size</Th>
               <Th>Filled</Th>
               <Th>Status</Th>
@@ -406,32 +452,42 @@ export function Home() {
             <If
               condition={!isEmpty(launchpadProjects)}
               fallback={
-                <Tr>
-                  <Td>
-                    <Skeleton className="w-[30px] h-[30px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                  <Td>
-                    <Skeleton className="w-full h-[22.5px] rounded-full" />
-                  </Td>
-                </Tr>
+                loadingProjects ? (
+                  <Tr>
+                    <Td>
+                      <Skeleton className="w-[30px] h-[30px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                    <Td>
+                      <Skeleton className="w-full h-[22.5px] rounded-full" />
+                    </Td>
+                  </Tr>
+                ) : (
+                  <Tr>
+                    <Td colSpan={8} className="flex items-center">
+                      <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
+
+                      <span>No items available</span>
+                    </Td>
+                  </Tr>
+                )
               }
             >
               {(launchpadProjects ?? []).map((e, index) => (
@@ -440,10 +496,9 @@ export function Home() {
                   fontSize="18px"
                   borderRadius="20px"
                   onClick={() => {
-                    if (!e) {
-                      return;
+                    if (e) {
+                      navigate(`/launchpad/${e?.listing_id}`);
                     }
-                    navigate(`/launchpad/${e?.listing_id}`);
                   }}
                   key={`launchpad-project-${e?.listing_id}-${index}`}
                   _hover={{
@@ -456,16 +511,7 @@ export function Home() {
                       className="w-[36px] h-[36px] rounded-full"
                     />
                   </Td>
-                  <Td>
-                    {/*
-                      allocation_price / allocation_size (price token symbol)
-                      <Th>Max Allocation</Th> view_investor_allowance
-                      <Th>Raise Size</Th> total * price / size in USDT
-                      <Th>Filled</Th> sold / total
-                      <Th>Status</Th> status mapeado
-                  */}
-                    {e?.project_token_info?.name}
-                  </Td>
+                  <Td>{e?.project_name}</Td>
                   <Td>
                     {new BigDecimalFloat(
                       new BN(e?.token_allocation_price ?? 0),
@@ -483,7 +529,6 @@ export function Home() {
                     )}
                   </Td>
                   <Td>{e?.public ? "Public" : "Private"}</Td>
-                  <Td>{e?.allocation?.total_quantity ?? 0}</Td>
                   <Td>
                     {new BigDecimalFloat(
                       new BN(e?.token_allocation_price ?? 0).mul(
@@ -539,7 +584,10 @@ export function Home() {
 
       {hasNextPage && !loadingProjects && (
         <Flex className="flex items-center justify-center">
-          <Button className="w-[168px]" onClick={() => fetchMoreItems()}>
+          <Button
+            className="w-[168px]"
+            onClick={() => fetchMoreItems(queryVariables)}
+          >
             {loadingItems ? <LoadingIndicator /> : "Load more items"}
           </Button>
         </Flex>

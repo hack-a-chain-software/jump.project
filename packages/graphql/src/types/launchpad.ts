@@ -1,4 +1,5 @@
 import { PaginationFilters } from "@/modules/tools/createPaginatedConnection";
+import { StatusEnum, VisibilityEnum } from "@near/apollo";
 import { ID } from "./graphql-types";
 
 export type Allocation = {
@@ -51,8 +52,10 @@ export type LaunchpadListing = {
 };
 
 export type LaunchpadFilters = {
-  status: "Open" | "Ended" | "Waiting" | "All";
-  visibility: "Private" | "Public" | "All";
-  showMineOnly: string;
+  status: StatusEnum;
+  visibility: VisibilityEnum;
+  showMineOnly: boolean;
   search: string;
-} & PaginationFilters;
+};
+
+export type PaginatedLaunchpadFilters = LaunchpadFilters & PaginationFilters;

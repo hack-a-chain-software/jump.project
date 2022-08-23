@@ -7,7 +7,7 @@ hooks:
     - prettier --write
     - eslint --cache --fix
 generates:
-  ./src/generated/hooks.tsx:
+  ./src/generated/hooks.ts:
     plugins:
       - "typescript"
       - "typescript-operations"

@@ -5,11 +5,13 @@ import {
   LaunchpadFilters,
   LaunchpadListing,
   NFTInvestor,
+  PaginatedLaunchpadFilters,
   ProjectIdQuery,
 } from "@/types";
 import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
+import { VisibilityEnum } from "@near/apollo";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
 
 export default {
@@ -90,48 +92,95 @@ export default {
 
     async launchpad_projects(
       _root: unknown,
-      filters: Partial<LaunchpadFilters>,
+      filters: Partial<PaginatedLaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
-      let sqlQuery = filters.showMineOnly
-        ? `
-          SELECT * 
-          FROM (SELECT * FROM "listings" WHERE account_id = $1) AS l
-          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-          INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)
-        `
-        : `
-          SELECT * FROM "listings" AS l
-          INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)
-        `;
+      type BindParameterClause = (offset: number) => string;
+      type QueryClause = string | BindParameterClause;
+      type FiltersMap<K extends string> = {
+        [key in K]: {
+          active: boolean;
+          joinClause?: QueryClause;
+          whereClause?: QueryClause;
+          params?: any[];
+        };
+      };
 
-      if (filters.status && ImportantStatusFilters.includes(filters.status)) {
-        sqlQuery +=
-          (filters.showMineOnly ? " AND " : " WHERE ") +
-          queriesPerStatus[filters.status];
+      const evalQueryClause = (clause: QueryClause, offset: number) =>
+        typeof clause == "string" ? clause : clause(offset);
+
+      const filtersMap: FiltersMap<keyof LaunchpadFilters> = {
+        status: {
+          active: !!(
+            filters.status && ImportantStatusFilters.includes(filters.status)
+          ),
+          whereClause: filters.status ? queriesPerStatus[filters.status] : "",
+        },
+        showMineOnly: {
+          active: !!filters.showMineOnly,
+          joinClause:
+            'INNER JOIN "allocations" AS a ON(l.listing_id = a.listing_id)',
+        },
+        visibility: {
+          active: !!filters.visibility,
+          whereClause:
+            filters.visibility == VisibilityEnum.Public
+              ? " l.public = true"
+              : " l.public = false",
+        },
+        search: {
+          active: !!filters.search,
+          whereClause: (offset: number) =>
+            `(m.project_name ILIKE $${1 + offset} || '%')`,
+          params: [filters.search],
+        },
+      };
+
+      const baseQuery =
+        'SELECT * FROM "listings" AS l INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)';
+
+      const joinClauseStatements: string[] = [];
+      const whereClauseStatements: string[] = [];
+      const params: any[] = [];
+      for (const filter of Object.values(filtersMap)) {
+        if (!filter.active) continue;
+
+        if (filter.joinClause) {
+          joinClauseStatements.push(
+            evalQueryClause(filter.joinClause, params.length)
+          );
+        }
+
+        if (filter.whereClause) {
+          whereClauseStatements.push(
+            evalQueryClause(filter.whereClause, params.length)
+          );
+        }
+
+        if (filter.params?.length) {
+          params.push(...filter.params);
+        }
       }
 
-      /*
-      if (filters.search) {
-        sqlQuery += (
-              
-        );
-      }
+      const joinClause = joinClauseStatements.length
+        ? joinClauseStatements.join(" ")
+        : "";
+      const whereClause = whereClauseStatements.length
+        ? `WHERE ${whereClauseStatements.join(" AND")}`
+        : "";
 
-      if (filters.visibility) {
-        sqlQuery += ();
-      }
-      */
+      const finalQuery = [baseQuery, joinClause, whereClause]
+        .filter((clause) => clause.length)
+        .join(" ");
 
       return createPageableQuery(
-        sqlQuery,
+        finalQuery,
         sequelize,
         {
           limit: filters.limit,
           offset: filters.offset,
         },
-        filters.showMineOnly ? [filters.showMineOnly] : [],
-        "listings"
+        params
       );
     },
   },

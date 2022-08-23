@@ -69,15 +69,13 @@ export default gql`
 
   enum StatusEnum {
     Open
-    Ended
+    Closed
     Waiting
-    All
   }
 
   enum VisibilityEnum {
     Private
     Public
-    All
   }
 
   type LaunchpadPage {
@@ -90,9 +88,10 @@ export default gql`
 
   type Query {
     launchpad_projects(
+      search: String
       status: StatusEnum
       visibility: VisibilityEnum
-      showMineOnly: String
+      showMineOnly: Boolean
       limit: Int
       offset: Int
     ): LaunchpadPage!
