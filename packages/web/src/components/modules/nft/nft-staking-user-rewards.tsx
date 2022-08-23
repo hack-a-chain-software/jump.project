@@ -1,5 +1,5 @@
 import { ValueBox, If } from "@/components";
-import { Text, Flex, Grid, Skeleton } from "@chakra-ui/react";
+import { Text, Flex, Image, Skeleton } from "@chakra-ui/react";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { StakingToken } from "@near/ts";
 import { useMemo } from "react";
@@ -27,6 +27,8 @@ export function NFTStakingUserRewards({
     });
   }, [tokens, rewards]);
 
+  console.log(tokenRewads);
+
   return (
     <Flex flex={1} direction="column" flexWrap="wrap">
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
@@ -52,7 +54,7 @@ export function NFTStakingUserRewards({
         >
           {tokenRewads &&
             tokenRewads.map(
-              ({ name, userBalance, decimals, symbol }, index) => (
+              ({ name, userBalance, decimals, symbol, icon }, index) => (
                 <ValueBox
                   key={"user-rewards-" + index}
                   flex="1"
@@ -61,13 +63,19 @@ export function NFTStakingUserRewards({
                   maxHeight="max-content"
                   title={`Your ${name} Rewards`}
                   value={
-                    accountId
-                      ? formatNumber(Number(userBalance), decimals) +
-                        " " +
-                        symbol
-                      : "Connect Wallet"
+                    accountId ? (
+                      <Flex className="items-top space-x-[4px]">
+                        {icon && <Image src={icon} className="h-[28px]" />}
+
+                        <Text
+                          children={formatNumber(Number(userBalance), decimals)}
+                        />
+                      </Flex>
+                    ) : (
+                      "Connect Wallet"
+                    )
                   }
-                  bottomText={`Your Total ${name} Rewards`}
+                  bottomText={name}
                 />
               )
             )}
