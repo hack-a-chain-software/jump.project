@@ -1,10 +1,12 @@
+import BN from "bn.js";
 import { ValueBox, If } from "@/components";
 import { Text, Flex, Image, Skeleton } from "@chakra-ui/react";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { StakingToken } from "@near/ts";
 import { useMemo } from "react";
-import { formatNumber } from "@near/ts";
 import isEmpty from "lodash/isEmpty";
+import { BigDecimalFloat } from "@near/ts";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingUserRewards({
@@ -17,12 +19,20 @@ export function NFTStakingUserRewards({
 
   const tokenRewads = useMemo(() => {
     return rewards?.map((token) => {
+      const totalBalance = tokens.reduce((sum, { balance }) => {
+        const tokenBalance = new BN(balance[token.account_id || ""].toString());
+
+        return sum.add(tokenBalance);
+      }, new BN("0"));
+
+      const decimalsBN = new BN(token.decimals).neg();
+
       return {
         ...token,
-        userBalance: tokens.reduce(
-          (sum, { balance }) => sum + balance[token.account_id || ""],
-          0
-        ),
+        userBalance: new BigDecimalFloat(
+          totalBalance,
+          decimalsBN
+        ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS),
       };
     });
   }, [tokens, rewards]);
@@ -51,32 +61,28 @@ export function NFTStakingUserRewards({
           condition={!isEmpty(tokenRewads)}
         >
           {tokenRewads &&
-            tokenRewads.map(
-              ({ name, userBalance, decimals, symbol, icon }, index) => (
-                <ValueBox
-                  key={"user-rewards-" + index}
-                  flex="1"
-                  flexGrow="1"
-                  alignItems="stretch"
-                  maxHeight="max-content"
-                  title={`Your ${name} Rewards`}
-                  value={
-                    accountId ? (
-                      <Flex className="items-top space-x-[4px]">
-                        {icon && <Image src={icon} className="h-[28px]" />}
+            tokenRewads.map(({ name, userBalance, icon }, index) => (
+              <ValueBox
+                key={"user-rewards-" + index}
+                flex="1"
+                flexGrow="1"
+                alignItems="stretch"
+                maxHeight="max-content"
+                title={`Your ${name} Rewards`}
+                value={
+                  accountId ? (
+                    <Flex className="items-top space-x-[4px]">
+                      {icon && <Image src={icon} className="h-[28px]" />}
 
-                        <Text
-                          children={formatNumber(Number(userBalance), decimals)}
-                        />
-                      </Flex>
-                    ) : (
-                      "Connect Wallet"
-                    )
-                  }
-                  bottomText={name}
-                />
-              )
-            )}
+                      <Text children={userBalance} />
+                    </Flex>
+                  ) : (
+                    "Connect Wallet"
+                  )
+                }
+                bottomText={name}
+              />
+            ))}
         </If>
       </Flex>
     </Flex>
