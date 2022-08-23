@@ -43,21 +43,9 @@ export class BigDecimalFloat {
       return toSafeNumber(div).toLocaleString(locale, options);
     }
 
-    const wholePart = toSafeNumber(div).toLocaleString(locale);
-
-    /*
-     *     Considering the base is always a power of 10, this could be done without loss of precision
-     * by avoiding division and instead operating on the base-10 string representation, but I don't
-     * know how to use the locale functionality of the browser
-     *
-     *     In order to have round-down (trim-digits) instead of round-close, change the next line of code to:
-     * const roundFloat = Math.floor(100 * mod.toNumber() / base.toNumber()) / 100;
-     * Or even change 100 to another power of 10 based on format options.
-     */
-    const roundFloat = mod.toNumber() / base.toNumber();
-    const fractPart = roundFloat.toLocaleString(locale, options);
-
-    return wholePart + fractPart.slice(1);
+    return Number.parseFloat(
+      div.toString() + "." + mod.toString()
+    ).toLocaleString(locale, options);
   }
 
   /* adjustDecimalPoint
