@@ -36,7 +36,7 @@ export const Staking = () => {
   const { stakeXToken, burnXToken } = useStaking();
 
   const {
-    data = { base_token: "1", x_token: "1" },
+    data: { base_token = "1", x_token = "1" } = {},
     loading: loadingTokenRatio,
   } = useNearQuery<TokenRatio>("view_token_ratio", {
     contract: X_JUMP_TOKEN,
@@ -90,6 +90,14 @@ export const Staking = () => {
   const { jumpGradient, glassyWhiteOpaque } = useTheme();
 
   const balanceXToken = useMemo(() => balance || "0", [balance]);
+
+  const baseToken = useMemo(() => {
+    return base_token === "0" ? "1" : base_token;
+  }, [base_token]);
+
+  const xToken = useMemo(() => {
+    return x_token === "0" ? "1" : x_token;
+  }, [x_token]);
 
   const getAmountRaw = (amount) => {
     const decimals = new BN(jumpMetadata?.decimals! + "");
@@ -181,10 +189,10 @@ export const Staking = () => {
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   value={new BigDecimalFloat(
-                    new BN(data.base_token),
+                    new BN(baseToken),
                     jumpExponent
                   ).formatQuotient(
-                    new BigDecimalFloat(new BN(data.x_token), jumpExponent),
+                    new BigDecimalFloat(new BN(xToken), jumpExponent),
                     new BN(9),
                     {
                       unit: "JUMP",
@@ -193,21 +201,19 @@ export const Staking = () => {
                   )}
                   title="xJUMP Value"
                   bottomText={
-                    "1 JUMP = " +
-                    new BigDecimalFloat(
-                      new BN(data.x_token),
-                      jumpExponent
-                    ).formatQuotient(
-                      new BigDecimalFloat(
-                        new BN(data.base_token),
-                        jumpExponent
-                      ),
-                      new BN(9),
-                      {
-                        unit: "xJUMP",
-                        formatOptions: CURRENCY_FORMAT_OPTIONS,
-                      }
-                    )
+                    "1 JUMP = " + (xToken !== "0" && baseToken !== "0")
+                      ? new BigDecimalFloat(
+                          new BN(xToken),
+                          jumpExponent
+                        ).formatQuotient(
+                          new BigDecimalFloat(new BN(baseToken), jumpExponent),
+                          new BN(9),
+                          {
+                            unit: "xJUMP",
+                            formatOptions: CURRENCY_FORMAT_OPTIONS,
+                          }
+                        )
+                      : "1.00 xJUMP"
                   }
                   className="h-full w-full"
                 />
@@ -223,10 +229,10 @@ export const Staking = () => {
                   bottomText={
                     "worth " +
                     new BigDecimalFloat(
-                      new BN(balanceXToken).mul(new BN(data.base_token)),
+                      new BN(balanceXToken).mul(new BN(baseToken)),
                       jumpExponent.mul(new BN(2))
                     ).formatQuotient(
-                      new BigDecimalFloat(new BN(data.x_token), jumpExponent),
+                      new BigDecimalFloat(new BN(xToken), jumpExponent),
                       new BN(9),
                       {
                         unit: "JUMP",
@@ -273,7 +279,7 @@ export const Staking = () => {
                         new BN("100")
                       )
                     ).formatQuotient(
-                      new BigDecimalFloat(new BN(data.base_token)),
+                      new BigDecimalFloat(new BN(baseToken)),
                       new BN(9),
                       { formatOptions: CURRENCY_FORMAT_OPTIONS }
                     ) + "%" // TODO: refactor so unit logic can apply to %?
