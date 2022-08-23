@@ -16,7 +16,7 @@ export function NFTStakeModal({
   collection: string;
   onClose: () => void;
 }) {
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
 
   const { selector, accountId } = useWalletSelector();
 
@@ -28,6 +28,14 @@ export function NFTStakeModal({
     }
 
     stake(selector, accountId as string, collection, selected);
+  };
+
+  const select = (id: string) => {
+    const items = selected.includes(id)
+      ? selected.filter((item) => item !== id)
+      : [...selected, id];
+
+    setSelected(items);
   };
 
   const { data, loading } = useNearQuery("nft_tokens_for_owner", {
@@ -97,11 +105,9 @@ export function NFTStakeModal({
                     height="auto"
                     padding="3px"
                     position="relative"
-                    onClick={() =>
-                      setSelected(selected === token_id ? "" : token_id)
-                    }
+                    onClick={() => select(token_id)}
                     background={
-                      selected === token_id ? "#761BA0" : "transparent"
+                      selected.includes(token_id) ? "#761BA0" : "transparent"
                     }
                   >
                     <Image
@@ -112,7 +118,7 @@ export function NFTStakeModal({
                       src={`https://images.weserv.nl/?url=${metadata.media}&w=800&fit=contain`}
                     />
 
-                    {selected === token_id && (
+                    {selected.includes(token_id) && (
                       <Flex
                         top="0"
                         left="0"
