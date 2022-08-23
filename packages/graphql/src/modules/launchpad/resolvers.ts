@@ -95,15 +95,21 @@ export default {
       filters: Partial<PaginatedLaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
-      type FiltersMap = {
-        [K in keyof LaunchpadFilters]?: {
+      type BindParameterClause = (offset: number) => string;
+      type QueryClause = string | BindParameterClause;
+      type FiltersMap<K extends string> = {
+        [key in K]: {
           active: boolean;
-          joinClause?: string;
-          whereClause?: string;
+          joinClause?: QueryClause;
+          whereClause?: QueryClause;
+          params?: any[];
         };
       };
 
-      const filtersMap: FiltersMap = {
+      const evalQueryClause = (clause: QueryClause, offset: number) =>
+        typeof clause == "string" ? clause : clause(offset);
+
+      const filtersMap: FiltersMap<keyof LaunchpadFilters> = {
         status: {
           active: !!(
             filters.status && ImportantStatusFilters.includes(filters.status)
@@ -119,21 +125,42 @@ export default {
           active: !!filters.visibility,
           whereClause:
             filters.visibility == VisibilityEnum.Public
-              ? "l.public = true"
-              : "l.public = false",
+              ? " l.public = true"
+              : " l.public = false",
+        },
+        search: {
+          active: !!filters.search,
+          whereClause: (offset: number) =>
+            `(m.project_name ILIKE $${1 + offset} || '%')`,
+          params: [filters.search],
         },
       };
 
       const baseQuery =
         'SELECT * FROM "listings" AS l INNER JOIN "listings_metadata" AS m ON(l.listing_id = m.listing_id)';
 
-      const joinClauseStatements = Object.values(filtersMap)
-        .filter((v) => v.active && v.joinClause)
-        .map((v) => v.joinClause);
+      const joinClauseStatements: string[] = [];
+      const whereClauseStatements: string[] = [];
+      const params: any[] = [];
+      for (const filter of Object.values(filtersMap)) {
+        if (!filter.active) continue;
 
-      const whereClauseStatements = Object.values(filtersMap)
-        .filter((v) => v.active && v.whereClause)
-        .map((v) => v.whereClause);
+        if (filter.joinClause) {
+          joinClauseStatements.push(
+            evalQueryClause(filter.joinClause, params.length)
+          );
+        }
+
+        if (filter.whereClause) {
+          whereClauseStatements.push(
+            evalQueryClause(filter.whereClause, params.length)
+          );
+        }
+
+        if (filter.params?.length) {
+          params.push(...filter.params);
+        }
+      }
 
       const joinClause = joinClauseStatements.length
         ? joinClauseStatements.join(" ")
@@ -153,7 +180,7 @@ export default {
           limit: filters.limit,
           offset: filters.offset,
         },
-        []
+        params
       );
     },
   },
