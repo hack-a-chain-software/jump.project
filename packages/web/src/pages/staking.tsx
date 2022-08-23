@@ -259,10 +259,6 @@ export const Staking = () => {
                         formatOptions: CURRENCY_FORMAT_OPTIONS,
                       }
                     )
-                    /*
-                     *
-                     *
-                     */
                   }
                 />
               </Skeleton>
