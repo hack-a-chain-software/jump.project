@@ -88,6 +88,7 @@ export default gql`
 
   type Query {
     launchpad_projects(
+      search: String
       status: StatusEnum
       visibility: VisibilityEnum
       showMineOnly: Boolean

@@ -174,6 +174,7 @@ export type QueryLaunchpadProjectArgs = {
 export type QueryLaunchpadProjectsArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
+  search?: InputMaybe<Scalars["String"]>;
   showMineOnly?: InputMaybe<Scalars["Boolean"]>;
   status?: InputMaybe<StatusEnum>;
   visibility?: InputMaybe<VisibilityEnum>;
@@ -238,6 +239,7 @@ export type LaunchpadConenctionQueryVariables = Exact<{
   accountId: Scalars["ID"];
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
+  search?: InputMaybe<Scalars["String"]>;
   status?: InputMaybe<StatusEnum>;
   visibility?: InputMaybe<VisibilityEnum>;
   showMineOnly?: InputMaybe<Scalars["Boolean"]>;
@@ -267,6 +269,7 @@ export type LaunchpadConenctionQuery = {
       token_allocation_price?: string | null;
       liquidity_pool_project_tokens?: string | null;
       allocations_sold?: string | null;
+      project_name?: string | null;
       status?: string | null;
       fee_liquidity_tokens?: string | null;
       fee_price_tokens?: string | null;
@@ -498,6 +501,7 @@ export const LaunchpadConenctionDocument = gql`
     $accountId: ID!
     $limit: Int
     $offset: Int
+    $search: String
     $status: StatusEnum
     $visibility: VisibilityEnum
     $showMineOnly: Boolean
@@ -505,6 +509,7 @@ export const LaunchpadConenctionDocument = gql`
     launchpad_projects(
       limit: $limit
       offset: $offset
+      search: $search
       status: $status
       visibility: $visibility
       showMineOnly: $showMineOnly
@@ -528,6 +533,7 @@ export const LaunchpadConenctionDocument = gql`
         token_allocation_price
         liquidity_pool_project_tokens
         allocations_sold
+        project_name
         project_token_info {
           name
           image
@@ -573,6 +579,7 @@ export const LaunchpadConenctionDocument = gql`
  *      accountId: // value for 'accountId'
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
+ *      search: // value for 'search'
  *      status: // value for 'status'
  *      visibility: // value for 'visibility'
  *      showMineOnly: // value for 'showMineOnly'

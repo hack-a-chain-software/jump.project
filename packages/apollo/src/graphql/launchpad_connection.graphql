@@ -2,6 +2,7 @@ query LaunchpadConenction(
   $accountId: ID!
   $limit: Int
   $offset: Int
+  $search: String
   $status: StatusEnum
   $visibility: VisibilityEnum
   $showMineOnly: Boolean
@@ -9,6 +10,7 @@ query LaunchpadConenction(
   launchpad_projects(
     limit: $limit
     offset: $offset
+    search: $search
     status: $status
     visibility: $visibility
     showMineOnly: $showMineOnly
@@ -32,6 +34,7 @@ query LaunchpadConenction(
       token_allocation_price
       liquidity_pool_project_tokens
       allocations_sold
+      project_name
       project_token_info {
         name
         image
