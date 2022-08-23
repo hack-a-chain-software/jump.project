@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import * as R from "ramda";
 import {
   Box,
@@ -12,7 +13,8 @@ import {
 import isEmpty from "lodash/isEmpty";
 import { useTheme } from "../../../hooks/theme";
 import { If, ValueBox } from "../../shared";
-import { formatNumber, StakingToken } from "@near/ts";
+import { formatNumber, BigDecimalFloat, StakingToken } from "@near/ts";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 export function NFTStakingCard(
   props: BoxProps & { name?: string; logo?: string; rewards?: StakingToken[] }
@@ -24,6 +26,18 @@ export function NFTStakingCard(
   const cardGradient = useColorModeValue("transparent", jumpGradient);
   const cardBg = useColorModeValue(jumpGradient, gradientBoxTopCard);
   const cardOpacity = useColorModeValue(glassyWhiteOpaque, "transparent");
+
+  const getFormatedBalance = (balance, decimals) => {
+    return formatNumber(balance, decimals);
+
+    const decimalsBN = new BN(decimals).neg();
+    const balanceBN = new BN(balance);
+
+    return new BigDecimalFloat(balanceBN, decimalsBN).toLocaleString(
+      "en",
+      CURRENCY_FORMAT_OPTIONS
+    );
+  };
 
   return (
     <Box
@@ -126,19 +140,27 @@ export function NFTStakingCard(
               gap={5}
               className="justify-start 2xl:justify-end"
             >
-              {props.rewards?.map(({ name, symbol, perMonth, decimals }, i) => (
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title={name + " Rewards"}
-                  value={
-                    formatNumber(Number(perMonth), decimals) + " " + symbol
-                  }
-                  flex="1"
-                  bottomText="Per Month"
-                  key={"nft-staking-rewards" + i}
-                  className="w-full max-w-[100%] xl:max-w-[300px] min-w-[210px]"
-                />
-              ))}
+              {props.rewards?.map(
+                ({ symbol, name, icon, perMonth, decimals }, i) => (
+                  <ValueBox
+                    borderColor={glassyWhiteOpaque}
+                    title={symbol + " Rewards"}
+                    value={
+                      <Flex className="items-top space-x-[4px]">
+                        {icon && <Image src={icon} className="h-[28px]" />}
+
+                        <Text
+                          children={getFormatedBalance(perMonth, decimals)}
+                        />
+                      </Flex>
+                    }
+                    flex="1"
+                    bottomText="Per Month"
+                    key={"nft-staking-rewards" + i}
+                    className="w-full max-w-[100%] xl:max-w-[300px] min-w-[210px]"
+                  />
+                )
+              )}
             </Flex>
           </If>
         </Box>
