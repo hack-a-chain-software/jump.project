@@ -27,8 +27,6 @@ export function NFTStakingUserRewards({
     });
   }, [tokens, rewards]);
 
-  console.log(tokenRewads);
-
   return (
     <Flex flex={1} direction="column" flexWrap="wrap">
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
