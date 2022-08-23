@@ -27,11 +27,10 @@ export const NFTStaking = () => {
 
   const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
 
-  const items = useMemo(() => {
-    if (loading) {
-      return [...Array(5)];
-    }
+  const cardOpacity = useColorModeValue(0.9, 0.7);
+  const cardBg = useColorModeValue(jumpGradient, glassyWhiteOpaque);
 
+  const items = useMemo(() => {
     return data?.nft_staking_projects?.data;
   }, [loading]);
 
@@ -59,7 +58,13 @@ export const NFTStaking = () => {
       />
 
       <If
-        fallback={!loading && <Empty text="No collections available" />}
+        fallback={
+          !loading ? (
+            <Empty text="No collections available" />
+          ) : (
+            <NFTStakingCard />
+          )
+        }
         condition={!isEmpty(items)}
       >
         {items && (
@@ -73,11 +78,8 @@ export const NFTStaking = () => {
                   )
                 }
                 _hover={{
-                  opacity: useColorModeValue(0.9, 0.7),
-                  background: useColorModeValue(
-                    jumpGradient,
-                    glassyWhiteOpaque
-                  ),
+                  opacity: cardOpacity,
+                  background: cardBg,
                 }}
                 logo={staking?.collection_meta?.image}
                 name={staking?.collection_meta?.name}

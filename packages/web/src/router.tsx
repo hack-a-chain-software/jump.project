@@ -1,7 +1,7 @@
-import { Flex, Grid } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Header, Nav } from "./components";
+import { Header, Nav, ReportButton } from "./components";
 import { useTheme } from "./hooks/theme";
 import { Home } from "./pages/home";
 import { NFTStaking } from "./pages/nft-staking";
@@ -28,8 +28,11 @@ function ErrorFallback({ error, resetErrorBoundary }) {
  */
 function Router() {
   const { gradientBackground } = useTheme();
+
   return (
     <Flex flex={1} bg={gradientBackground}>
+      <ReportButton />
+
       <BrowserRouter>
         <Header />
 
