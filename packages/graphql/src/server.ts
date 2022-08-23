@@ -1,7 +1,7 @@
 import { EnvVariables } from "@/env";
 import { ApolloServer } from "apollo-server";
 import { Sequelize } from "sequelize";
-import { Global, Launchpad, NFTStaking, XToken } from "./modules";
+import { Global, Launchpad, NFTStaking, XToken } from "@/modules";
 
 const {
   db_host,

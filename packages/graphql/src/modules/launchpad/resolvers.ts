@@ -5,15 +5,13 @@ import {
   LaunchpadFilters,
   LaunchpadListing,
   NFTInvestor,
+  PaginatedLaunchpadFilters,
   ProjectIdQuery,
 } from "@/types";
 import { findTokenMetadata } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
-import {
-  ImportantStatusFilters,
-  ListingStatuses,
-  queriesPerStatus,
-} from "@/constants/statuses";
+import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
+import { VisibilityEnum } from "@near/apollo";
 import { createPageableQuery } from "../tools/createPaginatedConnection";
 
 export default {
@@ -94,7 +92,7 @@ export default {
 
     async launchpad_projects(
       _root: unknown,
-      filters: Partial<LaunchpadFilters>,
+      filters: Partial<PaginatedLaunchpadFilters>,
       { sequelize }: GraphQLContext
     ) {
       type FiltersMap = {
@@ -120,7 +118,7 @@ export default {
         visibility: {
           active: !!filters.visibility,
           whereClause:
-            filters.visibility == "public"
+            filters.visibility == VisibilityEnum.Public
               ? "l.public = true"
               : "l.public = false",
         },

@@ -1,4 +1,4 @@
-import { LaunchpadFilters } from "@/types";
+import { StatusEnum, VisibilityEnum } from "@near/apollo";
 
 export enum ListingStatuses {
   Funded = "Funded", // Open or Waiting or Ended
@@ -9,27 +9,27 @@ export enum ListingStatuses {
   LiquidityPoolFinalized = "LiquidityPoolFinalized", // Ended
 }
 
-export const ImportantStatusFilters: LaunchpadFilters["status"][] = [
-  "waiting",
-  "closed",
-  "open",
+export const ImportantStatusFilters: StatusEnum[] = [
+  StatusEnum.Waiting,
+  StatusEnum.Closed,
+  StatusEnum.Open,
 ];
 
 export const queriesPerStatus = {
-  waiting: `
-    status = 'Funded'
+  [StatusEnum.Waiting]: `
+    status = 'funded'
     AND open_sale_1_timestamp >= CURRENT_TIMESTAMP`,
-  closed: `
-    (status = 'Funded' AND final_sale_2_timestamp <= CURRENT_TIMESTAMP)
+  [StatusEnum.Closed]: `
+    (status = 'funded' AND final_sale_2_timestamp <= CURRENT_TIMESTAMP)
     OR status IN (
-      'SaleFinalized',
-      'PoolCreated',
-      'PoolProjectTokenSent',
-      'PoolPriceTokenSent',
-      'LiquidityPoolFinalized'
+      'sale_finalized',
+      'pool_created',
+      'pool_project_token_sent',
+      'pool_price_token_sent',
+      'liquidity_pool_finalized'
     )`,
-  open: `
-    status = 'Funded'
+  [StatusEnum.Open]: `
+    status = 'funded'
     AND open_sale_1_timestamp <= CURRENT_TIMESTAMP 
     AND final_sale_2_timestamp >= CURRENT_TIMESTAMP`,
-} as Record<LaunchpadFilters["status"], string>;
+} as Record<StatusEnum, string>;
