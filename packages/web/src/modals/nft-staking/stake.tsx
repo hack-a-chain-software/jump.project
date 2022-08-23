@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import isEmpty from "lodash/isEmpty";
 import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
-import { Flex, Text, Grid, Image, Spinner } from "@chakra-ui/react";
+import {
+  Flex,
+  Text,
+  Image,
+  Spinner,
+  Button as CButton,
+} from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakeModal({
@@ -22,12 +28,12 @@ export function NFTStakeModal({
 
   const { stake } = useNftStaking();
 
-  const stakeNFT = async () => {
+  const stakeNFT = async (items?: string[]) => {
     if (!selected) {
       return;
     }
 
-    stake(selector, accountId as string, collection, selected);
+    stake(selector, accountId!, collection, items ?? selected);
   };
 
   const select = (id: string) => {
@@ -60,10 +66,27 @@ export function NFTStakeModal({
       footer={
         !loading &&
         !isEmpty(data) && (
-          <Button onClick={() => stakeNFT()} bg="white" color="black" w="100%">
-            Stake Now!
-            <ArrowRightIcon />
-          </Button>
+          <Fragment>
+            <Button
+              marginRight={12}
+              onClick={() => stakeNFT()}
+              bg="white"
+              color="black"
+              w="100%"
+            >
+              Stake Now!
+              <ArrowRightIcon />
+            </Button>
+
+            <CButton
+              variant="link"
+              onClick={() => {
+                stakeNFT(data?.map(({ token_id }) => token_id) || []);
+              }}
+            >
+              Stake All
+            </CButton>
+          </Fragment>
         )
       }
       shouldBlurBackdrop
