@@ -34,6 +34,8 @@ export const NFTStaking = () => {
     return data?.nft_staking_projects?.data;
   }, [loading]);
 
+  console.log(items);
+
   return (
     <PageContainer>
       <TopCard
@@ -81,7 +83,7 @@ export const NFTStaking = () => {
                   opacity: cardOpacity,
                   background: cardBg,
                 }}
-                logo={staking?.collection_meta?.image}
+                logo={staking?.collection_image}
                 name={staking?.collection_meta?.name}
                 rewards={staking?.rewards}
               />
