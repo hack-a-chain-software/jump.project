@@ -90,7 +90,7 @@ export function NFTStakingProject() {
       <BackButton onClick={() => navigate("/nft-staking")} />
 
       <NFTStakingCard
-        logo={staking?.collection_meta.image}
+        logo={staking?.collection_image}
         name={staking?.collection_meta.name}
         rewards={staking?.rewards}
       />

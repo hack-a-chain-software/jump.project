@@ -15,6 +15,9 @@ export default gql`
     token_address: ID!
     min_staking_period: String
     early_withdraw_penalty: String
+    round_interval: String
+    collection_image: String
+    collection_modal_image: String
 
     # Queries
     rewards(account_id: ID): [NFTStakingReward] # On Chain Data

@@ -347,8 +347,9 @@ async function testnetSetup() {
           "3000000000000000000",
           "4000000000000000000",
           "5000000000000000000",
+          "6000000000000000000",
         ],
-        tiers_entitled_allocations: ["10", "20", "30", "40", "50"],
+        tiers_entitled_allocations: ["10", "20", "30", "40", "50", "60"],
         allowance_phase_2: "10",
         partner_dex: "dex_account.testnet",
       },
@@ -457,54 +458,6 @@ async function testnetSetup() {
     args: { new_guardian: ownerAccount.accountId },
     attachedDeposit: new BN(1),
   });
-  const listing1PreSaleTokens = "1000000000000000000000000";
-  const listing1AllocationSize = "1000000000000000000000";
-  const listing1AllocationPrice = "10000000";
-  const listingLPtokens = "0";
-  const listingLPprice = "0";
-  const listing1_data = {
-    project_owner: ownerAccount.accountId,
-    project_token: octopusTokenAccount.accountId,
-    price_token: usdtTokenAccount.accountId,
-    listing_type: "Public",
-    open_sale_1_timestamp_seconds: increaseTimeStamp(nowTimestamp, 1),
-    open_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 2),
-    final_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 3),
-    liquidity_pool_timestamp_seconds: increaseTimeStamp(nowTimestamp, 4),
-    total_amount_sale_project_tokens: listing1PreSaleTokens,
-    token_allocation_size: listing1AllocationSize,
-    token_allocation_price: listing1AllocationPrice,
-    liquidity_pool_project_tokens: listingLPtokens,
-    liquidity_pool_price_tokens: listingLPprice,
-    fraction_instant_release: "10",
-    fraction_cliff_release: "50",
-    cliff_timestamp_seconds: increaseTimeStamp(nowTimestamp, 5),
-    end_cliff_timestamp_seconds: increaseTimeStamp(nowTimestamp, 6),
-    fee_price_tokens: "0",
-    fee_liquidity_tokens: "0",
-  };
-
-  await ownerAccount.functionCall({
-    contractId: launchpad.accountId,
-    methodName: "create_new_listing",
-    args: { listing_data: listing1_data },
-    attachedDeposit: new BN(1),
-  });
-  await ownerAccount.functionCall({
-    contractId: octopusTokenAccount.accountId,
-    methodName: "ft_transfer_call",
-    args: {
-      receiver_id: launchpad.accountId,
-      amount: listing1PreSaleTokens,
-      memo: null,
-      msg: JSON.stringify({
-        type: "FundListing",
-        listing_id: "0",
-      }),
-    },
-    attachedDeposit: new BN(1),
-    gas: new BN("300000000000000"),
-  });
 
   const listing2PreSaleTokens = "1000000000000000000000000";
   const listing2AllocationSize = "1000000000000000000000";
@@ -515,7 +468,7 @@ async function testnetSetup() {
     project_owner: ownerAccount.accountId,
     project_token: jumpTokenAccount.accountId,
     price_token: usdtTokenAccount.accountId,
-    listing_type: "Private",
+    listing_type: "Public",
     open_sale_1_timestamp_seconds: increaseTimeStamp(nowTimestamp, 1),
     open_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 2),
     final_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 3),
@@ -549,6 +502,55 @@ async function testnetSetup() {
       msg: JSON.stringify({
         type: "FundListing",
         listing_id: "1",
+      }),
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN("300000000000000"),
+  });
+
+  const listing1PreSaleTokens = "1000000000000000000000000";
+  const listing1AllocationSize = "1000000000000000000000";
+  const listing1AllocationPrice = "10000000";
+  const listingLPtokens = "0";
+  const listingLPprice = "0";
+  const listing1_data = {
+    project_owner: ownerAccount.accountId,
+    project_token: octopusTokenAccount.accountId,
+    price_token: usdtTokenAccount.accountId,
+    listing_type: "Private",
+    open_sale_1_timestamp_seconds: increaseTimeStamp(nowTimestamp, 1),
+    open_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 2),
+    final_sale_2_timestamp_seconds: increaseTimeStamp(nowTimestamp, 3),
+    liquidity_pool_timestamp_seconds: increaseTimeStamp(nowTimestamp, 4),
+    total_amount_sale_project_tokens: listing1PreSaleTokens,
+    token_allocation_size: listing1AllocationSize,
+    token_allocation_price: listing1AllocationPrice,
+    liquidity_pool_project_tokens: listingLPtokens,
+    liquidity_pool_price_tokens: listingLPprice,
+    fraction_instant_release: "10",
+    fraction_cliff_release: "50",
+    cliff_timestamp_seconds: increaseTimeStamp(nowTimestamp, 5),
+    end_cliff_timestamp_seconds: increaseTimeStamp(nowTimestamp, 6),
+    fee_price_tokens: "0",
+    fee_liquidity_tokens: "0",
+  };
+
+  await ownerAccount.functionCall({
+    contractId: launchpad.accountId,
+    methodName: "create_new_listing",
+    args: { listing_data: listing1_data },
+    attachedDeposit: new BN(1),
+  });
+  await ownerAccount.functionCall({
+    contractId: octopusTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: launchpad.accountId,
+      amount: listing1PreSaleTokens,
+      memo: null,
+      msg: JSON.stringify({
+        type: "FundListing",
+        listing_id: "0",
       }),
     },
     attachedDeposit: new BN(1),

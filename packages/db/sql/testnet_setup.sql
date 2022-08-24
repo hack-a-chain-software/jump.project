@@ -242,3 +242,157 @@ VALUES (
     'https://oin.finance/',
     'https://oin-finance.gitbook.io/925/'
   );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5nft1.testnet',
+    'https://paras-cdn.imgix.net/bafkreifa2m5phwxxyyqapzlgcdr7c26rot4r6jm6dqgityc2nkb5tsvceq?w=800&auto=format,compress',
+    ''
+  );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5nft2.testnet',
+    'https://paras-cdn.imgix.net/bafkreief64oulyor53cnwy5lvvsw7fg4jegcf6kvktkahgauwk63qx2njm?w=800&auto=format,compress',
+    ''
+  );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5nft3.testnet',
+    'https://paras-cdn.imgix.net/bafkreigynjl2dymbl42lm746rfy3gejgpo6xddcqaa75jku4u42ifig2wa?w=800&auto=format,compress',
+    ''
+  );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5gff.testnet',
+    'https://paras-cdn.imgix.net/bafybeign242fzlinls3uyvjv4xmgcq37vcxb36bioavfu7zxd4xpb3molu?w=800&auto=format,compress',
+    ''
+  );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5neph.testnet',
+    'https://paras-cdn.imgix.net/bafybeibmgxr3sewd4wpbbz54cp7zbfex46zvwup5netmhlls2wkf7cpnyu?w=800&auto=format,compress',
+    ''
+  );
+
+INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5cartel.testnet',
+    'https://paras-cdn.imgix.net/bafybeihkcxg5zpywkt4n3iuliaa6oriz35zsyhx54ou3onypxevqzyazza?w=800&auto=format,compress',
+    ''
+  );
+
+  INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5ntu.testnet',
+    'https://paras-cdn.imgix.net/bafkreidixsebqzucoj3sbwpt3xnogteirtqwhkifzflc72oy5qtkk3rgku?w=800&auto=format,compress',
+    ''
+  );
+
+  INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5dons.testnet',
+    'https://paras-cdn.imgix.net/bafkreiamzni6oq4jg3ztxbewrty57qnj3gbqjokfly7gssgs6nu2qmjima?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5nfca.testnet',
+    'https://paras-cdn.imgix.net/bafkreicfyhfkbhqrdglsyxghl7vx2djkhr2inbtsrbllbokdrj6jvglnl4?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5nrtn.testnet',
+    'https://paras-cdn.imgix.net/bafkreibql42tly53kang244kjdaqityi246w37qubgujxeeuloma7lbx6u?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5asac.testnet',
+    'https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5mara.testnet',
+    'https://paras-cdn.imgix.net/bafybeihyxgz6xf5skpkcxmkpelnxqwywzc5ixofmznxuhn7ytljttrrnky?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5mrbrn.testnet',
+    'https://paras-cdn.imgix.net/bafkreib7swm5bevrsdqcy4ntppdkk2ssn5a3crm66jamna4npohs7wmf44?w=800&auto=format,compress',
+    ''
+  );
+
+ INSERT INTO staking_programs_metadata (
+    collection_id,
+    collection_image,
+    collection_modal_image
+ ) 
+VALUES (
+    '6a50cca370177b6c50f5thebullishbulls.testnet',
+    'https://paras-cdn.imgix.net/bafkreiebgkqhsdsww5vowwxgcjcqey2ga57vb5jroiz6ebgwrlzpi24e6m?w=800&auto=format,compress',
+    ''
+  );

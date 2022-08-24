@@ -12,6 +12,7 @@ const {
     format: { formatNearAmount, parseNearAmount },
   },
   accountCreator: { UrlAccountCreator },
+  providers,
 } = nearAPI;
 
 setupListings();
@@ -155,6 +156,7 @@ async function setupListings() {
   //   },
   // ];
   const tokenArray = [];
+
   let counter = 0;
   for (tokenType of tokenArray) {
     console.log(counter);
@@ -168,11 +170,14 @@ async function setupListings() {
       methodName: "new",
       args: {
         owner_id: ownerAccount.accountId,
-        total_supply: "1000000000000000000000000000",
+        total_supply: "1000000000" + "0".repeat(tokenType.decimals),
         metadata: tokenType,
       },
     });
 
+    const totalAmount = "1000000" + "0".repeat(tokenType.decimals);
+    const allocationSize = "1000" + "0".repeat(tokenType.decimals);
+    const allocationPrice = generateRandom(10000000, 1000000000).toString();
     const listing_data = {
       project_owner: ownerAccount.accountId,
       project_token: newToken.accountId,
@@ -182,9 +187,9 @@ async function setupListings() {
       open_sale_2_timestamp_seconds: increaseTimeStamp(currentTimestamp, 2),
       final_sale_2_timestamp_seconds: increaseTimeStamp(currentTimestamp, 3),
       liquidity_pool_timestamp_seconds: increaseTimeStamp(currentTimestamp, 4),
-      total_amount_sale_project_tokens: "1000000000000000000000000",
-      token_allocation_size: "1000000000000000000000",
-      token_allocation_price: "10000000",
+      total_amount_sale_project_tokens: totalAmount,
+      token_allocation_size: allocationSize,
+      token_allocation_price: allocationPrice,
       liquidity_pool_project_tokens: "0",
       liquidity_pool_price_tokens: "0",
       fraction_instant_release: "10",
@@ -204,22 +209,23 @@ async function setupListings() {
       gas: new BN("300000000000000"),
       attachedDeposit: new BN("1500000000000000000000000"),
     });
-    await ownerAccount.functionCall({
+    const functionCallResponse = await ownerAccount.functionCall({
       contractId: accountMap.launchpad,
       methodName: "create_new_listing",
       args: { listing_data },
       attachedDeposit: new BN(1),
     });
+    const result = providers.getTransactionLastResult(functionCallResponse);
     await ownerAccount.functionCall({
       contractId: newToken.accountId,
       methodName: "ft_transfer_call",
       args: {
         receiver_id: accountMap.launchpad,
-        amount: "1000000000000000000000000",
+        amount: totalAmount,
         memo: null,
         msg: JSON.stringify({
           type: "FundListing",
-          listing_id: "0",
+          listing_id: result.toString(),
         }),
       },
       attachedDeposit: new BN(1),
@@ -359,9 +365,18 @@ async function setupListings() {
       },
     });
     const collection_rps = {};
-    collection_rps[accountMap.lockedTokenAccount] = "20000000000000";
-    collection_rps[accountMap.auroraTokenAccount] = "20000000000000";
-    collection_rps[accountMap.usdtTokenAccount] = "30";
+    collection_rps[accountMap.lockedTokenAccount] = generateRandom(
+      20000000000000,
+      2000000000000000
+    ).toString();
+    collection_rps[accountMap.auroraTokenAccount] = generateRandom(
+      20000000000000,
+      2000000000000000
+    ).toString();
+    collection_rps[accountMap.usdtTokenAccount] = generateRandom(
+      30,
+      3000
+    ).toString();
     const createStakingPayload = {
       collection_address: newNft.accountId,
       collection_owner: ownerAccount.accountId,
@@ -437,4 +452,20 @@ async function setupListings() {
     }
   };
   storeData(accountMap, "./account_map.json");
+}
+
+function generateRandom(min = 0, max = 100) {
+  // find diff
+  let difference = max - min;
+
+  // generate random number
+  let rand = Math.random();
+
+  // multiply with difference
+  rand = Math.floor(rand * difference);
+
+  // add with min value
+  rand = rand + min;
+
+  return rand;
 }

@@ -68,15 +68,11 @@ async function testnetSeed(seededUsers) {
 
   for (const seededUser of seededUsers) {
     // send usdt to invest in launchpad listings
-    await sendTokens(accountMap.usdtTokenAccount, "1000000000", seededUser);
+    sendTokens(accountMap.usdtTokenAccount, "1000000000", seededUser);
     // send jump token to be able to invest in launchpad
-    await sendTokens(
-      accountMap.jumpTokenAccount,
-      "10000000000000000000",
-      seededUser
-    );
+    sendTokens(accountMap.jumpTokenAccount, "10000000000000000000", seededUser);
     // send locked jump token to be able to check vesting page
-    await sendTokens(
+    sendTokens(
       accountMap.lockedTokenAccount,
       "10000000000000000000",
       seededUser

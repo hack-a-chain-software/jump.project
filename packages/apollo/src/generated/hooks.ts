@@ -117,11 +117,14 @@ export type NftPage = {
 export type NftStaking = {
   __typename?: "NFTStaking";
   collection_id: Scalars["ID"];
+  collection_image?: Maybe<Scalars["String"]>;
   collection_meta?: Maybe<CollectionMeta>;
+  collection_modal_image?: Maybe<Scalars["String"]>;
   collection_owner_id: Scalars["String"];
   early_withdraw_penalty?: Maybe<Scalars["String"]>;
   min_staking_period?: Maybe<Scalars["String"]>;
   rewards?: Maybe<Array<Maybe<NftStakingReward>>>;
+  round_interval?: Maybe<Scalars["String"]>;
   token_address: Scalars["ID"];
 };
 
@@ -383,6 +386,8 @@ export type NftStakingProjectsConnectionQuery = {
     data?: Array<{
       __typename?: "NFTStaking";
       collection_id: string;
+      collection_image?: string | null;
+      collection_modal_image?: string | null;
       collection_owner_id: string;
       token_address: string;
       collection_meta?: {
@@ -414,6 +419,8 @@ export type StakingProjectQuery = {
     __typename?: "NFTStaking";
     collection_id: string;
     collection_owner_id: string;
+    collection_image?: string | null;
+    collection_modal_image?: string | null;
     token_address: string;
     min_staking_period?: string | null;
     early_withdraw_penalty?: string | null;
@@ -741,6 +748,8 @@ export const NftStakingProjectsConnectionDocument = gql`
           image
           name
         }
+        collection_image
+        collection_modal_image
         collection_owner_id
         token_address
         rewards {
@@ -817,6 +826,8 @@ export const StakingProjectDocument = gql`
         name
       }
       collection_owner_id
+      collection_image
+      collection_modal_image
       token_address
       min_staking_period
       early_withdraw_penalty
