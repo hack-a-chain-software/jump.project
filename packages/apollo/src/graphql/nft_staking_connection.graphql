@@ -10,6 +10,8 @@ query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
         image
         name
       }
+      collection_image
+      collection_modal_image
       collection_owner_id
       token_address
       rewards {

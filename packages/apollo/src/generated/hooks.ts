@@ -117,11 +117,14 @@ export type NftPage = {
 export type NftStaking = {
   __typename?: "NFTStaking";
   collection_id: Scalars["ID"];
+  collection_image?: Maybe<Scalars["String"]>;
   collection_meta?: Maybe<CollectionMeta>;
+  collection_modal_image?: Maybe<Scalars["String"]>;
   collection_owner_id: Scalars["String"];
   early_withdraw_penalty?: Maybe<Scalars["String"]>;
   min_staking_period?: Maybe<Scalars["String"]>;
   rewards?: Maybe<Array<Maybe<NftStakingReward>>>;
+  round_interval?: Maybe<Scalars["String"]>;
   token_address: Scalars["ID"];
 };
 

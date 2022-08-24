@@ -68,7 +68,8 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query<NFTStaking>(
-        'select * from "staking_programs" where "collection_id" = $1 limit 1;',
+        `SELECT * FROM "staking_programs" AS s INNER JOIN "staking_programs_metadata" AS m 
+        ON (s.collection_id = m.collection_id) WHERE s.collection_id = $1 LIMIT 1`,
         {
           bind: [collection_id],
           type: QueryTypes.SELECT,
@@ -85,7 +86,8 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       return createPageableQuery(
-        'select * from "staking_programs"',
+        `SELECT * FROM "staking_programs" AS s INNER JOIN "staking_programs_metadata" AS m 
+        ON (s.collection_id = m.collection_id)`,
         sequelize,
         {
           limit,

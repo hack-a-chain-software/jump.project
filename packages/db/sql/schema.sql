@@ -86,6 +86,12 @@ create table if not exists staking_programs (
     round_interval numeric(21)
 );
 
+create table if not exists staking_programs_metadata (
+    collection_id text primary key references staking_programs (collection_id),
+    collection_image text,
+    collection_modal_image text
+);
+
 create table if not exists staked_nfts (
     nft_id text not null,
     collection_id text references staking_programs (collection_id),
