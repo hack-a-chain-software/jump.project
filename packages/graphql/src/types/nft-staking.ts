@@ -8,6 +8,9 @@ export type NFTStaking = {
   // farm: ID;
   min_staking_period: string;
   early_withdraw_penalty: string;
+  round_interval: string;
+  collection_image: string;
+  collection_modal_image: string;
 };
 
 export type StakedNFT = {

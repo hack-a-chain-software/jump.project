@@ -153,21 +153,27 @@ export type NFTPageFieldPolicy = {
 };
 export type NFTStakingKeySpecifier = (
   | "collection_id"
+  | "collection_image"
   | "collection_meta"
+  | "collection_modal_image"
   | "collection_owner_id"
   | "early_withdraw_penalty"
   | "min_staking_period"
   | "rewards"
+  | "round_interval"
   | "token_address"
   | NFTStakingKeySpecifier
 )[];
 export type NFTStakingFieldPolicy = {
   collection_id?: FieldPolicy<any> | FieldReadFunction<any>;
+  collection_image?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_meta?: FieldPolicy<any> | FieldReadFunction<any>;
+  collection_modal_image?: FieldPolicy<any> | FieldReadFunction<any>;
   collection_owner_id?: FieldPolicy<any> | FieldReadFunction<any>;
   early_withdraw_penalty?: FieldPolicy<any> | FieldReadFunction<any>;
   min_staking_period?: FieldPolicy<any> | FieldReadFunction<any>;
   rewards?: FieldPolicy<any> | FieldReadFunction<any>;
+  round_interval?: FieldPolicy<any> | FieldReadFunction<any>;
   token_address?: FieldPolicy<any> | FieldReadFunction<any>;
 };
 export type NFTStakingRewardKeySpecifier = (
