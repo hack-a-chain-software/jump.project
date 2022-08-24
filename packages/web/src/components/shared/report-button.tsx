@@ -60,7 +60,7 @@ export function ReportButton() {
           text-white
         "
         >
-          <ClipboardListIcon className="w-8" />
+          <ExclamationIcon className="w-8" />
 
           <span className="text-[18px]">Report Bug</span>
         </Flex>
