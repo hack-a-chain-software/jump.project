@@ -84,21 +84,21 @@ async function testnetSeed(seededUsers) {
 
     // mint nfts
     for (let i = 0; i < 4; i++) {
-      await mintNft(accountMap.nftCollection1Account, seededUser);
-      await mintNft(accountMap.nftCollection2Account, seededUser);
-      await mintNft(accountMap.nftCollection3Account, seededUser);
+      mintNft(accountMap.nftCollection1Account, seededUser);
+      mintNft(accountMap.nftCollection2Account, seededUser);
+      mintNft(accountMap.nftCollection3Account, seededUser);
 
-      await mintNft(accountMap["Good Fortune Felines"], seededUser);
-      await mintNft(accountMap["Nephilim"], seededUser);
-      await mintNft(accountMap["El Café Cartel - Gen 1"], seededUser);
-      await mintNft(accountMap["Near Tinker Union"], seededUser);
-      await mintNft(accountMap["The Dons"], seededUser);
-      await mintNft(accountMap["Near Future: Classic Art"], seededUser);
-      await mintNft(accountMap["NEARton NFT"], seededUser);
-      await mintNft(accountMap["Antisocial Ape Club"], seededUser);
-      await mintNft(accountMap["Mara"], seededUser);
-      await mintNft(accountMap["MR. BROWN"], seededUser);
-      await mintNft(accountMap["Bullish Bulls"], seededUser);
+      mintNft(accountMap["Good Fortune Felines"], seededUser);
+      mintNft(accountMap["Nephilim"], seededUser);
+      mintNft(accountMap["El Café Cartel - Gen 1"], seededUser);
+      mintNft(accountMap["Near Tinker Union"], seededUser);
+      mintNft(accountMap["The Dons"], seededUser);
+      mintNft(accountMap["Near Future: Classic Art"], seededUser);
+      mintNft(accountMap["NEARton NFT"], seededUser);
+      mintNft(accountMap["Antisocial Ape Club"], seededUser);
+      mintNft(accountMap["Mara"], seededUser);
+      mintNft(accountMap["MR. BROWN"], seededUser);
+      mintNft(accountMap["Bullish Bulls"], seededUser);
     }
   }
 }
