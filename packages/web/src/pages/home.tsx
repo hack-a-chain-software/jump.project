@@ -3,6 +3,7 @@ import isEmpty from "lodash/isEmpty";
 import { useState, useCallback, Fragment, useEffect } from "react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
+import { debounce } from "lodash-es";
 import {
   useViewInvestor,
   useViewLaunchpadSettings,
@@ -82,7 +83,8 @@ export function Home() {
 
   const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
-  const { data: launchpadSettings } = useViewLaunchpadSettings();
+  const { data: launchpadSettings, loading: loadingLaunchpadSettings } =
+    useViewLaunchpadSettings();
 
   const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
     useNearQuery<string, { account_id: string }>("ft_balance_of", {
@@ -123,38 +125,35 @@ export function Home() {
       limit: PAGINATE_LIMIT,
       accountId: accountId ?? "",
     },
+    notifyOnNetworkStatusChange: true,
   });
 
   useEffect(() => {
-    setLoadingItems(true);
-
-    refetch({
-      ...queryVariables,
-      offset: 0,
-    });
-
-    setLoadingItems(false);
-
-    return () => {};
+    (async () => {
+      await refetch({
+        ...queryVariables,
+        offset: 0,
+      });
+    })();
   }, [queryVariables]);
 
   const fetchMoreItems = useCallback(
-    async (queryVariables: LaunchpadConenctionQueryVariables) => {
-      setLoadingItems(!loadingItems);
-
+    debounce(async (queryVariables: LaunchpadConenctionQueryVariables) => {
       if (loadingProjects || !hasNextPage) {
         return;
       }
 
+      setLoadingItems(true);
+
       await fetchMore({
         variables: {
-          ...queryVariables,
           offset: (launchpadProjects ?? []).length,
+          ...queryVariables,
         },
       });
 
-      setLoadingItems(!loadingItems);
-    },
+      setLoadingItems(false);
+    }, 240),
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
 
@@ -206,9 +205,11 @@ export function Home() {
 
   const isLoaded = useMemo(() => {
     return (
-      !!launchpadSettings && !loadingBaseTokenBalance && !loadingProjectToken
+      !loadingLaunchpadSettings &&
+      !loadingBaseTokenBalance &&
+      !loadingProjectToken
     );
-  }, [launchpadSettings, loadingBaseTokenBalance, investor.data]);
+  }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
 
   const lastCheck = useMemo(() => {
     return new Date(Number(investor?.data?.last_check!) / 1_000_000);
@@ -449,48 +450,32 @@ export function Home() {
           </Thead>
 
           <Tbody>
-            <If
-              condition={!isEmpty(launchpadProjects)}
-              fallback={
-                loadingProjects ? (
-                  <Tr>
-                    <Td>
-                      <Skeleton className="w-[30px] h-[30px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                    <Td>
-                      <Skeleton className="w-full h-[22.5px] rounded-full" />
-                    </Td>
-                  </Tr>
-                ) : (
-                  <Tr>
-                    <Td colSpan={8} className="flex items-center">
-                      <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
+            {isEmpty(launchpadProjects) && !loadingProjects && (
+              <Tr>
+                <Td colSpan={8} className="flex items-center">
+                  <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
 
-                      <span>No items available</span>
-                    </Td>
-                  </Tr>
-                )
-              }
-            >
-              {(launchpadProjects ?? []).map((e, index) => (
+                  <span>No items available</span>
+                </Td>
+              </Tr>
+            )}
+
+            {loadingProjects && !loadingItems && (
+              <Tr>
+                <Td>
+                  <Skeleton className="w-[30px] h-[30px] rounded-full" />
+                </Td>
+                {[...Array(7)].map((_, i) => (
+                  <Td key={`launchpad-skeleton-${i}`}>
+                    <Skeleton className="w-full h-[22.5px] rounded-full" />
+                  </Td>
+                ))}
+              </Tr>
+            )}
+
+            {(loadingItems ||
+              (!isEmpty(launchpadProjects) && !loadingProjects)) &&
+              (launchpadProjects ?? []).map((e, index) => (
                 <Tr
                   cursor="pointer"
                   fontSize="18px"
@@ -577,12 +562,11 @@ export function Home() {
                   </Td>
                 </Tr>
               ))}
-            </If>
           </Tbody>
         </Table>
       </TableContainer>
 
-      {hasNextPage && !loadingProjects && (
+      {hasNextPage && (
         <Flex className="flex items-center justify-center">
           <Button
             className="w-[168px]"

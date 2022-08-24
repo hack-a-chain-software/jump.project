@@ -3,11 +3,12 @@ import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
 import { useTheme } from "@/hooks/theme";
-import { formatNumber } from "@near/ts";
 import { Token, StakingToken } from "@near/ts";
 import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { format, isBefore, addMilliseconds } from "date-fns";
+import { BigDecimalFloat } from "@near/ts";
+import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 export function TokenAccordion({
   token,
@@ -47,6 +48,16 @@ export function TokenAccordion({
 
     return penaltyBN.div(denom).toString() + "%";
   }, [rewards, token_id, penalty]);
+
+  const getFormatedBalance = (balance, decimals) => {
+    const decimalsBN = new BN(decimals).neg();
+    const balanceBN = new BN(balance);
+
+    return new BigDecimalFloat(balanceBN, decimalsBN).toLocaleString(
+      "en",
+      CURRENCY_FORMAT_OPTIONS
+    );
+  };
 
   return (
     <motion.div
@@ -110,21 +121,30 @@ export function TokenAccordion({
                 </Flex>
 
                 <Flex gap="15px" width="100%" flexWrap="wrap">
-                  {rewards?.map(({ account_id, name, symbol, decimals }, i) => (
-                    <ValueBox
-                      className="md:min-w-[250px]"
-                      borderColor={glassyWhiteOpaque}
-                      title={name + " Rewards"}
-                      color="white"
-                      value={
-                        formatNumber(Number(balance[account_id]), decimals) +
-                        " " +
-                        symbol
-                      }
-                      bottomText={`Total accumulated`}
-                      key={"nft-staking-rewards" + i}
-                    />
-                  ))}
+                  {rewards?.map(
+                    ({ account_id, icon, name, symbol, decimals }, i) => (
+                      <ValueBox
+                        className="md:min-w-[250px]"
+                        borderColor={glassyWhiteOpaque}
+                        title={name + " Rewards"}
+                        color="white"
+                        value={
+                          <Flex className="items-top space-x-[4px]">
+                            {icon && <Image src={icon} className="h-[28px]" />}
+
+                            <Text
+                              children={getFormatedBalance(
+                                balance[account_id],
+                                decimals
+                              )}
+                            />
+                          </Flex>
+                        }
+                        bottomText={symbol}
+                        key={"nft-staking-rewards" + i}
+                      />
+                    )
+                  )}
                 </Flex>
               </Flex>
             </Flex>

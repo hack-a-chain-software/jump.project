@@ -101,6 +101,7 @@ export const TopCard = ({
           bottom="0"
           maxH="100%"
           overflow="hidden"
+          opacity={0.1}
         >
           {jumpLogo && <JumpBigWhite />}
         </Flex>
