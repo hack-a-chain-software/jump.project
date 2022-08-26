@@ -1163,7 +1163,6 @@ dependencies = [
 name = "indexer"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "bb8",
  "bb8-postgres",
  "chrono",
@@ -1181,6 +1180,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "tracing-subscriber",
+ "vec_box",
 ]
 
 [[package]]
@@ -2497,6 +2497,12 @@ name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
+
+[[package]]
+name = "vec_box"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5283fc94a1cd6b5199f707a4b4d7f885b9457d430d111c68a07d3e3d199fb2b"
 
 [[package]]
 name = "version_check"
