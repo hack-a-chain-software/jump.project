@@ -126,3 +126,12 @@ begin
 end
 $$
 language plpgsql volatile;
+
+create table if not exists processed_events (
+    block_height numeric(21) not null,
+    log_index numeric(21) not null,
+    primary key (block_height, log_index),
+
+    succeeded boolean not null,
+    error text
+);

@@ -1,14 +1,15 @@
-use super::Event;
-use crate::pool::PgPooledConnection;
-use crate::types::json_types::{U128, U64};
-use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
-use crate::types::AccountId;
-use crate::events::launchpad::{U64toUTC};
-use async_trait::async_trait;
+use postgres_types::ToSql;
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use crate::types::json_types::{U128, U64};
+use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
+use crate::types::AccountId;
+
+use super::convert::{u128_to_decimal, u32_to_decimal, u64_to_decimal, u64_to_utc};
+use super::Event;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateStakingProgramLog {
@@ -32,7 +33,7 @@ pub struct UpdateStakingProgramLog {
 pub struct StakeNftLog {
     pub token_id: NonFungibleTokenId,
     pub owner_id: AccountId,
-    pub staked_timestamp: u64,
+    pub staked_timestamp: U64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -52,9 +53,53 @@ pub enum NftStakingEvent {
     UnstakeNft([UnstakeNftLog; 1]),
 }
 
-#[async_trait]
 impl Event for NftStakingEvent {
-    async fn sql_query(&self, conn: &mut PgPooledConnection) {
+    fn kind(&self) -> &'static str {
+        match &self {
+            Self::CreateStakingProgram(_) => "nft0",
+            Self::UpdateStakingProgram(_) => "nft1",
+            Self::StakeNft(_) => "nft2",
+            Self::UnstakeNft(_) => "nft3",
+        }
+    }
+
+    fn raw_statements(&self) -> &'static [&'static str] {
+        match &self {
+            Self::CreateStakingProgram(_) => &["
+                    insert into staking_programs (
+                        collection_id,
+                        collection_owner_id,
+                        token_address,
+                        min_staking_period,
+                        early_withdraw_penalty,
+                        round_interval
+                    )
+                    values ($1, $2, $3, $4, $5, $6)"],
+
+            Self::UpdateStakingProgram(_) => &["
+                    update staking_programs
+                    set 
+                        early_withdraw_penalty = coallesce($2, early_withdraw_penalty)
+                        min_staking_period = coallesce($3, min_staking_period)
+                    where collection_id = $1"],
+
+            Self::StakeNft(_) => &["
+                    insert into staked_nfts (
+                        nft_id,
+                        collection_id,
+                        owner_id,
+                        staked_timestamp
+                    )
+                    values ($1, $2, $3, $4)"],
+
+            Self::UnstakeNft(_) => &["
+                    delete from staked_nfts
+                    where nft_id = $1
+                    and collection_id = $2"],
+        }
+    }
+
+    fn parameters(&self) -> Vec<Vec<Box<dyn ToSql + Sync + '_>>> {
         match &self {
             Self::CreateStakingProgram(
                 [CreateStakingProgramLog {
@@ -66,31 +111,14 @@ impl Event for NftStakingEvent {
                     early_withdraw_penalty,
                     round_interval,
                 }],
-            ) => {
-                conn.query(
-                    "
-                    insert into staking_programs (
-                        collection_id,
-                        collection_owner_id,
-                        token_address,
-                        min_staking_period,
-                        early_withdraw_penalty,
-                        round_interval
-                    )
-                    values ($1, $2, $3, $4, $5, $6)
-                ",
-                    &[
-                        collection_address,
-                        collection_owner,
-                        token_address,
-                        &Decimal::from_u64(min_staking_period.0).unwrap(),
-                        &Decimal::from_u128(early_withdraw_penalty.0).unwrap(),
-                        &Decimal::from_u32(*round_interval).unwrap(),
-                    ],
-                )
-                .await
-                .unwrap();
-            }
+            ) => vec![vec_box![
+                collection_address,
+                collection_owner,
+                token_address,
+                u64_to_decimal(min_staking_period),
+                u128_to_decimal(early_withdraw_penalty),
+                u32_to_decimal(*round_interval),
+            ]],
 
             &Self::UpdateStakingProgram(
                 [UpdateStakingProgramLog {
@@ -98,23 +126,11 @@ impl Event for NftStakingEvent {
                     early_withdraw_penalty,
                     min_staking_period,
                 }],
-            ) => {
-                conn.query(
-                    "
-                    update staking_programs
-                    set
-                        early_withdraw_penalty = coallesce($2, early_withdraw_penalty)
-                        min_staking_period = coallesce($3, min_staking_period)
-                    where collection_id = $1",
-                    &[
-                        collection_address,
-                        &early_withdraw_penalty.and_then(|v| Decimal::from_u128(v.0)),
-                        &min_staking_period.and_then(|v| Decimal::from_u64(v.0)),
-                    ],
-                )
-                .await
-                .unwrap();
-            }
+            ) => vec![vec_box![
+                collection_address.clone(),
+                early_withdraw_penalty.and_then(|v| Decimal::from_u128(v.0)),
+                min_staking_period.and_then(|v| Decimal::from_u64(v.0)),
+            ]],
 
             Self::StakeNft(
                 [StakeNftLog {
@@ -125,25 +141,12 @@ impl Event for NftStakingEvent {
             ) => {
                 let (collection_id, nft_id) = split_ids(token_id);
 
-                conn.query(
-                    "
-                    insert into staked_nfts (
-                        nft_id,
-                        collection_id,
-                        owner_id,
-                        staked_timestamp
-                    )
-                    values ($1, $2, $3, $4)
-                ",
-                    &[
-                        nft_id,
-                        collection_id,
-                        owner_id,
-                        &U64toUTC(U64(*staked_timestamp)),
-                    ],
-                )
-                .await
-                .unwrap();
+                vec![vec_box![
+                    nft_id,
+                    collection_id,
+                    owner_id.clone(),
+                    u64_to_decimal(staked_timestamp),
+                ]]
             }
 
             Self::UnstakeNft(
@@ -154,16 +157,7 @@ impl Event for NftStakingEvent {
             ) => {
                 let (collection_id, nft_id) = split_ids(token_id);
 
-                conn.query(
-                    "
-                    delete from staked_nfts
-                    where nft_id = $1
-                    and collection_id = $2
-                ",
-                    &[nft_id, collection_id],
-                )
-                .await
-                .unwrap();
+                vec![vec_box![nft_id, collection_id]]
             }
         }
     }
