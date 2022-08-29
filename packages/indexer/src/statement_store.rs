@@ -21,7 +21,7 @@ impl StatementStore {
 
         let log_success_statement = conn
             .prepare(
-                "insert into processed_events (block_height, log_index, success)
+                "insert into processed_events (block_height, log_index, succeeded)
                 values ($1, $2, true);",
             )
             .await
@@ -31,7 +31,7 @@ impl StatementStore {
 
         let log_failure_statement = conn
             .prepare(
-                "insert into processed_events (block_height, log_index, success, error)
+                "insert into processed_events (block_height, log_index, succeeded, error)
                 values ($1, $2, false, $3);",
             )
             .await

@@ -52,7 +52,7 @@ async fn main() -> Result<(), tokio::io::Error> {
 async fn get_current_block_height(conn: PgPooledConnection) -> u64 {
     let numeric_block_height: Decimal = conn
         .query_one(
-            "SELECT MAX(block_height) FROM processed_events WHERE success = true",
+            "SELECT COALESCE(MAX(block_height), 0::numeric) FROM processed_events WHERE succeeded = true",
             &[],
         )
         .await
