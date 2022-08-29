@@ -44,8 +44,8 @@ impl From<StakingProgram> for SerializableStakingProgram {
 
 #[derive(Serialize, Deserialize)]
 pub struct SerializableFarm {
-  pub round_interval: u32,
-  pub start_at: u32,
+  pub round_interval: u64,
+  pub start_at: u64,
   pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
 }
 

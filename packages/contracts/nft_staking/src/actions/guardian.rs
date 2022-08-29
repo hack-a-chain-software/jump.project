@@ -44,14 +44,14 @@ pub struct CreateStakingProgramPayload {
   pub collection_rps: HashMap<FungibleTokenID, U128>,
   pub min_staking_period: U64,
   pub early_withdraw_penalty: U128,
-  pub round_interval: u32,
+  pub round_interval: u64, // amount of miliseconds between rounds
+  pub start_in: u64,       // amount of miliseconds until the farm starts
 }
 
 #[near_bindgen]
 impl Contract {
   #[payable]
   pub fn create_staking_program(&mut self, payload: CreateStakingProgramPayload) {
-    // panic!("TESTING_PANICS")
     let event_payload = payload.clone();
 
     self.only_guardians(env::predecessor_account_id());
@@ -73,7 +73,14 @@ impl Contract {
       .map(|(k, v)| (k.clone(), v.0))
       .collect();
 
-    let farm = Farm::new(collection.clone(), collection_rps, payload.round_interval);
+    let start_at = env::block_timestamp_ms() + payload.start_in;
+
+    let farm = Farm::new(
+      collection.clone(),
+      collection_rps,
+      payload.round_interval,
+      start_at,
+    );
 
     let staking_program = StakingProgram::new(
       farm,
