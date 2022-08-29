@@ -77,6 +77,10 @@ impl StatementStore {
         }
         let statements = self.prepared_statements.get(event.kind()).unwrap();
 
+        if statements.len() == 0 {
+            return;
+        }
+
         let transaction = self.conn.build_transaction().start().await.unwrap();
 
         for (statement, boxed_params) in statements.iter().zip(parameters.iter()) {

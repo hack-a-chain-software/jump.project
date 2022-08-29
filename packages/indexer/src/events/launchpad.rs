@@ -189,9 +189,7 @@ impl Event for LaunchpadEvent {
                 set staked_token = $2
                 where account_id = $1"],
 
-            Self::AddGuardian(_) | Self::RemoveGuardian(_) | Self::RetrieveTreasuryFunds(_) => {
-                todo!()
-            }
+            Self::AddGuardian(_) | Self::RemoveGuardian(_) | Self::RetrieveTreasuryFunds(_) => &[],
         }
     }
 
@@ -301,7 +299,7 @@ impl Event for LaunchpadEvent {
             ) => vec![vec_box![investor_id, u128_to_decimal(token_quantity)]],
 
             Self::AddGuardian(_) | Self::RemoveGuardian(_) | Self::RetrieveTreasuryFunds(_) => {
-                todo!()
+                vec![]
             }
         }
     }
