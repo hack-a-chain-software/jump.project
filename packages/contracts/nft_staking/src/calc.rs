@@ -1,10 +1,4 @@
-use near_sdk::Timestamp;
-
 use crate::{constants::DENOM_U256, types::u256::U256};
-
-pub const fn to_sec(timestamp: Timestamp) -> u32 {
-  (timestamp / 10u64.pow(9)) as u32
-}
 
 pub const fn ceil_division(a: u128, b: u128) -> u128 {
   a / b + (a % b != 0) as u128
