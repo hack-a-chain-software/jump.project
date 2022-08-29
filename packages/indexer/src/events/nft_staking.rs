@@ -8,7 +8,7 @@ use crate::types::json_types::{U128, U64};
 use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
 use crate::types::AccountId;
 
-use super::convert::{u128_to_decimal, u32_to_decimal, u64_to_decimal, u64_to_utc};
+use super::convert::{u128_to_decimal, u32_to_decimal, u64_to_decimal};
 use super::Event;
 
 #[derive(Serialize, Deserialize, Debug)]
