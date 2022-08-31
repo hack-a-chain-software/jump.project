@@ -77,7 +77,8 @@ async function testnetSeed(seededUsers) {
     });
   }
 
-  for (const seededUser of seededUsers) {
+  for (let seededUser of seededUsers) {
+    seededUser = seededUser.toLowerCase();
     // send usdt to invest in launchpad listings
     callbackList.push(
       sendTokens(accountMap.usdtTokenAccount, "1000000000", seededUser).catch(
@@ -103,84 +104,31 @@ async function testnetSeed(seededUsers) {
     );
 
     // mint nfts
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 1; i++) {
       callbackList.push(
         mintNft(accountMap.nftCollection1Account, seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap.nftCollection2Account, seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap.nftCollection3Account, seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-
-      callbackList.push(
-        mintNft(accountMap["Good Fortune Felines"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Nephilim"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["El Café Cartel - Gen 1"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Near Tinker Union"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["The Dons"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Near Future: Classic Art"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["NEARton NFT"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Antisocial Ape Club"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Mara"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["MR. BROWN"], seededUser).catch((e) =>
-          invalidCallback(seededUser, e)
-        )
-      );
-      callbackList.push(
-        mintNft(accountMap["Bullish Bulls"], seededUser).catch((e) =>
           invalidCallback(seededUser, e)
         )
       );
     }
   }
 
-  Promise.all(callbackList).then((_) =>
-    console.log("Invalid account IDs:", invalidSet)
-  );
+  await Promise.all(callbackList);
+  console.log("Invalid account IDs:", invalidSet);
 }
 
-testnetSeed(process.argv);
+async function batched(all) {
+  function* chunks(arr, n) {
+    for (let i = 0; i < arr.length; i += n) {
+      yield arr.slice(i, i + n);
+    }
+  }
+  let count = 0;
+  for (let chunk of chunks(all, 10)) {
+    count += chunk.length;
+    console.log(count);
+    await testnetSeed(chunk);
+  }
+}
+
+batched(process.argv);
