@@ -240,7 +240,7 @@ export function Home() {
     >
       <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
-          gradientText="Launchpad"
+          gradientText="Jump Pad"
           bigText="Stake. Help. Earn."
           bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
