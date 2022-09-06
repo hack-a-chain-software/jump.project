@@ -130,3 +130,32 @@ begin
 end
 $$
 language plpgsql volatile;
+
+create or replace function investor_withdraw_allocations(
+    investor_id text,
+    listing_id text,
+    project_status listing_status,
+    project_tokens_withdrawn u128
+)
+returns void
+as $$
+begin;
+    update allocations
+    set quantity_withdrawn = quantity_withdrawn + $4
+    where account_id = $1
+    and listing_id = $2;
+
+    update listings
+    set status = $3
+    where listing_id = $2;
+end;
+$$ language plpgsql volatile;
+
+create table if not exists processed_events (
+    block_height numeric(21) not null,
+    log_index numeric(21) not null,
+    primary key (block_height, log_index),
+
+    succeeded boolean not null,
+    error text
+);

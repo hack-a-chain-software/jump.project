@@ -1,15 +1,13 @@
-use crate::calc::ceil_division;
-use crate::calc::denom_convert;
-use crate::calc::denom_division;
-use crate::calc::to_sec;
-use crate::types::u256::U256;
-use crate::types::*;
-use crate::StorageKey;
+use std::collections::HashMap;
+
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::env;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
+use crate::calc::{ceil_division, denom_convert, denom_division};
+use crate::types::{u256::U256, *};
+use crate::StorageKey;
 
 type TokenRPS = HashMap<FungibleTokenID, U256>;
 
@@ -19,7 +17,7 @@ pub struct RewardsDistribution {
   pub unclaimed: u128,
   pub beneficiary: u128,
   pub rps: U256,
-  pub rr: u32,
+  pub rr: u64,
   pub reward: u128,
 }
 
@@ -35,7 +33,7 @@ impl RewardsDistribution {
     }
   }
 
-  pub fn distribute(&self, total_seeds: u64, round: u32) -> Self {
+  pub fn distribute(&self, total_seeds: u64, round: u64) -> Self {
     let mut dist = self.clone();
     dist.rr = round;
 
@@ -45,7 +43,7 @@ impl RewardsDistribution {
     if self.undistributed < added_reward {
       added_reward = self.undistributed;
 
-      let increment_rr = ceil_division(added_reward, self.reward) as u32;
+      let increment_rr: u64 = ceil_division(added_reward, self.reward).try_into().unwrap();
 
       dist.rr = self.rr + increment_rr;
     }
@@ -92,8 +90,8 @@ impl RewardsDistribution {
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize)]
 pub struct Farm {
-  pub round_interval: u32,
-  pub start_at: u32,
+  pub round_interval: u64, // duration of a round in miliseconds
+  pub start_at: u64, // timestamp in miliseconds to be used as t_0 for the lazy distribution calculations
 
   pub distributions: HashMap<FungibleTokenID, RewardsDistribution>,
 
@@ -117,8 +115,14 @@ impl Farm {
   pub fn new(
     collection: NFTCollection,
     collection_round_reward: FungibleTokenBalance,
-    round_interval: u32,
+    round_interval: u64,
+    start_at: u64,
   ) -> Self {
+    assert!(
+      start_at <= env::block_timestamp_ms(),
+      "cannot use a timestamp in the past as start_at parameter"
+    );
+
     let mut get_key = get_key_closure(collection);
 
     let mut distributions = HashMap::new();
@@ -128,7 +132,7 @@ impl Farm {
 
     Farm {
       round_interval,
-      start_at: 0,
+      start_at,
       distributions,
       nfts_rps: UnorderedMap::new(get_key()),
     }
@@ -156,8 +160,8 @@ impl Farm {
     amount
   }
 
-  fn round(&self) -> u32 {
-    let delta_t = to_sec(env::block_timestamp())
+  fn round(&self) -> u64 {
+    let delta_t = env::block_timestamp_ms()
       .checked_sub(self.start_at)
       .unwrap_or(0);
 
@@ -264,7 +268,7 @@ mod tests {
     }
 
     Farm {
-      round_interval: 15,
+      round_interval: 15000,
       start_at: 0,
       distributions,
       nfts_rps: UnorderedMap::new(b'd'),
@@ -292,7 +296,7 @@ mod tests {
   fn test_rewards_distribution_distribute(
     #[case] index: usize,
     #[case] total_seeds: u64,
-    #[case] rounds: u32,
+    #[case] rounds: u64,
     #[case] expected: (u128, u128, u128),
   ) {
     let context = get_context();
@@ -312,7 +316,7 @@ mod tests {
   #[case(44, 2)]
   #[case(1, 0)]
   #[case(15, 1)]
-  fn test_farm_round(#[case] block_seconds: u64, #[case] round: u32) {
+  fn test_farm_round(#[case] block_seconds: u64, #[case] round: u64) {
     let mut context = get_context();
     context.block_timestamp(block_seconds * 10u64.pow(9));
     testing_env!(context.build());

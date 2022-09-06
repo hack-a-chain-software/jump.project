@@ -22,7 +22,7 @@ pub enum SalePhase {
     Phase2,
 }
 
-#[derive(Debug, ToSql, FromSql, Deserialize, Serialize)]
+#[derive(Debug, Clone, ToSql, FromSql, Deserialize, Serialize)]
 #[postgres(name = "listing_status")]
 pub enum ListingStatus {
     #[postgres(name = "unfunded")]
@@ -68,7 +68,7 @@ pub struct ListingV1 {
 
     pub status: ListingStatus,
 
-    pub dex_id: Option<u64>,
+    pub dex_id: Option<U64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

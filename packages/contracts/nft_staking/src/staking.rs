@@ -89,8 +89,9 @@ impl StakingProgram {
       collection,
       collection_owner,
       collection_treasury: HashMap::new(),
-      farm,
       token_address,
+
+      farm,
       min_staking_period,
       early_withdraw_penalty,
 
@@ -289,7 +290,7 @@ mod tests {
 
     let [collection] = get_collections();
 
-    [Farm::new(collection, rps, 1)]
+    [Farm::new(collection, rps, 1000, 0)]
   }
 
   fn get_staking_program() -> StakingProgram {
