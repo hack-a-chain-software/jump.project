@@ -159,7 +159,7 @@ export const Staking = () => {
                   fontWeight="800"
                   letterSpacing="-0.03em"
                 >
-                  Jump
+                  xJump
                 </GradientText>
                 <Text
                   fontSize={50}
