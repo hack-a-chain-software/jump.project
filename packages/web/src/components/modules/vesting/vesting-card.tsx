@@ -5,7 +5,7 @@ import { Button, ValueBox } from "@/components";
 import { WalletIcon } from "@/assets/svg";
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
-import { formatNumber } from "@near/ts";
+import { formatNumber, getUTCDate } from "@near/ts";
 import {
   useVestingStore,
   Vesting,
@@ -24,7 +24,7 @@ export function VestingCard(
     useTheme();
 
   const createdAt = useMemo(() => {
-    return new Date(Number(props.start_timestamp) / 1000000);
+    return getUTCDate(Number(props.start_timestamp) / 1000000);
   }, [props.start_timestamp]);
 
   const endAt = useMemo(() => {
@@ -123,7 +123,7 @@ export function VestingCard(
                 fontWeight="800"
                 letterSpacing="-0.03em"
               >
-                {`${format(new Date(), "dd MMMM y")} - Vesting`}
+                {`${format(getUTCDate(), "dd MMMM y")} - Vesting`}
               </Text>
             </Flex>
 

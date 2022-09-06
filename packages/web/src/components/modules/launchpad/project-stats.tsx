@@ -1,7 +1,8 @@
 import BN from "bn.js";
 import { useMemo } from "react";
+import { format, isBefore } from "date-fns";
 import { Card } from "@/components";
-import { formatNumber } from "@near/ts";
+import { formatNumber, getUTCDate } from "@near/ts";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
 import {
@@ -30,9 +31,8 @@ export function ProjectStats({
   const { accountId } = useWalletSelector();
 
   const formatDate = (start_timestamp?: string) => {
-    const date = new Date(Number(start_timestamp ?? "0"));
-
-    return date.toLocaleDateString();
+    const date = getUTCDate(Number(start_timestamp ?? "0"));
+    return format(date, "dd/mm/yyyy");
   };
 
   const totalRaise = useMemo(() => {

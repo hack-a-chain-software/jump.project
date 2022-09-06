@@ -7,7 +7,7 @@ import { Token, StakingToken } from "@near/ts";
 import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { format, isBefore, addMilliseconds } from "date-fns";
-import { BigDecimalFloat } from "@near/ts";
+import { BigDecimalFloat, getUTCDate } from "@near/ts";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 export function TokenAccordion({
@@ -28,7 +28,7 @@ export function TokenAccordion({
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
   const staked = useMemo(() => {
-    return new Date(Number(stakedAt) / 1000000);
+    return getUTCDate(Number(stakedAt) / 1000000);
   }, [stakedAt, token_id]);
 
   const endPenalty = useMemo(() => {
@@ -36,7 +36,7 @@ export function TokenAccordion({
   }, [minStakedPeriod, token_id]);
 
   const hasWithdrawPenalty = useMemo(() => {
-    const today = new Date();
+    const today = getUTCDate();
 
     return isBefore(today, endPenalty);
   }, [staked, endPenalty, token_id]);

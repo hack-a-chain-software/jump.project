@@ -46,7 +46,7 @@ import {
 } from "../components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { BigDecimalFloat, formatNumber } from "@near/ts";
+import { BigDecimalFloat, formatNumber, getUTCDate } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
@@ -212,7 +212,7 @@ export function Home() {
   }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
 
   const lastCheck = useMemo(() => {
-    return new Date(Number(investor?.data?.last_check!) / 1_000_000);
+    return getUTCDate(Number(investor?.data?.last_check!) / 1_000_000);
   }, [investor?.data]);
 
   const endVesting = useMemo(() => {
@@ -223,7 +223,7 @@ export function Home() {
   }, [launchpadSettings]);
 
   const isLocked = useMemo(() => {
-    const now = new Date();
+    const now = getUTCDate();
 
     return isBefore(now, endVesting);
   }, [investor?.data, launchpadSettings]);
