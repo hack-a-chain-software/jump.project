@@ -15,9 +15,16 @@ use near_contract_standards::fungible_token::metadata::{
 use near_contract_standards::fungible_token::FungibleToken;
 use std::convert::TryInto;
 
+use uint::construct_uint;
+
 pub mod actions;
 pub mod errors;
 pub mod ext_interface;
+
+// U1024 with 256 bits consisting of 4 x 64-bit words
+construct_uint! {
+  pub struct U256(4);
+}
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -80,7 +87,10 @@ impl Contract {
       x_token_emission = quantity_deposited;
     } else {
       x_token_emission =
-        (quantity_deposited * self.ft_functionality.total_supply) / self.base_token_treasury;
+        (
+          (U256::from(quantity_deposited) * U256::from(self.ft_functionality.total_supply)) 
+          / U256::from(self.base_token_treasury)
+        ).try_into().unwrap();
     }
     // add tokens to recipient
     self
@@ -109,7 +119,9 @@ impl Contract {
   pub fn internal_burn_x_token(&mut self, quantity_to_burn: u128, recipient: AccountId) -> u128 {
     // calculate correct proportion
     let normal_token_withdraw =
-      (quantity_to_burn * self.base_token_treasury) / self.ft_functionality.total_supply;
+      (
+        (U256::from(quantity_to_burn) * U256::from(self.base_token_treasury)) / U256::from(self.ft_functionality.total_supply)
+    ).try_into().unwrap();
     // burn xTokens
     self
       .ft_functionality
