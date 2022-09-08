@@ -3,7 +3,8 @@ import { useMemo } from "react";
 import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
 import { tokenMetadata, launchpadProject } from "@/interfaces";
-import { Flex, Skeleton, Image, Text } from "@chakra-ui/react";
+import { Flex, Skeleton, Image, Text, Box } from "@chakra-ui/react";
+import { useTheme } from "../../../hooks/theme";
 
 export function ProjectInfo({
   isLoading,
@@ -14,6 +15,8 @@ export function ProjectInfo({
   launchpadProject: launchpadProject;
   metadataPriceToken: tokenMetadata;
 }) {
+  const { glassyWhiteOpaque } = useTheme();
+
   const finalPrice = useMemo(() => {
     if (!metadataPriceToken?.decimals && launchpadProject) {
       return "0";
@@ -34,6 +37,9 @@ export function ProjectInfo({
             isLoaded={!isLoading}
           >
             <Image
+              borderRadius={99}
+              border="solid 3px"
+              borderColor={glassyWhiteOpaque}
               className="w-[50px] h-[50px]"
               src={launchpadProject?.project_token_info?.image || ""}
             />

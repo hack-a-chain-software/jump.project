@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import { ValueBox, If } from "@/components";
-import { Text, Flex, Image, Skeleton } from "@chakra-ui/react";
+import { Text, Flex, Image, Skeleton, Box } from "@chakra-ui/react";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { StakingToken } from "@near/ts";
 import { useMemo } from "react";
@@ -8,12 +8,14 @@ import isEmpty from "lodash/isEmpty";
 import { BigDecimalFloat } from "@near/ts";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { useTheme } from "../../../hooks/theme";
 
 export function NFTStakingUserRewards({
   rewards,
 }: {
   rewards: StakingToken[];
 }) {
+  const { glassyWhiteOpaque } = useTheme();
   const { tokens } = useNftStaking();
   const { accountId } = useWalletSelector();
 
@@ -72,8 +74,15 @@ export function NFTStakingUserRewards({
                 value={
                   accountId ? (
                     <Flex className="items-top space-x-[4px]">
-                      {icon && <Image src={icon} className="h-[28px]" />}
-
+                      {icon && (
+                        <Image
+                          borderRadius={99}
+                          border="solid 3px"
+                          borderColor={glassyWhiteOpaque}
+                          src={icon}
+                          className="h-[28px]"
+                        />
+                      )}
                       <Text children={userBalance} />
                     </Flex>
                   ) : (
