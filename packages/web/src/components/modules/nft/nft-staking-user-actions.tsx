@@ -115,10 +115,15 @@ export function NFTStakingUserActions(props: any) {
                 >
                   Stake NFT <WalletIcon />
                 </Button>
-                <Button onClick={() => claim()} justifyContent="space-between">
+                <Button
+                  disabled={isEmpty(tokens)}
+                  onClick={() => claim()}
+                  justifyContent="space-between"
+                >
                   Claim Rewards <WalletIcon />
                 </Button>
                 <Button
+                  disabled={isEmpty(tokens)}
                   onClick={() => toggleUnstakeModal()}
                   justifyContent="space-between"
                 >
