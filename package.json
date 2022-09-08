@@ -9,7 +9,7 @@
     "gql:dev:mainnet": "yarn workspace @near/graphql dev:mainnet",
     "gql:start:mainnet": "yarn workspace @near/graphql start:mainnet",
     "gql:start:testnet": "yarn workspace @near/graphql start:testnet",
-    "web:dev": "CHOKIDAR_USEPOLLING=true yarn workspace @near/web dev",
+    "web:dev": "yarn workspace @near/web dev",
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
