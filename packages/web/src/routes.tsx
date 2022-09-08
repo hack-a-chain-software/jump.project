@@ -53,7 +53,7 @@ export const navRoutes = [
     subroutePrefix: "pools",
   },
   {
-    title: "Farm",
+    title: "Jump Token Laboratory",
     icon: <FarmIcon />,
     route: "/farm",
     subroutePrefix: "farm",
