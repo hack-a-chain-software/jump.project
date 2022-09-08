@@ -152,7 +152,7 @@ export function MemberArea({
             </Flex>
           </Skeleton>
 
-          <div className="flex mt-[25px] space-x-[12px]">
+          <div className="mt-[25px] space-y-[12px] md:space-y-0 md:flex md:space-x-[12px]">
             <Skeleton
               flex={1}
               width="100%"
