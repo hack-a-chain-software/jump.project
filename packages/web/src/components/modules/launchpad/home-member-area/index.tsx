@@ -90,11 +90,16 @@ export function MemberArea({
   return (
     <Card minWidth="315px" className="lg:flex-grow lg:max-w-[500px]">
       <Flex w="100%" h="100%" flexDirection="column">
-        <Text justifyContent="space-between" fontSize={22} fontWeight="900">
+        <Text
+          justifyContent="space-between"
+          fontSize={22}
+          fontWeight="900"
+          pb="5"
+        >
           Member Area
         </Text>
 
-        <Stack gap={1}>
+        <Stack>
           <Skeleton
             flex={1}
             width="100%"
