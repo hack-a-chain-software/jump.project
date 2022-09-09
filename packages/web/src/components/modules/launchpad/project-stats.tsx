@@ -32,7 +32,7 @@ export function ProjectStats({
 
   const formatDate = (start_timestamp?: string) => {
     const date = getUTCDate(Number(start_timestamp ?? "0"));
-    return format(date, "dd/mm/yyyy");
+    return format(date, "mm/dd/yyyy");
   };
 
   const totalRaise = useMemo(() => {
