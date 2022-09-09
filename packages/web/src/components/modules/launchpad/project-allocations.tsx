@@ -7,7 +7,15 @@ import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { launchpadProject, investorAllocation } from "@/interfaces";
-import { Card, If, GradientText, NumberInput, Button } from "@/components";
+import { Steps } from "intro.js-react";
+import {
+  Card,
+  If,
+  GradientText,
+  NumberInput,
+  Button,
+  IconButton,
+} from "@/components";
 
 export function ProjectAllocations({
   isLoading,
@@ -83,12 +91,67 @@ export function ProjectAllocations({
     return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
 
-  // const isEndSale = useMemo(() => {
+  const [showSteps, setShowSteps] = useState(false);
 
-  // }, []);
+  const stepItems = [
+    {
+      title: "Project Allocations",
+      element: ".project-allocations",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            In this session where you invest your Allowances and enter the
+            projects vesting campaign.
+          </span>
+
+          <span className="text-[#EB5757]">
+            When you burn an allowance, it is not possible to receive it again.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Project Allocations",
+      element: ".project-allocations-tokens",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>Entering a vesting campaign is easy.</span>
+
+          <span>
+            First you select how many allocations you want (make sure you have
+            the amount needed for each allocation) and click in Join Project.
+          </span>
+
+          <span className="text-[#EB5757]">
+            Whenever you spend an allocation, it cannot be refunded. Upon
+            entering the project, you will earn campaign rewards as per the
+            schedule.
+          </span>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative">
+    <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative project-allocations">
+      {!isLoading && (
+        <div className="absolute right-[24px] top-[24px]">
+          <IconButton onClick={() => setShowSteps(true)} />
+        </div>
+      )}
+
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <If condition={!enabledSales && !isLoading}>
         <Flex className="absolute inset-0 rounded-[24px] z-[2] bg-opacity-[.2] backdrop-blur-[10px] bg-black flex items-center justify-center flex-col">
           <Text
@@ -140,7 +203,7 @@ export function ProjectAllocations({
 
         <Skeleton
           isLoaded={!isLoading}
-          className="h-[92.5px] rounded-[16px] my-[30px]"
+          className="h-[92.5px] rounded-[16px] my-[30px] relative project-allocations-tokens"
         >
           <Flex gap="5px" direction="column" maxWidth="380px">
             <Flex flexWrap="wrap" justifyContent="space-between">

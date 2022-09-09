@@ -1,10 +1,10 @@
 import BN from "bn.js";
 import UpgradeModal from "./upgrade-modal";
 import { useMemo, Fragment, useState } from "react";
-import { Button, Card } from "@/components";
+import { Button, Card, IconButton } from "@/components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { Flex, Text, Stack, Skeleton } from "@chakra-ui/react";
+import { Flex, Text, Stack, Skeleton, Icon } from "@chakra-ui/react";
 import { formatNumber } from "@near/ts";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
@@ -12,6 +12,7 @@ import { InvestorInfo } from "@/hooks/modules/launchpad";
 import { BigDecimalFloat } from "@near/ts";
 import { tokenMetadata } from "@/interfaces";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { Steps } from "intro.js-react";
 
 export function MemberArea({
   isLoaded,
@@ -87,8 +88,81 @@ export function MemberArea({
     ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS);
   }, [metadata, stakedTokens]);
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      title: "Current Level",
+      element: ".current-level",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            Level is increased based on the total coins you deposited.
+          </span>
+
+          <span>Ex: if you stake 1 xpJump, your level will be 1.</span>
+        </div>
+      ),
+    },
+    {
+      title: "Staked xJump",
+      element: ".staked-xjump",
+      intro: <span>Your total amount staked on xJump.</span>,
+    },
+    {
+      title: "Base Allowance",
+      element: ".base-allowance",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            Allowances are consumed when you invest in vesting campaigns.
+          </span>
+
+          <span>
+            The higher your level, the greater the number of allocations
+            available to use in projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Upgrade Button",
+      element: ".upgrade-button",
+      intro: <span>Action button to open upgrade modal.</span>,
+    },
+    {
+      title: "Withdraw Button",
+      element: ".withdraw-button",
+      intro: (
+        <span>
+          Action button to withdraw all staked xJump tokens and return to level
+          0.
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <Card minWidth="315px" className="lg:flex-grow lg:max-w-[500px]">
+    <Card
+      minWidth="315px"
+      className="lg:flex-grow lg:max-w-[500px] member-area relative"
+    >
+      <div className="absolute right-[24px] top-[24px]">
+        <IconButton onClick={() => setShowSteps(true)} />
+      </div>
+
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <Flex w="100%" h="100%" flexDirection="column">
         <Text
           justifyContent="space-between"
@@ -117,7 +191,7 @@ export function MemberArea({
               >
                 {accountId ? (
                   <>
-                    <div className="flex justify-between w-full">
+                    <div className="flex justify-between w-full current-level relative">
                       <Text fontSize={18}>Current Level</Text>
 
                       <Text
@@ -127,7 +201,7 @@ export function MemberArea({
                       />
                     </div>
 
-                    <div className="flex justify-between w-full">
+                    <div className="flex justify-between w-full staked-xjump relative">
                       <Text>Staked xJump</Text>
 
                       <Text
@@ -137,7 +211,7 @@ export function MemberArea({
                       />
                     </div>
 
-                    <div className="flex justify-between w-full">
+                    <div className="flex justify-between w-full base-allowance relative">
                       <Text>Base Allowance</Text>
 
                       <Text
@@ -172,6 +246,7 @@ export function MemberArea({
                 bg="white"
                 color="black"
                 justifyContent="space-between"
+                className="upgrade-button relative"
               >
                 Upgrade Level
                 {(launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
@@ -198,7 +273,7 @@ export function MemberArea({
                 onClick={downgradeLevel}
                 justifyContent="space-between"
                 disabled={!level || isLocked || !accountId}
-                className="text-center"
+                className="text-center withdraw-button relative"
               >
                 {isLocked ? (
                   <span

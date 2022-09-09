@@ -43,3 +43,57 @@ body {
   background-color: rgba(250,250,250,.2) !important;
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5) !important;
 }
+
+.introjs-tooltip {
+  border-radius: 25px !important;
+  background-color: #682676 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.introjs-tooltiptext {
+  color: white !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.introjs-arrow.top,
+.introjs-arrow.left,
+.introjs-arrow.right,
+.introjs-arrow.bottom {
+  display: none !important;
+}
+
+.introjs-tooltipbuttons {
+  border-top: unset !important;
+}
+
+.introjs-button {
+  /* padding: 30px 20px !important; */
+  font-size: 16px !important;
+  border-radius: 15px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  text-shadow: none !important;
+}
+
+.introjs-button.introjs-prevbutton {
+  color: white !important;
+  border: 1px solid white !important;
+  background-color: transparent !important;
+  text-decoration: none !important;
+}
+
+.introjs-skipbutton {
+  color: white !important;
+}
+
+.introjs-skipbutton:hover {
+  opacity: .7 !important;
+}
+
+.introjs-disabled {
+  opacity: .4 !important;
+}
+
+.introjs-helperLayer {
+  border-radius: 25px !important;
+}
