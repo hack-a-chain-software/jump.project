@@ -55,6 +55,10 @@ body {
   font-family: 'Inter', sans-serif !important;
 }
 
+.introjs-tooltip-title {
+  color: white !important;
+}
+
 .introjs-arrow.top,
 .introjs-arrow.left,
 .introjs-arrow.right,
