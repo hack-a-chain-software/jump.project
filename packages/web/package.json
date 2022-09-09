@@ -34,6 +34,8 @@
     "date-fns": "^2.29.1",
     "formik": "^2.2.9",
     "framer-motion": "^6",
+    "intro.js": "^6.0.0",
+    "intro.js-react": "^0.6.0",
     "lodash-es": "^4.17.21",
     "near-api-js": "^0.44.2",
     "postcss": "^8.4.13",

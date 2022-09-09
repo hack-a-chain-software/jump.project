@@ -4,7 +4,7 @@ import { isBefore } from "date-fns";
 import { formatNumber } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Flex, Skeleton } from "@chakra-ui/react";
-import { Card, GradientText, Button } from "@/components";
+import { Card, GradientText, Button, IconButton } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import {
@@ -12,6 +12,8 @@ import {
   investorAllocation,
   tokenMetadata,
 } from "@/interfaces";
+import { useState } from "react";
+import { Steps } from "intro.js-react";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
@@ -71,8 +73,61 @@ export function ProjectUserArea({
     }
   };
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      title: "User Area",
+      element: ".project-user-area",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            In this session you follow the data of your investment in the
+            project, having access to the number of allocations invested, total
+            rewards received, how many rewards were collected and how many are
+            available for collection.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Retrieve Tokens",
+      element: ".project-user-area-retrieve",
+      intro: (
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            The rewards will be available at the end of the sell phase or when
+            all allocations are sold.
+          </span>
+
+          <span>
+            Your rewards will be updated according to the project timeline.
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <Card className="col-span-12 lg:col-span-6 xl:col-span-3">
+    <Card className="col-span-12 lg:col-span-6 xl:col-span-3 project-user-area relative">
+      {!isLoading && (
+        <div className="absolute right-[24px] top-[24px]">
+          <IconButton onClick={() => setShowSteps(true)} />
+        </div>
+      )}
+
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <Flex className="flex-col space-y-[12px] h-full w-full">
         <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
           User Area
@@ -162,7 +217,12 @@ export function ProjectUserArea({
           </Skeleton>
         </div>
 
-        <Skeleton isLoaded={!isLoading} w="100%" borderRadius="15px">
+        <Skeleton
+          isLoaded={!isLoading}
+          w="100%"
+          borderRadius="15px"
+          className="relative project-user-area-retrieve"
+        >
           <Button
             disabled={enabledSale || vestedAllocations === "0" || !accountId}
             onClick={() => retrieveTokens()}

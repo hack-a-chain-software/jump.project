@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash-es";
 import {
   useViewInvestor,
@@ -8,7 +8,6 @@ import {
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import {
-  Box,
   Flex,
   Image,
   Input,
@@ -32,13 +31,20 @@ import {
 import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import { Button, Select, TopCard, LoadingIndicator } from "../components";
+import {
+  Button,
+  Select,
+  TopCard,
+  LoadingIndicator,
+  IconButton,
+} from "../components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { BigDecimalFloat } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { FolderOpenIcon } from "@heroicons/react/solid";
 import { MemberArea } from "@/components/modules/launchpad/home-member-area";
+import { Steps } from "intro.js-react";
 
 const PAGINATE_LIMIT = 30;
 
@@ -151,6 +157,49 @@ export function Home() {
     );
   }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      element: ".launchpad",
+      title: "Launchpad",
+      intro: (
+        <div>
+          <span>
+            Jump launchpad is a page where you can stake your xJump, receive
+            allocations and invest in crypto projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Member Area",
+      element: ".member-area",
+      intro: (
+        <div className="flex flex-col">
+          <span className="mb-2">This is member area.</span>
+
+          <span>
+            In this section you can stake your xJump tokens, watch your level,
+            check the amount of staked tokens and the total of your allocations.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Projects",
+      element: ".table-projects",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            Here are all the projects that have vesting programs that you can
+            invest with your allocations
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Flex
       gap="30px"
@@ -159,42 +208,28 @@ export function Home() {
       w="100%"
       overflow="hidden"
       pt="150px"
+      className="relative"
     >
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
           gradientText="Launchpad"
           bigText="Stake. Help. Earn."
           bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
-        >
-          {/* <Skeleton
-            mt="20px"
-            width="100%"
-            height="42px"
-            maxWidth="200px"
-            borderRadius="30px"
-            endColor="rgba(255,255,255,0.3)"
-            isLoaded={!accountId || isLoaded}
-          >
-            <Box
-              bg="white"
-              p="10px"
-              px="15px"
-              maxW="200px"
-              alignItems="center"
-              justifyContent="center"
-              display="flex"
-              borderRadius="30px"
-              color="black"
-              fontWeight="semibold"
-            >
-              {!accountId
-                ? "Connect your wallet"
-                : formatNumber(new BN(totalAllowanceData ?? 0), 0) +
-                  " Allocations"}
-            </Box>
-          </Skeleton> */}
-        </TopCard>
+          onClick={() => setShowSteps(true)}
+        />
 
         <MemberArea
           isLoaded={isLoaded}
@@ -269,7 +304,13 @@ export function Home() {
         </Flex>
       </Flex>
 
-      <TableContainer px="20px" py="20px" borderWidth="2px" borderRadius={20}>
+      <TableContainer
+        px="20px"
+        py="20px"
+        borderWidth="2px"
+        borderRadius={20}
+        className="table-projects"
+      >
         <Table size="lg" width="100%" variant="unstyled">
           <Thead>
             <Tr fontSize="18px">

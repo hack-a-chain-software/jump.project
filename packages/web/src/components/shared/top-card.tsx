@@ -1,6 +1,7 @@
 import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import { JumpBigWhite } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
+import { IconButton } from "@/components";
 
 type Props = {
   gradientText: string;
@@ -11,6 +12,7 @@ type Props = {
   jumpLogo?: boolean;
   py?: boolean;
   children?: React.ReactNode;
+  onClick?: () => void;
 };
 
 export const TopCard = ({
@@ -22,6 +24,7 @@ export const TopCard = ({
   py = false,
   content = <></>,
   children,
+  onClick = () => {},
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();
   return (
@@ -30,6 +33,7 @@ export const TopCard = ({
       minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
+      className="launchpad"
     >
       <Box
         overflow="hidden"
@@ -48,6 +52,10 @@ export const TopCard = ({
         bg={glassyWhite}
         gap={5}
       >
+        <div className="absolute right-[24px] top-[24px]">
+          <IconButton onClick={onClick} />
+        </div>
+
         <Flex direction="column" zIndex="2" position="relative" flexGrow="1">
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
