@@ -18,6 +18,7 @@ import { WithdrawModal } from "../modals/staking/withdraw";
 import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
 import BN from "bn.js";
+import Big from "big.js";
 import { BigDecimalFloat } from "@near/ts";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
@@ -100,11 +101,11 @@ export const Staking = () => {
   }, [x_token]);
 
   const getAmountRaw = (amount) => {
-    const decimals = new BN(jumpMetadata?.decimals! + "");
+    //const decimals = new BN(jumpMetadata?.decimals! + "");
 
-    const denom = new BN("10").pow(decimals);
+    const denom = new Big("10").pow(jumpMetadata?.decimals!);
 
-    return new BN(amount).mul(denom).toString();
+    return new Big(amount).mul(denom).toString();
   };
 
   const submitStaking = useCallback(
