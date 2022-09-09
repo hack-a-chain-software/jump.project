@@ -134,10 +134,16 @@ export function MemberArea({
       title: "Withdraw Button",
       element: ".withdraw-button",
       intro: (
-        <span>
-          Action button to withdraw all staked xJump tokens and return to level
-          0.
-        </span>
+        <div className="flex flex-col space-y-[8px]">
+          <span>
+            Action button to withdraw all staked xJump tokens and return to
+            level 0.
+          </span>
+
+          <span className="font-[600]">
+            Will be available at the end of lock period
+          </span>
+        </div>
       ),
     },
   ];
