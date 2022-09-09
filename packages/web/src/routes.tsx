@@ -17,25 +17,25 @@ export const routes = {
 
 export const navRoutes = [
   {
-    title: "Launchpad",
+    title: "Jump Pad",
     icon: <RocketIcon />,
     route: "/launchpad",
     subroutePrefix: "/launchpad",
   },
   {
-    title: "Staking",
+    title: "xJump",
     icon: <WalletIcon />,
     route: "/coin-staking",
     subroutePrefix: "coin-staking",
   },
   {
-    title: "NFT Staking",
+    title: "Jump NFT Staking",
     icon: <WalletIcon />,
     route: "/nft-staking",
     subroutePrefix: "nft-staking",
   },
   {
-    title: "Vesting",
+    title: "Jump Vesting",
     icon: <LockIcon />,
     route: "/vesting",
     subroutePrefix: "vesting",
@@ -53,7 +53,7 @@ export const navRoutes = [
     subroutePrefix: "pools",
   },
   {
-    title: "Farm",
+    title: "Jump Token Laboratory",
     icon: <FarmIcon />,
     route: "/farm",
     subroutePrefix: "farm",

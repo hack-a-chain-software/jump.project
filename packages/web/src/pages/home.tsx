@@ -39,7 +39,7 @@ import {
   IconButton,
 } from "../components";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { BigDecimalFloat } from "@near/ts";
+import { BigDecimalFloat, getUTCDate } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { FolderOpenIcon } from "@heroicons/react/solid";
@@ -66,7 +66,8 @@ export function Home() {
 
   const { accountId } = useWalletSelector();
 
-  const { darkPurpleOpaque, glassyWhite, blackAndWhite } = useTheme();
+  const { darkPurpleOpaque, glassyWhite, blackAndWhite, glassyWhiteOpaque } =
+    useTheme();
 
   const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
 
@@ -224,7 +225,7 @@ export function Home() {
 
       <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
-          gradientText="Launchpad"
+          gradientText="Jump Pad"
           bigText="Stake. Help. Earn."
           bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
@@ -367,6 +368,9 @@ export function Home() {
                 >
                   <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                     <Image
+                      borderRadius={99}
+                      border="solid 3px"
+                      borderColor={glassyWhiteOpaque}
                       src={e?.project_token_info?.image || ""}
                       className="w-[36px] h-[36px] rounded-full"
                     />

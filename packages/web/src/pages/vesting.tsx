@@ -13,7 +13,7 @@ import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
-import { formatNumber } from "@near/ts";
+import { formatNumber, getUTCDate } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 
@@ -50,14 +50,14 @@ export const Vesting = () => {
     }
 
     return vestings.filter(({ start_timestamp, vesting_duration }) => {
-      const created = new Date(Number(start_timestamp) / 1000000);
+      const created = getUTCDate(Number(start_timestamp) / 1000000);
 
       const endAt = addMilliseconds(
         created,
         Number(vesting_duration) / 1000000
       );
 
-      const today = new Date();
+      const today = getUTCDate();
 
       if (filter === "complete") {
         return isBefore(endAt, today);
@@ -82,7 +82,7 @@ export const Vesting = () => {
   return (
     <PageContainer>
       <TopCard
-        gradientText="Locked Jump"
+        gradientText="Jump Vesting"
         bigText="Lock. Unlock. Withdraw."
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py

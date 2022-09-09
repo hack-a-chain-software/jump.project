@@ -1,6 +1,6 @@
 import BN from "bn.js";
-import { isBefore } from "date-fns";
-import { formatNumber } from "@near/ts";
+import { isBefore, format } from "date-fns";
+import { formatNumber, getUTCDate } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Fragment, useMemo, useState, useCallback } from "react";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
@@ -67,9 +67,8 @@ export function ProjectAllocations({
   );
 
   const formatDate = (start_timestamp?: string) => {
-    const date = new Date(Number(start_timestamp ?? "0"));
-
-    return date.toLocaleDateString();
+    const date = getUTCDate(Number(start_timestamp ?? "0"));
+    return format(date, "mm/dd/yyyy");
   };
 
   const enabledSales = useMemo(() => {

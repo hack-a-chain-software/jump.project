@@ -70,9 +70,11 @@ export function NFTStakingCard(
           <Flex
             minHeight="165px"
             userSelect="none"
-            direction="column"
+            direction="row"
             height="100%"
-            justifyContent="space-between"
+            justifyContent="center"
+            alignItems="center"
+            gap={2}
           >
             <Skeleton
               width="60px"
@@ -83,37 +85,43 @@ export function NFTStakingCard(
             >
               <Image src={props?.logo} w="51px" h="60px" borderRadius={30} />
             </Skeleton>
-
-            <Skeleton
-              minHeight="42px"
-              borderRadius={12}
-              isLoaded={!!props?.name}
-              endColor="rgba(255,255,255,0.3)"
+            <Flex
+              minHeight="165px"
+              userSelect="none"
+              direction="column"
+              height="100%"
+              justifyContent="center"
             >
-              <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
-                {props?.name}
-              </Text>
-            </Skeleton>
-
-            <Skeleton
-              minHeight="54px"
-              borderRadius={12}
-              maxWidth="500px"
-              isLoaded={!!props?.name}
-              endColor="rgba(255,255,255,0.3)"
-            >
-              <Text
-                maxWidth="500px"
-                fontSize={18}
-                fontWeight="600"
-                letterSpacing="-0.03em"
+              <Skeleton
+                minHeight="42px"
+                borderRadius={12}
+                isLoaded={!!props?.name}
+                endColor="rgba(255,255,255,0.3)"
               >
-                Earn {props.rewards?.map(({ symbol }) => symbol).join(", ")} as
-                rewards by staking on {props?.name} staking pool
-              </Text>
-            </Skeleton>
-          </Flex>
+                <Text fontSize={34} fontWeight="800" letterSpacing="-0.03em">
+                  {props?.name}
+                </Text>
+              </Skeleton>
 
+              <Skeleton
+                minHeight="54px"
+                borderRadius={12}
+                maxWidth="500px"
+                isLoaded={!!props?.name}
+                endColor="rgba(255,255,255,0.3)"
+              >
+                <Text
+                  maxWidth="500px"
+                  fontSize={18}
+                  fontWeight="600"
+                  letterSpacing="-0.03em"
+                >
+                  Earn {props.rewards?.map(({ symbol }) => symbol).join(", ")}{" "}
+                  as rewards by staking on {props?.name} staking pool
+                </Text>
+              </Skeleton>
+            </Flex>
+          </Flex>
           <If
             fallback={
               <Flex flexWrap="wrap" gap={5}>
@@ -145,8 +153,15 @@ export function NFTStakingCard(
                     title={symbol + " Rewards"}
                     value={
                       <Flex className="items-top space-x-[4px]">
-                        {icon && <Image src={icon} className="h-[28px]" />}
-
+                        {icon && (
+                          <Image
+                            borderRadius={99}
+                            border="solid 3px"
+                            borderColor={glassyWhiteOpaque}
+                            src={icon}
+                            className="h-[28px]"
+                          />
+                        )}
                         <Text
                           children={getFormatedBalance(perMonth, decimals)}
                         />
