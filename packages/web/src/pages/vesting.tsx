@@ -82,7 +82,7 @@ export const Vesting = () => {
   return (
     <PageContainer>
       <TopCard
-        gradientText="Locked Jump"
+        gradientText="Jump Vesting"
         bigText="Lock. Unlock. Withdraw."
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py

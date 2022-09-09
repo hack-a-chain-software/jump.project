@@ -1,8 +1,6 @@
 import BN from "bn.js";
 import isEmpty from "lodash/isEmpty";
-import { useState, useCallback, Fragment, useEffect } from "react";
-import { LockIcon, WalletIcon } from "@/assets/svg";
-import { format, addMilliseconds, isBefore } from "date-fns";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash-es";
 import {
   useViewInvestor,
@@ -10,16 +8,13 @@ import {
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import {
-  Box,
   Flex,
   Image,
   Input,
-  Stack,
   Table,
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
@@ -37,20 +32,19 @@ import { useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
 import {
-  If,
   Button,
-  Card,
   Select,
   TopCard,
   LoadingIndicator,
+  IconButton,
 } from "../components";
-import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { BigDecimalFloat, formatNumber, getUTCDate } from "@near/ts";
+import { BigDecimalFloat, getUTCDate } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 import { FolderOpenIcon } from "@heroicons/react/solid";
+import { MemberArea } from "@/components/modules/launchpad/home-member-area";
+import { Steps } from "intro.js-react";
 
 const PAGINATE_LIMIT = 30;
 
@@ -70,9 +64,10 @@ export function Home() {
 
   const navigate = useNavigate();
 
-  const { accountId, selector } = useWalletSelector();
+  const { accountId } = useWalletSelector();
 
-  const { darkPurpleOpaque, glassyWhite, blackAndWhite } = useTheme();
+  const { darkPurpleOpaque, glassyWhite, blackAndWhite, glassyWhiteOpaque } =
+    useTheme();
 
   const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
 
@@ -80,8 +75,6 @@ export function Home() {
 
   const { data: totalAllowanceData = "0" } =
     useViewTotalEstimatedInvestorAllowance(accountId!);
-
-  const { increaseMembership, decreaseMembership } = useLaunchpadStore();
 
   const { data: launchpadSettings, loading: loadingLaunchpadSettings } =
     useViewLaunchpadSettings();
@@ -157,52 +150,6 @@ export function Home() {
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
 
-  const stakedTokens = useMemo(
-    () => new BN(investor.data?.staked_token ?? 0),
-    [investor.data?.staked_token]
-  );
-
-  const minimumTokens = useMemo(
-    () => launchpadSettings?.tiers_minimum_tokens.map((t) => new BN(t)),
-    [launchpadSettings]
-  );
-
-  const level = useMemo(() => {
-    const metLevels = minimumTokens?.filter((tokenAmount) =>
-      tokenAmount.lte(stakedTokens)
-    );
-
-    return metLevels?.length ?? 0;
-  }, [minimumTokens, stakedTokens]);
-
-  const amountToNextLevel = useMemo(() => {
-    return minimumTokens?.[level]
-      ? minimumTokens[level]!.sub(stakedTokens)
-      : new BN(0);
-  }, [minimumTokens, stakedTokens]);
-
-  const formatedAmountToNextLevel = useMemo(() => {
-    return new BigDecimalFloat(
-      amountToNextLevel,
-      new BN(baseTokenMetadata?.decimals ?? 0).neg()
-    ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS);
-  }, [baseTokenMetadata]);
-
-  const upgradeLevel = () => {
-    const formattedLevel = level + 1;
-    increaseMembership(formattedLevel, accountId!, selector);
-  };
-
-  const downgradeLevel = () => {
-    const formattedLevel = level - 1;
-    decreaseMembership(formattedLevel, accountId!, selector);
-    increaseMembership(formattedLevel, accountId!, selector);
-  };
-
-  const isDisabled = useMemo(() => {
-    return new BN(baseTokenBalance ?? 0).lt(amountToNextLevel);
-  }, [baseTokenBalance, amountToNextLevel]);
-
   const isLoaded = useMemo(() => {
     return (
       !loadingLaunchpadSettings &&
@@ -211,22 +158,48 @@ export function Home() {
     );
   }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
 
-  const lastCheck = useMemo(() => {
-    return getUTCDate(Number(investor?.data?.last_check!) / 1_000_000);
-  }, [investor?.data]);
+  const [showSteps, setShowSteps] = useState(false);
 
-  const endVesting = useMemo(() => {
-    return addMilliseconds(
-      lastCheck,
-      Number(launchpadSettings?.token_lock_period) / 1_000_000
-    );
-  }, [launchpadSettings]);
+  const stepItems = [
+    {
+      element: ".launchpad",
+      title: "Launchpad",
+      intro: (
+        <div>
+          <span>
+            Jump launchpad is a page where you can stake your xJump, receive
+            allocations and invest in crypto projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Member Area",
+      element: ".member-area",
+      intro: (
+        <div className="flex flex-col">
+          <span className="mb-2">This is member area.</span>
 
-  const isLocked = useMemo(() => {
-    const now = getUTCDate();
-
-    return isBefore(now, endVesting);
-  }, [investor?.data, launchpadSettings]);
+          <span>
+            In this section you can stake your xJump tokens, watch your level,
+            check the amount of staked tokens and the total of your allocations.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Projects",
+      element: ".table-projects",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            Here are all the projects that have vesting programs that you can
+            invest with your allocations
+          </span>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Flex
@@ -236,142 +209,39 @@ export function Home() {
       w="100%"
       overflow="hidden"
       pt="150px"
+      className="relative"
     >
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <Flex gap={5} className="flex-col lg:flex-row">
         <TopCard
-          gradientText="Launchpad"
+          gradientText="Jump Pad"
           bigText="Stake. Help. Earn."
           bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
-        >
-          <Skeleton
-            mt="20px"
-            width="100%"
-            height="42px"
-            maxWidth="200px"
-            borderRadius="30px"
-            endColor="rgba(255,255,255,0.3)"
-            isLoaded={!accountId || isLoaded}
-          >
-            <Box
-              bg="white"
-              p="10px"
-              px="15px"
-              maxW="200px"
-              alignItems="center"
-              justifyContent="center"
-              display="flex"
-              borderRadius="30px"
-              color="black"
-              fontWeight="semibold"
-            >
-              {!accountId
-                ? "Connect your wallet"
-                : formatNumber(new BN(totalAllowanceData ?? 0), 0) +
-                  " Allocations"}
-            </Box>
-          </Skeleton>
-        </TopCard>
+          onClick={() => setShowSteps(true)}
+        />
 
-        <Card minWidth="315px" className="lg:flex-grow lg:max-w-[400px]">
-          <Flex w="100%" h="100%" flexDirection="column">
-            <Text justifyContent="space-between" fontSize={22} fontWeight="900">
-              Member Area
-            </Text>
-
-            <Stack gap={1}>
-              <Skeleton
-                mt={5}
-                flex={1}
-                width="100%"
-                borderRadius="18px"
-                isLoaded={isLoaded}
-                endColor="rgba(255,255,255,0.3)"
-              >
-                <Flex direction="column" flex={1} mt={5}>
-                  <Flex
-                    mb="5px"
-                    flexWrap="wrap"
-                    justifyContent="space-between"
-                    flex={1}
-                  >
-                    {accountId ? (
-                      <>
-                        <Text fontSize={18} fontWeight="semibold">
-                          Level {level}
-                        </Text>
-
-                        <Text
-                          fontSize={18}
-                          children={`Stake ${
-                            formatedAmountToNextLevel +
-                            baseTokenMetadata?.symbol
-                          } to next level`}
-                        />
-                      </>
-                    ) : (
-                      "Connect Wallet"
-                    )}
-                  </Flex>
-                </Flex>
-              </Skeleton>
-
-              <Skeleton
-                mt={5}
-                flex={1}
-                width="100%"
-                borderRadius="18px"
-                isLoaded={isLoaded}
-                endColor="rgba(255,255,255,0.3)"
-              >
-                <Button
-                  onClick={upgradeLevel}
-                  disabled={isDisabled || !accountId}
-                  w="100%"
-                  bg="white"
-                  color="black"
-                  justifyContent="space-between"
-                >
-                  Upgrade Level
-                  {(launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
-                  level ? (
-                    <LockIcon />
-                  ) : (
-                    <WalletIcon />
-                  )}
-                </Button>
-              </Skeleton>
-
-              <Skeleton
-                mt={5}
-                flex={1}
-                width="100%"
-                borderRadius="18px"
-                isLoaded={isLoaded}
-                endColor="rgba(255,255,255,0.3)"
-              >
-                <Button
-                  w="100%"
-                  bg="transparent"
-                  border="1px solid white"
-                  color="white"
-                  onClick={downgradeLevel}
-                  justifyContent="space-between"
-                  disabled={!level || isLocked || !accountId}
-                >
-                  {isLocked ? (
-                    `Downgrade at: ${format(endVesting, "MM/dd/yyyy")}`
-                  ) : (
-                    <Fragment>
-                      Downgrade Level
-                      {!!level ? <WalletIcon /> : <LockIcon />}
-                    </Fragment>
-                  )}
-                </Button>
-              </Skeleton>
-            </Stack>
-          </Flex>
-        </Card>
+        <MemberArea
+          isLoaded={isLoaded}
+          investor={investor?.data!}
+          totalAllowance={totalAllowanceData}
+          launchpadSettings={launchpadSettings!}
+          baseToken={{
+            balance: baseTokenBalance!,
+            metadata: baseTokenMetadata!,
+          }}
+        />
       </Flex>
 
       <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
@@ -435,7 +305,13 @@ export function Home() {
         </Flex>
       </Flex>
 
-      <TableContainer px="20px" py="20px" borderWidth="2px" borderRadius={20}>
+      <TableContainer
+        px="20px"
+        py="20px"
+        borderWidth="2px"
+        borderRadius={20}
+        className="table-projects"
+      >
         <Table size="lg" width="100%" variant="unstyled">
           <Thead>
             <Tr fontSize="18px">
@@ -492,6 +368,9 @@ export function Home() {
                 >
                   <Td borderTopLeftRadius="16px" borderBottomLeftRadius="16px">
                     <Image
+                      borderRadius={99}
+                      border="solid 3px"
+                      borderColor={glassyWhiteOpaque}
                       src={e?.project_token_info?.image || ""}
                       className="w-[36px] h-[36px] rounded-full"
                     />

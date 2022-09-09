@@ -24,14 +24,19 @@ export const useNftStaking = create<{
   unstake: (
     connection: WalletSelector,
     account: string,
-    tokens: string[],
-    collection: string,
-    rewards: any
+    tokens: Token[],
+    collection: string
   ) => Promise<void>;
   getTokenStorage: (
     connection: WalletSelector,
     account: string,
     token: string
+  ) => Promise<any>;
+  claimRewards: (
+    connection: WalletSelector,
+    account: string,
+    tokens: Token[],
+    collection: string
   ) => Promise<any>;
 }>((set, get) => ({
   tokens: [],
@@ -155,12 +160,12 @@ export const useNftStaking = create<{
     executeMultipleTransactions(transactions, wallet);
   },
 
-  unstake: async (connection, account, tokens, collection, balance) => {
+  unstake: async (connection, account, tokens, collection) => {
     const wallet = await connection.wallet();
 
     const transactions: any = [];
 
-    tokens.forEach((item) => {
+    tokens.forEach(({ token_id }) => {
       transactions.push(
         getTransaction(
           account,
@@ -172,18 +177,26 @@ export const useNftStaking = create<{
                 type: "NFTContract",
                 account_id: collection,
               },
-              item,
+              token_id,
             ],
           }
         )
       );
     });
 
-    for (const key in balance) {
-      if (balance[key] === "0") {
-        continue;
+    const balances = tokens.reduce<string[]>((current, { balance }) => {
+      for (const key in balance) {
+        if (balance[key] === "0" || current.includes(key)) {
+          continue;
+        }
+
+        current.push(key);
       }
 
+      return current;
+    }, []);
+
+    for (const key of balances) {
       const storage = await get().getTokenStorage(connection, account, key);
 
       if (!storage) {
@@ -200,11 +213,82 @@ export const useNftStaking = create<{
           )
         );
       }
+
+      transactions.push(
+        getTransaction(
+          account,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "withdraw_reward",
+          {
+            collection: {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            token_id: key,
+          }
+        )
+      );
     }
 
-    for (const key in balance) {
-      if (balance[key] === "0") {
-        continue;
+    executeMultipleTransactions(transactions, wallet);
+  },
+
+  claimRewards: async (connection, account, tokens, collection) => {
+    const wallet = await connection.wallet();
+
+    const transactions: any = [];
+
+    tokens.forEach(({ token_id }) => {
+      transactions.push(
+        getTransaction(
+          account,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "claim_reward",
+          {
+            collection: {
+              type: "NFTContract",
+              account_id: collection,
+            },
+            token_id: [
+              {
+                type: "NFTContract",
+                account_id: collection,
+              },
+              token_id,
+            ],
+          }
+        )
+      );
+    });
+
+    const balances = tokens.reduce<string[]>((current, { balance }) => {
+      for (const key in balance) {
+        if (balance[key] === "0" || current.includes(key)) {
+          continue;
+        }
+
+        current.push(key);
+      }
+
+      return current;
+    }, []);
+
+    for (const key of balances) {
+      const storage = await get().getTokenStorage(connection, account, key);
+
+      if (!storage) {
+        transactions.push(
+          getTransaction(
+            account,
+            key,
+            "storage_deposit",
+            {
+              account_id: account,
+              registration_only: false,
+            },
+            "0.10"
+          )
+        );
       }
 
       transactions.push(
