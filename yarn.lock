@@ -6532,6 +6532,16 @@ interpret@^1.0.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
 
+intro.js-react@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/intro.js-react/-/intro.js-react-0.6.0.tgz#df024dfe5929553efa157baf460b85b8bfc64d31"
+  integrity sha512-Ozkx1w89zXPM4Uufc3eoolq0svLQLoDon28YaxqhN1ZmS0oG5Fb2Tui6AZQJXDY8HC2kwq+Smzv3QXa0kf5ZGg==
+
+intro.js@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/intro.js/-/intro.js-6.0.0.tgz#710c963ce7bc4f5d1af1f901fffc83ad7af658da"
+  integrity sha512-ZUiR6BoLSvPSlLG0boewnWVgji1fE1gBvP/pyw5pgCKXEDQz1mMeUxarggClPNs71UTq364LwSk9zxz17A9gaQ==
+
 invariant@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
