@@ -14,12 +14,11 @@ export function NFTStakingUserActions(props: any) {
   const { id = "" } = useParams();
   const collection = window.atob(id);
 
-  const { accountId } = useWalletSelector();
+  const { accountId, selector } = useWalletSelector();
 
-  const { jumpGradient, darkPurple, gradientBoxTopCard, glassyWhiteOpaque } =
-    useTheme();
+  const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
-  const { tokens } = useNftStaking();
+  const { tokens, claimRewards } = useNftStaking();
 
   const [showStake, setShowStake] = useState(false);
   const [showUnstake, setShowUnstake] = useState(false);
@@ -45,6 +44,8 @@ export function NFTStakingUserActions(props: any) {
 
     setShowUnstake(!showUnstake);
   };
+
+  const claim = () => claimRewards(selector, accountId!, tokens, collection);
 
   return (
     <>
@@ -115,6 +116,14 @@ export function NFTStakingUserActions(props: any) {
                   Stake NFT <WalletIcon />
                 </Button>
                 <Button
+                  disabled={isEmpty(tokens)}
+                  onClick={() => claim()}
+                  justifyContent="space-between"
+                >
+                  Claim Rewards <WalletIcon />
+                </Button>
+                <Button
+                  disabled={isEmpty(tokens)}
                   onClick={() => toggleUnstakeModal()}
                   justifyContent="space-between"
                 >

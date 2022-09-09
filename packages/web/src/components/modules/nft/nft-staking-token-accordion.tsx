@@ -1,4 +1,5 @@
 import BN from "bn.js";
+import Big from "big.js";
 import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
 import { ValueBox } from "@/components";
@@ -50,13 +51,13 @@ export function TokenAccordion({
   }, [rewards, token_id, penalty]);
 
   const getFormatedBalance = (balance, decimals) => {
-    const decimalsBN = new BN(decimals).neg();
-    const balanceBN = new BN(balance);
+    // const decimalsBN = new BN(decimals).neg();
+    // const balanceBN = new BN(balance);
 
-    return new BigDecimalFloat(balanceBN, decimalsBN).toLocaleString(
-      "en",
-      CURRENCY_FORMAT_OPTIONS
-    );
+    const decimalsBig = Big(10).pow(decimals);
+    const balanceBig = new Big(balance).div(decimalsBig).toFixed(2);
+
+    return balanceBig;
   };
 
   return (

@@ -1,4 +1,3 @@
-import { WalletConnection } from "near-api-js";
 import { useNearQuery } from "react-near";
 
 const defaultLPOptions = {
@@ -7,7 +6,7 @@ const defaultLPOptions = {
   onError: console.warn,
 };
 
-type InvestorInfo = {
+export type InvestorInfo = {
   account_id: string;
   storage_deposit: string;
   storage_used: string;

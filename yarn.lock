@@ -3939,6 +3939,11 @@ base64url@^3.0.1:
   resolved "https://registry.yarnpkg.com/base64url/-/base64url-3.0.1.tgz#6399d572e2bc3f90a9a8b22d5dbb0a32d33f788d"
   integrity sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==
 
+big.js@^6.2.1:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/big.js/-/big.js-6.2.1.tgz#7205ce763efb17c2e41f26f121c420c6a7c2744f"
+  integrity sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==
+
 binary-extensions@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
@@ -6526,6 +6531,16 @@ interpret@^1.0.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.4.0.tgz#665ab8bc4da27a774a40584e812e3e0fa45b1a1e"
   integrity sha512-agE4QfB2Lkp9uICn7BAqoscw4SZP9kTE2hxiFI3jBPmXJfdqiahTbUuKGsMoN2GtqL9AxhYioAcVvgsb1HvRbA==
+
+intro.js-react@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/intro.js-react/-/intro.js-react-0.6.0.tgz#df024dfe5929553efa157baf460b85b8bfc64d31"
+  integrity sha512-Ozkx1w89zXPM4Uufc3eoolq0svLQLoDon28YaxqhN1ZmS0oG5Fb2Tui6AZQJXDY8HC2kwq+Smzv3QXa0kf5ZGg==
+
+intro.js@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/intro.js/-/intro.js-6.0.0.tgz#710c963ce7bc4f5d1af1f901fffc83ad7af658da"
+  integrity sha512-ZUiR6BoLSvPSlLG0boewnWVgji1fE1gBvP/pyw5pgCKXEDQz1mMeUxarggClPNs71UTq364LwSk9zxz17A9gaQ==
 
 invariant@^2.2.4:
   version "2.2.4"

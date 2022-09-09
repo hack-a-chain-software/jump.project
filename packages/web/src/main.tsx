@@ -11,6 +11,7 @@ import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
 import { WalletSelectorModal } from "@/modals";
 import { buildClient } from "./resolvers";
+import "intro.js/introjs.css";
 
 // TODO: Find a better way to handle this buffer error
 window.Buffer = window.Buffer || Buffer;

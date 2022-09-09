@@ -31,13 +31,7 @@ export function NFTUnstakeModal({
       footer={
         <Button
           onClick={() =>
-            unstake(
-              selector,
-              accountId as string,
-              selected.map((item) => item.token_id),
-              collection,
-              selected[0].balance
-            )
+            unstake(selector, accountId as string, selected, collection)
           }
           bg="white"
           color="black"
