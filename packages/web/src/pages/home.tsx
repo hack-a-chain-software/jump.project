@@ -371,6 +371,8 @@ export function Home() {
                       borderRadius={99}
                       border="solid 3px"
                       borderColor={glassyWhiteOpaque}
+                      outline={glassyWhiteOpaque}
+                      boxSizing="content-box"
                       src={e?.project_token_info?.image || ""}
                       className="w-[36px] h-[36px] rounded-full"
                     />

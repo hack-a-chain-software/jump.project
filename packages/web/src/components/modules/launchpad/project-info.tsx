@@ -40,7 +40,9 @@ export function ProjectInfo({
               borderRadius={99}
               border="solid 3px"
               borderColor={glassyWhiteOpaque}
-              className="w-[50px] h-[50px]"
+              outline={glassyWhiteOpaque}
+              boxSizing="content-box"
+              className="w-[50px]"
               src={launchpadProject?.project_token_info?.image || ""}
             />
           </Skeleton>

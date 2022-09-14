@@ -132,7 +132,7 @@ export function ProjectAllocations({
   ];
 
   return (
-    <Card className="col-span-12 lg:col-span-6 xl:col-span-4 relative project-allocations">
+    <>
       {!isLoading && (
         <div className="absolute right-[24px] top-[24px]">
           <IconButton onClick={() => setShowSteps(true)} />
@@ -274,6 +274,6 @@ export function ProjectAllocations({
           </Skeleton>
         </If>
       </Flex>
-    </Card>
+    </>
   );
 }

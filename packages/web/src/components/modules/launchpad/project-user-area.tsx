@@ -109,7 +109,7 @@ export function ProjectUserArea({
   ];
 
   return (
-    <Card className="col-span-12 lg:col-span-6 xl:col-span-3 project-user-area relative">
+    <>
       {!isLoading && (
         <div className="absolute right-[24px] top-[24px]">
           <IconButton onClick={() => setShowSteps(true)} />
@@ -234,6 +234,6 @@ export function ProjectUserArea({
           </Button>
         </Skeleton>
       </Flex>
-    </Card>
+    </>
   );
 }
