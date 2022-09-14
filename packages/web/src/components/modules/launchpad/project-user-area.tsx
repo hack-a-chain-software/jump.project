@@ -128,95 +128,96 @@ export function ProjectUserArea({
         }}
       />
 
-      <Flex className="flex-col space-y-[12px] h-full w-full">
-        <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
-          User Area
-        </GradientText>
+      <Flex className="flex-col space-y-[12px] h-5/6 w-full">
+        <Flex className="flex-col space-y-[12px] justify-evenly h-5/6 w-full">
+          <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
+            User Area
+          </GradientText>
 
-        <div className="flex-col space-y-[4px]">
-          <Skeleton
-            isLoaded={!isLoading}
-            className="flex space-x-[4px] rounded-[16px]"
-          >
-            <div>
-              <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                Allocations:
-              </span>
-            </div>
+          <div className="flex-col space-y-[4px]">
+            <Skeleton
+              isLoaded={!isLoading}
+              className="flex space-x-[4px] rounded-[16px]"
+            >
+              <div>
+                <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                  Allocations:
+                </span>
+              </div>
 
-            <div>
-              <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {accountId
-                  ? investorAllocation.allocationsBought ?? "0"
-                  : CONNECT_WALLET_MESSAGE}
-              </span>
-            </div>
-          </Skeleton>
+              <div>
+                <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                  {accountId
+                    ? investorAllocation.allocationsBought ?? "0"
+                    : CONNECT_WALLET_MESSAGE}
+                </span>
+              </div>
+            </Skeleton>
 
-          <Skeleton
-            isLoaded={!isLoading}
-            className="flex space-x-[4px] rounded-[16px]"
-          >
-            <div>
-              <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                Total amount:
-              </span>
-            </div>
+            <Skeleton
+              isLoaded={!isLoading}
+              className="flex space-x-[4px] rounded-[16px]"
+            >
+              <div>
+                <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                  Total amount:
+                </span>
+              </div>
 
-            <div>
-              <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {accountId ? totalAmount : CONNECT_WALLET_MESSAGE}
-              </span>
-            </div>
-          </Skeleton>
+              <div>
+                <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                  {accountId ? totalAmount : CONNECT_WALLET_MESSAGE}
+                </span>
+              </div>
+            </Skeleton>
 
-          <Skeleton
-            isLoaded={!isLoading}
-            className="flex space-x-[4px] rounded-[16px]"
-          >
-            <div>
-              <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                Unlocked amount:
-              </span>
-            </div>
+            <Skeleton
+              isLoaded={!isLoading}
+              className="flex space-x-[4px] rounded-[16px]"
+            >
+              <div>
+                <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                  Unlocked amount:
+                </span>
+              </div>
 
-            <div>
-              <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {accountId
-                  ? formatNumber(
-                      unlockedAmount,
-                      decimals,
-                      metadataProjectToken?.symbol!
-                    )
-                  : CONNECT_WALLET_MESSAGE}
-              </span>
-            </div>
-          </Skeleton>
+              <div>
+                <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                  {accountId
+                    ? formatNumber(
+                        unlockedAmount,
+                        decimals,
+                        metadataProjectToken?.symbol!
+                      )
+                    : CONNECT_WALLET_MESSAGE}
+                </span>
+              </div>
+            </Skeleton>
 
-          <Skeleton
-            isLoaded={!isLoading}
-            className="flex space-x-[4px] rounded-[16px]"
-          >
-            <div>
-              <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                Claimed amount:
-              </span>
-            </div>
+            <Skeleton
+              isLoaded={!isLoading}
+              className="flex space-x-[4px] rounded-[16px]"
+            >
+              <div>
+                <span className="text-[18px] font-[600] tracking-[-0.05em]">
+                  Claimed amount:
+                </span>
+              </div>
 
-            <div>
-              <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                {accountId
-                  ? formatNumber(
-                      claimedAmount,
-                      decimals,
-                      metadataProjectToken?.symbol!
-                    )
-                  : CONNECT_WALLET_MESSAGE}
-              </span>
-            </div>
-          </Skeleton>
-        </div>
-
+              <div>
+                <span className="text-[18px] font-[500] tracking-[-0.05em]">
+                  {accountId
+                    ? formatNumber(
+                        claimedAmount,
+                        decimals,
+                        metadataProjectToken?.symbol!
+                      )
+                    : CONNECT_WALLET_MESSAGE}
+                </span>
+              </div>
+            </Skeleton>
+          </div>
+        </Flex>
         <Skeleton
           isLoaded={!isLoading}
           w="100%"
