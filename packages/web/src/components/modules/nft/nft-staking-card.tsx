@@ -70,10 +70,10 @@ export function NFTStakingCard(
           <Flex
             minHeight="165px"
             userSelect="none"
-            direction="row"
+            direction={{ base: "column", sm: "column", md: "row" }}
             height="100%"
             justifyContent="center"
-            alignItems="center"
+            alignItems={{ base: "flex-start", md: "center" }}
             gap={2}
           >
             <Skeleton
@@ -157,7 +157,9 @@ export function NFTStakingCard(
                           <Image
                             borderRadius={99}
                             border="solid 3px"
+                            outline={glassyWhiteOpaque}
                             borderColor={glassyWhiteOpaque}
+                            boxSizing="content-box"
                             src={icon}
                             className="h-[28px]"
                           />

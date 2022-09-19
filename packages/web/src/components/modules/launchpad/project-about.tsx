@@ -10,7 +10,7 @@ export function ProjectAbout({
   launchpadProject: launchpadProject;
 }) {
   return (
-    <Card className="w-full col-span-12 lg:col-span-6 xl:col-span-3">
+    <Card className="w-full col-span-12 lg:col-span-6 xl:col-span-6">
       <Flex className="flex-col space-y-[12px] h-full w-full">
         <Text
           fontWeight="800"
