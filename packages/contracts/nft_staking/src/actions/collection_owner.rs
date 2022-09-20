@@ -57,6 +57,8 @@ impl Contract {
     staking_program.only_program_token(&token_id);
 
     staking_program.move_funds(token_id, op);
+
+    self.staking_programs.insert(&collection, &staking_program);
   }
 
   #[payable]
