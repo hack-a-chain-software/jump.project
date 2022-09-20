@@ -16,6 +16,7 @@ import { useEffect, useState, useMemo } from "react";
 import { formatNumber, getUTCDate } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { Steps } from "intro.js-react";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
@@ -79,13 +80,57 @@ export const Vesting = () => {
     return isEmpty(investorInfo);
   }, [investorInfo, accountId]);
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      element: ".amount-locked",
+      title: "Locked Tokens",
+      intro: (
+        <div>
+          <span>This section shows your amount of locked tokens.</span>
+        </div>
+      ),
+    },
+    {
+      title: "Unlocked Tokens",
+      element: ".amount-unlocked",
+      intro: (
+        <div className="flex flex-col">
+          <span>Here you can see your amount of unlocked tokens.</span>
+        </div>
+      ),
+    },
+    {
+      title: "Amount",
+      element: ".amount-withdrawn",
+      intro: (
+        <div className="flex flex-col">
+          <span>This is the total amount of tokens you have withdrawn.</span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
       <TopCard
         gradientText="Jump Vesting"
         bigText="Lock. Unlock. Withdraw."
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
+        onClick={() => setShowSteps(true)}
         content={
           <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
             <Skeleton
@@ -97,6 +142,7 @@ export const Vesting = () => {
             >
               <ValueBox
                 borderColor={glassyWhiteOpaque}
+                className="amount-locked"
                 title="Total Locked"
                 value={
                   accountId
@@ -120,6 +166,7 @@ export const Vesting = () => {
               <ValueBox
                 borderColor={glassyWhiteOpaque}
                 title="Total Unlocked"
+                className="amount-unlocked"
                 value={
                   accountId
                     ? `${formatNumber(
@@ -142,6 +189,7 @@ export const Vesting = () => {
               <ValueBox
                 borderColor={glassyWhiteOpaque}
                 title="Total Withdrawn"
+                className="amount-withdrawn"
                 value={
                   accountId
                     ? `${formatNumber(
