@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use serde::ser::SerializeMap;
-
 use near_sdk::{
   json_types::{U128, U64},
   serde::{Deserialize, Serialize},
@@ -56,22 +54,5 @@ impl From<Farm> for SerializableFarm {
       start_at: farm.start_at,
       distributions: farm.distributions,
     }
-  }
-}
-
-pub struct SerializableFungibleTokenBalance(pub FungibleTokenBalance);
-
-impl Serialize for SerializableFungibleTokenBalance {
-  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  where
-    S: near_sdk::serde::Serializer,
-  {
-    let mut map = serializer.serialize_map(Some(self.0.len()))?;
-
-    for (k, &v) in &self.0 {
-      map.serialize_entry(&k.to_string(), &U128(v))?;
-    }
-
-    map.end()
   }
 }
