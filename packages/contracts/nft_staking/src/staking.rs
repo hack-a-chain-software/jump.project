@@ -21,8 +21,6 @@ pub struct StakedNFT {
   pub token_id: NonFungibleTokenID,
   pub owner_id: AccountId,
   pub staked_timestamp: u64,
-
-  #[serde(skip)]
   pub balance: FungibleTokenBalance,
 }
 

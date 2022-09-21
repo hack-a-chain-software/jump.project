@@ -7,7 +7,7 @@ use crate::types::{FungibleTokenID, NFTCollection};
 use crate::{
   actions::guardian::CreateStakingProgramPayload,
   staking::StakedNFT,
-  types::{FungibleTokenBalance, NonFungibleTokenID, SerializableFungibleTokenBalance},
+  types::{FungibleTokenBalance, NonFungibleTokenID},
 };
 
 fn log_event<T: Serialize>(event: &str, data: T) {
@@ -36,7 +36,7 @@ pub fn stake_nft(staked_nft: &StakedNFT) {
 pub fn unstake_nft(nft_id: &NonFungibleTokenID, balance: FungibleTokenBalance) {
   let event = json!({
     "token_id": nft_id,
-    "withdrawn_balance": SerializableFungibleTokenBalance(balance)
+    "withdrawn_balance": balance
   });
 
   log_event("unstake_nft", event);
