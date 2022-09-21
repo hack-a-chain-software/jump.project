@@ -4,6 +4,14 @@ use crate::{staking::StakingProgram, types::FungibleTokenID, Contract};
 
 impl Contract {
   #[inline]
+  pub fn only_owner(&self, account_id: &AccountId) {
+    assert_eq!(
+      account_id, &self.owner,
+      "Only the contract owner may call this function"
+    )
+  }
+
+  #[inline]
   pub fn only_guardians(&self, account_id: &AccountId) {
     assert!(
       self.guardians.contains(&account_id),
