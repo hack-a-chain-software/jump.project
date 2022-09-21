@@ -1,29 +1,11 @@
 use crate::actions::transfer::FTRoutePayload;
 use crate::constants::FT_TRANSFER_GAS;
 use crate::ext_interfaces::ext_fungible_token;
-use crate::staking::{FundsOperation, StakingProgram};
+use crate::treasury::TreasuryOperation;
 use crate::types::*;
 use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise};
-
-impl StakingProgram {
-  #[inline]
-  fn only_collection_owner(&self, account_id: &AccountId) {
-    assert_eq!(
-      account_id, &self.collection_owner,
-      "Only collection owner may call this function",
-    );
-  }
-
-  #[inline]
-  fn only_program_token(&self, token_id: &FungibleTokenID) {
-    assert_eq!(
-      token_id, &self.token_address,
-      "Collection owner may only operate on program token"
-    );
-  }
-}
+use near_sdk::{assert_one_yocto, env, near_bindgen, Promise};
 
 impl Contract {
   pub fn deposit_distribution_funds(&mut self, payload: FTRoutePayload, collection: NFTCollection) {
@@ -43,22 +25,19 @@ impl Contract {
 #[near_bindgen]
 impl Contract {
   #[payable]
-  pub fn move_funds(
+  pub fn move_beneficiary_funds_to_collection(
     &mut self,
     collection: NFTCollection,
-    op: FundsOperation,
     token_id: FungibleTokenID,
   ) {
     assert_one_yocto();
-    let account_id = env::predecessor_account_id();
 
-    let mut staking_program = self.staking_programs.get(&collection).unwrap();
-    staking_program.only_collection_owner(&account_id);
-    staking_program.only_program_token(&token_id);
-
-    staking_program.move_funds(token_id, op);
-
-    self.staking_programs.insert(&collection, &staking_program);
+    self.move_treasury(
+      TreasuryOperation::BeneficiaryToCollection,
+      &env::predecessor_account_id(),
+      &collection,
+      token_id,
+    );
   }
 
   #[payable]

@@ -15,11 +15,7 @@ impl Contract {
       "Transfered token is not accepted by this contract"
     );
 
-    let treasury_amount = self.contract_treasury.get(&payload.token_id).unwrap_or(0);
-
-    self
-      .contract_treasury
-      .insert(&payload.token_id, &(treasury_amount + payload.amount));
+    *self.contract_treasury.entry(payload.token_id).or_insert(0) += payload.amount;
   }
 }
 

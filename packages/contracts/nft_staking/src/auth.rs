@@ -1,0 +1,65 @@
+use near_sdk::AccountId;
+
+use crate::{staking::StakingProgram, types::FungibleTokenID, Contract};
+
+impl Contract {
+  #[inline]
+  pub fn only_guardians(&self, account_id: &AccountId) {
+    assert!(
+      self.guardians.contains(&account_id),
+      "Only guardians may call this function"
+    );
+  }
+
+  #[inline]
+  pub fn is_contract_token(&self, token_id: &FungibleTokenID) -> bool {
+    self.contract_tokens.contains(token_id)
+  }
+
+  #[inline]
+  pub fn only_contract_tokens(&self, token_id: &FungibleTokenID) {
+    assert!(
+      self.is_contract_token(token_id),
+      "Guardians may only operate on contract tokens"
+    )
+  }
+
+  #[inline]
+  pub fn only_non_contract_tokens(&self, token_id: &FungibleTokenID) {
+    assert!(
+      !self.is_contract_token(token_id),
+      "Staking program token cannot be a contract token"
+    );
+  }
+}
+
+impl StakingProgram {
+  #[inline]
+  pub fn is_program_token(&self, token_id: &FungibleTokenID) -> bool {
+    token_id == &self.token_address
+  }
+
+  #[inline]
+  pub fn only_collection_owner(&self, account_id: &AccountId) {
+    assert_eq!(
+      account_id, &self.collection_owner,
+      "Only collection owner may call this function",
+    );
+  }
+
+  #[inline]
+  pub fn only_program_token(&self, token_id: &FungibleTokenID) {
+    assert!(
+      self.is_program_token(token_id),
+      "Collection owner may only operate on program token"
+    );
+  }
+
+  #[inline]
+  pub fn only_non_program_tokens(&self, token_id: &FungibleTokenID) {
+    assert!(
+      !self.is_program_token(token_id),
+      "Cannot operate on staking program tokens."
+    );
+  }
+}

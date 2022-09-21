@@ -144,7 +144,7 @@ impl Farm {
     self.distributions.insert(token_id.clone(), dist);
   }
 
-  pub fn withdraw_beneficiary(&mut self, token_id: &FungibleTokenID) -> u128 {
+  pub fn withdraw_beneficiary_funds(&mut self, token_id: &FungibleTokenID) -> u128 {
     let (dist, amount) = self
       .distributions
       .get(&token_id)
