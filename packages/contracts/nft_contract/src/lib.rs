@@ -1,5 +1,6 @@
 use near_sdk::{env, near_bindgen, AccountId, PanicOnDefault, Promise, PromiseOrValue};
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::json_types::U128;
 use near_sdk::collections::LazyOption;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_contract_standards::non_fungible_token::metadata::{
@@ -15,21 +16,22 @@ use near_contract_standards::{
 pub struct Contract {
   tokens: NonFungibleToken,
   metadata: LazyOption<NFTContractMetadata>,
-  counter: u64,
+  counter: u128,
+  media_quantity: u128,
 }
 
 #[near_bindgen]
 impl Contract {
   #[init]
-  pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
+  pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, media_quantity: Option<U128>) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
 
     Contract {
       tokens: NonFungibleToken::new(b'a', owner_id, Some(b'b'), Some(b'c'), Some(b'd')),
       metadata: LazyOption::new(b'e', Some(&metadata)),
-
       counter: 0,
+      media_quantity: media_quantity.unwrap_or(U128(200)).0,
     }
   }
 
@@ -45,10 +47,10 @@ impl Contract {
       media: Some(format!(
         "{}/{}.png",
         self.metadata.get().unwrap().base_uri.unwrap().clone(),
-        self.counter
+        self.counter % self.media_quantity
       )),
       media_hash: None,
-      copies: Some(self.counter),
+      copies: Some(self.counter as u64),
       issued_at: None,
       expires_at: None,
       starts_at: None,

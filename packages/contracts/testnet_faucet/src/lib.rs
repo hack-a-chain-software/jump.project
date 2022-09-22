@@ -2,8 +2,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap};
 use near_sdk::json_types::{U128};
 use near_sdk::{
-  env, near_bindgen, ext_contract, AccountId, PanicOnDefault, Promise, BorshStorageKey, Gas,
-  assert_one_yocto,
+  env, near_bindgen, ext_contract, AccountId, PanicOnDefault, Promise, BorshStorageKey, Gas
 };
 
 use near_contract_standards::non_fungible_token::Token;
