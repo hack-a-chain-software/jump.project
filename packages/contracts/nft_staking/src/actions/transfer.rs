@@ -1,6 +1,6 @@
 use crate::*;
 use near_sdk::json_types::U128;
-use near_sdk::{PromiseOrValue};
+use near_sdk::PromiseOrValue;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
