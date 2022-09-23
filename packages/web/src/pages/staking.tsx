@@ -101,8 +101,6 @@ export const Staking = () => {
   }, [x_token]);
 
   const getAmountRaw = (amount) => {
-    //const decimals = new BN(jumpMetadata?.decimals! + "");
-
     const denom = new Big("10").pow(jumpMetadata?.decimals!);
 
     return new Big(amount).mul(denom).toString();
