@@ -18,12 +18,11 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::CollectionToDistribution {
-        amount: Some(amount.0),
-      },
+      TreasuryOperation::CollectionToDistribution,
       &env::predecessor_account_id(),
       &collection,
       token_id,
+      Some(amount.0),
     );
   }
 }

@@ -1,4 +1,3 @@
-use crate::actions::transfer::FTRoutePayload;
 use crate::constants::FT_TRANSFER_GAS;
 use crate::ext_interfaces::ext_fungible_token;
 use crate::treasury::TreasuryOperation;
@@ -6,21 +5,6 @@ use crate::types::*;
 use crate::{Contract, ContractExt};
 use near_sdk::json_types::U128;
 use near_sdk::{assert_one_yocto, env, near_bindgen, Promise};
-
-impl Contract {
-  pub fn deposit_distribution_funds(&mut self, payload: FTRoutePayload, collection: NFTCollection) {
-    let token_id = payload.token_id;
-    let amount = payload.amount;
-    let account_id = payload.sender_id;
-
-    let mut staking_program = self.staking_programs.get(&collection).unwrap();
-    staking_program.only_collection_owner(&account_id);
-    staking_program.only_program_token(&token_id);
-    staking_program.deposit_distribution_funds(&token_id, amount);
-
-    self.staking_programs.insert(&collection, &staking_program);
-  }
-}
 
 #[near_bindgen]
 impl Contract {
@@ -37,6 +21,7 @@ impl Contract {
       &env::predecessor_account_id(),
       &collection,
       token_id,
+      None,
     );
   }
 

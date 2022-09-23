@@ -6,11 +6,19 @@ use crate::types::*;
 use crate::Contract;
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum TreasuryOperation {
-  ContractToCollection { amount: Option<u128> },
-  CollectionToContract { amount: Option<u128> },
-  CollectionToDistribution { amount: Option<u128> },
+  ContractToCollection,
+  CollectionToContract,
+  CollectionToDistribution,
   BeneficiaryToCollection,
+  /*
+   *   Maybe this operation does not fit here with the others, it's possible
+   * that we should create a different category of deposit operations. But for now
+   * I think the simplest and most effective solution is to have it here, considering
+   * there's no reason for anyone to deposit to a treasury.
+   */
+  DepositToDistribution,
 }
 
 impl Contract {
@@ -22,23 +30,16 @@ impl Contract {
     token_id: &FungibleTokenID,
   ) {
     match &operation {
-      TreasuryOperation::CollectionToContract { amount: _ }
-      | TreasuryOperation::ContractToCollection { amount: _ } => {
+      TreasuryOperation::CollectionToContract | TreasuryOperation::ContractToCollection => {
         self.only_guardians(operator);
         self.only_contract_tokens(token_id);
         staking_program.only_non_program_tokens(token_id);
       }
 
-      TreasuryOperation::CollectionToDistribution { amount: _ }
-      | TreasuryOperation::BeneficiaryToCollection => {
-        if staking_program.is_program_token(token_id) {
-          staking_program.only_collection_owner(operator);
-        } else if self.is_contract_token(token_id) {
-          self.only_guardians(operator);
-          staking_program.only_non_program_tokens(token_id);
-        } else {
-          panic!("Token does not belong to staking program");
-        }
+      TreasuryOperation::CollectionToDistribution
+      | TreasuryOperation::BeneficiaryToCollection
+      | TreasuryOperation::DepositToDistribution => {
+        self.assert_authorized_operator(operator, staking_program, token_id);
       }
     }
   }
@@ -48,6 +49,7 @@ impl Contract {
     operation: TreasuryOperation,
     staking_program: &mut StakingProgram,
     token_id: FungibleTokenID,
+    amount: Option<u128>,
   ) {
     let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
 
@@ -57,7 +59,7 @@ impl Contract {
       .or_insert(0);
 
     match operation {
-      TreasuryOperation::ContractToCollection { amount } => {
+      TreasuryOperation::ContractToCollection => {
         let amount = amount.unwrap_or(*contract_treasury);
         assert!(
           amount <= *contract_treasury,
@@ -66,7 +68,7 @@ impl Contract {
         *contract_treasury -= amount;
         *collection_treasury += amount;
       }
-      TreasuryOperation::CollectionToContract { amount } => {
+      TreasuryOperation::CollectionToContract => {
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
@@ -75,7 +77,7 @@ impl Contract {
         *collection_treasury -= amount;
         *contract_treasury += amount;
       }
-      TreasuryOperation::CollectionToDistribution { amount } => {
+      TreasuryOperation::CollectionToDistribution => {
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
@@ -85,10 +87,21 @@ impl Contract {
         staking_program.deposit_distribution_funds(&token_id, amount);
       }
       TreasuryOperation::BeneficiaryToCollection => {
+        assert!(
+          amount.is_none(),
+          "This operation does not support the parameter 'amount'"
+        );
         // TODO: ideally this would call StakingProgram::withdraw_beneficiary_funds
         let amount = staking_program.farm.withdraw_beneficiary_funds(&token_id);
 
         *collection_treasury += amount;
+      }
+      TreasuryOperation::DepositToDistribution => {
+        assert!(
+          amount.is_some(),
+          "This operation does not support the parameter 'amount'"
+        );
+        staking_program.deposit_distribution_funds(&token_id, amount.unwrap());
       }
     }
   }
@@ -99,11 +112,12 @@ impl Contract {
     operator: &AccountId,
     collection: &NFTCollection,
     token_id: FungibleTokenID,
+    amount: Option<u128>,
   ) {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
     self.assert_authorized_operation(operation, operator, &staking_program, &token_id);
-    self.reallocate_treasury(operation, &mut staking_program, token_id);
+    self.reallocate_treasury(operation, &mut staking_program, token_id, amount);
 
     self.staking_programs.insert(&collection, &staking_program);
   }
@@ -236,17 +250,17 @@ mod tests {
 
   #[rstest]
   #[case::guardian_ct_contract_to_collection(
-    TreasuryOperation::ContractToCollection{ amount: Some(0) },
+    TreasuryOperation::ContractToCollection,
     guardian(),
     contract_token()
   )]
   #[case::guardian_ct_collection_to_contract(
-    TreasuryOperation::CollectionToContract{ amount: Some(0) },
+    TreasuryOperation::CollectionToContract,
     guardian(),
     contract_token()
   )]
   #[case::guardian_ct_collection_to_distribution(
-    TreasuryOperation::CollectionToDistribution{ amount: Some(0) },
+    TreasuryOperation::CollectionToDistribution,
     guardian(),
     contract_token()
   )]
@@ -255,13 +269,23 @@ mod tests {
     guardian(),
     contract_token()
   )]
+  #[case::guardian_ct_deposit_to_distribution(
+    TreasuryOperation::DepositToDistribution,
+    guardian(),
+    contract_token()
+  )]
   #[case::collection_owner_pt_collection_to_distribution(
-    TreasuryOperation::CollectionToDistribution{ amount: Some(0) },
+    TreasuryOperation::CollectionToDistribution,
     collection_owner(),
     program_token()
   )]
   #[case::collection_owner_pt_beneficiary_to_collection(
     TreasuryOperation::BeneficiaryToCollection,
+    collection_owner(),
+    program_token()
+  )]
+  #[case::collection_owner_pt_deposit_to_distribution(
+    TreasuryOperation::DepositToDistribution,
     collection_owner(),
     program_token()
   )]
@@ -277,17 +301,17 @@ mod tests {
 
   #[rstest]
   #[case::guardian_pt_contract_to_collection(
-    TreasuryOperation::ContractToCollection { amount: Some(0) },
+    TreasuryOperation::ContractToCollection,
     guardian(),
     program_token()
   )]
   #[case::guardian_pt_collection_to_contract(
-    TreasuryOperation::CollectionToContract { amount: Some(0) },
+    TreasuryOperation::CollectionToContract,
     guardian(),
     program_token()
   )]
   #[case::guardian_pt_collection_to_distribution(
-    TreasuryOperation::CollectionToDistribution { amount: Some(0) },
+    TreasuryOperation::CollectionToDistribution,
     guardian(),
     program_token()
   )]
@@ -296,33 +320,43 @@ mod tests {
     guardian(),
     program_token()
   )]
+  #[case::guardian_pt_deposit_to_distribution(
+    TreasuryOperation::DepositToDistribution,
+    guardian(),
+    program_token()
+  )]
   #[case::collection_owner_ct_contract_to_collection(
-    TreasuryOperation::ContractToCollection { amount: Some(0) },
+    TreasuryOperation::ContractToCollection,
     collection_owner(),
     contract_token()
   )]
   #[case::collection_owner_pt_contract_to_collection(
-    TreasuryOperation::ContractToCollection { amount: Some(0) },
+    TreasuryOperation::ContractToCollection,
     collection_owner(),
     program_token()
   )]
   #[case::collection_owner_ct_collection_to_contract(
-    TreasuryOperation::CollectionToContract { amount: Some(0) },
+    TreasuryOperation::CollectionToContract,
     collection_owner(),
     contract_token()
   )]
   #[case::collection_owner_pt_collection_to_contract(
-    TreasuryOperation::CollectionToContract { amount: Some(0) },
+    TreasuryOperation::CollectionToContract,
     collection_owner(),
     program_token()
   )]
   #[case::collection_owner_ct_collection_to_distribution(
-    TreasuryOperation::CollectionToDistribution { amount: Some(0) },
+    TreasuryOperation::CollectionToDistribution,
     collection_owner(),
     contract_token()
   )]
   #[case::collection_owner_ct_beneficiary_to_collection(
     TreasuryOperation::BeneficiaryToCollection,
+    collection_owner(),
+    contract_token()
+  )]
+  #[case::collection_owner_ct_deposit_to_distribution(
+    TreasuryOperation::DepositToDistribution,
     collection_owner(),
     contract_token()
   )]
@@ -344,41 +378,59 @@ mod tests {
 
   #[rstest]
   #[case::contract_to_collection_amount(
-    TreasuryOperation::ContractToCollection { amount: Some(5) },
+    TreasuryOperation::ContractToCollection,
+    Some(5),
     (45, 55, 50, 50)
   )]
   #[case::contract_to_collection(
-    TreasuryOperation::ContractToCollection { amount: None },
+    TreasuryOperation::ContractToCollection,
+    None,
     (0, 100, 50, 50)
   )]
   #[case::collection_to_contract_amount(
-    TreasuryOperation::CollectionToContract { amount: Some(5) },
+    TreasuryOperation::CollectionToContract,
+    Some(5),
     (55, 45, 50, 50)
   )]
   #[case::collection_to_contract(
-    TreasuryOperation::CollectionToContract { amount: None },
+    TreasuryOperation::CollectionToContract,
+    None,
     (100, 0, 50, 50)
   )]
   #[case::collection_to_distribution_amount(
-    TreasuryOperation::CollectionToDistribution { amount: Some(5) },
+    TreasuryOperation::CollectionToDistribution,
+    Some(5),
     (50, 45, 55, 50)
   )]
   #[case::collection_to_distribution(
-    TreasuryOperation::CollectionToDistribution { amount: None },
+    TreasuryOperation::CollectionToDistribution,
+    None,
     (50, 0, 100, 50)
   )]
   #[case::beneficiary_to_collection(
     TreasuryOperation::BeneficiaryToCollection,
+    None,
     (50, 100, 50, 0)
+  )]
+  #[case::deposit_to_distribution(
+    TreasuryOperation::DepositToDistribution,
+    Some(5),
+    (50, 50, 55, 50)
   )]
   fn test_reallocate_treasury(
     mut contract: Contract,
     mut staking_program: StakingProgram,
     contract_token: FungibleTokenID,
     #[case] operation: TreasuryOperation,
+    #[case] amount: Option<u128>,
     #[case] expected: (u128, u128, u128, u128),
   ) {
-    contract.reallocate_treasury(operation, &mut staking_program, contract_token.clone());
+    contract.reallocate_treasury(
+      operation,
+      &mut staking_program,
+      contract_token.clone(),
+      amount,
+    );
 
     let updated_contract_treasury = contract.contract_treasury.get(&contract_token).unwrap();
     let updated_collection_treasury = staking_program

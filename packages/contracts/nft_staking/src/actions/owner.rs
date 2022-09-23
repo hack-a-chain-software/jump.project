@@ -1,19 +1,5 @@
-use crate::actions::transfer::FTRoutePayload;
 use crate::{Contract, ContractExt, FungibleTokenID};
 use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise};
-
-impl Contract {
-  pub fn deposit_contract_treasury(&mut self, payload: FTRoutePayload) {
-    self.only_owner(&payload.sender_id);
-
-    assert!(
-      self.contract_treasury.contains_key(&payload.token_id),
-      "Transfered token is not accepted by this contract"
-    );
-
-    *self.contract_treasury.entry(payload.token_id).or_insert(0) += payload.amount;
-  }
-}
 
 #[near_bindgen]
 impl Contract {
