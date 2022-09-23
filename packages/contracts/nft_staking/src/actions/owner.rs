@@ -50,7 +50,7 @@ impl Contract {
 
     // TODO: create an index of program tokens and assert it's a non-program token
 
-    self.contract_tokens.insert(&new_contract_token);
+    self.contract_treasury.insert(new_contract_token, 0);
   }
 
   #[payable]
@@ -68,6 +68,6 @@ impl Contract {
      *  This is very unlikely to happen, however it would be good to avoid this possibility.
      */
 
-    self.contract_tokens.remove(&remove_contract_token);
+    self.contract_treasury.remove(&remove_contract_token);
   }
 }

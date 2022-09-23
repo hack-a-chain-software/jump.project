@@ -21,7 +21,7 @@ impl Contract {
 
   #[inline]
   pub fn is_contract_token(&self, token_id: &FungibleTokenID) -> bool {
-    self.contract_tokens.contains(token_id)
+    self.contract_treasury.contains_key(token_id)
   }
 
   #[inline]

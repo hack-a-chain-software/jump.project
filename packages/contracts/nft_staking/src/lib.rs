@@ -25,7 +25,6 @@ mod types;
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
 pub struct Contract {
   pub owner: AccountId,
-  pub contract_tokens: UnorderedSet<FungibleTokenID>,
   pub contract_treasury: FungibleTokenBalance,
   pub guardians: UnorderedSet<AccountId>,
   pub investors: LookupMap<AccountId, Investor>,
@@ -36,7 +35,6 @@ pub struct Contract {
 enum StorageKey {
   Guardians,
   Investors,
-  ContractTokens,
   StakingPrograms,
   StakingProgramField {
     collection: NFTCollection,
@@ -58,16 +56,13 @@ impl Contract {
   pub fn new(owner_id: AccountId, contract_tokens: Vec<FungibleTokenID>) -> Self {
     assert!(!env::state_exists(), "Already initialized");
 
-    let mut contract_tokens_set = UnorderedSet::new(StorageKey::ContractTokens);
     let mut contract_treasury = HashMap::new();
     for token_id in contract_tokens.iter() {
-      contract_tokens_set.insert(token_id);
       contract_treasury.insert(token_id.clone(), 0u128);
     }
 
     Self {
       owner: owner_id,
-      contract_tokens: contract_tokens_set,
       contract_treasury,
       guardians: UnorderedSet::new(StorageKey::Guardians),
       investors: LookupMap::new(StorageKey::Investors),
