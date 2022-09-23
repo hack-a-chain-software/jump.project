@@ -77,6 +77,8 @@ export function NFTStakingUserRewards({
                         <Image
                           borderRadius={99}
                           border="solid 3px"
+                          outline={glassyWhiteOpaque}
+                          boxSizing="content-box"
                           borderColor={glassyWhiteOpaque}
                           src={icon}
                           className="h-[28px]"

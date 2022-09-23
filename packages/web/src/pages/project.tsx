@@ -1,5 +1,14 @@
 import { useMemo } from "react";
-import { Box, Flex, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Text,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from "@chakra-ui/react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
 import {
@@ -20,6 +29,7 @@ import {
   PageContainer,
   ProjectUserArea,
   ProjectAllocations,
+  ProjectTabUserAllocations,
 } from "@/components";
 import {
   useViewVestedAllocations,
@@ -114,21 +124,26 @@ export const Project = () => {
           launchpadProject={launchpadProject!}
         />
 
-        <ProjectUserArea
-          isLoading={isLoading}
-          launchpadProject={launchpadProject!}
-          vestedAllocations={vestedAllocations!}
-          investorAllocation={investorAllocation}
-          metadataProjectToken={metadataProjectToken!}
-        />
-
-        <ProjectAllocations
-          isLoading={isLoading}
-          investorAllowance={investorAllowance!}
-          launchpadProject={launchpadProject!}
-          priceTokenBalance={priceTokenBalance!}
-          totalAllowanceData={totalAllowanceData!}
-          investorAllocation={investorAllocation!}
+        <ProjectTabUserAllocations
+          projectUserComponent={
+            <ProjectUserArea
+              isLoading={isLoading}
+              launchpadProject={launchpadProject!}
+              vestedAllocations={vestedAllocations!}
+              investorAllocation={investorAllocation}
+              metadataProjectToken={metadataProjectToken!}
+            />
+          }
+          projectAllocationsComponent={
+            <ProjectAllocations
+              isLoading={isLoading}
+              investorAllowance={investorAllowance!}
+              launchpadProject={launchpadProject!}
+              priceTokenBalance={priceTokenBalance!}
+              totalAllowanceData={totalAllowanceData!}
+              investorAllocation={investorAllocation!}
+            />
+          }
         />
 
         <ProjectStats
