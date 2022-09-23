@@ -1,4 +1,5 @@
 import { ID } from "./graphql-types";
+import { PaginationFilters } from "@/modules/tools/createPaginatedConnection";
 
 export type NFTStaking = {
   collection_id: ID;
@@ -20,3 +21,9 @@ export type StakedNFT = {
   staked_timestamp: string;
   balances: string[];
 };
+
+export type NFTStakingFilters = {
+  search: string;
+};
+
+export type PaginatedNFTStakingFilters = NFTStakingFilters & PaginationFilters;
