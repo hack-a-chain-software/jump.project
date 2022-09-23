@@ -186,7 +186,7 @@ describe("NFT Staking Contract Integration Tests", () => {
     );
   });
 
-  it("collection owners should be able to deposit project token to program's collection treasury", async () => {
+  it("collection owners should be able to deposit project token to the program's collection treasury", async () => {
     await collectionOwnerAccount.call(
       tokenContractAccounts[2],
       "storage_deposit",
@@ -208,7 +208,7 @@ describe("NFT Staking Contract Integration Tests", () => {
         receiver_id: stakingContractAccount.accountId,
         amount: "80",
         memo: JSON.stringify({
-          type: "CollectionOwnerDeposit",
+          type: "DepositToDistribution",
           collection: {
             type: "NFTContract",
             account_id: nftContractAccount.accountId,
@@ -245,8 +245,8 @@ describe("NFT Staking Contract Integration Tests", () => {
     );
 
     /*
-            this isn't working in test env for reasons (it's a cross-contract call)
-        */
+      this isn't working in test env for reasons (it's a cross-contract call)
+    */
 
     const undo = await stakerAccount.call(
       nftContractAccount,
@@ -276,15 +276,15 @@ describe("NFT Staking Contract Integration Tests", () => {
     // );
 
     /*
-            now this doesn't work because the library sucks
-            const result = await stakingContractAccount.view("view_staked", {
-                collection: {
-                    type: 'NFTContract',
-                    account_id: nftContractAccount.accountId
-                },
-                account_id: stakerAccount.accountId
-            });
-        */
+      now this doesn't work because the library sucks
+      const result = await stakingContractAccount.view("view_staked", {
+          collection: {
+              type: 'NFTContract',
+              account_id: nftContractAccount.accountId
+          },
+          account_id: stakerAccount.accountId
+      });
+    */
 
     const result = await stakerAccount.call(
       stakingContractAccount,
