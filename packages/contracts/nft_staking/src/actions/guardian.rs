@@ -98,12 +98,11 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::ContractToCollection {
-        amount: Some(amount.0),
-      },
+      TreasuryOperation::ContractToCollection,
       &env::predecessor_account_id(),
       &collection,
       token_id,
+      Some(amount.0),
     );
   }
 
@@ -117,12 +116,11 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::CollectionToContract {
-        amount: Some(amount.0),
-      },
+      TreasuryOperation::CollectionToContract,
       &env::predecessor_account_id(),
       &collection,
       token_id,
+      Some(amount.0),
     );
   }
 }
