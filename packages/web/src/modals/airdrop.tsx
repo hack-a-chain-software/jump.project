@@ -31,8 +31,8 @@ export function AirdropModal({
 
     const transactions: Transaction[] = [];
 
-    const denomJ = new Big("10").pow(18!);
-    const denomU = new Big("10").pow(6!);
+    const denomJ = new Big("10").pow(18);
+    const denomU = new Big("10").pow(6);
 
     transactions.push(
       getTransaction(
@@ -40,7 +40,7 @@ export function AirdropModal({
         "faucet_test4.testnet",
         "ft_faucet",
         {
-          token: "faucet_test1.testnet",
+          token: "faucet_test2.testnet",
           amount: new Big(20).mul(denomJ).toString(),
         },
         "0.25"
@@ -53,7 +53,7 @@ export function AirdropModal({
         "faucet_test4.testnet",
         "ft_faucet",
         {
-          token: "faucet_test2.testnet",
+          token: "faucet_test1.testnet",
           amount: new Big(20).mul(denomU).toString(),
         },
         "0.25"
