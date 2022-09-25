@@ -11,6 +11,10 @@ const {
 
 const { storeData, createAccount, registerContracts } = require("./utils");
 
+const { nftStakingSetup } = require("./nft_staking_setup");
+
+const { launchpadSetup } = require("./launchpad_setup");
+
 testnetSetup();
 
 async function testnetSetup() {
@@ -96,7 +100,7 @@ async function testnetSetup() {
     methodName: "new",
     args: {
       owner_id: execution_data.connAccountMap.ownerAccount.accountId,
-      total_supply: "1000000000000000000000000000",
+      total_supply: "10000000000000000000000000000000000",
       metadata: {
         spec: "ft-1.0.0",
         name: "Jump",
@@ -232,7 +236,7 @@ async function testnetSetup() {
   const promisesMint = [];
   for (let minter of minterContracts) {
     promisesMint.push(
-      ownerAccount.functionCall({
+      execution_data.connAccountMap.ownerAccount.functionCall({
         contractId: execution_data.connAccountMap.lockedTokenAccount.accountId,
         methodName: "add_minter",
         args: {
@@ -245,6 +249,7 @@ async function testnetSetup() {
   await Promise.all(promisesMint);
 
   // setup NFT staking listings
+  await nftStakingSetup(execution_data);
 
   // setup Launchpad listings
 }

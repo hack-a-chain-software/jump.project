@@ -27,11 +27,12 @@ impl Contract {
     &self,
     operation: TreasuryOperation,
     operator: &AccountId,
-    staking_program: &StakingProgram,
+    staking_program: Option<&StakingProgram>,
     token_id: &FungibleTokenID,
   ) {
     match &operation {
       TreasuryOperation::CollectionToContract | TreasuryOperation::ContractToCollection => {
+        let staking_program = staking_program.unwrap();
         self.only_guardians(operator);
         self.only_contract_tokens(token_id);
         staking_program.only_non_program_tokens(token_id);
@@ -40,38 +41,43 @@ impl Contract {
       TreasuryOperation::CollectionToDistribution
       | TreasuryOperation::BeneficiaryToCollection
       | TreasuryOperation::DepositToDistribution => {
+        let staking_program = staking_program.unwrap();
         self.assert_authorized_operator(operator, staking_program, token_id);
       }
 
-      TreasuryOperation::DepositToContract => ()
+      TreasuryOperation::DepositToContract => (),
     }
   }
 
   fn reallocate_treasury(
     &mut self,
     operation: TreasuryOperation,
-    staking_program: &mut StakingProgram,
+    staking_program: Option<&mut StakingProgram>,
     token_id: FungibleTokenID,
     amount: Option<u128>,
   ) {
     let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
-
-    let collection_treasury = staking_program
-      .collection_treasury
-      .entry(token_id.clone())
-      .or_insert(0);
-
+      
     match operation {
       TreasuryOperation::ContractToCollection => {
         let amount = amount.unwrap_or(*contract_treasury);
+        let collection_treasury = staking_program.unwrap().collection_treasury
+        .entry(token_id.clone())
+        .or_insert(0);
+
         assert!(
           amount <= *contract_treasury,
-          "Insufficient contract treasury"
+          "Insufficient contract treasury, amount: {}, treasury: {}",
+          amount,
+          *contract_treasury
         );
         *contract_treasury -= amount;
         *collection_treasury += amount;
       }
       TreasuryOperation::CollectionToContract => {
+        let collection_treasury = staking_program.unwrap().collection_treasury
+        .entry(token_id.clone())
+        .or_insert(0);
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
@@ -81,6 +87,10 @@ impl Contract {
         *contract_treasury += amount;
       }
       TreasuryOperation::CollectionToDistribution => {
+        let staking_program = staking_program.unwrap();
+        let collection_treasury = staking_program.collection_treasury
+        .entry(token_id.clone())
+        .or_insert(0);
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
@@ -90,6 +100,10 @@ impl Contract {
         staking_program.deposit_distribution_funds(&token_id, amount);
       }
       TreasuryOperation::BeneficiaryToCollection => {
+        let staking_program = staking_program.unwrap();
+        let collection_treasury = staking_program.collection_treasury
+        .entry(token_id.clone())
+        .or_insert(0);
         assert!(
           amount.is_none(),
           "This operation does not support the parameter 'amount'"
@@ -100,6 +114,7 @@ impl Contract {
         *collection_treasury += amount;
       }
       TreasuryOperation::DepositToDistribution => {
+        let staking_program = staking_program.unwrap();
         assert!(
           amount.is_some(),
           "This operation needs the parameter 'amount'"
@@ -111,7 +126,7 @@ impl Contract {
           amount.is_some(),
           "This operation needs the parameter 'amount'"
         );
-        *collection_treasury += amount.unwrap();
+        *contract_treasury += amount.unwrap();
       }
     }
   }
@@ -120,16 +135,21 @@ impl Contract {
     &mut self,
     operation: TreasuryOperation,
     operator: &AccountId,
-    collection: &NFTCollection,
+    collection: Option<&NFTCollection>,
     token_id: FungibleTokenID,
     amount: Option<u128>,
   ) {
-    let mut staking_program = self.staking_programs.get(&collection).unwrap();
+    if let Some(collection) = collection {
+      let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
-    self.assert_authorized_operation(operation, operator, &staking_program, &token_id);
-    self.reallocate_treasury(operation, &mut staking_program, token_id, amount);
+      self.assert_authorized_operation(operation, operator, Some(&staking_program), &token_id);
+      self.reallocate_treasury(operation, Some(&mut staking_program), token_id, amount);
 
-    self.staking_programs.insert(&collection, &staking_program);
+      self.staking_programs.insert(&collection, &staking_program);
+    } else {
+      self.assert_authorized_operation(operation, operator, None, &token_id);
+      self.reallocate_treasury(operation, None, token_id, amount);
+    }
   }
 }
 
@@ -190,7 +210,7 @@ mod tests {
     collection_round_reward.insert(contract_token.clone(), 10);
     collection_round_reward.insert(program_token.clone(), 10);
 
-    let mut farm = Farm::new(collection.clone(), collection_round_reward, 5);
+    let mut farm = Farm::new(collection.clone(), collection_round_reward, 5, 0);
 
     farm
       .distributions
@@ -306,7 +326,7 @@ mod tests {
     #[case] operator: AccountId,
     #[case] token_id: FungibleTokenID,
   ) {
-    contract.assert_authorized_operation(operation, &operator, &staking_program, &token_id);
+    contract.assert_authorized_operation(operation, &operator, Some(&staking_program), &token_id);
   }
 
   #[rstest]
@@ -380,7 +400,7 @@ mod tests {
     std::panic::set_hook(Box::new(|_| {}));
 
     let panicked = std::panic::catch_unwind(|| {
-      contract.assert_authorized_operation(operation, &operator, &staking_program, &token_id);
+      contract.assert_authorized_operation(operation, &operator, Some(&staking_program), &token_id);
     });
 
     assert!(panicked.is_err());
@@ -437,7 +457,7 @@ mod tests {
   ) {
     contract.reallocate_treasury(
       operation,
-      &mut staking_program,
+      Some(&mut staking_program),
       contract_token.clone(),
       amount,
     );

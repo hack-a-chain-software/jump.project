@@ -1,5 +1,5 @@
 const nearAPI = require("near-api-js");
-const { KeyPair } = require("near-workspaces");
+const { BN, KeyPair } = require("near-workspaces");
 const fs = require("fs");
 
 function storeData(data, path) {
@@ -78,8 +78,8 @@ async function deployToken(
       metadata,
     },
   });
-  execution_data.connAccountMap[tokenName] = account;
-  execution_data.cccountMap[tokenName] = account.accountId;
+  execution_data.connAccountMap[newTokenName] = account;
+  execution_data.accountMap[newTokenName] = account.accountId;
 }
 
 async function deployNft(newNftName, metadata, execution_data) {
@@ -95,8 +95,24 @@ async function deployNft(newNftName, metadata, execution_data) {
       metadata,
     },
   });
-  execution_data.connAccountMap[tokenName] = account;
-  execution_data.cccountMap[tokenName] = account.accountId;
+  execution_data.connAccountMap[newNftName] = account;
+  execution_data.accountMap[newNftName] = account.accountId;
+}
+
+function generateRandom(min = 0, max = 100) {
+  // find diff
+  let difference = max - min;
+
+  // generate random number
+  let rand = Math.random();
+
+  // multiply with difference
+  rand = Math.floor(rand * difference);
+
+  // add with min value
+  rand = rand + min;
+
+  return rand;
 }
 
 module.exports = {
@@ -105,4 +121,5 @@ module.exports = {
   registerContracts,
   deployToken,
   deployNft,
+  generateRandom,
 };

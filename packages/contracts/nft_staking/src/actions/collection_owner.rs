@@ -19,7 +19,7 @@ impl Contract {
     self.move_treasury(
       TreasuryOperation::BeneficiaryToCollection,
       &env::predecessor_account_id(),
-      &collection,
+      Some(&collection),
       token_id,
       None,
     );

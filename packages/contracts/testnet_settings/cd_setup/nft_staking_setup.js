@@ -1,7 +1,5 @@
 const nearAPI = require("near-api-js");
-const { BN, KeyPair } = require("near-workspaces");
-const fs = require("fs");
-const crypto = require("crypto");
+const { BN } = require("near-workspaces");
 
 const {
   connect,
@@ -9,13 +7,20 @@ const {
   accountCreator: { UrlAccountCreator },
 } = nearAPI;
 
-const { registerContracts, deployToken, deployNft } = require("./utils");
+const {
+  registerContracts,
+  deployToken,
+  deployNft,
+  generateRandom,
+} = require("./utils");
 
 /*
  * This setup create a NFT + TOKEN pair for each listing
  * Must then pass select RPS, interval, min period and penalty to build each
  */
 async function nftStakingSetup(execution_data) {
+  console.log("Start NFT staking setup");
+
   let { near, keyStore, accountCreator, config, accountMap, connAccountMap } =
     execution_data;
 
@@ -39,7 +44,7 @@ async function nftStakingSetup(execution_data) {
     decimals: 18,
   };
   await deployToken(
-    "partnerToken",
+    "partnertoken",
     partnerSupply,
     partnerMetadata,
     execution_data
@@ -49,17 +54,17 @@ async function nftStakingSetup(execution_data) {
   await connAccountMap.ownerAccount.functionCall({
     contractId: connAccountMap.nftStaking.accountId,
     methodName: "add_contract_token",
-    args: { new_contract_token: connAccountMap.partnerToken.accountId },
+    args: { new_contract_token: connAccountMap.partnertoken.accountId },
     attachedDeposit: new BN(1),
   });
 
   // Deposit contract_tokens to NFT Staking Contract
   await registerContracts(
-    [connAccountMap.nftStaking.accountId],
-    [connAccountMap.partnerToken.accountId]
+    [connAccountMap.nftStaking],
+    [connAccountMap.partnertoken]
   );
   await connAccountMap.ownerAccount.functionCall({
-    contractId: connAccountMap.partnerToken.accountId,
+    contractId: connAccountMap.partnertoken.accountId,
     methodName: "ft_transfer_call",
     args: {
       receiver_id: connAccountMap.nftStaking.accountId,
@@ -70,7 +75,38 @@ async function nftStakingSetup(execution_data) {
     gas: new BN("300000000000000"),
   });
 
+  // deposit lockedJUMP to NFT staking contract
+
+  const lockedAmount = partnerSupply;
+  await connAccountMap.ownerAccount.functionCall({
+    contractId: connAccountMap.jumpTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: connAccountMap.lockedTokenAccount.accountId,
+      amount: lockedAmount,
+      msg: JSON.stringify({
+        type: "Mint",
+        account_id: connAccountMap.ownerAccount.accountId,
+      }),
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN("300000000000000"),
+  });
+
+  await connAccountMap.ownerAccount.functionCall({
+    contractId: connAccountMap.lockedTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: connAccountMap.nftStaking.accountId,
+      amount: lockedAmount,
+      msg: JSON.stringify({ type: "DepositToContract" }),
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN("300000000000000"),
+  });
+
   // All project tokens to be deployed
+  // always use 6 decimals
   const projectTokens = {
     generic: {
       spec: "ft-1.0.0",
@@ -93,131 +129,131 @@ async function nftStakingSetup(execution_data) {
       },
       token: projectTokens.generic,
     },
-    {
-      nft: {
-        name: "Secret Skellies Society",
-        symbol: "BONEZ",
-        base_uri:
-          "https://bafybeiewqydtijclzgpdgeymx7opqa7n37sz2jvaaa7l64v5dvmusva434.ipfs.dweb.link",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "The Undead Army",
-        symbol: "UNDEAD",
-        base_uri:
-          "https://bafybeie2yio33xzp6rhjpxsgq2zplo57laygx5oikwyvxt5x654llwers4.ipfs.dweb.link",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "NEAR Meerkat Kingdom",
-        symbol: "NMK",
-        base_uri:
-          "https://bafybeiht5jof3n265j3jd3rm2sfg6anf567sfgcgqko4oepf77a6ewe3um.ipfs.dweb.link",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Good Fortune Felines",
-        symbol: "GFF",
-        base_uri:
-          "https://ewtd.mypinata.cloud/ipfs/QmNtWmU8LuNNexpcw3djhGcdudkUarX8oiovGCZrwrhYR4",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Nephilim",
-        symbol: "NEPH",
-        base_uri:
-          "https://ewtd.mypinata.cloud/ipfs/QmbrThqCsndQAqoCrSGogy43Bsbjkmay7nFsALz3W5ZLRv",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "El Café Cartel - Gen 1",
-        symbol: "CARTEL",
-        base_uri:
-          "https://bafybeienu3old5yt7c23yftcb7pjx2oux7pyaliwgo4btzjbjjvqvjz4nm.ipfs.dweb.link/",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Near Tinker Union",
-        symbol: "NTU",
-        base_uri: "https://ipfs.fleek.co/ipfs",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "The Dons",
-        symbol: "DONS",
-        base_uri:
-          "https://bafybeidc6bxn6txfks2usyz4guflzmdi5qt4ek7rwmqyurzg3qhq6w3zhe.ipfs.dweb.link/",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Near Future: Classic Art",
-        symbol: "NFCA",
-        base_uri:
-          "https://ewtd.mypinata.cloud/ipfs/QmbQJTTPHRdAH5jXYDZeooewu9sm4NwqWT7JtYch7VXeun",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "NEARton NFT",
-        symbol: "NRTN",
-        base_uri:
-          "https://bafybeieru7nk7ps324zqjcnaaykzyrukffnept73jo2pvukjyvoob2vfzy.ipfs.dweb.link",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Antisocial Ape Club",
-        symbol: "ASAC",
-        base_uri:
-          "https://ipfs.io/ipfs/bafybeicj5zfhe3ytmfleeiindnqlj7ydkpoyitxm7idxdw2kucchojf7v4",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Mara",
-        symbol: "MARA",
-        base_uri:
-          "https://ipfs.io/ipfs/bafybeibvdkthkvso4lrxaxazfof2qs6bkjwikfubktiojlksz3tj5txdyi",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "MR. BROWN",
-        symbol: "MRBRN",
-        base_uri:
-          "https://cloudflare-ipfs.com/ipfs/QmP3shtToBeoeHizRtvgUPJTeGbcVn2rdZhERSwEiQHtJh",
-      },
-      token: projectTokens.generic,
-    },
-    {
-      nft: {
-        name: "Bullish Bulls",
-        symbol: "thebullishbulls",
-        base_uri:
-          "https://bafybeiduuiztwwrphs4t7q5bl4xoidbemnbzkps2kzioflk2msacaw7yiu.ipfs.dweb.link",
-      },
-      token: projectTokens.generic,
-    },
+    // {
+    //     nft: {
+    //         name: "Secret Skellies Society",
+    //         symbol: "BONEZ",
+    //         base_uri:
+    //             "https://bafybeiewqydtijclzgpdgeymx7opqa7n37sz2jvaaa7l64v5dvmusva434.ipfs.dweb.link",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "The Undead Army",
+    //         symbol: "UNDEAD",
+    //         base_uri:
+    //             "https://bafybeie2yio33xzp6rhjpxsgq2zplo57laygx5oikwyvxt5x654llwers4.ipfs.dweb.link",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "NEAR Meerkat Kingdom",
+    //         symbol: "NMK",
+    //         base_uri:
+    //             "https://bafybeiht5jof3n265j3jd3rm2sfg6anf567sfgcgqko4oepf77a6ewe3um.ipfs.dweb.link",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Good Fortune Felines",
+    //         symbol: "GFF",
+    //         base_uri:
+    //             "https://ewtd.mypinata.cloud/ipfs/QmNtWmU8LuNNexpcw3djhGcdudkUarX8oiovGCZrwrhYR4",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Nephilim",
+    //         symbol: "NEPH",
+    //         base_uri:
+    //             "https://ewtd.mypinata.cloud/ipfs/QmbrThqCsndQAqoCrSGogy43Bsbjkmay7nFsALz3W5ZLRv",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "El Café Cartel - Gen 1",
+    //         symbol: "CARTEL",
+    //         base_uri:
+    //             "https://bafybeienu3old5yt7c23yftcb7pjx2oux7pyaliwgo4btzjbjjvqvjz4nm.ipfs.dweb.link/",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Near Tinker Union",
+    //         symbol: "NTU",
+    //         base_uri: "https://ipfs.fleek.co/ipfs",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "The Dons",
+    //         symbol: "DONS",
+    //         base_uri:
+    //             "https://bafybeidc6bxn6txfks2usyz4guflzmdi5qt4ek7rwmqyurzg3qhq6w3zhe.ipfs.dweb.link/",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Near Future: Classic Art",
+    //         symbol: "NFCA",
+    //         base_uri:
+    //             "https://ewtd.mypinata.cloud/ipfs/QmbQJTTPHRdAH5jXYDZeooewu9sm4NwqWT7JtYch7VXeun",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "NEARton NFT",
+    //         symbol: "NRTN",
+    //         base_uri:
+    //             "https://bafybeieru7nk7ps324zqjcnaaykzyrukffnept73jo2pvukjyvoob2vfzy.ipfs.dweb.link",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Antisocial Ape Club",
+    //         symbol: "ASAC",
+    //         base_uri:
+    //             "https://ipfs.io/ipfs/bafybeicj5zfhe3ytmfleeiindnqlj7ydkpoyitxm7idxdw2kucchojf7v4",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Mara",
+    //         symbol: "MARA",
+    //         base_uri:
+    //             "https://ipfs.io/ipfs/bafybeibvdkthkvso4lrxaxazfof2qs6bkjwikfubktiojlksz3tj5txdyi",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "MR. BROWN",
+    //         symbol: "MRBRN",
+    //         base_uri:
+    //             "https://cloudflare-ipfs.com/ipfs/QmP3shtToBeoeHizRtvgUPJTeGbcVn2rdZhERSwEiQHtJh",
+    //     },
+    //     token: projectTokens.generic,
+    // },
+    // {
+    //     nft: {
+    //         name: "Bullish Bulls",
+    //         symbol: "thebullishbulls",
+    //         base_uri:
+    //             "https://bafybeiduuiztwwrphs4t7q5bl4xoidbemnbzkps2kzioflk2msacaw7yiu.ipfs.dweb.link",
+    //     },
+    //     token: projectTokens.generic,
+    // },
   ];
 
   // deploy all reward tokens
@@ -230,8 +266,8 @@ async function nftStakingSetup(execution_data) {
       execution_data
     );
     await registerContracts(
-      [connAccountMap.nftStaking.accountId],
-      [connAccountMap[tokenName].accountId]
+      [connAccountMap.nftStaking],
+      [connAccountMap[token]]
     );
   }
 
@@ -252,29 +288,25 @@ async function nftStakingSetup(execution_data) {
     );
     const collection_rps = {};
     // randomize considering decimals
-    collection_rps[accountMap.lockedTokenAccount] = generateRandom(
-      20000000000000,
-      2000000000000000
+    collection_rps[connAccountMap.lockedTokenAccount.accountId] =
+      generateRandom(100000000000000, 1000000000000000).toString();
+    collection_rps[connAccountMap.partnertoken.accountId] = generateRandom(
+      100000000000000,
+      1000000000000000
     ).toString();
-    collection_rps[accountMap.auroraTokenAccount] = generateRandom(
-      20000000000000,
-      2000000000000000
-    ).toString();
-    collection_rps[accountMap.usdtTokenAccount] = generateRandom(
-      30,
-      3000
-    ).toString();
+    collection_rps[tokenAddress] = generateRandom(1000, 5000).toString();
     const createStakingPayload = {
       collection_address: collectionAddress,
       collection_owner: connAccountMap.ownerAccount.accountId,
       token_address: tokenAddress,
       collection_rps,
       min_staking_period: "10000000000000",
-      early_withdraw_penalty: "1000000000000",
+      early_withdraw_penalty: "500000000000",
       round_interval: 10,
+      start_in: 0,
     };
-    await ownerAccount.functionCall({
-      contractId: accountMap.nftStaking,
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
       methodName: "create_staking_program",
       args: {
         payload: createStakingPayload,
@@ -284,5 +316,54 @@ async function nftStakingSetup(execution_data) {
     });
 
     // deposit tokens to program
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
+      methodName: "move_contract_funds_to_collection",
+      args: {
+        collection: {
+          type: "NFTContract",
+          account_id: collectionAddress,
+        },
+        token_id: connAccountMap.lockedTokenAccount.accountId,
+        amount: "1000000000000000000000000",
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
+
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
+      methodName: "move_contract_funds_to_collection",
+      args: {
+        collection: {
+          type: "NFTContract",
+          account_id: collectionAddress,
+        },
+        token_id: connAccountMap.partnertoken.accountId,
+        amount: "1000000000000000000000000",
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
+
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: tokenAddress,
+      methodName: "ft_transfer_call",
+      args: {
+        receiver_id: connAccountMap.nftStaking.accountId,
+        amount: "1000000000000",
+        msg: JSON.stringify({
+          type: "DepositToDistribution",
+          collection: {
+            type: "NFTContract",
+            account_id: collectionAddress,
+          },
+        }),
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
   }
 }
+
+module.exports = { nftStakingSetup };

@@ -108,7 +108,7 @@ impl Contract {
     self.move_treasury(
       TreasuryOperation::ContractToCollection,
       &env::predecessor_account_id(),
-      &collection,
+      Some(&collection),
       token_id,
       Some(amount.0),
     );
@@ -126,7 +126,7 @@ impl Contract {
     self.move_treasury(
       TreasuryOperation::CollectionToContract,
       &env::predecessor_account_id(),
-      &collection,
+      Some(&collection),
       token_id,
       Some(amount.0),
     );
