@@ -64,12 +64,10 @@ async function deployToken(
   metadata,
   execution_data
 ) {
-  const tokenContract = fs.readFileSync("../../out/tokenContract.wasm");
-  const tokenName = execution_data.accountMap.prefix + newTokenName;
-  const account = await createAccount(
-    execution_data.accountMap.prefix + newTokenName,
-    execution_data
-  );
+  const tokenContract = fs.readFileSync("../../out/token_contract.wasm");
+  const tokenName =
+    execution_data.accountMap.prefix + newTokenName + ".testnet";
+  const account = await createAccount(tokenName, execution_data);
   await account.deployContract(tokenContract);
   await account.functionCall({
     contractId: account.accountId,
@@ -80,8 +78,31 @@ async function deployToken(
       metadata,
     },
   });
-  execution_data.connAccountMap.tokenName = account;
-  execution_data.cccountMap.tokenName = account.accountId;
+  execution_data.connAccountMap[tokenName] = account;
+  execution_data.cccountMap[tokenName] = account.accountId;
 }
 
-module.exports = { storeData, createAccount, registerContracts, deployToken };
+async function deployNft(newNftName, metadata, execution_data) {
+  const tokenContract = fs.readFileSync("../../out/nft_contract.wasm");
+  const tokenName = execution_data.accountMap.prefix + newNftName + ".testnet";
+  const account = await createAccount(tokenName, execution_data);
+  await account.deployContract(tokenContract);
+  await account.functionCall({
+    contractId: account.accountId,
+    methodName: "new",
+    args: {
+      owner_id: execution_data.connAccountMap.ownerAccount.accountId,
+      metadata,
+    },
+  });
+  execution_data.connAccountMap[tokenName] = account;
+  execution_data.cccountMap[tokenName] = account.accountId;
+}
+
+module.exports = {
+  storeData,
+  createAccount,
+  registerContracts,
+  deployToken,
+  deployNft,
+};
