@@ -135,11 +135,11 @@ create or replace function investor_withdraw_allocations(
     investor_id text,
     listing_id text,
     project_status listing_status,
-    project_tokens_withdrawn u128
+    project_tokens_withdrawn numeric(40)
 )
 returns void
 as $$
-begin;
+begin
     update allocations
     set quantity_withdrawn = quantity_withdrawn + $4
     where account_id = $1

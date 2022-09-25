@@ -11,6 +11,9 @@ pub struct ContractsConfig {
 
 impl ContractsConfig {
     fn init() -> Self {
+        println!("{}", get_required_var("LAUNCHPAD_CONTRACT_ACCOUNT_ID"));
+        println!("{}", get_required_var("NFT_STAKING_CONTRACT_ACCOUNT_ID"));
+        println!("{}", get_required_var("X_TOKEN_CONTRACT_ACCOUNT_ID"));
         Self {
             launchpad_contract_account_id: get_required_var("LAUNCHPAD_CONTRACT_ACCOUNT_ID"),
             nft_staking_contract_account_id: get_required_var("NFT_STAKING_CONTRACT_ACCOUNT_ID"),

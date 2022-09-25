@@ -101,4 +101,40 @@ impl Contract {
 
     events::update_staking_program(json!({ "min_staking_period": new_period }));
   }
+
+  #[payable]
+  pub fn move_contract_funds_to_collection(
+    &mut self,
+    collection: NFTCollection,
+    token_id: FungibleTokenID,
+    amount: U128,
+  ) {
+    assert_one_yocto();
+
+    self.move_treasury(
+      TreasuryOperation::ContractToCollection,
+      &env::predecessor_account_id(),
+      Some(&collection),
+      token_id,
+      Some(amount.0),
+    );
+  }
+
+  #[payable]
+  pub fn move_collection_funds_to_contract(
+    &mut self,
+    collection: NFTCollection,
+    token_id: FungibleTokenID,
+    amount: U128,
+  ) {
+    assert_one_yocto();
+
+    self.move_treasury(
+      TreasuryOperation::CollectionToContract,
+      &env::predecessor_account_id(),
+      Some(&collection),
+      token_id,
+      Some(amount.0),
+    );
+  }
 }

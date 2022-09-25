@@ -21,8 +21,8 @@ impl<'a, T: Event + Deserialize<'a>> EventEmitterAccount<T> {
         }
     }
 
-    pub fn parse_event(&self, event_json_string: &'a str) -> T {
-        serde_json::from_str::<T>(event_json_string).unwrap()
+    pub fn parse_event(&self, event_json_string: &'a str) -> Result<T, serde_json::Error> {
+        serde_json::from_str::<T>(event_json_string)
     }
 
     pub fn is(&self, account_id: &str) -> bool {
@@ -72,15 +72,21 @@ impl ContractAccount {
         match &self {
             Self::Launchpad(account) => {
                 let event = account.parse_event(event_json_string);
-                store.process_event(event_id, event).await;
+                if let Ok(event) = event {
+                    store.process_event(event_id, event).await;
+                }
             }
             Self::NftStaking(account) => {
                 let event = account.parse_event(event_json_string);
-                store.process_event(event_id, event).await;
+                if let Ok(event) = event {
+                    store.process_event(event_id, event).await;
+                }
             }
             Self::XToken(account) => {
                 let event = account.parse_event(event_json_string);
-                store.process_event(event_id, event).await;
+                if let Ok(event) = event {
+                    store.process_event(event_id, event).await;
+                }
             }
         }
     }

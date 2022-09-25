@@ -3,7 +3,11 @@ import { useMemo } from "react";
 import { ModalImageDialog, Button } from "@/components";
 import { Flex, Text } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { getTransaction, executeMultipleTransactions } from "@/tools";
+import {
+  getTransaction,
+  executeMultipleTransactions,
+  viewFunction,
+} from "@/tools";
 import { Transaction } from "@near/ts";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { useQuery } from "@apollo/client";
@@ -28,37 +32,33 @@ export function AirdropModal({
 
   const getJumpTokens = async () => {
     const wallet = await selector.wallet();
+    console.log("A");
+    const tokens = await viewFunction(
+      selector,
+      import.meta.env.VITE_FAUCET_CONTRACT,
+      "view_tokens"
+    );
+    console.log("B");
 
     const transactions: Transaction[] = [];
 
-    const denomJ = new Big("10").pow(18);
-    const denomU = new Big("10").pow(6);
+    for (let token of tokens) {
+      const metadata = await viewFunction(selector, token, "ft_metadata");
+      const decimalsPower = new Big("10").pow(metadata.decimals);
 
-    transactions.push(
-      getTransaction(
-        accountId!,
-        "faucet_test4.testnet",
-        "ft_faucet",
-        {
-          token: "faucet_test2.testnet",
-          amount: new Big(20).mul(denomJ).toString(),
-        },
-        "0.25"
-      )
-    );
-
-    transactions.push(
-      getTransaction(
-        accountId!,
-        "faucet_test4.testnet",
-        "ft_faucet",
-        {
-          token: "faucet_test1.testnet",
-          amount: new Big(20).mul(denomU).toString(),
-        },
-        "0.25"
-      )
-    );
+      transactions.push(
+        getTransaction(
+          accountId!,
+          import.meta.env.VITE_FAUCET_CONTRACT,
+          "ft_faucet",
+          {
+            token,
+            amount: new Big(20).mul(decimalsPower).toString(),
+          },
+          "0.51"
+        )
+      );
+    }
 
     executeMultipleTransactions(transactions, wallet);
   };
@@ -66,21 +66,27 @@ export function AirdropModal({
   const getNfts = async () => {
     const wallet = await selector.wallet();
 
+    const collections = await viewFunction(
+      selector,
+      import.meta.env.VITE_FAUCET_CONTRACT,
+      "view_nfts"
+    );
+
     const transactions: Transaction[] = [];
 
-    ["faucet_test3.testnet"].forEach((collection) =>
+    for (let collection of collections) {
       transactions.push(
         getTransaction(
           accountId!,
-          "faucet_test4.testnet",
+          import.meta.env.VITE_FAUCET_CONTRACT,
           "nft_faucet",
           {
             collection,
           },
           "0.25"
         )
-      )
-    );
+      );
+    }
 
     executeMultipleTransactions(transactions, wallet);
   };
