@@ -1,44 +1,47 @@
 const fs = require("fs");
 
 let contracts_data;
-try {
-  let contracts_data_raw = fs.readFileSync("testnet_settings/account_map.json");
-  contracts_data = JSON.parse(contracts_data_raw);
-} catch (err) {
-  contracts_data = {
-    ownerAccount: "b4b4d9fbc16727eec5af1b84482d8da87c928ffcowner.testnet",
-    userSampleAccount: "b4b4d9fbc16727eec5af1b84482d8da87c928ffcuser.testnet",
-    jumpTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcjump_token.testnet",
-    auroraTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcaurora_token.testnet",
-    octopusTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcoctopus_token.testnet",
-    skywardTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcskyward_token.testnet",
-    usdtTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcusdt_token.testnet",
-    xTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcxjump_token.testnet",
-    lockedTokenAccount:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffclocked_token.testnet",
-    nftCollection1Account:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcnft1.testnet",
-    nftCollection2Account:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcnft2.testnet",
-    nftCollection3Account:
-      "b4b4d9fbc16727eec5af1b84482d8da87c928ffcnft3.testnet",
-    nftStaking: "b4b4d9fbc16727eec5af1b84482d8da87c928ffcnft_staking.testnet",
-    launchpad: "b4b4d9fbc16727eec5af1b84482d8da87c928ffclaunchpad.testnet",
-  };
-}
 
-const environment_file = `
+let contracts_data_raw = fs.readFileSync(
+  "packages/contracts/testnet_settings/account_map.json"
+);
+contracts_data = JSON.parse(contracts_data_raw);
+
+const environment_file_web = `
 VITE_BASE_TOKEN=${contracts_data.jumpTokenAccount}
 VITE_LOCKED_CONTRACT=${contracts_data.lockedTokenAccount}
 VITE_STAKING_CONTRACT=${contracts_data.xTokenAccount}
 VITE_NFT_STAKING_CONTRACT=${contracts_data.nftStaking}
 VITE_JUMP_LAUNCHPAD_CONTRACT=${contracts_data.launchpad}
+VITE_FAUCET_CONTRACT=${contracts_data.faucet}
+VITE_NEAR_NETWORK=${process.env.NEAR_NETWORK}
 `;
 
-fs.writeFileSync("./packages/web/.env", environment_file);
+fs.writeFileSync("./packages/web/.env", environment_file_web);
+
+const environment_file_graphql = `
+SERVE_PORT=4000
+DB_USERNAME=${process.env.DB_USER}
+DB_PASSWORD=${process.env.DB_PASS}
+DB_HOST=${process.env.DB_HOST}
+DB_PORT=5432
+DB_NAME=${process.env.DB_NAME}
+NFT_STAKING_CONTRACT=${contracts_data.nftStaking}
+`;
+
+fs.writeFileSync("./packages/graphql/.env", environment_file_graphql);
+
+const environment_file_indexer = `
+LAUNCHPAD_CONTRACT_ACCOUNT_ID=${contracts_data.launchpad}
+NFT_STAKING_CONTRACT_ACCOUNT_ID=${contracts_data.nftStaking}
+X_TOKEN_CONTRACT_ACCOUNT_ID=${contracts_data.xTokenAccount}
+PG_HOST=${process.env.DB_HOST}
+PG_USER=${process.env.DB_USER}
+PG_PORT=5432
+PG_DATABASE=${process.env.DB_NAME}
+PG_PASSWORD=${process.env.DB_PASS}
+LAKE_FRAMEWORK_NETWORK=${process.env.NEAR_NETWORK}
+LAKE_FRAMEWORK_BLOCK_HEIGHT=${contracts_data.prefix}
+`;
+
+fs.writeFileSync("./packages/indexer/.env", environment_file_indexer);

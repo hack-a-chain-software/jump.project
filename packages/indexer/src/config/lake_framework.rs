@@ -18,6 +18,8 @@ pub struct LakeFrameworkConfig {
 
 impl LakeFrameworkConfig {
     fn init() -> Self {
+        println!("{}", get_required_var("LAKE_FRAMEWORK_NETWORK").as_str());
+        println!("{}", get_required_var("LAKE_FRAMEWORK_BLOCK_HEIGHT").as_str());
         Self {
             network: Network::from_str(get_required_var("LAKE_FRAMEWORK_NETWORK").as_str())
                 .unwrap_or(Network::Testnet),

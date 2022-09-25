@@ -69,8 +69,7 @@ impl StatementStore {
     */
 
     pub async fn process_event(&mut self, event_id: EventId, event: impl Event) {
-        let parameters = event.parameters();
-
+        
         // TODO: let statements = self.get_statements(&event).await;
         if !self.prepared_statements.contains_key(event.kind()) {
             self.prepare_statements(&event).await;
@@ -80,6 +79,8 @@ impl StatementStore {
         if statements.len() == 0 {
             return;
         }
+
+        let parameters = event.parameters();
 
         let transaction = self.conn.build_transaction().start().await.unwrap();
 

@@ -227,7 +227,7 @@ export function Home() {
         <TopCard
           gradientText="Jump Pad"
           bigText="Stake. Help. Earn."
-          bottomDescription="This is the Jump launchad where you can spend the launchpad tickets to invest and support Launchpad Projects"
+          bottomDescription="This is the Jump launchpad where you can spend the launchpad tickets to invest and support Launchpad Projects"
           jumpLogo
           onClick={() => setShowSteps(true)}
         />

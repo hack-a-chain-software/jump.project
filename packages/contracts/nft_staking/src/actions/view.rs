@@ -94,4 +94,8 @@ impl Contract {
 
     balance.into()
   }
+
+  pub fn view_contract_tokens(&self) -> FungibleTokenBalance {
+    self.contract_treasury.clone()
+  }
 }
