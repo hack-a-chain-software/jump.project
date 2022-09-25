@@ -7,6 +7,7 @@ use near_sdk::PromiseOrValue;
 #[serde(tag = "type")]
 enum FTRoute {
   DepositToDistribution { collection: NFTCollection },
+  DepositToContract,
 }
 
 pub struct FTRoutePayload<'a> {
@@ -57,6 +58,9 @@ impl Contract {
     match route {
       FTRoute::DepositToDistribution { collection } => {
         self.deposit_distribution_funds(payload, collection);
+      }
+      FTRoute::DepositToContract => {
+        self.deposit_contract_funds(payload);
       }
     }
   }

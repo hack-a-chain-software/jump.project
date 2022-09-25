@@ -19,6 +19,7 @@ pub enum TreasuryOperation {
    * there's no reason for anyone to deposit to a treasury.
    */
   DepositToDistribution,
+  DepositToContract,
 }
 
 impl Contract {
@@ -41,6 +42,8 @@ impl Contract {
       | TreasuryOperation::DepositToDistribution => {
         self.assert_authorized_operator(operator, staking_program, token_id);
       }
+
+      TreasuryOperation::DepositToContract => ()
     }
   }
 
@@ -99,9 +102,16 @@ impl Contract {
       TreasuryOperation::DepositToDistribution => {
         assert!(
           amount.is_some(),
-          "This operation does not support the parameter 'amount'"
+          "This operation needs the parameter 'amount'"
         );
         staking_program.deposit_distribution_funds(&token_id, amount.unwrap());
+      }
+      TreasuryOperation::DepositToContract => {
+        assert!(
+          amount.is_some(),
+          "This operation needs the parameter 'amount'"
+        );
+        *collection_treasury += amount.unwrap();
       }
     }
   }
