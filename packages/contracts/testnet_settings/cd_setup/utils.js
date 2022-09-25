@@ -65,6 +65,7 @@ async function deployToken(
   execution_data
 ) {
   const tokenContract = fs.readFileSync("../../out/token_contract.wasm");
+  newTokenName = parseAccountName(newTokenName);
   const tokenName =
     execution_data.accountMap.prefix + newTokenName + ".testnet";
   const account = await createAccount(tokenName, execution_data);
@@ -83,6 +84,7 @@ async function deployToken(
 }
 
 async function deployNft(newNftName, metadata, execution_data) {
+  newNftName = parseAccountName(newNftName);
   const tokenContract = fs.readFileSync("../../out/nft_contract.wasm");
   const tokenName = execution_data.accountMap.prefix + newNftName + ".testnet";
   const account = await createAccount(tokenName, execution_data);
@@ -115,6 +117,18 @@ function generateRandom(min = 0, max = 100) {
   return rand;
 }
 
+function parseAccountName(name) {
+  name = name.toLowerCase();
+  name = name.replace(/[^a-z0-9]/gi, "");
+  name = name.substring(0, 15);
+  return name;
+}
+
+function increaseTimeStamp(nowTimestamp, daysIncrease) {
+  let newTime = parseInt(nowTimestamp) + daysIncrease * 60 * 60 * 24;
+  return newTime.toString();
+}
+
 module.exports = {
   storeData,
   createAccount,
@@ -122,4 +136,6 @@ module.exports = {
   deployToken,
   deployNft,
   generateRandom,
+  parseAccountName,
+  increaseTimeStamp,
 };

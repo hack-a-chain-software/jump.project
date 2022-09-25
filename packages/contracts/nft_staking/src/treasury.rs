@@ -56,10 +56,11 @@ impl Contract {
     token_id: FungibleTokenID,
     amount: Option<u128>,
   ) {
-    let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
+    
       
     match operation {
       TreasuryOperation::ContractToCollection => {
+        let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
         let amount = amount.unwrap_or(*contract_treasury);
         let collection_treasury = staking_program.unwrap().collection_treasury
         .entry(token_id.clone())
@@ -75,6 +76,7 @@ impl Contract {
         *collection_treasury += amount;
       }
       TreasuryOperation::CollectionToContract => {
+        let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
         let collection_treasury = staking_program.unwrap().collection_treasury
         .entry(token_id.clone())
         .or_insert(0);
@@ -122,6 +124,7 @@ impl Contract {
         staking_program.deposit_distribution_funds(&token_id, amount.unwrap());
       }
       TreasuryOperation::DepositToContract => {
+        let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
         assert!(
           amount.is_some(),
           "This operation needs the parameter 'amount'"
