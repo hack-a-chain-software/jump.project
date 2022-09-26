@@ -32,33 +32,30 @@ export function AirdropModal({
 
   const getJumpTokens = async () => {
     const wallet = await selector.wallet();
-
+    console.log("A");
     const tokens = await viewFunction(
-      wallet,
+      selector,
       import.meta.env.VITE_FAUCET_CONTRACT,
       "view_tokens"
     );
+    console.log("B");
 
     const transactions: Transaction[] = [];
 
     for (let token of tokens) {
-      const metadata = await viewFunction(
-        wallet,
-        import.meta.env.VITE_BASE_TOKEN,
-        "ft_metadata"
-      );
+      const metadata = await viewFunction(selector, token, "ft_metadata");
       const decimalsPower = new Big("10").pow(metadata.decimals);
 
       transactions.push(
         getTransaction(
           accountId!,
-          import.meta.env.VITE_BASE_TOKEN,
+          import.meta.env.VITE_FAUCET_CONTRACT,
           "ft_faucet",
           {
             token,
             amount: new Big(20).mul(decimalsPower).toString(),
           },
-          "0.25"
+          "0.51"
         )
       );
     }
@@ -70,7 +67,7 @@ export function AirdropModal({
     const wallet = await selector.wallet();
 
     const collections = await viewFunction(
-      wallet,
+      selector,
       import.meta.env.VITE_FAUCET_CONTRACT,
       "view_nfts"
     );
@@ -81,7 +78,7 @@ export function AirdropModal({
       transactions.push(
         getTransaction(
           accountId!,
-          import.meta.env.VITE_BASE_TOKEN,
+          import.meta.env.VITE_FAUCET_CONTRACT,
           "nft_faucet",
           {
             collection,

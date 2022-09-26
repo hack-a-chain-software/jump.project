@@ -352,5 +352,5 @@ async function testnetSetup() {
   await nftStakingSetup(execution_data);
 
   // setup Launchpad listings
-  // await launchpadSetup(execution_data);
+  await launchpadSetup(execution_data);
 }

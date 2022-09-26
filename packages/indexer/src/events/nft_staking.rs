@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::types::json_types::{U128, U64};
-use crate::types::staking::{split_ids, FungibleTokenBalance, NonFungibleTokenId};
+use crate::types::staking::{split_ids, FungibleTokenBalance, FungibleTokenId, NonFungibleTokenId, NftCollection};
 use crate::types::AccountId;
 
 use super::convert::{u128_to_decimal, u32_to_decimal, u64_to_decimal};
@@ -170,9 +170,7 @@ impl Event for NftStakingEvent {
                 vec![vec_box![nft_id, collection_id]]
             }
 
-            _ => {
-                println!("unimplemented!()");
-            }
+           
         }
     }
 }
