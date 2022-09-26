@@ -1,5 +1,5 @@
 import { Box, Flex, Text, Skeleton, useDisclosure } from "@chakra-ui/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import {
@@ -9,6 +9,7 @@ import {
   PageContainer,
   ValueBox,
   Card,
+  IconButton,
 } from "../components";
 import { X_JUMP_TOKEN, JUMP_TOKEN } from "../env/contract";
 import { useTheme } from "../hooks/theme";
@@ -21,6 +22,7 @@ import BN from "bn.js";
 import Big from "big.js";
 import { BigDecimalFloat } from "@near/ts";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { Steps } from "intro.js-react";
 
 interface TokenRatio {
   x_token: string;
@@ -35,6 +37,8 @@ interface TokenRatio {
 export const Staking = () => {
   const { accountId, selector } = useWalletSelector();
   const { stakeXToken, burnXToken } = useStaking();
+
+  const [showSteps, setShowSteps] = useState(false);
 
   const {
     data: { base_token = "1", x_token = "1" } = {},
@@ -142,10 +146,75 @@ export const Staking = () => {
     return new BN(jumpMetadata?.decimals ?? 0).neg();
   }, [jumpMetadata]);
 
+  const stepItems = [
+    {
+      element: ".jump-staking",
+      title: "Jump Stakig",
+      intro: (
+        <div>
+          <span>
+            In the Jump Staking page you can stake your JUMP tokens and earn
+            tickets to join the launchpad pools.
+          </span>
+        </div>
+      ),
+    },
+    {
+      element: ".xjump-value",
+      intro: (
+        <div className="flex flex-col">
+          <span>This is the current xJump Value in JUMP tokens.</span>
+        </div>
+      ),
+    },
+    {
+      element: ".owned-xjump",
+      intro: (
+        <div className="flex flex-col">
+          <span>Here you can see the amount of xJump you own.</span>
+        </div>
+      ),
+    },
+    {
+      element: ".annual-pr",
+      intro: (
+        <div className="flex flex-col">
+          <span>This is the annual percentage rate.</span>
+        </div>
+      ),
+    },
+    {
+      title: "User Area",
+      element: ".user-area",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            This is the user area. Here you can stake your tokens or unstake
+            them and claim the available rewards.
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
       <Flex gap={4} w="100%" flexWrap="wrap">
-        <Card p="3px" flexGrow="1" borderRadius="26px">
+        <Card p="3px" flexGrow="1" borderRadius="26px" className="jump-staking">
+          <div className="relative right-[-99%] top-[-50%]">
+            <IconButton onClick={() => setShowSteps(true)} />
+          </div>
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -214,7 +283,7 @@ export const Staking = () => {
                         )
                       : "1.00 xJUMP"
                   }
-                  className="h-full w-full"
+                  className="h-full w-full xjump-value"
                 />
               </Skeleton>
 
@@ -224,7 +293,7 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="You own"
-                  className="h-full w-full"
+                  className="h-full w-full owned-xjump"
                   bottomText={
                     "worth " +
                     new BigDecimalFloat(
@@ -279,7 +348,7 @@ export const Staking = () => {
                       { formatOptions: CURRENCY_FORMAT_OPTIONS }
                     ) + "%" // TODO: refactor so unit logic can apply to %?
                   }
-                  className="h-full w-full"
+                  className="h-full w-full annual-pr"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}
                 />
@@ -288,7 +357,7 @@ export const Staking = () => {
           </Flex>
         </Card>
 
-        <Card flex={1} flexGrow="1">
+        <Card flex={1} flexGrow="1" className="user-area">
           <Flex
             h="100%"
             direction="column"
