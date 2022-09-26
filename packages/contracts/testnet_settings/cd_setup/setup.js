@@ -58,6 +58,7 @@ async function testnetSetup() {
     lockedTokenAccount: random_prefix + "locked_token.testnet",
     nftStaking: random_prefix + "nft_staking.testnet",
     launchpad: random_prefix + "launchpad.testnet",
+    faucet: random_prefix + "faucet.testnet",
     last_block_height: last_block_height,
   };
   storeData(execution_data.accountMap, "../account_map.json");
@@ -89,6 +90,10 @@ async function testnetSetup() {
   );
   execution_data.connAccountMap.launchpad = await createAccount(
     execution_data.accountMap.launchpad,
+    execution_data
+  );
+  execution_data.connAccountMap.faucet = await createAccount(
+    execution_data.accountMap.faucet,
     execution_data
   );
 
@@ -234,6 +239,18 @@ async function testnetSetup() {
     },
   });
 
+  // Faucet contract
+
+  const faucet_contract = fs.readFileSync("../../out/testnet_faucet.wasm");
+  await execution_data.connAccountMap.faucet.deployContract(faucet_contract);
+  await execution_data.connAccountMap.faucet.functionCall({
+    contractId: execution_data.connAccountMap.faucet.accountId,
+    methodName: "new",
+    args: {
+      owner: execution_data.connAccountMap.ownerAccount.accountId,
+    },
+  });
+
   // register contracts in eachother
   await registerContracts(
     [
@@ -243,6 +260,7 @@ async function testnetSetup() {
       execution_data.connAccountMap.lockedTokenAccount,
       execution_data.connAccountMap.nftStaking,
       execution_data.connAccountMap.launchpad,
+      execution_data.connAccountMap.faucet,
     ],
     [
       execution_data.connAccountMap.usdtTokenAccount,
@@ -261,6 +279,7 @@ async function testnetSetup() {
     execution_data.connAccountMap.lockedTokenAccount,
     execution_data.connAccountMap.launchpad,
     execution_data.connAccountMap.nftStaking,
+    execution_data.connAccountMap.faucet,
   ];
   const promisesMint = [];
   for (let minter of minterContracts) {
@@ -276,6 +295,58 @@ async function testnetSetup() {
     );
   }
   await Promise.all(promisesMint);
+
+  // Add tokens to faucet
+  execution_data.connAccountMap.ownerAccount.functionCall({
+    contractId: execution_data.connAccountMap.usdtTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: execution_data.connAccountMap.faucet.accountId,
+      amount: "1000000000000000000",
+      msg: "",
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN(300000000000000),
+  });
+
+  execution_data.connAccountMap.ownerAccount.functionCall({
+    contractId: execution_data.connAccountMap.jumpTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: execution_data.connAccountMap.faucet.accountId,
+      amount: "1000000000000000000000000000000",
+      msg: "",
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN(300000000000000),
+  });
+
+  await execution_data.connAccountMap.ownerAccount.functionCall({
+    contractId: execution_data.connAccountMap.jumpTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: execution_data.connAccountMap.lockedTokenAccount.accountId,
+      amount: "1000000000000000000000000000000",
+      msg: JSON.stringify({
+        type: "Mint",
+        account_id: execution_data.connAccountMap.ownerAccount.accountId,
+      }),
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN("300000000000000"),
+  });
+
+  execution_data.connAccountMap.ownerAccount.functionCall({
+    contractId: execution_data.connAccountMap.lockedTokenAccount.accountId,
+    methodName: "ft_transfer_call",
+    args: {
+      receiver_id: execution_data.connAccountMap.faucet.accountId,
+      amount: "1000000000000000000000000000000",
+      msg: "",
+    },
+    attachedDeposit: new BN(1),
+    gas: new BN(300000000000000),
+  });
 
   // setup NFT staking listings
   await nftStakingSetup(execution_data);

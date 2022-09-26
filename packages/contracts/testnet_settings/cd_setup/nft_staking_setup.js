@@ -273,7 +273,6 @@ async function nftStakingSetup(execution_data) {
 
   // deploy all contracts and add to NFT staking contract
   for (collection of nftsArray) {
-    console.log("iteration");
     const collectionName = parseAccountName(collection.nft.name);
     const collectionAddress =
       execution_data.accountMap.prefix + collectionName + ".testnet";
@@ -287,7 +286,16 @@ async function nftStakingSetup(execution_data) {
       },
       execution_data
     );
-    console.log(tokenAddress);
+
+    await execution_data.connAccountMap.ownerAccount.functionCall({
+      contractId: execution_data.connAccountMap.faucet.accountId,
+      methodName: "nft_register",
+      args: {
+        account_id: collectionAddress,
+      },
+      gas: new BN(300000000000000),
+    });
+
     const collection_rps = {};
     // randomize considering decimals
     collection_rps[connAccountMap.lockedTokenAccount.accountId] =
@@ -307,7 +315,7 @@ async function nftStakingSetup(execution_data) {
       round_interval: 10,
       start_in: 0,
     };
-    console.log(createStakingPayload);
+
     await connAccountMap.ownerAccount.functionCall({
       contractId: connAccountMap.nftStaking.accountId,
       methodName: "create_staking_program",
@@ -317,14 +325,6 @@ async function nftStakingSetup(execution_data) {
       attachedDeposit: new BN(1),
       gas: new BN(300000000000000),
     });
-
-    console.log(
-      await connAccountMap.ownerAccount.viewFunction(
-        connAccountMap.nftStaking.accountId,
-        "view_contract_tokens",
-        {}
-      )
-    );
 
     // deposit tokens to program
     await connAccountMap.ownerAccount.functionCall({
@@ -342,14 +342,6 @@ async function nftStakingSetup(execution_data) {
       gas: new BN(300000000000000),
     });
 
-    console.log(
-      await connAccountMap.ownerAccount.viewFunction(
-        connAccountMap.nftStaking.accountId,
-        "view_contract_tokens",
-        {}
-      )
-    );
-
     await connAccountMap.ownerAccount.functionCall({
       contractId: connAccountMap.nftStaking.accountId,
       methodName: "move_contract_funds_to_collection",
@@ -364,14 +356,6 @@ async function nftStakingSetup(execution_data) {
       attachedDeposit: new BN(1),
       gas: new BN(300000000000000),
     });
-
-    console.log(
-      await connAccountMap.ownerAccount.viewFunction(
-        connAccountMap.nftStaking.accountId,
-        "view_contract_tokens",
-        {}
-      )
-    );
 
     await connAccountMap.ownerAccount.functionCall({
       contractId: tokenAddress,
@@ -390,14 +374,6 @@ async function nftStakingSetup(execution_data) {
       attachedDeposit: new BN(1),
       gas: new BN(300000000000000),
     });
-
-    console.log(
-      await connAccountMap.ownerAccount.viewFunction(
-        connAccountMap.nftStaking.accountId,
-        "view_contract_tokens",
-        {}
-      )
-    );
   }
 }
 
