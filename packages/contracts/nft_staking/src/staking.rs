@@ -83,10 +83,14 @@ impl StakingProgram {
   ) -> Self {
     let mut get_key = get_key_closure(collection.clone());
 
+    // TODO: consider how (if possible) to initialize the treasury with contract token entries
+    let mut collection_treasury = HashMap::new();
+    collection_treasury.insert(token_address.clone(), 0);
+
     StakingProgram {
       collection,
       collection_owner,
-      collection_treasury: HashMap::new(),
+      collection_treasury,
       token_address,
 
       farm,
@@ -178,8 +182,7 @@ impl StakingProgram {
       .get(&owner_id)
       .unwrap_or_else(|| HashMap::new());
 
-    let staked_nft_balance = staked_nft.balance.clone();
-    for (k, amount) in staked_nft_balance {
+    for (k, amount) in staked_nft.balance.clone() {
       staked_nft.balance.insert(k.clone(), 0);
 
       let withdrawable_amount = denom_multiplication(amount, withdraw_rate);
