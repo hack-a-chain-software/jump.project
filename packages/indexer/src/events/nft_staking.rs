@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::types::json_types::{U128, U64};
-use crate::types::staking::{split_ids, FungibleTokenBalance, FungibleTokenId, NonFungibleTokenId, NftCollection};
+use crate::types::staking::{
+    split_ids, FungibleTokenBalance, FungibleTokenId, NftCollection, NonFungibleTokenId,
+};
 use crate::types::AccountId;
 
 use super::convert::{u128_to_decimal, u32_to_decimal, u64_to_decimal};
@@ -50,7 +52,6 @@ pub struct WithdrawRewardLog {
     pub amount: U128,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "event", content = "data")]
 #[serde(rename_all = "snake_case")]
@@ -60,7 +61,6 @@ pub enum NftStakingEvent {
     UpdateStakingProgram([UpdateStakingProgramLog; 1]),
     StakeNft([StakeNftLog; 1]),
     UnstakeNft([UnstakeNftLog; 1]),
-    WithdrawReward([WithdrawRewardLog; 1]),
 }
 
 impl Event for NftStakingEvent {
@@ -169,8 +169,6 @@ impl Event for NftStakingEvent {
 
                 vec![vec_box![nft_id, collection_id]]
             }
-
-           
         }
     }
 }
