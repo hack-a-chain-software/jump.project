@@ -43,7 +43,7 @@ impl Contract {
         self.assert_authorized_operator(operator, staking_program, token_id);
       }
 
-      TreasuryOperation::DepositToContract => ()
+      TreasuryOperation::DepositToContract => (),
     }
   }
 
@@ -54,8 +54,6 @@ impl Contract {
     token_id: FungibleTokenID,
     amount: Option<u128>,
   ) {
-    let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
-
     let collection_treasury = staking_program
       .collection_treasury
       .entry(token_id.clone())
@@ -63,6 +61,8 @@ impl Contract {
 
     match operation {
       TreasuryOperation::ContractToCollection => {
+        let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
+
         let amount = amount.unwrap_or(*contract_treasury);
         assert!(
           amount <= *contract_treasury,
@@ -72,6 +72,8 @@ impl Contract {
         *collection_treasury += amount;
       }
       TreasuryOperation::CollectionToContract => {
+        let contract_treasury = self.contract_treasury.entry(token_id.clone()).or_insert(0);
+
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
