@@ -192,7 +192,7 @@ mod tests {
     collection_round_reward.insert(contract_token.clone(), 10);
     collection_round_reward.insert(program_token.clone(), 10);
 
-    let mut farm = Farm::new(collection.clone(), collection_round_reward, 5);
+    let mut farm = Farm::new(collection.clone(), collection_round_reward, 5, 0);
 
     farm
       .distributions
