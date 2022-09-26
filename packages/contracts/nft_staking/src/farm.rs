@@ -212,7 +212,7 @@ impl Farm {
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.clone().iter() {
-      let rps = *token_rps.get(k).unwrap_or(&U256::zero());
+      let rps = *token_rps.get(k).unwrap();
 
       let (dist, claimed) = prev_dist.claim(rps);
 
