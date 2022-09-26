@@ -50,7 +50,6 @@ impl Contract {
       staking_program.only_collection_owner(operator);
     } else if self.is_contract_token(token_id) {
       self.only_guardians(operator);
-      staking_program.only_non_program_tokens(token_id);
     } else {
       panic!("Token does not belong to staking program");
     }
