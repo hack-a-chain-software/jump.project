@@ -32,6 +32,15 @@ pub struct NFTRoutePayload<'a> {
   pub collection: NFTCollection,
 }
 
+impl Contract {
+  fn assert_collection_has_program(&self, collection: &NFTCollection) {
+    assert!(
+      self.staking_programs.contains_key(&collection),
+      "Transfered token collection is not accepted by this contract"
+    );
+  }
+}
+
 #[near_bindgen]
 impl Contract {
   pub fn ft_on_transfer(
@@ -60,6 +69,7 @@ impl Contract {
         self.deposit_contract_funds(payload);
       }
       FTRoute::DepositToCollection { collection } => {
+        self.assert_collection_has_program(&collection);
         self.deposit_collection_funds(payload, collection);
       }
     }
@@ -75,10 +85,8 @@ impl Contract {
     let collection = NFTCollection::NFTContract {
       account_id: env::predecessor_account_id(),
     };
-    assert!(
-      self.staking_programs.contains_key(&collection),
-      "Transfered token collection is not accepted by this contract"
-    );
+
+    self.assert_collection_has_program(&collection);
 
     let result = self.match_nft_route(NFTRoutePayload {
       sender_id,
