@@ -1,7 +1,5 @@
-use crate::{
-  events, farm::Farm, funds::transfer::TransferOperation, staking::StakingProgram, types::*,
-  Contract, ContractExt,
-};
+use std::collections::HashMap;
+
 use near_sdk::{
   assert_one_yocto, env,
   json_types::{U128, U64},
@@ -10,7 +8,8 @@ use near_sdk::{
   AccountId,
 };
 use serde_json::json;
-use std::collections::HashMap;
+
+use crate::{events, farm::Farm, staking::StakingProgram, types::*, Contract, ContractExt};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CreateStakingProgramPayload {
@@ -96,41 +95,5 @@ impl Contract {
     self.staking_programs.insert(&collection, &staking_program);
 
     events::update_staking_program(json!({ "min_staking_period": new_period }));
-  }
-
-  #[payable]
-  pub fn move_contract_funds_to_collection(
-    &mut self,
-    collection: NFTCollection,
-    token_id: FungibleTokenID,
-    amount: U128,
-  ) {
-    assert_one_yocto();
-
-    self.move_treasury(
-      TransferOperation::ContractToCollection,
-      &env::predecessor_account_id(),
-      &collection,
-      token_id,
-      Some(amount.0),
-    );
-  }
-
-  #[payable]
-  pub fn move_collection_funds_to_contract(
-    &mut self,
-    collection: NFTCollection,
-    token_id: FungibleTokenID,
-    amount: U128,
-  ) {
-    assert_one_yocto();
-
-    self.move_treasury(
-      TransferOperation::CollectionToContract,
-      &env::predecessor_account_id(),
-      &collection,
-      token_id,
-      Some(amount.0),
-    );
   }
 }

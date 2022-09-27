@@ -38,7 +38,7 @@ impl Contract {
     }
   }
 
-  fn reallocate_treasury(
+  fn reallocate_funds(
     &mut self,
     operation: TransferOperation,
     staking_program: &mut StakingProgram,
@@ -95,7 +95,7 @@ impl Contract {
     }
   }
 
-  pub fn move_treasury(
+  pub fn transfer_funds(
     &mut self,
     operation: TransferOperation,
     operator: &AccountId,
@@ -106,7 +106,7 @@ impl Contract {
     let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
     self.assert_authorized_treasury_operation(operation, operator, &staking_program, &token_id);
-    self.reallocate_treasury(operation, &mut staking_program, token_id, amount);
+    self.reallocate_funds(operation, &mut staking_program, token_id, amount);
 
     self.staking_programs.insert(&collection, &staking_program);
   }
@@ -281,7 +281,7 @@ mod tests {
     #[case] amount: Option<u128>,
     #[case] expected: (u128, u128, u128, u128),
   ) {
-    contract.reallocate_treasury(
+    contract.reallocate_funds(
       operation,
       &mut staking_program,
       contract_token.clone(),
