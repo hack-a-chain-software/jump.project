@@ -1,10 +1,9 @@
-use crate::constants::FT_TRANSFER_GAS;
-use crate::ext_interfaces::ext_fungible_token;
-use crate::treasury::TreasuryOperation;
-use crate::types::*;
-use crate::{Contract, ContractExt};
-use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, env, near_bindgen, Promise};
+use crate::{
+  constants::FT_TRANSFER_GAS, ext_interfaces::ext_fungible_token,
+  funds::transfer::TransferOperation, types::*, Contract, ContractExt,
+};
+
+use near_sdk::{assert_one_yocto, env, json_types::U128, near_bindgen, Promise};
 
 #[near_bindgen]
 impl Contract {
@@ -17,7 +16,7 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::BeneficiaryToCollection,
+      TransferOperation::BeneficiaryToCollection,
       &env::predecessor_account_id(),
       &collection,
       token_id,
