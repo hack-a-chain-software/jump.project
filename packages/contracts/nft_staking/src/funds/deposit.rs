@@ -40,7 +40,10 @@ impl Contract {
         amount: _,
       } => {
         // TODO: ideally this repeated read wouldn't be needed if we had a global program token index
-        let staking_program = self.staking_programs.get(&collection).unwrap();
+        let staking_program = self
+          .staking_programs
+          .get(&collection)
+          .expect("Collection has no Staking Program associated with it");
         self.assert_authorized_operator(operator, &staking_program, token_id);
       }
     }
