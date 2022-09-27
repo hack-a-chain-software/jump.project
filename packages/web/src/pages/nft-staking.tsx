@@ -9,9 +9,10 @@ import {
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTheme } from "@/hooks/theme";
 import { NftStakingProjectsConnectionDocument } from "@near/apollo";
+import { Steps } from "intro.js-react";
 
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
@@ -36,13 +37,55 @@ export const NFTStaking = () => {
 
   console.log(items);
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      element: ".projects-list",
+      title: "Staking Pools",
+      intro: (
+        <div>
+          <span>
+            In this page you can see a list of all the staking pools available
+            to stake your NFT assets.
+          </span>
+        </div>
+      ),
+    },
+    {
+      element: ".projects-card",
+      title: "Project Pool",
+      intro: (
+        <div>
+          <span>
+            The project card displays all the rewards you can get per month if
+            you stake in.
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
+      <Steps
+        enabled={showSteps}
+        steps={stepItems}
+        initialStep={0}
+        onExit={() => setShowSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+
       <TopCard
         gradientText="Jump NFT"
         bigText="Staking"
         bottomDescription="Stake your NFT assets in order to get rewards from the collection owners and also from JUMP and Partners!"
         py
+        onClick={() => setShowSteps(true)}
         renderAsset={
           <>
             {collectionImages.map((imagesrc, i) => (
@@ -70,9 +113,10 @@ export const NFTStaking = () => {
         condition={!isEmpty(items)}
       >
         {items && (
-          <Stack spacing="32px">
+          <Stack spacing="32px" className="projects-list">
             {items.map((staking, index) => (
               <NFTStakingCard
+                className="projects-card"
                 key={"nft-staking-collection" + index}
                 onClick={() =>
                   navigate(
