@@ -2,15 +2,12 @@ use near_sdk::{near_bindgen, AccountId};
 
 use crate::{
   staking::StakedNFT,
-  types::{NFTCollection, NonFungibleTokenID},
+  types::{FungibleTokenBalance, NFTCollection, NonFungibleTokenID, SerializableStakingProgram},
   Contract, ContractExt,
 };
 
-use crate::types::{SerializableFungibleTokenBalance, SerializableStakingProgram};
-
 #[near_bindgen]
 impl Contract {
-  //retornar o staking program / farm -> round_rewards e saldo pra ver quanto tempo vai durar a farm
   pub fn view_staking_program(
     &self,
     collection: NFTCollection,
@@ -18,19 +15,15 @@ impl Contract {
     self.staking_programs.get(&collection).map(From::from)
   }
 
-  pub fn view_staked_nft_balance(
-    &self,
-    nft_id: NonFungibleTokenID,
-  ) -> SerializableFungibleTokenBalance {
+  pub fn view_staked_nft_balance(&self, nft_id: NonFungibleTokenID) -> FungibleTokenBalance {
     let collection = &nft_id.0;
     let mut staking_program = self.staking_programs.get(collection).unwrap();
 
     let staked_nft = staking_program.view_unclaimed_rewards(&nft_id);
 
-    SerializableFungibleTokenBalance(staked_nft.balance)
+    staked_nft.balance
   }
 
-  //retornar saldos do contract treasury
   pub fn view_guardians(&self, from_index: Option<u16>, limit: Option<u16>) -> Vec<String> {
     let from_index: usize = from_index.map(From::from).unwrap_or(0);
     let limit: usize = limit.map(From::from).unwrap_or(usize::MAX);
@@ -88,11 +81,11 @@ impl Contract {
     &self,
     collection: NFTCollection,
     account_id: AccountId,
-  ) -> SerializableFungibleTokenBalance {
+  ) -> FungibleTokenBalance {
     let staking_program = self.staking_programs.get(&collection).unwrap();
 
     let balance = staking_program.stakers_balances.get(&account_id).unwrap();
 
-    SerializableFungibleTokenBalance(balance)
+    balance
   }
 }

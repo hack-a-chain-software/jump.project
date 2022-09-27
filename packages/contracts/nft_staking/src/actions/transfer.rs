@@ -1,13 +1,13 @@
 use crate::*;
 use near_sdk::json_types::U128;
-use near_sdk::{PromiseOrValue};
+use near_sdk::PromiseOrValue;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "type")]
 enum FTRoute {
-  OwnerDeposit,
-  CollectionOwnerDeposit { collection: NFTCollection },
+  DepositToDistribution { collection: NFTCollection },
+  DepositToContract,
 }
 
 pub struct FTRoutePayload<'a> {
@@ -56,12 +56,11 @@ impl Contract {
     let route: FTRoute = serde_json::from_str(payload.msg).expect("");
 
     match route {
-      FTRoute::OwnerDeposit => {
-        self.deposit_contract_treasury(payload);
-      }
-
-      FTRoute::CollectionOwnerDeposit { collection } => {
+      FTRoute::DepositToDistribution { collection } => {
         self.deposit_distribution_funds(payload, collection);
+      }
+      FTRoute::DepositToContract => {
+        self.deposit_contract_funds(payload);
       }
     }
   }

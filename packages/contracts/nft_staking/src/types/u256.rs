@@ -99,6 +99,7 @@ impl<'de> Deserialize<'de> for U256 {
   }
 }
 
+#[allow(unused_imports)]
 mod tests {
   use super::*;
   use std::io::BufWriter;

@@ -21,8 +21,6 @@ pub struct StakedNFT {
   pub token_id: NonFungibleTokenID,
   pub owner_id: AccountId,
   pub staked_timestamp: u64,
-
-  #[serde(skip)]
   pub balance: FungibleTokenBalance,
 }
 
@@ -160,7 +158,9 @@ impl StakingProgram {
     staked_nft
   }
 
-  // maybe refactor with a StakedNFT withdraw method?
+  // TODO: maybe refactor with a StakedNFT withdraw method?
+  // method that allows an investor to withdraw their NFT's balance to their investor balance
+  // this is where the early withdraw logic is applied
   pub fn inner_withdraw(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     let mut staked_nft = self.claim_rewards(token_id);
     let owner_id = &staked_nft.owner_id;
@@ -195,6 +195,7 @@ impl StakingProgram {
     balance
   }
 
+  // method that allows an investor to withdraw their balance of a specific fungible token
   pub fn outer_withdraw(
     &mut self,
     staker_id: &AccountId,
@@ -217,6 +218,7 @@ impl StakingProgram {
     amount
   }
 
+  // action to compensate failed outer_withdraw transactions
   pub fn outer_deposit(&mut self, staker_id: &AccountId, token_id: &FungibleTokenID, amount: u128) {
     let mut balance = self
       .stakers_balances
@@ -232,26 +234,12 @@ impl StakingProgram {
     self.farm.deposit_distribution_funds(token_id, amount);
   }
 
-  pub fn withdraw_collection_treasury(&mut self, token_id: FungibleTokenID) -> u128 {
-    self.collection_treasury.insert(token_id, 0).unwrap()
+  pub fn withdraw_beneficiary_funds(&mut self, token_id: &FungibleTokenID) -> u128 {
+    self.farm.withdraw_beneficiary_funds(&token_id)
   }
 
-  pub fn move_funds(&mut self, token_id: FungibleTokenID, op: FundsOperation) {
-    let balance = *self.collection_treasury.get(&token_id).unwrap_or(&0);
-    match op {
-      FundsOperation::TreasuryToDistribution { amount } => {
-        assert!(balance > amount, "Insufficent funds in treasury.");
-        self
-          .collection_treasury
-          .insert(token_id.clone(), balance - amount);
-        self.farm.deposit_distribution_funds(&token_id, amount);
-      }
-
-      FundsOperation::DistributionToTreasury => {
-        let amount = self.farm.withdraw_beneficiary(&token_id);
-        self.collection_treasury.insert(token_id, balance + amount);
-      }
-    }
+  pub fn withdraw_collection_treasury(&mut self, token_id: FungibleTokenID) -> u128 {
+    self.collection_treasury.insert(token_id, 0).unwrap()
   }
 }
 

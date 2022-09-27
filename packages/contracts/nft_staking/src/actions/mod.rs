@@ -1,4 +1,6 @@
+pub mod collection_operator;
 pub mod collection_owner;
+pub mod deposit;
 pub mod guardian;
 pub mod owner;
 pub mod staker;
