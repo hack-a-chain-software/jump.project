@@ -1,6 +1,7 @@
 use near_sdk::json_types::U128;
 use near_sdk::{ext_contract, AccountId};
 
+use crate::funds::deposit::DepositOperation;
 use crate::types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID};
 
 #[ext_contract(ext_fungible_token)]
@@ -37,6 +38,13 @@ pub trait ThisContract {
     collection: NFTCollection,
     token_id: FungibleTokenID,
     owner_id: AccountId,
+    amount: U128,
+  );
+
+  fn compensate_withdraw_treasury(
+    &mut self,
+    operation: DepositOperation,
+    token_id: FungibleTokenID,
     amount: U128,
   );
 }

@@ -1,16 +1,34 @@
-use crate::{Contract, ContractExt, FungibleTokenID};
-use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId, Promise};
+use crate::{
+  constants::{COMPENSATE_GAS, FT_TRANSFER_GAS},
+  ext_interfaces::{ext_fungible_token, ext_self},
+  funds::deposit::DepositOperation,
+  Contract, ContractExt, FungibleTokenID,
+};
+use near_sdk::{assert_one_yocto, env, json_types::U128, near_bindgen, AccountId, Promise};
 
 #[near_bindgen]
 impl Contract {
   #[payable]
-  pub fn withdraw_contract_treasury(&mut self, token_id: FungibleTokenID) -> Promise {
+  pub fn withdraw_contract_treasury(&mut self, token_id: FungibleTokenID, amount: U128) -> Promise {
+    let caller_id = env::predecessor_account_id();
+
     assert_one_yocto();
-    self.only_owner(&env::predecessor_account_id());
+    self.only_owner(&caller_id);
     self.only_contract_tokens(&token_id);
 
-    let amount = self.contract_treasury.insert(token_id, 0).unwrap_or(0);
-    Promise::new(self.owner.clone()).transfer(amount) // transferir tokens
+    let balance = self.contract_treasury.entry(token_id.clone()).or_insert(0);
+    assert!(*balance >= amount.0, "Insufficient funds in treasury");
+    *balance -= amount.0;
+
+    ext_fungible_token::ext(token_id.clone())
+      .with_static_gas(FT_TRANSFER_GAS)
+      .with_attached_deposit(1)
+      .ft_transfer(caller_id, amount, None)
+      .then(
+        ext_self::ext(env::current_account_id())
+          .with_static_gas(COMPENSATE_GAS)
+          .compensate_withdraw_treasury(DepositOperation::ContractTreasury, token_id, amount),
+      )
   }
 
   #[payable]
