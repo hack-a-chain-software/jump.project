@@ -20,6 +20,16 @@
       "database": "jump_testnet",
       "username": "postgres",
       "password": "JDX-secret_password-1683413286"
+    },
+    {
+      "previewLimit": 50,
+      "server": "staging-db.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "staging-jump",
+      "database": "jump_testnet",
+      "username": "postgres",
+      "password": "JDX-secret_password-1683413286"
     }
   ]
 }

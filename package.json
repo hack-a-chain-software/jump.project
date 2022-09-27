@@ -17,7 +17,10 @@
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged",
-    "setup:testnet:web": "node .github/utilities/set_testnet_environments.js"
+    "setup:testnet:env": "node .github/utilities/set_testnet_environments.js",
+    "setup:staging:env": "node .github/utilities/set_staging_environments.js",
+    "setup:staging:db": "node .github/utilities/database_reset.js",
+    "setup:staging:db:populate": "node .github/utilities/database_basic_populate.js"
   },
   "husky": {
     "hooks": {

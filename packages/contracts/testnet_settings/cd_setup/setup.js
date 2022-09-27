@@ -11,9 +11,13 @@ const {
 
 const { storeData, createAccount, registerContracts } = require("./utils");
 
-const { nftStakingSetup } = require("./nft_staking_setup");
+const {
+  nftStakingSetup,
+  nftsArray,
+  parseAccountName,
+} = require("./nft_staking_setup");
 
-const { launchpadSetup } = require("./launchpad_setup");
+const { launchpadSetup, tokenArray } = require("./launchpad_setup");
 
 testnetSetup();
 
@@ -61,7 +65,6 @@ async function testnetSetup() {
     faucet: random_prefix + "faucet.testnet",
     last_block_height: last_block_height,
   };
-  storeData(execution_data.accountMap, "../account_map.json");
 
   // create accounts
   execution_data.connAccountMap.ownerAccount = await createAccount(
@@ -353,4 +356,9 @@ async function testnetSetup() {
 
   // setup Launchpad listings
   await launchpadSetup(execution_data);
+
+  // store data in file
+  storeData(execution_data.accountMap, "../account_map.json");
 }
+
+module.exports = { nftsArray, tokenArray, parseAccountName };
