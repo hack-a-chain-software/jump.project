@@ -9,20 +9,23 @@ use near_sdk::{assert_one_yocto, env, json_types::U128, near_bindgen};
 #[near_bindgen]
 impl Contract {
   #[payable]
-  pub fn move_collection_funds_to_distribution(
+  pub fn transfer(
     &mut self,
+    operation: TransferOperation,
     collection: NFTCollection,
     token_id: FungibleTokenID,
-    amount: U128,
+    amount: Option<U128>,
   ) {
     assert_one_yocto();
 
-    self.move_treasury(
-      TransferOperation::CollectionToDistribution,
-      &env::predecessor_account_id(),
+    let operator = env::predecessor_account_id();
+
+    self.transfer_funds(
+      operation,
+      &operator,
       &collection,
       token_id,
-      Some(amount.0),
+      amount.map(|x| x.0),
     );
   }
 }
