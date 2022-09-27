@@ -48,6 +48,7 @@ export function NFTStakingCard(
         ["name", "logo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
+      className="projects-card"
     >
       <Box w="100%" bg={cardBg} borderRadius="24px">
         <Box

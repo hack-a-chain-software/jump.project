@@ -10238,6 +10238,11 @@ sync-fetch@0.4.1, sync-fetch@^0.4.0:
     buffer "^5.7.1"
     node-fetch "^2.6.1"
 
+tailwind-merge@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/tailwind-merge/-/tailwind-merge-1.6.0.tgz#dd652005544aa0b04628e69688b7108265f0d441"
+  integrity sha512-lfpys05uZMcVGIbgrrM/HlQGYKiPIcUhs76H1VrXo0gerpYkoLk4zjQTppdyAcBcmpzlzXJw7X0JniUKOr2hkg==
+
 tailwindcss@^3.0.24:
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.1.4.tgz#64b09059805505902139fa805d97046080bd90b9"

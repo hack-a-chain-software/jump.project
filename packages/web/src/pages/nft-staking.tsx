@@ -85,6 +85,7 @@ export const NFTStaking = () => {
         bigText="Staking"
         bottomDescription="Stake your NFT assets in order to get rewards from the collection owners and also from JUMP and Partners!"
         py
+        className="projects-list"
         onClick={() => setShowSteps(true)}
         renderAsset={
           <>
@@ -113,10 +114,9 @@ export const NFTStaking = () => {
         condition={!isEmpty(items)}
       >
         {items && (
-          <Stack spacing="32px" className="projects-list">
+          <Stack spacing="32px">
             {items.map((staking, index) => (
               <NFTStakingCard
-                className="projects-card"
                 key={"nft-staking-collection" + index}
                 onClick={() =>
                   navigate(

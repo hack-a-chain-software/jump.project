@@ -2,6 +2,7 @@ import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import { JumpBigWhite } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
 import { IconButton } from "@/components";
+import { twMerge } from "tailwind-merge";
 
 type Props = {
   gradientText: string;
@@ -13,6 +14,7 @@ type Props = {
   py?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
+  className?: string;
 };
 
 export const TopCard = ({
@@ -24,6 +26,7 @@ export const TopCard = ({
   py = false,
   content = <></>,
   children,
+  className,
   onClick = () => {},
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();
@@ -33,7 +36,7 @@ export const TopCard = ({
       minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
-      className="launchpad"
+      className={twMerge("launchpad", className)}
     >
       <Box
         overflow="hidden"
