@@ -1,5 +1,6 @@
 use crate::{
   constants::{COMPENSATE_GAS, FT_TRANSFER_GAS},
+  errors::ERR_INSUFFICIENT_CONTRACT_TREASURY,
   ext_interfaces::{ext_fungible_token, ext_self},
   funds::deposit::DepositOperation,
   Contract, ContractExt, FungibleTokenID,
@@ -17,7 +18,7 @@ impl Contract {
     self.only_contract_tokens(&token_id);
 
     let balance = self.contract_treasury.entry(token_id.clone()).or_insert(0);
-    assert!(*balance >= amount.0, "Insufficient funds in treasury");
+    assert!(*balance >= amount.0, "{ERR_INSUFFICIENT_CONTRACT_TREASURY}");
     *balance -= amount.0;
 
     ext_fungible_token::ext(token_id.clone())

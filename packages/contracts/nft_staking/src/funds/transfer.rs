@@ -2,6 +2,7 @@ use near_sdk::AccountId;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+  errors::{ERR_INSUFFICIENT_COLLECTION_TREASURY, ERR_INSUFFICIENT_CONTRACT_TREASURY},
   staking::StakingProgram,
   types::{FungibleTokenID, NFTCollection},
   Contract,
@@ -56,7 +57,7 @@ impl Contract {
         let amount = amount.unwrap_or(*contract_treasury);
         assert!(
           amount <= *contract_treasury,
-          "Insufficient contract treasury"
+          "{ERR_INSUFFICIENT_CONTRACT_TREASURY}"
         );
         *contract_treasury -= amount;
         *collection_treasury += amount;
@@ -67,7 +68,7 @@ impl Contract {
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
-          "Insufficient collection treasury"
+          "{ERR_INSUFFICIENT_COLLECTION_TREASURY}"
         );
         *collection_treasury -= amount;
         *contract_treasury += amount;
@@ -76,7 +77,7 @@ impl Contract {
         let amount = amount.unwrap_or(*collection_treasury);
         assert!(
           amount <= *collection_treasury,
-          "Insufficient collection treasury"
+          "{ERR_INSUFFICIENT_COLLECTION_TREASURY}"
         );
         *collection_treasury -= amount;
         staking_program.deposit_distribution_funds(&token_id, amount);
