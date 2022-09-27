@@ -1,3 +1,4 @@
+use crate::funds::deposit::DepositOperation;
 use crate::*;
 use near_sdk::json_types::U128;
 use near_sdk::PromiseOrValue;
@@ -6,8 +7,7 @@ use near_sdk::PromiseOrValue;
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "type")]
 enum FTRoute {
-  DepositToContract,
-  DepositToCollection { collection: NFTCollection },
+  Deposit(DepositOperation),
 }
 
 pub struct FTRoutePayload<'a> {
@@ -65,13 +65,12 @@ impl Contract {
     let route: FTRoute = serde_json::from_str(payload.msg).expect("Unrecognized deposit route");
 
     match route {
-      FTRoute::DepositToContract => {
-        self.deposit_contract_funds(payload);
-      }
-      FTRoute::DepositToCollection { collection } => {
-        self.assert_collection_has_program(&collection);
-        self.deposit_collection_funds(payload, collection);
-      }
+      FTRoute::Deposit(operation) => self.deposit(
+        operation,
+        &payload.sender_id,
+        payload.token_id,
+        payload.amount,
+      ),
     }
   }
 

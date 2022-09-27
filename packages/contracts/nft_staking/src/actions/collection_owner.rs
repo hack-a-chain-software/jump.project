@@ -1,6 +1,9 @@
 use crate::{
-  constants::FT_TRANSFER_GAS, ext_interfaces::ext_fungible_token,
-  funds::transfer::TransferOperation, types::*, Contract, ContractExt,
+  constants::{COMPENSATE_GAS, FT_TRANSFER_GAS},
+  ext_interfaces::{ext_fungible_token, ext_self},
+  funds::{deposit::DepositOperation, transfer::TransferOperation},
+  types::*,
+  Contract, ContractExt,
 };
 
 use near_sdk::{assert_one_yocto, env, json_types::U128, near_bindgen, Promise};
@@ -29,6 +32,7 @@ impl Contract {
     &mut self,
     collection: NFTCollection,
     token_id: FungibleTokenID,
+    amount: Option<U128>,
   ) -> Promise {
     assert_one_yocto();
     let account_id = env::predecessor_account_id();
@@ -37,11 +41,21 @@ impl Contract {
     staking_program.only_collection_owner(&account_id);
     staking_program.only_program_token(&token_id);
 
-    let amount = staking_program.withdraw_collection_treasury(token_id.clone());
+    let withdrawn_amount =
+      U128(staking_program.withdraw_collection_treasury(token_id.clone(), amount.map(|x| x.0)));
 
-    ext_fungible_token::ext(token_id)
+    ext_fungible_token::ext(token_id.clone())
       .with_static_gas(FT_TRANSFER_GAS)
       .with_attached_deposit(1)
-      .ft_transfer(account_id.clone(), U128(amount), None)
+      .ft_transfer(account_id.clone(), withdrawn_amount, None)
+      .then(
+        ext_self::ext(env::current_account_id())
+          .with_static_gas(COMPENSATE_GAS)
+          .compensate_withdraw_treasury(
+            DepositOperation::CollectionTreasury { collection },
+            token_id,
+            withdrawn_amount,
+          ),
+      )
   }
 }

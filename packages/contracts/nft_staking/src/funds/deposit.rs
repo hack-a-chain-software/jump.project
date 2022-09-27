@@ -1,20 +1,16 @@
-use near_sdk::AccountId;
+use near_sdk::{is_promise_success, json_types::U128, near_bindgen, AccountId};
+use serde::{Deserialize, Serialize};
 
 use crate::{
   types::{FungibleTokenID, NFTCollection},
-  Contract,
+  Contract, ContractExt,
 };
 
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum DepositOperation {
-  ContractTreasury {
-    token_id: FungibleTokenID,
-    amount: u128,
-  },
-  CollectionTreasury {
-    collection: NFTCollection,
-    token_id: FungibleTokenID,
-    amount: u128,
-  },
+  ContractTreasury,
+  CollectionTreasury { collection: NFTCollection },
 }
 
 impl Contract {
@@ -22,23 +18,17 @@ impl Contract {
     &self,
     operation: &DepositOperation,
     operator: &AccountId,
+    token_id: &FungibleTokenID,
   ) {
     match operation {
-      DepositOperation::ContractTreasury {
-        token_id,
-        amount: _,
-      } => {
+      DepositOperation::ContractTreasury => {
         /*
          *   TODO: this operation is unauthorized because we want partners to call it,
          * if we ever create more authorization roles, we should assert it here.
          */
         self.only_contract_tokens(token_id);
       }
-      DepositOperation::CollectionTreasury {
-        collection,
-        token_id,
-        amount: _,
-      } => {
+      DepositOperation::CollectionTreasury { collection } => {
         // TODO: ideally this repeated read wouldn't be needed if we had a global program token index
         let staking_program = self
           .staking_programs
@@ -49,16 +39,17 @@ impl Contract {
     }
   }
 
-  fn deposit_treasury(&mut self, operation: DepositOperation) {
+  fn deposit_treasury_funds(
+    &mut self,
+    operation: DepositOperation,
+    token_id: FungibleTokenID,
+    amount: u128,
+  ) {
     match operation {
-      DepositOperation::ContractTreasury { token_id, amount } => {
+      DepositOperation::ContractTreasury => {
         *self.contract_treasury.entry(token_id).or_insert(0) += amount;
       }
-      DepositOperation::CollectionTreasury {
-        collection,
-        token_id,
-        amount,
-      } => {
+      DepositOperation::CollectionTreasury { collection } => {
         let mut staking_program = self.staking_programs.get(&collection).unwrap();
 
         *staking_program
@@ -73,9 +64,30 @@ impl Contract {
     }
   }
 
-  pub fn deposit(&mut self, operation: DepositOperation, operator: &AccountId) {
-    self.assert_authorized_deposit_operation(&operation, operator);
-    self.deposit_treasury(operation);
+  pub fn deposit(
+    &mut self,
+    operation: DepositOperation,
+    operator: &AccountId,
+    token_id: FungibleTokenID,
+    amount: u128,
+  ) {
+    self.assert_authorized_deposit_operation(&operation, operator, &token_id);
+    self.deposit_treasury_funds(operation, token_id, amount);
+  }
+}
+
+#[near_bindgen]
+impl Contract {
+  #[private]
+  pub fn compensate_withdraw_treasury(
+    &mut self,
+    operation: DepositOperation,
+    token_id: FungibleTokenID,
+    amount: U128,
+  ) {
+    if !is_promise_success() {
+      self.deposit_treasury_funds(operation, token_id, amount.0)
+    }
   }
 }
 
@@ -87,77 +99,61 @@ mod tests {
   use super::*;
 
   #[rstest]
-  #[case::contract_guardian_ct(
-    DepositOperation::ContractTreasury{
-      token_id: contract_token(),
-      amount: 0,
-    },
-    guardian()
-  )]
+  #[case::contract_guardian_ct(DepositOperation::ContractTreasury, guardian(), contract_token())]
   #[case::collection_guardian_ct(
     DepositOperation::CollectionTreasury {
       collection: collection(),
-      token_id: contract_token(),
-      amount: 0,
     },
-    guardian()
+    guardian(),
+    contract_token()
   )]
   #[case::collection_collection_owner_pt(
     DepositOperation::CollectionTreasury {
       collection: collection(),
-      token_id: program_token(),
-      amount: 0,
     },
-    collection_owner()
+    collection_owner(),
+    program_token()
   )]
   fn test_authorized_deposit(
     contract: Contract,
     #[case] operation: DepositOperation,
     #[case] operator: AccountId,
+    #[case] token_id: FungibleTokenID,
   ) {
-    contract.assert_authorized_deposit_operation(&operation, &operator);
+    contract.assert_authorized_deposit_operation(&operation, &operator, &token_id);
   }
 
   #[rstest]
-  #[case::contract_guardian_pt(
-    DepositOperation::ContractTreasury{
-      token_id: program_token(),
-      amount: 0,
-    },
-    guardian()
-  )]
+  #[case::contract_guardian_pt(DepositOperation::ContractTreasury, guardian(), program_token())]
   #[case::contract_collection_owner_pt(
-    DepositOperation::ContractTreasury{
-      token_id: program_token(),
-      amount: 0,
-    },
-    collection_owner()
+    DepositOperation::ContractTreasury,
+    collection_owner(),
+    program_token()
   )]
   #[case::collection_guardian_pt(
     DepositOperation::CollectionTreasury {
       collection: collection(),
-      token_id: program_token(),
-      amount: 0,
     },
-    guardian()
+    guardian(),
+    program_token()
   )]
   #[case::collection_collection_owner_ct(
     DepositOperation::CollectionTreasury {
       collection: collection(),
-      token_id: contract_token(),
-      amount: 0,
     },
-    collection_owner()
+    collection_owner(),
+    contract_token()
   )]
   fn test_unauthorized_deposit(
     contract: Contract,
     #[case] operation: DepositOperation,
     #[case] operator: AccountId,
+    #[case] token_id: FungibleTokenID,
   ) {
     std::panic::set_hook(Box::new(|_| {}));
 
     let panicked = std::panic::catch_unwind(|| {
-      contract.assert_authorized_deposit_operation(&operation, &operator);
+      contract.assert_authorized_deposit_operation(&operation, &operator, &token_id);
     });
 
     assert!(panicked.is_err());
@@ -169,10 +165,11 @@ mod tests {
 
     let amount = 1;
 
-    contract.deposit_treasury(DepositOperation::ContractTreasury {
-      token_id: contract_token.clone(),
+    contract.deposit_treasury_funds(
+      DepositOperation::ContractTreasury,
+      contract_token.clone(),
       amount,
-    });
+    );
 
     let final_balance = *contract.contract_treasury.get(&contract_token).unwrap();
 
@@ -195,11 +192,13 @@ mod tests {
 
     let amount = 1;
 
-    contract.deposit_treasury(DepositOperation::CollectionTreasury {
-      collection: collection.clone(),
-      token_id: contract_token.clone(),
+    contract.deposit_treasury_funds(
+      DepositOperation::CollectionTreasury {
+        collection: collection.clone(),
+      },
+      contract_token.clone(),
       amount,
-    });
+    );
 
     let final_balance = *contract
       .staking_programs

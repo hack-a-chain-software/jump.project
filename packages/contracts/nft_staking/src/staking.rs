@@ -241,8 +241,22 @@ impl StakingProgram {
     self.farm.withdraw_beneficiary_funds(&token_id)
   }
 
-  pub fn withdraw_collection_treasury(&mut self, token_id: FungibleTokenID) -> u128 {
-    self.collection_treasury.insert(token_id, 0).unwrap()
+  pub fn withdraw_collection_treasury(
+    &mut self,
+    token_id: FungibleTokenID,
+    amount: Option<u128>,
+  ) -> u128 {
+    let balance = self.collection_treasury.entry(token_id).or_insert(0);
+
+    let amount = amount.unwrap_or(*balance);
+    assert!(
+      *balance >= amount,
+      "Insufficient funds in collection treasury"
+    );
+
+    *balance -= amount;
+
+    amount
   }
 }
 
