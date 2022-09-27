@@ -65,12 +65,7 @@ impl Contract {
     let route: FTRoute = serde_json::from_str(payload.msg).expect("Unrecognized deposit route");
 
     match route {
-      FTRoute::Deposit(operation) => self.deposit(
-        operation,
-        &payload.sender_id,
-        payload.token_id,
-        payload.amount,
-      ),
+      FTRoute::Deposit(operation) => self.deposit(payload, operation),
     }
   }
 

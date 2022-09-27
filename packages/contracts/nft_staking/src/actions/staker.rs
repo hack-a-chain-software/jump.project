@@ -1,5 +1,5 @@
 use crate::{
-  actions::token_transfer::NFTRoutePayload,
+  actions::token_router::NFTRoutePayload,
   constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS},
   events,
   ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self},

@@ -2,6 +2,7 @@ use near_sdk::{is_promise_success, json_types::U128, near_bindgen, AccountId};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+  actions::token_router::FTRoutePayload,
   types::{FungibleTokenID, NFTCollection},
   Contract, ContractExt,
 };
@@ -39,7 +40,7 @@ impl Contract {
     }
   }
 
-  fn deposit_treasury_funds(
+  fn deposit_funds(
     &mut self,
     operation: DepositOperation,
     token_id: FungibleTokenID,
@@ -64,15 +65,13 @@ impl Contract {
     }
   }
 
-  pub fn deposit(
-    &mut self,
-    operation: DepositOperation,
-    operator: &AccountId,
-    token_id: FungibleTokenID,
-    amount: u128,
-  ) {
-    self.assert_authorized_deposit_operation(&operation, operator, &token_id);
-    self.deposit_treasury_funds(operation, token_id, amount);
+  pub fn deposit(&mut self, payload: FTRoutePayload, operation: DepositOperation) {
+    let token_id = payload.token_id;
+    let operator = payload.sender_id;
+    let amount = payload.amount;
+
+    self.assert_authorized_deposit_operation(&operation, &operator, &token_id);
+    self.deposit_funds(operation, token_id, amount);
   }
 }
 
@@ -86,7 +85,7 @@ impl Contract {
     amount: U128,
   ) {
     if !is_promise_success() {
-      self.deposit_treasury_funds(operation, token_id, amount.0)
+      self.deposit_funds(operation, token_id, amount.0)
     }
   }
 }
@@ -165,7 +164,7 @@ mod tests {
 
     let amount = 1;
 
-    contract.deposit_treasury_funds(
+    contract.deposit_funds(
       DepositOperation::ContractTreasury,
       contract_token.clone(),
       amount,
@@ -192,7 +191,7 @@ mod tests {
 
     let amount = 1;
 
-    contract.deposit_treasury_funds(
+    contract.deposit_funds(
       DepositOperation::CollectionTreasury {
         collection: collection.clone(),
       },
