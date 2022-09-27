@@ -5,5 +5,5 @@ pub mod guardian;
 pub mod owner;
 pub mod staker;
 pub mod storage_impl;
-pub mod transfer;
+pub mod token_transfer;
 pub mod view;

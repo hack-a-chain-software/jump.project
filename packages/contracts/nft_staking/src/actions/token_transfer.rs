@@ -6,8 +6,8 @@ use near_sdk::PromiseOrValue;
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "type")]
 enum FTRoute {
-  DepositToDistribution { collection: NFTCollection },
   DepositToContract,
+  DepositToCollection { collection: NFTCollection },
 }
 
 pub struct FTRoutePayload<'a> {
@@ -53,14 +53,14 @@ impl Contract {
   }
 
   fn match_ft_route(&mut self, payload: FTRoutePayload) {
-    let route: FTRoute = serde_json::from_str(payload.msg).expect("");
+    let route: FTRoute = serde_json::from_str(payload.msg).expect("Unrecognized deposit route");
 
     match route {
-      FTRoute::DepositToDistribution { collection } => {
-        self.deposit_distribution_funds(payload, collection);
-      }
       FTRoute::DepositToContract => {
         self.deposit_contract_funds(payload);
+      }
+      FTRoute::DepositToCollection { collection } => {
+        self.deposit_collection_funds(payload, collection);
       }
     }
   }

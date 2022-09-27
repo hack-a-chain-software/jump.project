@@ -16,9 +16,9 @@ mod errors;
 mod events;
 mod ext_interfaces;
 mod farm;
+mod funds;
 mod investor;
 mod staking;
-mod treasury;
 mod types;
 
 #[near_bindgen]

@@ -1,11 +1,15 @@
-use crate::actions::transfer::NFTRoutePayload;
-use crate::constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS};
-use crate::ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self};
-use crate::staking::{StakedNFT, StakingProgram};
-use crate::{events, types::*};
-use crate::{Contract, ContractExt};
-use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, env, is_promise_success, near_bindgen, AccountId, Promise};
+use crate::{
+  actions::token_transfer::NFTRoutePayload,
+  constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS},
+  events,
+  ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self},
+  staking::{StakedNFT, StakingProgram},
+  types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
+  Contract, ContractExt,
+};
+use near_sdk::{
+  assert_one_yocto, env, is_promise_success, json_types::U128, near_bindgen, AccountId, Promise,
+};
 
 impl StakingProgram {
   #[inline]

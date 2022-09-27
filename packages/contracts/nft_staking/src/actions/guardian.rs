@@ -1,12 +1,14 @@
-use crate::events;
-use crate::farm::Farm;
-use crate::staking::StakingProgram;
-use crate::treasury::TreasuryOperation;
-use crate::types::*;
-use crate::{Contract, ContractExt};
-use near_sdk::json_types::{U128, U64};
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{assert_one_yocto, env, near_bindgen, AccountId};
+use crate::{
+  events, farm::Farm, funds::transfer::TransferOperation, staking::StakingProgram, types::*,
+  Contract, ContractExt,
+};
+use near_sdk::{
+  assert_one_yocto, env,
+  json_types::{U128, U64},
+  near_bindgen,
+  serde::{Deserialize, Serialize},
+  AccountId,
+};
 use serde_json::json;
 use std::collections::HashMap;
 
@@ -106,7 +108,7 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::ContractToCollection,
+      TransferOperation::ContractToCollection,
       &env::predecessor_account_id(),
       &collection,
       token_id,
@@ -124,7 +126,7 @@ impl Contract {
     assert_one_yocto();
 
     self.move_treasury(
-      TreasuryOperation::CollectionToContract,
+      TransferOperation::CollectionToContract,
       &env::predecessor_account_id(),
       &collection,
       token_id,
