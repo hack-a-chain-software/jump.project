@@ -1,14 +1,17 @@
 use std::collections::HashMap;
 
-use crate::calc::denom_multiplication;
-use crate::constants::DENOM;
-use crate::farm::Farm;
-use crate::types::*;
-use crate::StorageKey;
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LookupMap, UnorderedMap, UnorderedSet};
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, AccountId};
+use near_sdk::{
+  borsh::{BorshDeserialize, BorshSerialize},
+  collections::{LookupMap, UnorderedMap, UnorderedSet},
+  env,
+  serde::{Deserialize, Serialize},
+  AccountId,
+};
+
+use crate::{
+  calc::denom_multiplication, constants::DENOM, errors::ERR_INSUFFICIENT_COLLECTION_TREASURY,
+  farm::Farm, types::*, StorageKey,
+};
 
 #[derive(Serialize, Deserialize)]
 pub enum FundsOperation {
@@ -249,10 +252,7 @@ impl StakingProgram {
     let balance = self.collection_treasury.entry(token_id).or_insert(0);
 
     let amount = amount.unwrap_or(*balance);
-    assert!(
-      *balance >= amount,
-      "Insufficient funds in collection treasury"
-    );
+    assert!(*balance >= amount, "{ERR_INSUFFICIENT_COLLECTION_TREASURY}");
 
     *balance -= amount;
 
