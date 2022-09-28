@@ -9,7 +9,7 @@ on:
       - testnet-version
 
 jobs:
-  vercel_deploy:
+  full_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
