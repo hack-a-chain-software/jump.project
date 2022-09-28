@@ -1,5 +1,4 @@
 FROM node:18.9.1
-# RUN npm list protractor || npm install -g yarn
 WORKDIR /project
 COPY ./packages/apollo ./packages/apollo
 COPY ./packages/graphql ./packages/graphql
