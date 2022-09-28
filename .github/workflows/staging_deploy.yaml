@@ -58,7 +58,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: graphql-jump
-          ECR_IMAGE: graphql:latest
+          ECR_IMAGE: graphql
         run: |
           # Build a docker container and
           # push it to ECR so that it can

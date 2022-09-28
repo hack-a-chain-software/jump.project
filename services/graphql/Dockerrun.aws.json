@@ -1,7 +1,7 @@
 {
     "AWSEBDockerrunVersion": "1",
     "Image": {
-      "Name": "180652525544.dkr.ecr.us-east-2.amazonaws.com/graphql-jump"
+      "Name": "180652525544.dkr.ecr.us-east-2.amazonaws.com/graphql-jump:graphql"
     },
     "Ports": [
       {
