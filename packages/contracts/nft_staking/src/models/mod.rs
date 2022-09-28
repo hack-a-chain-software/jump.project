@@ -9,6 +9,7 @@ pub use self::staked_nft::StakedNFT;
 pub use self::staking_program::StakingProgram;
 
 // TODO: convert these to actual fixtures
+#[cfg(test)]
 mod tests_fixtures {
   use std::str::FromStr;
 
