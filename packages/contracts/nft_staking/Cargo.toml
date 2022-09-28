@@ -16,6 +16,6 @@ borsh = "0.9"
 uint = "0.9.3"
 
 [dev-dependencies]
-rstest = "0.14.0"
+rstest = "0.15.0"
 
 [workspace]
