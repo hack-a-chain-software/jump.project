@@ -9,6 +9,7 @@
     "gql:dev:mainnet": "yarn workspace @near/graphql dev:mainnet",
     "gql:start:mainnet": "yarn workspace @near/graphql start:mainnet",
     "gql:start:testnet": "yarn workspace @near/graphql start:testnet",
+    "gql:start": "yarn workspace @near/graphql start",
     "web:dev": "yarn workspace @near/web dev",
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",

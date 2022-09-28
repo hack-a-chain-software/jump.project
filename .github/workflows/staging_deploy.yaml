@@ -8,11 +8,12 @@ env:
   DB_NAME: ${{ secrets.STAGING_DB_NAME }}
   DB_USER: ${{ secrets.STAGING_DB_USER }}
   DB_PASS: ${{ secrets.STAGING_DB_PASS }}
+  AWS_REGION: us-east-2
 
 on:
   push:
     branches:
-      - main
+      - JDX-199-build-staging-and-testnet-ci-cd
 
 jobs:
   vercel_deploy:
@@ -29,102 +30,133 @@ jobs:
       - name: Installing Dependencies
         run: yarn
 
-      # Deploy testnet contracts
-      - name: Deploy Contracts
-        run: yarn workspace @near/contracts deploy:testnet
+      # # Deploy testnet contracts
+      # - name: Deploy Contracts
+      #   run: yarn workspace @near/contracts deploy:testnet
 
-      # Set envs for builds
-      - name: Set Testnet environment variables
-        run: yarn setup:staging:env
+      # # Set envs for builds
+      # - name: Set Testnet environment variables
+      #   run: yarn setup:staging:env
       
-      # Clear staging DB
-      - name: Reset Database
-        run: yarn setup:staging:db
+      # # Clear staging DB
+      # - name: Reset Database
+      #   run: yarn setup:staging:db
 
-      # Set AWS deployments - Indexer
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
 
-      - name: Build, tag, and push INDEXER image to Amazon ECR
+      - name: Build, tag, and push GRAPHQL image to Amazon ECR
         id: build-image-indexer
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: graphql-jump
+          ECR_IMAGE: graphql
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:jumpindexer .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:jumpindexer
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:jumpindexer"
+          docker build . -f services/graphql/Dockerfile --t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
+       # # Set AWS deployments - Indexer 
+      - name: Get timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+        
+      - name: Run string replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
       
-      - name: Fill in the new image ID in the Amazon ECS task definition INDEXER
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v14
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image-indexer.outputs.image }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: staging-graphql-beanstalk
+          environment_name: Staginggraphqlbeanstalk-env
+          version_label: "staging-graphql-beanstalk-${{ steps.format-time.outputs.replaced }}"
+          region: us-east-2
+          deployment_package: services/graphql/Dockerrun.aws.json
+      
+      # - name: Fill in the new image ID in the Amazon ECS task definition INDEXER
+      #   id: task-def
+      #   uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+      #   with:
+      #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
+      #     container-name: ${{ env.CONTAINER_NAME }}
+      #     image: ${{ steps.build-image-indexer.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition INDEXER
-        uses: aws-actions/amazon-ecs-deploy-task-definition@de0132cf8cdedb79975c6d42b77eb7ea193cf28e
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      # - name: Deploy Amazon ECS task definition INDEXER
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@de0132cf8cdedb79975c6d42b77eb7ea193cf28e
+      #   with:
+      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+      #     service: ${{ env.ECS_SERVICE }}
+      #     cluster: ${{ env.ECS_CLUSTER }}
+      #     wait-for-service-stability: true
 
       # Set AWS deployments - Graphql
-      - name: Build, tag, and push GRAPHQL image to Amazon ECR
-        id: build-image-graphql
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql"
+      # - name: Build Graphql Docker image
+      #   run: docker build . -f services/graphql/Dockerfile
+
+      # - name: Generate Deployment Package
+      #   run: zip -r deploy.zip *
+
+      # - name: Build, tag, and push GRAPHQL image to Amazon ECR
+      #   id: build-image-graphql
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #   run: |
+      #     # Build a docker container and
+      #     # push it to ECR so that it can
+      #     # be deployed to ECS.
+      #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql .
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql
+      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:jumpgraphql"
       
-      - name: Fill in the new image ID in the Amazon ECS task definition INDEXER
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image-graphql.outputs.image }}
+      # - name: Fill in the new image ID in the Amazon ECS task definition INDEXER
+      #   id: task-def
+      #   uses: aws-actions/amazon-ecs-render-task-definition@97587c9d45a4930bf0e3da8dd2feb2a463cf4a3a
+      #   with:
+      #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
+      #     container-name: ${{ env.CONTAINER_NAME }}
+      #     image: ${{ steps.build-image-graphql.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition INDEXER
-        uses: aws-actions/amazon-ecs-deploy-task-definition@de0132cf8cdedb79975c6d42b77eb7ea193cf28e
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      # - name: Deploy Amazon ECS task definition INDEXER
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@de0132cf8cdedb79975c6d42b77eb7ea193cf28e
+      #   with:
+      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+      #     service: ${{ env.ECS_SERVICE }}
+      #     cluster: ${{ env.ECS_CLUSTER }}
+      #     wait-for-service-stability: true
 
       
-      # Deploy Vercel app
-      - name: Pull vercel setup
-        run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # # Deploy Vercel app
+      # - name: Pull vercel setup
+      #   run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # - name: Build Project Artifacts
+      #   run: vercel build --prod --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      - name: Deploy Project Artifacts to Vercel
-        run: > 
-          vercel 
-          deploy 
-          --prebuilt
-          --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # - name: Deploy Project Artifacts to Vercel
+      #   run: > 
+      #     vercel 
+      #     deploy 
+      #     --prebuilt
+      #     --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      # Populate DB with metadata
-      - name: Populate DB with basic metadata
-        run: yarn setup:staging:db:populate
+      # # Populate DB with metadata
+      # - name: Populate DB with basic metadata
+      #   run: yarn setup:staging:db:populate

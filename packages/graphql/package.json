@@ -6,7 +6,9 @@
   "repository": "http://github.com/hack-a-chain/jump.project",
   "author": "Hack a Chain",
   "license": "MIT",
+  "private": true, 
   "scripts": {
+    "start": "ts-node -r tsconfig-paths/register src/server.ts --bind 0.0.0.0",
     "start:mainnet": "ENV=MAINNET ts-node -r tsconfig-paths/register src/server.ts",
     "start:testnet": "ENV=TESTNET ts-node -r tsconfig-paths/register src/server.ts",
     "dev:mainnet": "ENV=MAINNET ts-node-dev -r tsconfig-paths/register src/server.ts",
