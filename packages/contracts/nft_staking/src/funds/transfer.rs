@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
   errors::{ERR_INSUFFICIENT_COLLECTION_TREASURY, ERR_INSUFFICIENT_CONTRACT_TREASURY},
-  staking::StakingProgram,
+  models::StakingProgram,
   types::{FungibleTokenID, NFTCollection},
   Contract,
 };

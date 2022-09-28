@@ -9,8 +9,7 @@ mod tests_fixtures {
   use rstest::fixture;
 
   use crate::{
-    farm::Farm,
-    staking::StakingProgram,
+    models::{Farm, StakingProgram},
     types::{FungibleTokenID, NFTCollection},
     Contract,
   };

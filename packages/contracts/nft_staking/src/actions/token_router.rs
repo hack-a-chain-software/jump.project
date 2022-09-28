@@ -1,7 +1,11 @@
-use crate::funds::deposit::DepositOperation;
-use crate::*;
-use near_sdk::json_types::U128;
-use near_sdk::PromiseOrValue;
+use near_sdk::{env, json_types::U128, near_bindgen, AccountId, PromiseOrValue};
+use serde::{Deserialize, Serialize};
+
+use crate::{
+  funds::deposit::DepositOperation,
+  types::{FungibleTokenID, NFTCollection, NonFungibleTokenID},
+  Contract, ContractExt,
+};
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]

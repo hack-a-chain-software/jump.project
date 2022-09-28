@@ -1,12 +1,15 @@
-use crate::investor::Investor;
-use crate::staking::StakingProgram;
-use crate::types::*;
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LookupMap, UnorderedSet};
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault};
 use std::collections::HashMap;
 use std::vec::Vec;
+
+use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::collections::{LookupMap, UnorderedSet};
+use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault};
+
+use crate::{
+  investor::Investor,
+  models::StakingProgram,
+  types::{FungibleTokenBalance, FungibleTokenID, NFTCollection},
+};
 
 mod actions;
 mod auth;
@@ -15,10 +18,9 @@ mod constants;
 mod errors;
 mod events;
 mod ext_interfaces;
-mod farm;
 mod funds;
 mod investor;
-mod staking;
+mod models;
 mod types;
 
 #[near_bindgen]

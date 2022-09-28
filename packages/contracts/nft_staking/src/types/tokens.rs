@@ -6,9 +6,13 @@ use near_sdk::{
   AccountId,
 };
 
+use super::u256::U256;
+
 pub type FungibleTokenID = AccountId;
 
 pub type FungibleTokenBalance = HashMap<FungibleTokenID, u128>;
+
+pub type TokenRPS = HashMap<FungibleTokenID, U256>;
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
