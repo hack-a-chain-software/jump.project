@@ -14,7 +14,7 @@
     "deploy": "npm run build:contract && npm run deploy:contract",
     "prestart": "npm run build:contract:debug && npm run dev:deploy:contract",
     "test:rust": "npm run build:contract && cargo test -- --nocapture && cd nft_staking && cargo test -- --nocapture && cd ..",
-    "test:lib": "npm run build:contract && clear && NEAR_ENV=sandbox jest && cd tests-rs && cargo test && cd ..",
+    "test:lib": "npm run build:contract && clear && NEAR_ENV=sandbox jest && cd tests && cargo test && cd ..",
     "format": "cargo fmt --all"
   },
   "devDependencies": {
