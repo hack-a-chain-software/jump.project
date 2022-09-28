@@ -6,10 +6,7 @@ use near_sdk::{
   AccountId,
 };
 
-use crate::{
-  farm::{Farm, RewardsDistribution},
-  staking::StakingProgram,
-};
+use crate::models::{Farm, RewardsDistribution, StakingProgram};
 
 use super::tokens::{FungibleTokenBalance, FungibleTokenID, NFTCollection};
 

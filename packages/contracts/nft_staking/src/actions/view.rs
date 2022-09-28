@@ -1,7 +1,7 @@
 use near_sdk::{near_bindgen, AccountId};
 
 use crate::{
-  staking::StakedNFT,
+  models::StakedNFT,
   types::{FungibleTokenBalance, NFTCollection, NonFungibleTokenID, SerializableStakingProgram},
   Contract, ContractExt,
 };

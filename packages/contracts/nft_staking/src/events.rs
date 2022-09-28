@@ -6,7 +6,7 @@ use near_sdk::{json_types::U128, log};
 use crate::types::{FungibleTokenID, NFTCollection};
 use crate::{
   actions::guardian::CreateStakingProgramPayload,
-  staking::StakedNFT,
+  models::StakedNFT,
   types::{FungibleTokenBalance, NonFungibleTokenID},
 };
 

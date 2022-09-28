@@ -9,7 +9,12 @@ use near_sdk::{
 };
 use serde_json::json;
 
-use crate::{events, farm::Farm, staking::StakingProgram, types::*, Contract, ContractExt};
+use crate::{
+  events,
+  models::{Farm, StakingProgram},
+  types::*,
+  Contract, ContractExt,
+};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CreateStakingProgramPayload {

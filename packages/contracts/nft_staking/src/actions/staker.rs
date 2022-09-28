@@ -3,7 +3,7 @@ use crate::{
   constants::{COMPENSATE_GAS, FT_TRANSFER_GAS, NFT_TRANSFER_GAS},
   events,
   ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self},
-  staking::{StakedNFT, StakingProgram},
+  models::{StakedNFT, StakingProgram},
   types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
   Contract, ContractExt,
 };

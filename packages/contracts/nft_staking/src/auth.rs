@@ -1,6 +1,6 @@
 use near_sdk::AccountId;
 
-use crate::{staking::StakingProgram, types::FungibleTokenID, Contract};
+use crate::{models::StakingProgram, types::FungibleTokenID, Contract};
 
 impl Contract {
   #[inline]

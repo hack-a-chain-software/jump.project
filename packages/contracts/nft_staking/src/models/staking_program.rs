@@ -1,51 +1,20 @@
 use std::collections::HashMap;
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::{
-  borsh::{BorshDeserialize, BorshSerialize},
   collections::{LookupMap, UnorderedMap, UnorderedSet},
-  env,
-  serde::{Deserialize, Serialize},
-  AccountId,
+  env, AccountId,
 };
 
 use crate::{
-  calc::denom_multiplication, constants::DENOM, errors::ERR_INSUFFICIENT_COLLECTION_TREASURY,
-  farm::Farm, types::*, StorageKey,
+  calc::denom_multiplication,
+  constants::DENOM,
+  errors::ERR_INSUFFICIENT_COLLECTION_TREASURY,
+  types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
+  StorageKey,
 };
 
-#[derive(Serialize, Deserialize)]
-pub enum FundsOperation {
-  TreasuryToDistribution { amount: u128 },
-  DistributionToTreasury,
-}
-
-#[derive(Serialize, BorshSerialize, BorshDeserialize)]
-pub struct StakedNFT {
-  pub token_id: NonFungibleTokenID,
-  pub owner_id: AccountId,
-  pub staked_timestamp: u64,
-  pub balance: FungibleTokenBalance,
-}
-
-impl StakedNFT {
-  pub fn new(token_id: NonFungibleTokenID, owner_id: AccountId, staked_timestamp: u64) -> Self {
-    let balance = HashMap::new();
-
-    StakedNFT {
-      token_id,
-      owner_id,
-      staked_timestamp,
-      balance,
-    }
-  }
-
-  pub fn update_balance(&mut self, rewards: FungibleTokenBalance) {
-    self.balance = rewards
-      .iter()
-      .map(|(k, v)| (k.clone(), v + self.balance.get(k).unwrap_or(&0)))
-      .collect();
-  }
-}
+use super::{Farm, StakedNFT};
 
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct StakingProgram {
@@ -165,11 +134,11 @@ impl StakingProgram {
     staked_nft
   }
 
-  // TODO: maybe refactor with a StakedNFT withdraw method?
   // method that allows an investor to withdraw their NFT's balance to their investor balance
   // this is where the early withdraw logic is applied
   pub fn inner_withdraw(&mut self, token_id: &NonFungibleTokenID) -> FungibleTokenBalance {
     let mut staked_nft = self.claim_rewards(token_id);
+    let withdrawn_balance = staked_nft.withdraw();
     let owner_id = &staked_nft.owner_id;
 
     let staking_duration = env::block_timestamp() - staked_nft.staked_timestamp;
@@ -185,9 +154,7 @@ impl StakingProgram {
       .get(&owner_id)
       .unwrap_or_else(|| HashMap::new());
 
-    for (k, amount) in staked_nft.balance.clone() {
-      staked_nft.balance.insert(k.clone(), 0);
-
+    for (k, amount) in withdrawn_balance {
       let withdrawable_amount = denom_multiplication(amount, withdraw_rate);
       let remainder = amount - withdrawable_amount;
 
@@ -260,6 +227,7 @@ impl StakingProgram {
   }
 }
 
+// TODO: update tests to use fixtures
 #[cfg(test)]
 mod tests {
   use std::{collections::HashMap, str::FromStr};
@@ -439,7 +407,7 @@ mod tests {
     let mut staking_program = get_staking_program();
     let token_id = get_token_ids()[0].clone();
     let amount = Some(100);
-    let balance_amount = 200u128;
+    let balance_amount = 200;
 
     let mut balance = HashMap::new();
     balance.insert(token_id.clone(), balance_amount);
