@@ -89,7 +89,7 @@ export const Vesting = () => {
         element: ".amount-locked",
         intro: (
           <div>
-            <span>This section shows your amount of locked tokens.</span>
+            <span>This is your amount of locked tokens.</span>
           </div>
         ),
       },
@@ -98,7 +98,7 @@ export const Vesting = () => {
         element: ".amount-unlocked",
         intro: (
           <div className="flex flex-col">
-            <span>Here you can see your amount of unlocked tokens.</span>
+            <span>Here you can find your amount of unlocked tokens.</span>
           </div>
         ),
       },
@@ -278,7 +278,7 @@ export const Vesting = () => {
             </Flex>
           </Flex>
           {vestings && accountId! && (
-            <Stack spacing="32px">
+            <Stack spacing="32px" className="vesting-card">
               {filtered.map((vesting, index) => (
                 <VestingCard
                   {...vesting}

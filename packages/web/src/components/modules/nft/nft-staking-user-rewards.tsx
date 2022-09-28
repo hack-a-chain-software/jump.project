@@ -44,7 +44,7 @@ export function NFTStakingUserRewards({
         Your Position:
       </Text>
 
-      <Flex gap={3} flexWrap="wrap">
+      <Flex gap={3} flexWrap="wrap" className="obtained-rewards">
         <If
           fallback={
             <>

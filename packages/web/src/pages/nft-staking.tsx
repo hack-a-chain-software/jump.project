@@ -46,8 +46,8 @@ export const NFTStaking = () => {
       intro: (
         <div>
           <span>
-            In this page you can see a list of all the staking pools available
-            to stake your NFT assets.
+            This page displays a list of all the staking pools available to
+            stake your NFT assets.
           </span>
         </div>
       ),
@@ -58,8 +58,8 @@ export const NFTStaking = () => {
       intro: (
         <div>
           <span>
-            The project card displays all the rewards you can get per month if
-            you stake in.
+            The pool card shows all the rewards you earn per month when you
+            stake on it.
           </span>
         </div>
       ),

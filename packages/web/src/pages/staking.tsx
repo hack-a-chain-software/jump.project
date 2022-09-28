@@ -38,7 +38,8 @@ export const Staking = () => {
   const { accountId, selector } = useWalletSelector();
   const { stakeXToken, burnXToken } = useStaking();
 
-  const [showSteps, setShowSteps] = useState(false);
+  const [showStakingSteps, setShowStakingSteps] = useState(false);
+  const [showUserSteps, setShowUserSteps] = useState(false);
 
   const {
     data: { base_token = "1", x_token = "1" } = {},
@@ -146,7 +147,7 @@ export const Staking = () => {
     return new BN(jumpMetadata?.decimals ?? 0).neg();
   }, [jumpMetadata]);
 
-  const stepItems = [
+  const stepStakingItems = [
     {
       element: ".jump-staking",
       title: "Jump Stakig",
@@ -183,15 +184,24 @@ export const Staking = () => {
         </div>
       ),
     },
+  ];
+
+  const stepUserItems = [
     {
-      title: "User Area",
-      element: ".user-area",
+      title: "Stake",
+      element: ".stake-button",
       intro: (
         <div className="flex flex-col">
-          <span>
-            This is the user area. Here you can stake your tokens or unstake
-            them and claim the available rewards.
-          </span>
+          <span>Click here to stake your JUMP tokens!</span>
+        </div>
+      ),
+    },
+    {
+      title: "Unstake",
+      element: ".unstake-button",
+      intro: (
+        <div className="flex flex-col">
+          <span>Click here to unstake and receive your rewards!</span>
         </div>
       ),
     },
@@ -200,10 +210,21 @@ export const Staking = () => {
   return (
     <PageContainer>
       <Steps
-        enabled={showSteps}
-        steps={stepItems}
+        enabled={showStakingSteps}
+        steps={stepStakingItems}
         initialStep={0}
-        onExit={() => setShowSteps(false)}
+        onExit={() => setShowStakingSteps(false)}
+        options={{
+          showProgress: false,
+          showBullets: false,
+          scrollToElement: false,
+        }}
+      />
+      <Steps
+        enabled={showUserSteps}
+        steps={stepUserItems}
+        initialStep={0}
+        onExit={() => setShowUserSteps(false)}
         options={{
           showProgress: false,
           showBullets: false,
@@ -212,8 +233,8 @@ export const Staking = () => {
       />
       <Flex gap={4} w="100%" flexWrap="wrap">
         <Card p="3px" flexGrow="1" borderRadius="26px" className="jump-staking">
-          <div className="relative right-[-99%] top-[-50%]">
-            <IconButton onClick={() => setShowSteps(true)} />
+          <div className="relative right-[-98%] top-[-54%] w-[0px] h-[0px]">
+            <IconButton onClick={() => setShowStakingSteps(true)} />
           </div>
           <Flex
             flex={1.6}
@@ -358,6 +379,9 @@ export const Staking = () => {
         </Card>
 
         <Card flex={1} flexGrow="1" className="user-area">
+          <div className="relative right-[-98%] top-[-54%] w-[0px] h-[0px]">
+            <IconButton onClick={() => setShowUserSteps(true)} />
+          </div>
           <Flex
             h="100%"
             direction="column"
@@ -379,7 +403,10 @@ export const Staking = () => {
               </Text>
             </div>
             <Flex direction="column" gap={4} width="100%">
-              <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
+              <Skeleton
+                isLoaded={!isLoading}
+                className="rounded-[15px] w-full stake-button"
+              >
                 <Button
                   color="black"
                   border="1px solid white"
@@ -394,7 +421,10 @@ export const Staking = () => {
                 </Button>
               </Skeleton>
 
-              <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
+              <Skeleton
+                isLoaded={!isLoading}
+                className="rounded-[15px] w-full unstake-button"
+              >
                 <Button
                   color="white"
                   border="1px solid white"

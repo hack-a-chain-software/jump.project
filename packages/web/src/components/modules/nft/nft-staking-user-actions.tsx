@@ -9,6 +9,8 @@ import { useNftStaking } from "@/stores/nft-staking-store";
 import { Button, GradientText } from "@/components/shared";
 import { Flex, Box, Text, useColorModeValue, Stack } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { Steps } from "intro.js-react";
+import { IconButton } from "@/components";
 
 export function NFTStakingUserActions(props: any) {
   const { id = "" } = useParams();
@@ -47,6 +49,38 @@ export function NFTStakingUserActions(props: any) {
 
   const claim = () => claimRewards(selector, accountId!, tokens, collection);
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      element: ".stake-nft",
+      title: "Stake NFT",
+      intro: (
+        <div>
+          <span>Click here to stake your NFT assets!</span>
+        </div>
+      ),
+    },
+    {
+      element: ".collect-rewards",
+      title: "Collect Rewards",
+      intro: (
+        <div>
+          <span>Click here to claim all your available rewards!</span>
+        </div>
+      ),
+    },
+    {
+      element: ".unstake-nft",
+      title: "Unstake All NFTs",
+      intro: (
+        <div>
+          <span>If you want to unstake all your NFTs, click here.</span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <NFTStakeModal
@@ -78,10 +112,25 @@ export function NFTStakingUserActions(props: any) {
             borderRadius="24px"
             bg={useColorModeValue(jumpGradient, gradientBoxTopCard)}
           >
+            <Steps
+              enabled={showSteps}
+              steps={stepItems}
+              initialStep={0}
+              onExit={() => setShowSteps(false)}
+              options={{
+                showProgress: false,
+                showBullets: false,
+                scrollToElement: false,
+              }}
+            />
             <Box
               p="40px"
               bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
+              position="relative"
             >
+              <Box className="absolute right-[50px] top-[20px] w-[0px] h-[0px]">
+                <IconButton onClick={() => setShowSteps(true)} />
+              </Box>
               <GradientText
                 mb="-5px"
                 fontWeight="800"
@@ -112,6 +161,7 @@ export function NFTStakingUserActions(props: any) {
                 <Button
                   onClick={() => toggleStakeModal()}
                   justifyContent="space-between"
+                  className="stake-nft"
                 >
                   Stake NFT <WalletIcon />
                 </Button>
@@ -119,6 +169,7 @@ export function NFTStakingUserActions(props: any) {
                   disabled={isEmpty(tokens)}
                   onClick={() => claim()}
                   justifyContent="space-between"
+                  className="collect-rewards"
                 >
                   Claim Rewards <WalletIcon />
                 </Button>
@@ -126,6 +177,7 @@ export function NFTStakingUserActions(props: any) {
                   disabled={isEmpty(tokens)}
                   onClick={() => toggleUnstakeModal()}
                   justifyContent="space-between"
+                  className="unstake-nft"
                 >
                   Unstake All NFTs <WalletIcon />
                 </Button>

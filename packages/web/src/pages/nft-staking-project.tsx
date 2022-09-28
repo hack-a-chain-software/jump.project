@@ -23,6 +23,7 @@ import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
 import { Token } from "@near/ts";
+
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakingProject() {
@@ -78,6 +79,47 @@ export function NFTStakingProject() {
     },
   });
 
+  const stepItems = [
+    {
+      element: ".launchpad",
+      title: "Launchpad",
+      intro: (
+        <div>
+          <span>
+            Jump launchpad is a page where you can stake your xJump, receive
+            allocations and invest in crypto projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Member Area",
+      element: ".member-area",
+      intro: (
+        <div className="flex flex-col">
+          <span className="mb-2">This is member area.</span>
+
+          <span>
+            In this section you can stake your xJump tokens, watch your level,
+            check the amount of staked tokens and the total of your allocations.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Projects",
+      element: ".table-projects",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            Here are all the projects that have vesting programs that you can
+            invest with your allocations
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
       <NFTUnstakeModal
@@ -93,8 +135,8 @@ export function NFTStakingProject() {
         logo={staking?.collection_image}
         name={staking?.collection_meta.name}
         rewards={staking?.rewards}
+        isProjectPage={true}
       />
-
       <Flex
         flex={1}
         direction="row"

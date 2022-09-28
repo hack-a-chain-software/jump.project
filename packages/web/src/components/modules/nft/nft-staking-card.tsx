@@ -15,9 +15,17 @@ import { useTheme } from "../../../hooks/theme";
 import { If, ValueBox } from "../../shared";
 import { formatNumber, BigDecimalFloat, StakingToken } from "@near/ts";
 import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { IconButton } from "@/components";
+import { Steps } from "intro.js-react";
+import { useState } from "react";
 
 export function NFTStakingCard(
-  props: BoxProps & { name?: string; logo?: string; rewards?: StakingToken[] }
+  props: BoxProps & {
+    name?: string;
+    logo?: string;
+    rewards?: StakingToken[];
+    isProjectPage?: boolean;
+  }
 ) {
   const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
@@ -37,6 +45,34 @@ export function NFTStakingCard(
     );
   };
 
+  const [showSteps, setShowSteps] = useState(false);
+
+  const stepItems = [
+    {
+      element: ".nft-rewards",
+      title: "Rewards",
+      intro: (
+        <div>
+          <span>
+            These are the rewards you earn when you stake on this pool.
+          </span>
+        </div>
+      ),
+    },
+    {
+      element: ".obtained-rewards",
+      title: "Your Position",
+      intro: (
+        <div>
+          <span>
+            This is your current position. Here you can find how much you earned
+            so far.
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Box
       color="white"
@@ -45,7 +81,7 @@ export function NFTStakingCard(
       background={cardGradient}
       borderRadius="26px"
       {...(R.omit(
-        ["name", "logo", "tokens", "frequency", "rewards"],
+        ["name", "logo", "tokens", "frequency", "rewards", "isProjectPage"],
         props
       ) as Record<string, string>)}
       className="projects-card"
@@ -68,6 +104,22 @@ export function NFTStakingCard(
               : ""
           }
         >
+          <Steps
+            enabled={showSteps}
+            steps={stepItems}
+            initialStep={0}
+            onExit={() => setShowSteps(false)}
+            options={{
+              showProgress: false,
+              showBullets: false,
+              scrollToElement: false,
+            }}
+          />
+          {props?.isProjectPage && (
+            <div className="absolute right-[45px] top-[20px] w-[0px] h-[0px]">
+              <IconButton onClick={() => setShowSteps(true)} />
+            </div>
+          )}
           <Flex
             minHeight="165px"
             userSelect="none"
@@ -145,7 +197,7 @@ export function NFTStakingCard(
               flexGrow={1}
               flexWrap="wrap"
               gap={5}
-              className="justify-start 2xl:justify-end"
+              className="justify-start 2xl:justify-end nft-rewards"
             >
               {props.rewards?.map(
                 ({ symbol, name, icon, perMonth, decimals }, i) => (
