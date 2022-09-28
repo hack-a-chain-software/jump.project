@@ -30,13 +30,13 @@ jobs:
       - name: Installing Dependencies
         run: yarn
 
-      # # Deploy testnet contracts
-      # - name: Deploy Contracts
-      #   run: yarn workspace @near/contracts deploy:testnet
+      # Deploy testnet contracts
+      - name: Deploy Contracts
+        run: yarn workspace @near/contracts deploy:testnet
 
-      # # Set envs for builds
-      # - name: Set Testnet environment variables
-      #   run: yarn setup:staging:env
+      # Set envs for builds
+      - name: Set Testnet environment variables
+        run: yarn setup:staging:env
       
       # # Clear staging DB
       # - name: Reset Database
