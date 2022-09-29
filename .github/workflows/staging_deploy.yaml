@@ -107,6 +107,9 @@ jobs:
       #     deployment_package: services/graphql/Dockerrun.aws.json
 
       # AWS deployment INDEXER
+      - name: Build indexer
+        run: yarn indexer:build
+
       - name: Build, tag, and push INDEXER image to Amazon ECR
         id: build-image-indexer
         env:

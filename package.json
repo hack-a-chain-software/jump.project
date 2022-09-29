@@ -15,6 +15,7 @@
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
     "contract:lib:tests": "yarn workspace @near/contracts test:lib",
+    "indexer:build": "yarn workspace @near/indexer build",
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged",
