@@ -27,7 +27,7 @@ jobs:
           source $HOME/.cargo/env
           rustup component add rustfmt
           rustup target add wasm32-unknown-unknown
-          
+
       - name: Install Vercel CLI
         run: npm install --global vercel@canary
       
@@ -37,13 +37,13 @@ jobs:
       - name: Installing Dependencies
         run: yarn
 
-      # Deploy testnet contracts
-      - name: Deploy Contracts
-        run: yarn workspace @near/contracts deploy:testnet
+      # # Deploy testnet contracts
+      # - name: Deploy Contracts
+      #   run: yarn workspace @near/contracts deploy:testnet
 
-      # Set envs for builds
-      - name: Set Testnet environment variables
-        run: yarn setup:staging:env
+      # # Set envs for builds
+      # - name: Set Testnet environment variables
+      #   run: yarn setup:staging:env
       
       # # Clear staging DB
       # - name: Reset Database
@@ -73,7 +73,8 @@ jobs:
           docker build . -f services/graphql/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
-       # # Set AWS deployments - Indexer 
+      
+      # # Set AWS deployments - Indexer 
       - name: Get timestamp
         uses: gerred/actions/current-time@master
         id: current-time
