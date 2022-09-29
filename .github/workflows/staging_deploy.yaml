@@ -2,7 +2,7 @@ name: Staging Deploy
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_TESTNET_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_TESTNET_PROJECT_ID }}
-  VITE_GRAPHQL_API_URI: https://jacksondev.xyz/
+  VITE_GRAPHQL_API_URI: https://staging.jacksondev.xyz/
   NEAR_NETWORK: testnet
   DB_HOST: ${{ secrets.STAGING_DB_HOST }}
   DB_NAME: ${{ secrets.STAGING_DB_NAME }}
@@ -68,9 +68,9 @@ jobs:
           AWS_SECRET: ${{ secrets.AWS_LAKE_SECRET_KEY }}
         run: yarn setup:lake:consumer
 
-      # # Clear staging DB
-      # - name: Reset Database
-      #   run: yarn setup:staging:db
+      # Clear staging DB
+      - name: Reset Database
+        run: yarn setup:staging:db
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
@@ -107,19 +107,19 @@ jobs:
       #     deployment_package: services/graphql/Dockerrun.aws.json
 
       # AWS deployment INDEXER
-      - name: Build indexer
-        run: yarn indexer:build
+      # - name: Build indexer
+      #   run: yarn indexer:build
 
-      - name: Build, tag, and push INDEXER image to Amazon ECR
-        id: build-image-indexer
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: jump-indexer
-          ECR_IMAGE: indexer
-        run: |
-          docker build . -f services/indexer/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
+      # - name: Build, tag, and push INDEXER image to Amazon ECR
+      #   id: build-image-indexer
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     ECR_REPOSITORY: jump-indexer
+      #     ECR_IMAGE: indexer
+      #   run: |
+      #     docker build . -f services/indexer/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
