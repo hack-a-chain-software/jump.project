@@ -27,6 +27,7 @@ const JSON_EVENT_PREFIX: &str = "EVENT_JSON:";
 async fn main() -> Result<(), tokio::io::Error> {
     config::initialize();
 
+    println!("initialize");
     let pool = Box::leak(Box::new(build_pool(get_postgres_config()).await));
 
     let contract_accounts = ContractAccount::init_accounts(
@@ -68,6 +69,7 @@ async fn listen_blocks(
     store: &mut StatementStore,
 ) {
     while let Some(streamer_message) = stream.recv().await {
+        println!("block");
         for shard in streamer_message.shards {
             for receipt in shard.receipt_execution_outcomes {
                 let outcome = receipt.execution_outcome.outcome;
