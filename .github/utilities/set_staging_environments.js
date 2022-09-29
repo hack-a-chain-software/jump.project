@@ -20,7 +20,7 @@ VITE_NEAR_NETWORK=${process.env.NEAR_NETWORK}
 fs.writeFileSync("./packages/web/.env", environment_file_web);
 
 const environment_file_graphql = `
-SERVE_PORT=80
+SERVER_PORT=80
 DB_USERNAME=${process.env.DB_USER}
 DB_PASSWORD=${process.env.DB_PASS}
 DB_HOST=${process.env.DB_HOST}
