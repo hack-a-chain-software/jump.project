@@ -8,5 +8,5 @@ COPY ./package.json ./package.json
 COPY ./tsconfig.json ./tsconfig.json
 COPY ./yarn.lock ./yarn.lock
 RUN yarn
-EXPOSE 4000
+EXPOSE 80
 CMD ["yarn", "gql:start"]

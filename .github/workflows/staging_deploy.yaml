@@ -96,9 +96,9 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: staging-graphql
-          environment_name: Staginggraphql-env
-          version_label: "staging-graphql-${{ steps.format-time.outputs.replaced }}"
+          application_name: staging-backend-graphql
+          environment_name: Stagingbackendgraphql-env
+          version_label: "staging-backend-graphql-${{ steps.format-time.outputs.replaced }}"
           region: us-east-1
           deployment_package: services/graphql/Dockerrun.aws.json
       
