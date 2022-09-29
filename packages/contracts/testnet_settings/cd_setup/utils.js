@@ -28,7 +28,14 @@ async function createAccount(account_id, execution_data) {
     await execution_data.accountCreator.createAccount(account_id, publicKey);
     return await execution_data.near.account(account_id);
   } catch (err) {
-    if (err.toString().includes("TooManyRequestsError:")) {
+    if (
+      err.toString().includes("TooManyRequestsError:") ||
+      err
+        .toString()
+        .includes(
+          "The server encountered a temporary error and could not complete your request.<p>Please try again in"
+        )
+    ) {
       await sleep(1000 * 60 * 1);
       return await createAccount(account_id, execution_data);
     } else {
