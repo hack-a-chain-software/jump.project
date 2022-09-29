@@ -33,7 +33,7 @@ export function Header() {
             onClick={() => setShowTokenModal(!showTokenModal)}
           >
             <Text fontSize={20} fontWeight="800" letterSpacing="-0.03em">
-              Need Tokens?
+              Get Testnet Tokens
             </Text>
           </Flex>
 
