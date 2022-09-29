@@ -16,7 +16,7 @@ const {
 const sequelize = new Sequelize({
   port: db_port,
   // host: db_host,
-  host: "postgres-jump-testnet.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
+  host: db_host,
   database: db_name,
   dialect: db_dialect,
   username: db_username,
