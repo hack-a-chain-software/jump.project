@@ -158,7 +158,7 @@ jobs:
         run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
         run: >
