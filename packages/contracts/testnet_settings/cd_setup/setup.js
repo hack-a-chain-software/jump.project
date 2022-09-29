@@ -359,6 +359,8 @@ async function testnetSetup() {
 
   // store data in file
   storeData(execution_data.accountMap, "../account_map.json");
+
+  console.log(execution_data.accountMap);
 }
 
 module.exports = { nftsArray, tokenArray, parseAccountName };
