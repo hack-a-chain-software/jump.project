@@ -8,7 +8,7 @@ env:
   DB_NAME: ${{ secrets.STAGING_DB_NAME }}
   DB_USER: ${{ secrets.STAGING_DB_USER }}
   DB_PASS: ${{ secrets.STAGING_DB_PASS }}
-  AWS_REGION: us-east-2
+  AWS_REGION: us-east-1
 
 on:
   push:
@@ -45,6 +45,9 @@ jobs:
       # - name: Set Testnet environment variables
       #   run: yarn setup:staging:env
       
+      - name: Set AWS S3 LAKE consumer credentials
+        run: yarn setup:lake:consumer
+
       # # Clear staging DB
       # - name: Reset Database
       #   run: yarn setup:staging:db
@@ -64,7 +67,7 @@ jobs:
         id: build-image-indexer
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: graphql-jump
+          ECR_REPOSITORY: jump-graphql
           ECR_IMAGE: graphql
         run: |
           # Build a docker container and
@@ -93,10 +96,10 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: staging-graphql-beanstalk
-          environment_name: Staginggraphqlbeanstalk-env
-          version_label: "staging-graphql-beanstalk-${{ steps.format-time.outputs.replaced }}"
-          region: us-east-2
+          application_name: staging-graphql
+          environment_name: Staginggraphql-env
+          version_label: "staging-graphql-${{ steps.format-time.outputs.replaced }}"
+          region: us-east-1
           deployment_package: services/graphql/Dockerrun.aws.json
       
       # - name: Fill in the new image ID in the Amazon ECS task definition INDEXER

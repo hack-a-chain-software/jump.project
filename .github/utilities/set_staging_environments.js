@@ -42,7 +42,7 @@ PG_PORT=5432
 PG_DATABASE=${process.env.DB_NAME}
 PG_PASSWORD=${process.env.DB_PASS}
 LAKE_FRAMEWORK_NETWORK=${process.env.NEAR_NETWORK}
-LAKE_FRAMEWORK_BLOCK_HEIGHT=${contracts_data.prefix}
+LAKE_FRAMEWORK_BLOCK_HEIGHT=${contracts_data.last_block_height}
 `;
 
 fs.writeFileSync("./packages/indexer/.env", environment_file_indexer);
