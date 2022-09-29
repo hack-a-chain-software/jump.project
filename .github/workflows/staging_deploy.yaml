@@ -107,19 +107,19 @@ jobs:
       #     deployment_package: services/graphql/Dockerrun.aws.json
 
       # AWS deployment INDEXER
-      # - name: Build indexer
-      #   run: yarn indexer:build
+      - name: Build indexer
+        run: yarn indexer:build
 
-      # - name: Build, tag, and push INDEXER image to Amazon ECR
-      #   id: build-image-indexer
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     ECR_REPOSITORY: jump-indexer
-      #     ECR_IMAGE: indexer
-      #   run: |
-      #     docker build . -f services/indexer/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
+      - name: Build, tag, and push INDEXER image to Amazon ECR
+        id: build-image-indexer
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: jump-indexer
+          ECR_IMAGE: indexer
+        run: |
+          docker build . -f services/indexer/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
