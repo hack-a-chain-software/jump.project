@@ -19,7 +19,7 @@ const {
 
 const { launchpadSetup, tokenArray } = require("./launchpad_setup");
 
-testnetSetup();
+// testnetSetup();
 
 async function testnetSetup() {
   // set connection

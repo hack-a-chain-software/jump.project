@@ -64,29 +64,29 @@ async function restartDb() {
     initiliazeTestnetQuery += baseLaunchpadQuery;
   }
 
-  for (collection of nftsArray) {
-    const baseNftQuery = `
-    INSERT INTO staking_programs_metadata (
-        collection_id,
-        collection_image,
-        collection_modal_image
-      )
-    VALUES (
-        '${prefix}${parseAccountName(collection.nft.name)}',
-        ${builQueryString(collection.db_metadata.collection_image)},
-        ${builQueryString(collection.db_metadata.collection_modal_image)}
-      );
-    `;
-    await client.query(baseNftQuery);
-    initiliazeTestnetQuery += baseNftQuery;
-  }
+  // for (collection of nftsArray) {
+  //   const baseNftQuery = `
+  //   INSERT INTO staking_programs_metadata (
+  //       collection_id,
+  //       collection_image,
+  //       collection_modal_image
+  //     )
+  //   VALUES (
+  //       '${prefix}${parseAccountName(collection.nft.name)}.testnet',
+  //       ${builQueryString(collection.db_metadata.collection_image)},
+  //       ${builQueryString(collection.db_metadata.collection_modal_image)}
+  //     );
+  //   `;
+  //   await client.query(baseNftQuery);
+  //   initiliazeTestnetQuery += baseNftQuery;
+  // }
 
   // console.log(initiliazeTestnetQuery);
 
   // await client.query(initiliazeTestnetQuery);
   console.log("Initial data succesfully seeded");
 
-  // process.exit(0);
+  process.exit(0);
 }
 
 function builQueryString(input) {
