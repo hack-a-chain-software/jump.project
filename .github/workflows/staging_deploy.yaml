@@ -11,7 +11,7 @@ env:
   AWS_REGION: us-east-1
   ECS_SERVICE: staging-indexer-service
   ECS_CLUSTER: staging-indexer-cluster
-  ECS_TASK_DEFINITION: run-indexer
+  ECS_TASK_DEFINITION: services/indexer/task-definition.json
   CONTAINER_NAME: staging-indexer
 
 on:
