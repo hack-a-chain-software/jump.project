@@ -9,7 +9,7 @@ use crate::{
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-#[serde(tag = "type")]
+#[serde(tag = "type", content = "data")]
 enum FTRoute {
   Deposit(DepositOperation),
 }

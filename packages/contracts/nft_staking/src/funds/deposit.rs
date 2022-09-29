@@ -24,8 +24,8 @@ impl Contract {
     match operation {
       DepositOperation::ContractTreasury => {
         /*
-         *   TODO: this operation is unauthorized because we want partners to call it,
-         * if we ever create more authorization roles, we should assert it here.
+         *   TODO: this operation is non-authorized because we want partners to be able
+         * call it. If we ever create more authorization roles, we should assert it here.
          */
         self.only_contract_tokens(token_id);
       }
