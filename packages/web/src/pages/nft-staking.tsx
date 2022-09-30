@@ -1,18 +1,29 @@
-import { Image, Stack, useColorModeValue } from "@chakra-ui/react";
+import { Image, Stack, useColorModeValue, Flex, Input } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
+import { debounce } from "lodash-es";
 import {
   If,
   TopCard,
   NFTStakingCard,
   PageContainer,
   Empty,
+  Select,
 } from "../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/hooks/theme";
-import { NftStakingProjectsConnectionDocument } from "@near/apollo";
+import { NftStakingProjectsConnectionDocument, StakedEnum } from "@near/apollo";
 import { Steps } from "intro.js-react";
+import {
+  StatusEnum,
+  VisibilityEnum,
+  NftStakingProjectsConnectionQueryVariables,
+} from "@near/apollo";
+import { useWalletSelector } from "@/context/wallet-selector";
+import { Staking } from "./staking";
+
+const PAGINATE_LIMIT = 30;
 
 const collectionImages = [
   "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
@@ -24,20 +35,55 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const { jumpGradient, glassyWhiteOpaque } = useTheme();
+  const [showSteps, setShowSteps] = useState(false);
+  const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
+  // const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
+  const [filterSearch, setSearch] = useState<string | null>(null);
+  // const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
+  //   null
+  // );
+  const [loadingItems, setLoadingItems] = useState(false);
+  const { accountId } = useWalletSelector();
 
-  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
+  const { jumpGradient, glassyWhiteOpaque, blackAndWhite } = useTheme();
 
   const cardOpacity = useColorModeValue(0.9, 0.7);
   const cardBg = useColorModeValue(jumpGradient, glassyWhiteOpaque);
 
-  const items = useMemo(() => {
-    return data?.nft_staking_projects?.data;
-  }, [loading]);
+  const queryVariables: NftStakingProjectsConnectionQueryVariables =
+    useMemo(() => {
+      return {
+        limit: PAGINATE_LIMIT,
+        accountId: accountId ?? "",
+        showStaked: filterStaked,
+        // visibility: filterVisibility,
+        // status: filterStatus,
+        search: filterSearch,
+      };
+    }, [/*filterStatus, filterVisibility,*/ filterSearch, filterStaked]);
 
-  console.log(items);
+  // const items = useMemo(() => {
+  //   return data?.nft_staking_projects?.data;
+  // }, [loading, filterStaked]);
 
-  const [showSteps, setShowSteps] = useState(false);
+  const {
+    data: nftProjects,
+    loading,
+    refetch,
+  } = useQuery(NftStakingProjectsConnectionDocument, {
+    notifyOnNetworkStatusChange: true,
+  });
+
+  console.log(nftProjects?.nft_staking_projects.data);
+
+  useEffect(() => {
+    (async () => {
+      await refetch({
+        ...queryVariables,
+        offset: 0,
+      });
+    })();
+  }, [queryVariables]);
 
   const stepItems = [
     {
@@ -101,7 +147,65 @@ export const NFTStaking = () => {
           </>
         }
       />
+      <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
+        <Flex gap="4" flexGrow="1" flexWrap="wrap">
+          {/* <Select
+            value={filterStatus}
+            placeholder="Status"
+            onChange={(value: StatusEnum | null) => setStatus(value)}
+            items={[
+              { label: "Public", value: StatusEnum.Open },
+              { label: "Private", value: StatusEnum.Closed },
+            ] as const}
+          />
+          <Select
+            placeholder="Visibility"
+            value={filterVisibility}
+            onChange={(value: VisibilityEnum | null) =>
+              setVisibility(value as VisibilityEnum)
+            }
+            items={[
+              { label: "Public", value: VisibilityEnum.Public },
+              { label: "Private", value: VisibilityEnum.Private },
+            ] as const}
 
+          /> */}
+          <Select
+            value={filterStaked}
+            placeholder="Staked"
+            onChange={(value: StakedEnum | null) =>
+              setStaked(value as StakedEnum)
+            }
+            items={
+              [
+                { label: "Yes", value: StakedEnum.Yes },
+                { label: "No", value: StakedEnum.No },
+              ] as const
+            }
+          />
+        </Flex>
+
+        {/* <Flex className="md:max-w-[330px]" w="100%">
+          <Input
+            borderWidth="2px"
+            h="60px"
+            maxW="100%"
+            w="100%"
+            value={filterSearch ?? ""}
+            fontSize={16}
+            borderRadius={15}
+            placeholder="Search by project name"
+            _placeholder={{
+              color: blackAndWhite,
+            }}
+            outline="none"
+            px="20px"
+            onInput={(event) =>
+              setSearch((event.target as HTMLInputElement).value)
+            }
+          />
+        </Flex> */}
+      </Flex>
       <If
         fallback={
           !loading ? (
@@ -110,11 +214,11 @@ export const NFTStaking = () => {
             <NFTStakingCard />
           )
         }
-        condition={!isEmpty(items)}
+        condition={!isEmpty(nftProjects)}
       >
-        {items && (
+        {nftProjects && (
           <Stack spacing="32px" className="projects-list">
-            {items.map((staking, index) => (
+            {nftProjects?.nft_staking_projects?.data?.map((staking, index) => (
               <NFTStakingCard
                 className="projects-card"
                 key={"nft-staking-collection" + index}

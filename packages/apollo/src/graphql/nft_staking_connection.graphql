@@ -1,5 +1,15 @@
-query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
-  nft_staking_projects(limit: $limit, offset: $offset) {
+query NFTStakingProjectsConnection(
+  $search: String
+  $limit: Int
+  $offset: Int
+  $showStaked: StakedEnum
+) {
+  nft_staking_projects(
+    search: $search
+    limit: $limit
+    offset: $offset
+    showStaked: $showStaked
+  ) {
     pageSize
     totalCount
     itemsPerPage
