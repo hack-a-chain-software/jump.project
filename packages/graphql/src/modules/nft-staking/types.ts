@@ -33,6 +33,11 @@ export default gql`
     account_id: String
   }
 
+  enum StakedEnum {
+    Yes
+    No
+  }
+
   type StakedNFT {
     # SQL + Blockchain Data
     nft_id: ID
@@ -53,7 +58,12 @@ export default gql`
   }
 
   type Query {
-    nft_staking_projects(limit: Int, offset: Int, search: String): NFTPage!
+    nft_staking_projects(
+      limit: Int
+      offset: Int
+      search: String
+      showStaked: StakedEnum
+    ): NFTPage!
     staking(collection_id: ID!): NFTStaking
   }
 `;

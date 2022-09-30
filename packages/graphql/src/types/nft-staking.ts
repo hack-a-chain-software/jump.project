@@ -1,4 +1,5 @@
 import { ID } from "./graphql-types";
+import { StakedEnum } from "@near/apollo";
 import { PaginationFilters } from "@/modules/tools/createPaginatedConnection";
 
 export type NFTStaking = {
@@ -24,6 +25,7 @@ export type StakedNFT = {
 
 export type NFTStakingFilters = {
   search: string;
+  showStaked: StakedEnum;
 };
 
 export type PaginatedNFTStakingFilters = NFTStakingFilters & PaginationFilters;

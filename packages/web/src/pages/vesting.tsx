@@ -105,8 +105,8 @@ export const Vesting = () => {
 
   const stepItems = [
     {
-      element: ".amount-locked",
       title: "Locked Tokens",
+      element: ".amount-locked",
       intro: (
         <div>
           <span>This section shows your amount of locked tokens.</span>
@@ -127,7 +127,26 @@ export const Vesting = () => {
       element: ".amount-withdrawn",
       intro: (
         <div className="flex flex-col">
-          <span>This is the total amount of tokens you have withdrawn.</span>
+          <span>
+            This is the total amount of tokens you have withdrawn so far.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Vesting Card",
+      element: ".vesting-card",
+      intro: (
+        <div className="flex flex-col">
+          <span className="mb-2">
+            This section shows all the currently active programs you invested
+            in.
+          </span>
+
+          <span>
+            You can claim the available amount of tokens, buy a fast pass or
+            wait until the end of the vesting period.
+          </span>
         </div>
       ),
     },
@@ -268,6 +287,7 @@ export const Vesting = () => {
             <Stack spacing="32px">
               {filtered.map((vesting, index) => (
                 <VestingCard
+                  className="vesting-card"
                   {...vesting}
                   token={investorInfo.token as Token}
                   contractData={investorInfo.contractData as ContractData}
