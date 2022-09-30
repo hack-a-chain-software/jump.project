@@ -286,7 +286,7 @@ export const useNftStaking = create<{
               account_id: account,
               registration_only: false,
             },
-            "0.10"
+            "0.50"
           )
         );
       }
