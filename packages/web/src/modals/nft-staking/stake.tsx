@@ -138,7 +138,7 @@ export function NFTStakeModal({
                       height="100%"
                       borderRadius="20px"
                       className="aspect-square"
-                      src={`https://images.weserv.nl/?url=${metadata.media}&w=800&fit=contain`}
+                      src={`https://images.weserv.nl/?url=${metadata.media}&dpr=4`}
                     />
 
                     {selected.includes(token_id) && (
