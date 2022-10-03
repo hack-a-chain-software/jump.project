@@ -46,10 +46,6 @@ enum StorageKey {
     collection: NFTCollection,
     counter: u8,
   },
-  NFTsByOwner {
-    collection: NFTCollection,
-    owner_id: AccountId,
-  },
 }
 
 #[near_bindgen]

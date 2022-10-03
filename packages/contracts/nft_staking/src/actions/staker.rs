@@ -18,7 +18,7 @@ impl StakingProgram {
       self
         .nfts_by_owner
         .get(&caller_id)
-        .map(|nfts| nfts.contains(token_id))
+        .map(|nfts| nfts.contains(&token_id.1))
         .unwrap_or(false),
       "Only the token's owner may operate it."
     );
