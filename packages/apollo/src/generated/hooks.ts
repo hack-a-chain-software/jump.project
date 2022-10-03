@@ -187,11 +187,17 @@ export type QueryNftStakingProjectsArgs = {
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
   search?: InputMaybe<Scalars["String"]>;
+  showStaked?: InputMaybe<StakedEnum>;
 };
 
 export type QueryStakingArgs = {
   collection_id: Scalars["ID"];
 };
+
+export enum StakedEnum {
+  No = "No",
+  Yes = "Yes",
+}
 
 export type StakedNft = {
   __typename?: "StakedNFT";
@@ -371,8 +377,10 @@ export type LaunchPadProjectQuery = {
 };
 
 export type NftStakingProjectsConnectionQueryVariables = Exact<{
+  search?: InputMaybe<Scalars["String"]>;
   limit?: InputMaybe<Scalars["Int"]>;
   offset?: InputMaybe<Scalars["Int"]>;
+  showStaked?: InputMaybe<StakedEnum>;
 }>;
 
 export type NftStakingProjectsConnectionQuery = {
@@ -736,8 +744,18 @@ export type LaunchPadProjectQueryResult = Apollo.QueryResult<
   LaunchPadProjectQueryVariables
 >;
 export const NftStakingProjectsConnectionDocument = gql`
-  query NFTStakingProjectsConnection($limit: Int, $offset: Int) {
-    nft_staking_projects(limit: $limit, offset: $offset) {
+  query NFTStakingProjectsConnection(
+    $search: String
+    $limit: Int
+    $offset: Int
+    $showStaked: StakedEnum
+  ) {
+    nft_staking_projects(
+      search: $search
+      limit: $limit
+      offset: $offset
+      showStaked: $showStaked
+    ) {
       pageSize
       totalCount
       itemsPerPage
@@ -778,8 +796,10 @@ export const NftStakingProjectsConnectionDocument = gql`
  * @example
  * const { data, loading, error } = useNftStakingProjectsConnectionQuery({
  *   variables: {
+ *      search: // value for 'search'
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
+ *      showStaked: // value for 'showStaked'
  *   },
  * });
  */

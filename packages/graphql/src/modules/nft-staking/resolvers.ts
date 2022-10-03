@@ -1,7 +1,12 @@
 import { CommonErrors } from "@/errors";
 import { GraphQLContext } from "@/types";
-import { NFTStaking } from "@/types/nft-staking";
+import {
+  NFTStaking,
+  NFTStakingFilters,
+  PaginatedNFTStakingFilters,
+} from "@/types/nft-staking";
 import { QueryTypes } from "sequelize";
+import { StakedEnum } from "@near/apollo";
 import {
   findCollectionMetadata,
   findStakingProgram,
@@ -82,18 +87,83 @@ export default {
     },
     async nft_staking_projects(
       _root: unknown,
-      { limit, offset }: PaginationFilters & { search: string },
+      filters: Partial<PaginatedNFTStakingFilters>,
       { sequelize }: GraphQLContext
     ) {
+      type BindParameterClause = (offset: number) => string;
+      type QueryClause = string | BindParameterClause;
+      type FiltersMap<K extends string> = {
+        [key in K]: {
+          active: boolean;
+          joinClause?: QueryClause;
+          whereClause?: QueryClause;
+          params?: any[];
+        };
+      };
+
+      const evalQueryClause = (clause: QueryClause, offset: number) =>
+        typeof clause == "string" ? clause : clause(offset);
+
+      const filtersMap: FiltersMap<keyof NFTStakingFilters> = {
+        search: {
+          active: !!filters.search,
+          whereClause: (offset: number) =>
+            `(s.collection_id ILIKE $${1 + offset} || '%')`,
+          params: [filters.search],
+        },
+        showStaked: {
+          active: !!filters.showStaked,
+          whereClause:
+            filters.showStaked == "Yes"
+              ? "exists (select 1 from staked_nfts as a where s.collection_id = a.collection_id)"
+              : "not exists (select 1 from staked_nfts as a where s.collection_id = a.collection_id)",
+        },
+      };
+
+      const baseQuery = `SELECT * FROM "staking_programs" AS s INNER JOIN "staking_programs_metadata" AS m ON (s.collection_id = m.collection_id)`;
+
+      const joinClauseStatements: string[] = [];
+      const whereClauseStatements: string[] = [];
+      const params: any[] = [];
+      for (const filter of Object.values(filtersMap)) {
+        if (!filter.active) continue;
+
+        if (filter.joinClause) {
+          joinClauseStatements.push(
+            evalQueryClause(filter.joinClause, params.length)
+          );
+        }
+
+        if (filter.whereClause) {
+          whereClauseStatements.push(
+            evalQueryClause(filter.whereClause, params.length)
+          );
+        }
+
+        if (filter.params?.length) {
+          params.push(...filter.params);
+        }
+      }
+
+      const joinClause = joinClauseStatements.length
+        ? joinClauseStatements.join(" ")
+        : "";
+      const whereClause = whereClauseStatements.length
+        ? `WHERE ${whereClauseStatements.join(" AND")}`
+        : "";
+
+      const finalQuery = [baseQuery, joinClause, whereClause]
+        .filter((clause) => clause.length)
+        .join(" ");
+
       return createPageableQuery(
-        `SELECT * FROM "staking_programs" AS s INNER JOIN "staking_programs_metadata" AS m 
-        ON (s.collection_id = m.collection_id)`,
+        finalQuery,
         sequelize,
         {
-          limit,
-          offset,
+          limit: filters.limit,
+          offset: filters.offset,
         },
-        []
+        params
       );
     },
   },
