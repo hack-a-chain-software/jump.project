@@ -92,3 +92,4 @@ pub async fn initialize_ft_contract(
     .await
     .unwrap()
 }
+

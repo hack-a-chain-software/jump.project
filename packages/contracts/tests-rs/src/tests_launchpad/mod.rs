@@ -27,7 +27,7 @@ mod tests {
   async fn test_normal_flow() -> anyhow::Result<()> {
     let worker: Worker<Sandbox> = workspaces::sandbox().await?;
 
-    let root = worker.root_account();
+    let root = worker.root_account().unwrap();
 
     // CREATE USER ACCOUNTS
     let owner = create_user_account(&root, &worker, "owner").await;

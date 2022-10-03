@@ -6,6 +6,7 @@ mod storage;
 mod token;
 mod x_token;
 mod locked_token;
+mod token_launcher;
 
 pub use token::*;
 pub use storage::*;
@@ -13,6 +14,7 @@ pub use launchpad::*;
 pub use ref_finance::*;
 pub use x_token::*;
 pub use locked_token::*;
+pub use token_launcher::*;
 
 pub fn get_wasm(file_name: &str) -> Result<Vec<u8>, Error> {
   std::fs::read(Path::new(OUT_DIR).join(file_name))

@@ -1,13 +1,18 @@
 use crate::*;
-use near_sdk::json_types::U128;
-///TO-DO: Cost of deployment
-/// Calculate binary size
-///
+use near_sdk::{
+  json_types::U128,
+  serde::{Serialize, Deserialize},
+};
 
-#[derive(BorshSerialize, BorshDeserialize)]
+/// Binary struct hosts the information regarding the contract to
+/// be deployed - the hash is the address on the contract memory for
+/// the contract binary that will be deployed
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Binary {
   pub contract_name: String,
   pub contract_hash: CryptoHash,
+  //This is how much the user should pay as a DEPLOYMENT FEE - it's different from the cost of storage
   pub deployment_cost: U128,
   pub init_fn_name: String,
   pub init_fn_params: String,

@@ -8,10 +8,12 @@ use std::collections::HashMap;
 use near_units::parse_near;
 use futures::future::{try_join_all};
 
+
 mod methods;
 mod tests_launchpad;
 mod tests_x_token;
 mod tests_locked_jump;
+mod tests_token_launcher;
 
 pub use methods::*;
 
@@ -30,7 +32,7 @@ pub const DEFAULT_GAS: u64 = 3_000_000_000_000;
 
 pub const FT_DECIMALS: u8 = 24;
 
-pub const USER_ACCOUNT_BALANCE: u128 = 5_000_000_000_000_000_000_000_000;
+pub const USER_ACCOUNT_BALANCE: u128 = 500_000_000_000_000_000_000_000_000;
 pub const CONTRACT_ACCOUNT_BALANCE: u128 = 200_000_000_000_000_000_000_000_000;
 
 #[tokio::main]
