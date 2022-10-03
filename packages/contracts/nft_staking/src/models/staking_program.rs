@@ -94,7 +94,7 @@ impl StakingProgram {
   }
 
   pub fn stake_nft(&mut self, token_id: NonFungibleTokenID, owner_id: AccountId) -> StakedNFT {
-    let staked_nft = StakedNFT::new(token_id, owner_id, env::block_timestamp());
+    let staked_nft = StakedNFT::new(token_id, owner_id, env::block_timestamp_ms());
 
     self.insert_staked_nft(&staked_nft);
 
@@ -141,7 +141,7 @@ impl StakingProgram {
     let withdrawn_balance = staked_nft.withdraw();
     let owner_id = &staked_nft.owner_id;
 
-    let staking_duration = env::block_timestamp() - staked_nft.staked_timestamp;
+    let staking_duration = env::block_timestamp_ms() - staked_nft.staked_timestamp;
     let early_withdraw = staking_duration < self.min_staking_period;
     let withdraw_rate = if early_withdraw {
       DENOM - self.early_withdraw_penalty
@@ -274,7 +274,7 @@ mod tests {
       get_collections()[0].clone(),
       get_accounts()[0].clone(),
       get_token_ids()[2].clone(),
-      5 * 10u64.pow(9),
+      5 * 10u64.pow(3),
       DENOM / 5,
     )
   }
@@ -329,7 +329,7 @@ mod tests {
     let token_id = get_token_ids()[0].clone();
     let nft_id = get_nft_id()[0].clone();
 
-    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 4 * 10u64.pow(9));
+    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 4 * 10u64.pow(3));
     staked_nft.balance.insert(token_id.clone(), 10);
     staking_program.insert_staked_nft(&staked_nft);
 
@@ -352,7 +352,7 @@ mod tests {
     let withdrawn_amount = 8;
     let remainder = 2;
 
-    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 9 * 10u64.pow(9));
+    let mut staked_nft = StakedNFT::new(nft_id.clone(), staker_id, 9 * 10u64.pow(3));
     staked_nft
       .balance
       .insert(token_id.clone(), withdrawn_amount + remainder);

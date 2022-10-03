@@ -41,11 +41,6 @@ impl Farm {
     round_interval: u64,
     start_at: u64,
   ) -> Self {
-    assert!(
-      start_at >= env::block_timestamp_ms(),
-      "cannot use a timestamp in the past as start_at parameter"
-    );
-
     let mut get_key = get_key_closure(collection);
 
     let mut distributions = HashMap::new();

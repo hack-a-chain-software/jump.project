@@ -85,7 +85,7 @@ mod tests {
     program_token: FungibleTokenID,
   ) -> StakedNFT {
     let id = (collection, "#1".to_string());
-    let mut staked_nft = StakedNFT::new(id, staker, 5 * 10u64.pow(9));
+    let mut staked_nft = StakedNFT::new(id, staker, 5 * 10u64.pow(3));
 
     staked_nft.balance.insert(contract_token, 10);
     staked_nft.balance.insert(program_token, 5);
