@@ -7,16 +7,14 @@ use near_sdk::serde_json::value::Value;
 use events::event_contract_deploy;
 
 const NO_DEPOSIT: Balance = 0;
-const BASE: Gas = Gas(100_000_000_000_000);
-const CALLBACK_GAS: Gas = Gas(BASE.0 * 2);
+const BASE: Gas = Gas(70_000_000_000_000);   
+const CALLBACK_GAS: Gas = Gas(10_000_000_000_000);
 const CALLBACK: &str = "callback";
-// TODO:
-// - CALLBACK FUNCTION
 
 #[near_bindgen]
 impl Contract {
   ///Verifies if the selected contract meets the conditions to be deployed
-  ///Calls the deploy function that has usafe methods
+  ///Calls the deploy function that has unsafe methods
   #[payable]
   pub fn deploy_new_contract(
     &mut self,
@@ -26,13 +24,6 @@ impl Contract {
   ) {
     let deploy_address = create_deploy_address(deploy_prefix);
 
-    //verify if contract is already on deployed contract list
-    if let Some(_value) = self
-      .deployed_contracts
-      .get(&deploy_address.clone().try_into().unwrap())
-    {
-      panic!("{}", ERR_101)
-    }
     //verify if contract size does not exceed max allowed on near
     assert!(
       deploy_address.len() < 64,
@@ -40,6 +31,15 @@ impl Contract {
       ERR_102,
       env::current_account_id()
     );
+
+    //verify if contract is already on deployed contract list
+    if let Some(_value) = self
+      .deployed_contracts
+      .get(&deploy_address.clone().try_into().unwrap())
+    {
+      panic!("{}", ERR_101)
+    }
+    
 
     let binary = self.binaries.get(&contract_to_be_deployed).expect(ERR_103);
 
@@ -49,6 +49,8 @@ impl Contract {
       self.storage_cost.get(&contract_hash_58).expect(ERR_103).0 * env::storage_byte_cost();
 
     //verify that user payed enough storage
+    //the cost of storage is composed by the cost of deployment(deployment fee charged
+    // by the factory) +  blockchain storage cost
     assert!(
       env::attached_deposit() >= (storage_cost + binary.deployment_cost.0),
       "{}{}{}",
@@ -77,6 +79,8 @@ impl Contract {
     &mut self,
     deploy_address: AccountId,
     type_of_contract: String,
+    initial_deposit: U128,
+    user_deploying: AccountId,
   ) -> PromiseOrValue<bool> {
     if is_promise_success() {
       //Log the sucessfull deployment
@@ -88,7 +92,7 @@ impl Contract {
       //Log the failed deployement
       event_contract_deploy(deploy_address, type_of_contract, "Fail".to_string());
       //return the attached deposit to the account that signed the deploy
-      Promise::new(env::predecessor_account_id()).transfer(env::attached_deposit());
+      Promise::new(user_deploying).transfer(initial_deposit.0);
       PromiseOrValue::Value(false)
     }
   }
@@ -108,8 +112,13 @@ pub fn deploy_contract(
   let factory_account_id = env::current_account_id().as_bytes().to_vec();
   let code_hash = binary.contract_hash;
   let init_fn = binary.init_fn_name;
+  // arguments for callback function - initial deposit is used to return funds on callback
   let callback_args = near_sdk::serde_json::to_vec(
-    &json!({ "deploy_address": deploy_address, "type_of_contract":contract_to_be_deployed }),
+    &json!({ "deploy_address": deploy_address,
+     "type_of_contract":contract_to_be_deployed,
+      "initial_deposit":env::attached_deposit().to_string(),
+      "user_deploying": env::predecessor_account_id()
+    }),
   )
   .expect("Failed to serialize callback args");
 
@@ -132,7 +141,7 @@ pub fn deploy_contract(
     sys::promise_batch_action_transfer(promise_id, &attached_deposit as *const u128 as _);
     // deploy contract (code is taken from register 0).
     sys::promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
-    // call `new` with given arguments.
+    // call `new` with given arguments
     sys::promise_batch_action_function_call(
       promise_id,
       init_fn.len() as _,
@@ -143,7 +152,7 @@ pub fn deploy_contract(
       BASE.0,
     );
     // attach callback to the factory.
-    let _ = sys::promise_then(
+    let callback_id = sys::promise_then(
       promise_id,
       factory_account_id.len() as _,
       factory_account_id.as_ptr() as _,
@@ -156,7 +165,7 @@ pub fn deploy_contract(
     );
     // attach callback to the factory.
     // add
-    sys::promise_return(promise_id);
+    sys::promise_return(callback_id);
   }
 }
 
@@ -164,3 +173,74 @@ pub fn create_deploy_address(prefix: String) -> String {
   let contract_account = env::current_account_id();
   format!("{}.{}", prefix, contract_account,)
 }
+
+#[cfg(test)]
+mod tests {
+  use std::ptr::null;
+
+  use near_sdk::{testing_env, serde_json};
+
+  use crate::tests::*;
+  use crate::*;
+
+  use super::*;
+
+  pub const DEPLOYED: &str = "test.factory.near";
+  pub const LONG: &str =
+    "Aaaaaaaaaaaaaaaaaaaaaaaaaaadddddddddddddddaaaaaakfbksdjbfksbfgajkbglkd3kjdajkbdflgkjdjkkskdfbskssssssssssaaaaaaaaaaaaaaa";
+
+  /// Test the deployment of a contract that is already
+  /// listed on the map of deployed contracts
+  /// This function should panic
+  #[test]
+  #[should_panic(expected = "Deploy: deploy_new_contract: This contract address already exists")]
+  fn test_deploy_new_contract_panic_contract_already_listed() {
+    let context = get_context(
+      vec![],
+      10,
+      100,
+      OWNER_ACCOUNT.parse().unwrap(),
+      0,
+      Gas(10u64.pow(18)),
+    );
+    testing_env!(context);
+
+    let mut contract: Contract = init_contract();
+    let mut contract_deployed = create_deploy_address(DEPLOYED.to_string());
+    contract
+      .deployed_contracts
+      .insert(&contract_deployed.parse().unwrap(), &"token".to_string());
+
+    contract.deploy_new_contract("token".to_string(), DEPLOYED.to_string(), json!(null));
+  }
+
+  /// Test the deployment of a contract that is already
+  /// listed on the map of deployed contracts
+  /// This function should panic
+  #[test]
+  #[should_panic(
+    expected = "Deploy: deploy_new_contract: The contract address can not have MORE than 64 characters -> This includes the factory prefix: "
+  )]
+  fn test_deploy_new_contract_panic_contract_name_too_long() {
+    let context = get_context(
+      vec![],
+      10,
+      100,
+      OWNER_ACCOUNT.parse().unwrap(),
+      0,
+      Gas(10u64.pow(18)),
+    );
+    testing_env!(context);
+
+    let mut contract: Contract = init_contract();
+    let mut contract_deployed = create_deploy_address(LONG.to_string());
+
+    contract.deploy_new_contract("token".to_string(), contract_deployed, json!(null));
+  }
+}
+
+// pub fn deploy_new_contract(
+//   &mut self,
+//   contract_to_be_deployed: String,
+//   deploy_prefix: String,
+//   args: Value,

@@ -1,7 +1,7 @@
 use crate::*;
 use events::event_new_contract_saved;
 
-/// Store new staking contract, caller must pay the storage costs.
+/// Store a new contract, caller must pay the storage costs.
 /// Returns base58 of the hash of the stored contract.
 /// User must register the contract
 #[no_mangle]
@@ -61,7 +61,7 @@ fn store_contract() -> Base58CryptoHash {
     // Contract address (hash) on memory
     let contract_hash = Base58CryptoHash::from(blob_hash.clone());
     // Return from function value of register 1.
-    let blob_hash_str = near_sdk::serde_json::to_string(&Base58CryptoHash::from(blob_hash))
+    let blob_hash_str = near_sdk::serde_json::to_string(&contract_hash)
       .unwrap()
       .into_bytes();
     sys::value_return(blob_hash_str.len() as _, blob_hash_str.as_ptr() as _);

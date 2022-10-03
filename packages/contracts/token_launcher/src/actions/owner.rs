@@ -53,4 +53,16 @@ impl Contract {
       sys::value_return(u64::MAX as _, 0 as _);
     }
   }
+
+  // pub fn edit_binary(
+  //   &mut self,
+  //   contract_name: String,
+  //   contract_hash: CryptoHash,
+  //   deployment_cost: U128,
+  //   init_fn_name: String,
+  //   init_fn_params: String,
+  // ) {
+  //   //validate that the owner is calling the function
+  //   assert_eq!(env::predecessor_account_id(), self.owner, "{}", ERR_202);
+  // }
 }
