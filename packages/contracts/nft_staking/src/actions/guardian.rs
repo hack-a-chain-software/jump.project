@@ -24,8 +24,8 @@ pub struct CreateStakingProgramPayload {
   pub collection_rps: HashMap<FungibleTokenID, U128>,
   pub min_staking_period: U64,
   pub early_withdraw_penalty: U128,
-  pub round_interval: u64, // amount of miliseconds between rounds
-  pub start_in: u64,       // amount of miliseconds until the farm starts
+  pub round_interval: U64, // amount of miliseconds between rounds
+  pub start_in: U64,       // amount of miliseconds until the farm starts
 }
 
 #[near_bindgen]
@@ -53,12 +53,12 @@ impl Contract {
       .map(|(k, v)| (k.clone(), v.0))
       .collect();
 
-    let start_at = env::block_timestamp_ms() + payload.start_in;
+    let start_at = env::block_timestamp_ms() + payload.start_in.0;
 
     let farm = Farm::new(
       collection.clone(),
       collection_rps,
-      payload.round_interval,
+      payload.round_interval.0,
       start_at,
     );
 
