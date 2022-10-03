@@ -133,13 +133,13 @@ export function NFTStakeModal({
                       selected.includes(token_id) ? "#761BA0" : "transparent"
                     }
                   >
-                    <Image
+                    <img
                       width="100%"
                       height="100%"
-                      borderRadius="20px"
                       className="aspect-square"
-                      src={`https://images.weserv.nl/?url=${metadata.media}&w=800&fit=contain`}
-                    />
+                      src={`https://images.weserv.nl/?url=${metadata.media}&dpr=4`}
+                      loading="lazy"
+                    ></img>
 
                     {selected.includes(token_id) && (
                       <Flex

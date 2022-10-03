@@ -2,7 +2,7 @@ name: Staging Deploy
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_TESTNET_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_TESTNET_PROJECT_ID }}
-  VITE_GRAPHQL_API_URI: https://staging.jacksondev.xyz/
+  VITE_GRAPHQL_API_URI: https://staginggraphql.jumpdefi.xyz/
   NEAR_NETWORK: testnet
   DB_HOST: ${{ secrets.STAGING_DB_HOST }}
   DB_NAME: ${{ secrets.STAGING_DB_NAME }}
@@ -168,6 +168,6 @@ jobs:
           --prod
           --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      # Populate DB with metadata
-      - name: Populate DB with basic metadata
-        run: yarn setup:staging:db:populate
+      # # Populate DB with metadata
+      # - name: Populate DB with basic metadata
+      #   run: yarn setup:staging:db:populate
