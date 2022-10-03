@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::{
-  collections::{LookupMap, UnorderedMap, UnorderedSet},
+  collections::{LookupMap, UnorderedMap},
   env, AccountId,
 };
 
@@ -29,7 +29,7 @@ pub struct StakingProgram {
 
   pub staked_nfts: UnorderedMap<NonFungibleTokenID, StakedNFT>,
   pub stakers_balances: LookupMap<AccountId, FungibleTokenBalance>,
-  pub nfts_by_owner: LookupMap<AccountId, UnorderedSet<NonFungibleTokenID>>,
+  pub nfts_by_owner: LookupMap<AccountId, HashSet<String>>,
 }
 
 // TODO: turn this into a macro
@@ -70,7 +70,7 @@ impl StakingProgram {
       early_withdraw_penalty,
 
       staked_nfts: UnorderedMap::new(get_key()),
-      stakers_balances: LookupMap::new(get_key()),
+      stakers_balances: LookupMap::<AccountId, FungibleTokenBalance>::new(get_key()),
       nfts_by_owner: LookupMap::new(get_key()),
     }
   }
@@ -81,13 +81,11 @@ impl StakingProgram {
 
     self.staked_nfts.insert(token_id, &staked_nft);
 
-    let mut nfts_by_owner = self.nfts_by_owner.get(owner_id).unwrap_or_else(|| {
-      UnorderedSet::new(StorageKey::NFTsByOwner {
-        collection: self.collection.clone(),
-        owner_id: owner_id.clone(),
-      })
-    });
-    nfts_by_owner.insert(token_id);
+    let mut nfts_by_owner = self
+      .nfts_by_owner
+      .get(owner_id)
+      .unwrap_or_else(|| HashSet::new());
+    nfts_by_owner.insert(token_id.1.clone());
 
     self.nfts_by_owner.insert(owner_id, &nfts_by_owner);
     self.farm.add_nft(token_id);
@@ -106,7 +104,7 @@ impl StakingProgram {
 
     self.staked_nfts.remove(token_id);
     let mut nfts_by_owner_set = self.nfts_by_owner.get(owner_id).unwrap();
-    nfts_by_owner_set.remove(token_id);
+    nfts_by_owner_set.remove(&token_id.1);
     self.nfts_by_owner.insert(owner_id, &nfts_by_owner_set);
 
     self.farm.nfts_rps.remove(token_id);
@@ -297,7 +295,7 @@ mod tests {
       .nfts_by_owner
       .get(&owner_id)
       .unwrap()
-      .contains(&nft_id));
+      .contains(&nft_id.1));
 
     assert_eq!(
       staking_program.staked_nfts.get(&nft_id).unwrap().token_id,

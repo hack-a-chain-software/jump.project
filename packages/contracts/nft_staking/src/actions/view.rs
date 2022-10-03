@@ -61,7 +61,7 @@ impl Contract {
           .iter()
           .skip(from_index as usize)
           .take(limit)
-          .map(|(_, id)| id)
+          .map(|id| id.clone())
           .collect(),
         None => vec![],
       },
