@@ -136,18 +136,10 @@ export function NFTStakeModal({
                     <img
                       width="100%"
                       height="100%"
-                      // borderRadius="20px"
                       className="aspect-square"
                       src={`https://images.weserv.nl/?url=${metadata.media}&dpr=4`}
                       loading="lazy"
                     ></img>
-                    {/* <Image
-                      width="100%"
-                      height="100%"
-                      borderRadius="20px"
-                      className="aspect-square"
-                      src={`https://images.weserv.nl/?url=${metadata.media}&dpr=4`}
-                    /> */}
 
                     {selected.includes(token_id) && (
                       <Flex
