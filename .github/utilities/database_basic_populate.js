@@ -23,10 +23,10 @@ async function restartDb() {
 
   const client = new Client({
     user: "postgres",
-    host: "staging-db.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
-    database: "jump_testnet",
-    password: "JDX-secret_password-1683413286",
-    port: 5432,
+    host: "localhost",
+    database: "postgres",
+    password: "1234",
+    port: 5438,
   });
 
   await client.connect();
@@ -59,31 +59,28 @@ async function restartDb() {
         ${builQueryString(token.db_metadata.whitepaper)}
       );
     `;
-    console.log(baseLaunchpadQuery);
-    await client.query(baseLaunchpadQuery);
     initiliazeTestnetQuery += baseLaunchpadQuery;
   }
 
-  // for (collection of nftsArray) {
-  //   const baseNftQuery = `
-  //   INSERT INTO staking_programs_metadata (
-  //       collection_id,
-  //       collection_image,
-  //       collection_modal_image
-  //     )
-  //   VALUES (
-  //       '${prefix}${parseAccountName(collection.nft.name)}.testnet',
-  //       ${builQueryString(collection.db_metadata.collection_image)},
-  //       ${builQueryString(collection.db_metadata.collection_modal_image)}
-  //     );
-  //   `;
-  //   await client.query(baseNftQuery);
-  //   initiliazeTestnetQuery += baseNftQuery;
-  // }
+  for (collection of nftsArray) {
+    const baseNftQuery = `
+    INSERT INTO staking_programs_metadata (
+        collection_id,
+        collection_image,
+        collection_modal_image
+      )
+    VALUES (
+        '${prefix}${parseAccountName(collection.nft.name)}.testnet',
+        ${builQueryString(collection.db_metadata.collection_image)},
+        ${builQueryString(collection.db_metadata.collection_modal_image)}
+      );
+    `;
+    initiliazeTestnetQuery += baseNftQuery;
+  }
 
-  // console.log(initiliazeTestnetQuery);
+  console.log(initiliazeTestnetQuery);
 
-  // await client.query(initiliazeTestnetQuery);
+  await client.query(initiliazeTestnetQuery);
   console.log("Initial data succesfully seeded");
 
   process.exit(0);
