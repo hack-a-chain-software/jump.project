@@ -20,11 +20,16 @@ type RetrieveTreasuryFundsData = {
 };
 
 const CREATE_LISTING = "create_listing";
+type TokenType = {
+  FT: {
+    account_id: string;
+  };
+};
 type Listing = {
   listing_id: string;
   project_owner: string;
-  project_token: string;
-  price_token: string;
+  project_token: TokenType;
+  price_token: TokenType;
 };
 type CreateListingData = {
   listing_data: {
