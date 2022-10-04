@@ -9,6 +9,7 @@ members = [
   "./nft_contract",
   "./mintable_token_contract",
   "./token_contract",
+  "./vesting_contract",
   "./testnet_faucet",
   "./x_token",
   "./locked_token",
