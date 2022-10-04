@@ -30,6 +30,13 @@ type Listing = {
   project_owner: string;
   project_token: TokenType;
   price_token: TokenType;
+  listing_type: string;
+  open_sale_1_timestamp: string;
+  open_sale_2_timestamp: string;
+  final_sale_2_timestamp: string;
+  liquidity_pool_timestamp: string;
+  total_amount_sale_project_tokens: string;
+  token_allocation_size: string;
 };
 type CreateListingData = {
   listing_data: {
