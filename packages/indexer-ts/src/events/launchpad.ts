@@ -1,60 +1,116 @@
-import { NearEvent } from "../types";
+import Big from "big.js";
+import { Sequelize } from "sequelize/types";
+import {
+  NearEvent,
+  CREATE_LISTING,
+  CreateListingData,
+  CANCEL_LISTING,
+  CancelListingData,
+  PROJECT_FUND_LISTING,
+  ProjectFundListingData,
+  PROJECT_WITHDRAW_LISTING,
+  ProjectWithdrawListingData,
+  INVESTOR_BUY_ALLOCATIONS,
+  InvestorBuyAllocationsData,
+} from "../types";
+import { Listing, Allocation } from "../models";
 
-/* Define all interested events that will trigger DB actions
- * All other events will be discarded
- */
-const ADD_GUARDIAN = "add_guardian";
-type AddGuardianData = {
-  new_guardian: string;
-};
-
-const REMOVE_GUARDIAN = "remove_guardian";
-type RemoveGuardianData = {
-  old_guardian: string;
-};
-
-const RETRIVE_TREASURY_FUNDS = "retrieve_treasury_funds";
-type RetrieveTreasuryFundsData = {
-  token_type: string;
-  quantity: string;
-};
-
-const CREATE_LISTING = "create_listing";
-type TokenType = {
-  FT: {
-    account_id: string;
-  };
-};
-type Listing = {
-  listing_id: string;
-  project_owner: string;
-  project_token: TokenType;
-  price_token: TokenType;
-  listing_type: string;
-  open_sale_1_timestamp: string;
-  open_sale_2_timestamp: string;
-  final_sale_2_timestamp: string;
-  liquidity_pool_timestamp: string;
-  total_amount_sale_project_tokens: string;
-  token_allocation_size: string;
-};
-type CreateListingData = {
-  listing_data: {
-    V1: Listing;
-  };
-};
-
-const CANCEL_LISTING = "cancel_listing";
-const PROJECT_FUND_LISTING = "project_fund_listing";
-const PROJECT_WITHDRAW_LISTING = "project_withdraw_listing";
-const INVESTOR_BUY_ALLOCATIONS = "investor_buy_allocations";
-const INVESTOR_WITHDRAW_ALLOCATIONS = "investor_withdraw_allocations";
-const INVESTOR_STAKE_MEMBERSHIP = "investor_stake_membership";
-const INVESTOR_UNSTAKE_MEMBERSHIP = "investor_unstake_membership";
-
-export async function handleLaunchpadEvent(event: NearEvent): Promise<void> {
+export async function handleLaunchpadEvent(
+  event: NearEvent,
+  sequelize: Sequelize
+): Promise<void> {
   switch (event.event) {
-    case ADD_GUARDIAN: {
+    case CREATE_LISTING: {
+      let data: CreateListingData = event.data[0];
+      let objectData = data.listing_data.V1;
+      await Listing.create({
+        listing_id: objectData.listing_id,
+        public: objectData.listing_type == "Public",
+        listing_status: objectData.status,
+        project_owner: objectData.project_owner,
+        project_token: objectData.project_token.FT.account_id,
+        price_token: objectData.project_token.FT.account_id,
+        open_sale_1_timestamp: objectData.open_sale_1_timestamp,
+        open_sale_2_timestamp: objectData.open_sale_2_timestamp,
+        final_sale_2_timestamp: objectData.final_sale_2_timestamp,
+        liquidity_pool_timestamp: objectData.liquidity_pool_timestamp,
+        total_amount_sale_project_tokens:
+          objectData.total_amount_sale_project_tokens,
+        token_allocation_size: objectData.token_allocation_size,
+        token_allocation_price: objectData.token_allocation_price,
+        allocations_sold: objectData.allocations_sold,
+        liquidity_pool_project_tokens: objectData.liquidity_pool_project_tokens,
+        liquidity_pool_price_tokens: objectData.liquidity_pool_price_tokens,
+        fraction_instant_release: objectData.fraction_instant_release,
+        fraction_cliff_release: objectData.fraction_cliff_release,
+        cliff_timestamp: objectData.cliff_timestamp,
+        end_cliff_timestamp: objectData.end_cliff_timestamp,
+        fee_price_tokens: objectData.fee_price_tokens,
+        fee_liquidity_tokens: objectData.fee_liquidity_tokens,
+        dex_id: objectData.dex_id,
+      });
+      break;
+    }
+
+    case CANCEL_LISTING: {
+      let data: CancelListingData = event.data[0];
+      let entryPk = data.listing_id;
+      let entry: Listing = (await Listing.findByPk(entryPk))!;
+      entry.listing_status = "cancelled";
+      await entry.save();
+      break;
+    }
+
+    case PROJECT_FUND_LISTING: {
+      let data: ProjectFundListingData = event.data[0];
+      let entryPk = data.listing_id;
+      let entry: Listing = (await Listing.findByPk(entryPk))!;
+      entry.listing_status = "funded";
+      await entry.save();
+      break;
+    }
+
+    case PROJECT_WITHDRAW_LISTING: {
+      let data: ProjectWithdrawListingData = event.data[0];
+      let entryPk = data.listing_id;
+      let entry: Listing = (await Listing.findByPk(entryPk))!;
+      entry.listing_status = data.project_status;
+      await entry.save();
+      break;
+    }
+
+    // Need to rebuild investor_buy_allocation
+    // postrgres function logic here
+    case INVESTOR_BUY_ALLOCATIONS: {
+      let data: InvestorBuyAllocationsData = event.data[0];
+      let listingPk = data.listing_id;
+      let listing: Listing = (await Listing.findByPk(listingPk))!;
+      let entry = await Allocation.findOne({
+        where: {
+          account_id: data.investor_id,
+          listing_id: data.listing_id,
+        },
+      });
+      if (entry === null) {
+        await Allocation.create({
+          account_id: data.investor_id,
+          listing_id: data.listing_id,
+          total_allocation: data.allocations_purchased,
+          total_quantity: data.tokens_purchased,
+          quantity_withdrawn: "0",
+        });
+      } else {
+        entry.total_allocation = new Big(entry.total_allocation)
+          .plus(new Big(data.allocations_purchased))
+          .toFixed();
+        entry.total_quantity = new Big(entry.total_quantity)
+          .plus(new Big(data.tokens_purchased))
+          .toFixed();
+        await entry.save();
+      }
+      listing.listing_status = data.project_status;
+      listing.allocations_sold = data.total_allocations_sold;
+      await listing.save();
       break;
     }
   }

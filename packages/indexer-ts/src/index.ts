@@ -1,5 +1,6 @@
 import { startStream, types } from "near-lake-framework";
 import { S3_BUCKET, START_BLOCK } from "./env";
+import { sequelizeConnect } from "./connector";
 import { processTransaction } from "./processor";
 
 /* Sets environment to run indexer on
@@ -22,13 +23,14 @@ const lakeConfig: types.LakeConfig = {
 async function handleStreamerMessage(
   streamerMessage: types.StreamerMessage
 ): Promise<void> {
+  const sequelize = await sequelizeConnect();
   for (let shard of streamerMessage.shards) {
     for (let receipt of shard.receiptExecutionOutcomes) {
       let outcome = receipt.executionOutcome.outcome;
       let status: any = outcome.status;
       if (status.Failure !== null && status.Unknown !== null) {
         let blockHeight = streamerMessage.block.header.height;
-        await processTransaction(receipt, blockHeight);
+        await processTransaction(receipt, blockHeight, sequelize);
       }
     }
   }

@@ -10,19 +10,38 @@ import {
   ForeignKey,
 } from "sequelize";
 
-export function initializeNftStaking(sequelize: Sequelize) {
-  class StakingProgram extends Model<
-    InferAttributes<StakingProgram>,
-    InferCreationAttributes<StakingProgram>
-  > {
-    declare collection_id: string;
-    declare collection_owner_id: string;
-    declare token_address: string;
-    declare min_staking_period: string;
-    declare early_withdraw_penalty: string;
-    declare round_interval: string;
-  }
+export class StakingProgram extends Model<
+  InferAttributes<StakingProgram>,
+  InferCreationAttributes<StakingProgram>
+> {
+  declare collection_id: string;
+  declare collection_owner_id: string;
+  declare token_address: string;
+  declare min_staking_period: string;
+  declare early_withdraw_penalty: string;
+  declare round_interval: string;
+}
 
+export class StakingProgramMetadata extends Model<
+  InferAttributes<StakingProgramMetadata>,
+  InferCreationAttributes<StakingProgramMetadata>
+> {
+  declare collection_id: ForeignKey<StakingProgram["collection_id"]>;
+  declare collection_image: string;
+  declare collection_modal_image: string;
+}
+
+export class StakedNft extends Model<
+  InferAttributes<StakedNft>,
+  InferCreationAttributes<StakedNft>
+> {
+  declare nft_id: string;
+  declare collection_id: ForeignKey<StakingProgram["collection_id"]>;
+  declare owner_id: string;
+  declare staked_timestamp: string;
+}
+
+export function initializeNftStaking(sequelize: Sequelize) {
   StakingProgram.init(
     {
       collection_id: {
@@ -51,15 +70,6 @@ export function initializeNftStaking(sequelize: Sequelize) {
     }
   );
 
-  class StakingProgramMetadata extends Model<
-    InferAttributes<StakingProgramMetadata>,
-    InferCreationAttributes<StakingProgramMetadata>
-  > {
-    declare collection_id: ForeignKey<StakingProgram["collection_id"]>;
-    declare collection_image: string;
-    declare collection_modal_image: string;
-  }
-
   StakingProgramMetadata.init(
     {
       collection_id: {
@@ -85,16 +95,6 @@ export function initializeNftStaking(sequelize: Sequelize) {
     },
   });
   StakingProgramMetadata.belongsTo(StakingProgram);
-
-  class StakedNft extends Model<
-    InferAttributes<StakedNft>,
-    InferCreationAttributes<StakedNft>
-  > {
-    declare nft_id: string;
-    declare collection_id: ForeignKey<StakingProgram["collection_id"]>;
-    declare owner_id: string;
-    declare staked_timestamp: Date;
-  }
 
   StakedNft.init(
     {

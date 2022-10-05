@@ -1,8 +1,8 @@
-import { sequelizeConnect } from "./connector";
 import { types } from "near-lake-framework";
 import { INTERESTED_CONTRACTS } from "./env";
 import { processEvent } from "./events";
 import { EventId } from "./types";
+import { Sequelize } from "sequelize/types";
 
 const JSON_EVENT_PREFIX = "EVENT_JSON:";
 
@@ -14,7 +14,8 @@ const JSON_EVENT_PREFIX = "EVENT_JSON:";
  */
 export async function processTransaction(
   executionOutcome: types.ExecutionOutcomeWithReceipt,
-  blockHeight: number
+  blockHeight: number,
+  sequelize: Sequelize
 ) {
   const outcome = executionOutcome.executionOutcome.outcome;
   const executorId = outcome.executorId;
@@ -28,7 +29,7 @@ export async function processTransaction(
           blockHeight,
           index,
         };
-        await processEvent(executorId, eventJsonString, eventId);
+        await processEvent(executorId, eventJsonString, eventId, sequelize);
       }
     }
   }

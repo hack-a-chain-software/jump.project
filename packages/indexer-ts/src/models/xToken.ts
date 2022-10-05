@@ -10,17 +10,17 @@ import {
   ForeignKey,
 } from "sequelize";
 
-export function initializeXToken(sequelize: Sequelize) {
-  class xTokenRatio extends Model<
-    InferAttributes<xTokenRatio>,
-    InferCreationAttributes<xTokenRatio>
-  > {
-    declare key_column: number;
-    declare time_event: Date;
-    declare base_token_amount: string;
-    declare x_token_amount: string;
-  }
+export class xTokenRatio extends Model<
+  InferAttributes<xTokenRatio>,
+  InferCreationAttributes<xTokenRatio>
+> {
+  declare key_column: number;
+  declare time_event: string;
+  declare base_token_amount: string;
+  declare x_token_amount: string;
+}
 
+export function initializeXToken(sequelize: Sequelize) {
   xTokenRatio.init(
     {
       key_column: {

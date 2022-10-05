@@ -1,18 +1,22 @@
+import { Sequelize } from "sequelize/types";
 import {
   LAUNCHPAD_CONTRACT,
   NFT_STAKING_CONTRACT,
   XTOKEN_CONTRACT,
 } from "../env";
 import { EventId, NearEvent } from "../types";
+import { handleLaunchpadEvent } from "./launchpad";
 
 export async function processEvent(
   executorId: string,
   eventJsonString: string,
-  eventId: EventId
+  eventId: EventId,
+  sequelize: Sequelize
 ): Promise<void> {
   const event: NearEvent = JSON.parse(eventJsonString);
   switch (executorId) {
     case LAUNCHPAD_CONTRACT: {
+      await handleLaunchpadEvent(event, sequelize);
       break;
     }
     case NFT_STAKING_CONTRACT: {

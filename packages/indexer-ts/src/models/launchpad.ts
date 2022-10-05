@@ -10,16 +10,74 @@ import {
   ForeignKey,
 } from "sequelize";
 
-export function initializeLaunchpad(sequelize: Sequelize) {
-  class LaunchpadInvestor extends Model<
-    InferAttributes<LaunchpadInvestor>,
-    InferCreationAttributes<LaunchpadInvestor>
-  > {
-    declare account_id: string;
-    declare staked_token: string;
-    declare last_check: Date;
-  }
+export class LaunchpadInvestor extends Model<
+  InferAttributes<LaunchpadInvestor>,
+  InferCreationAttributes<LaunchpadInvestor>
+> {
+  declare account_id: string;
+  declare staked_token: string;
+  declare last_check: string;
+}
 
+export class Listing extends Model<
+  InferAttributes<Listing>,
+  InferCreationAttributes<Listing>
+> {
+  declare listing_id: string;
+  declare public: boolean;
+  declare listing_status: string;
+  declare project_owner: string;
+  declare project_token: string;
+  declare price_token: string;
+
+  declare open_sale_1_timestamp: string;
+  declare open_sale_2_timestamp: string;
+  declare final_sale_2_timestamp: string;
+  declare liquidity_pool_timestamp: string;
+
+  declare total_amount_sale_project_tokens: string;
+  declare token_allocation_size: string;
+  declare token_allocation_price: string;
+  declare allocations_sold: string;
+  declare liquidity_pool_project_tokens: string;
+  declare liquidity_pool_price_tokens: string;
+  declare fraction_instant_release: string;
+  declare fraction_cliff_release: string;
+  declare cliff_timestamp: string;
+  declare end_cliff_timestamp: string;
+  declare fee_price_tokens: string;
+  declare fee_liquidity_tokens: string;
+  declare dex_id: string;
+}
+
+export class ListingMetadata extends Model<
+  InferAttributes<ListingMetadata>,
+  InferCreationAttributes<ListingMetadata>
+> {
+  declare listing_id: ForeignKey<Listing["listing_id"]>;
+  declare project_name: string;
+  declare description_token: string;
+  declare description_project: string;
+  declare discord: string;
+  declare twitter: string;
+  declare telegram: string;
+  declare website: string;
+  declare whitepaper: string;
+}
+
+export class Allocation extends Model<
+  InferAttributes<Allocation>,
+  InferCreationAttributes<Allocation>
+> {
+  declare account_id: string;
+  declare listing_id: ForeignKey<Listing["listing_id"]>;
+
+  declare quantity_withdrawn: string;
+  declare total_quantity: string;
+  declare total_allocation: string;
+}
+
+export function initializeLaunchpad(sequelize: Sequelize) {
   LaunchpadInvestor.init(
     {
       account_id: {
@@ -49,37 +107,6 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     "liquidity_pool_finalized",
     "cancelled",
   ];
-
-  class Listing extends Model<
-    InferAttributes<Listing>,
-    InferCreationAttributes<Listing>
-  > {
-    declare listing_id: string;
-    declare public: boolean;
-    declare listing_status: string;
-    declare project_owner: string;
-    declare project_token: string;
-    declare price_token: string;
-
-    declare open_sale_1_timestamp: Date;
-    declare open_sale_2_timestamp: Date;
-    declare final_sale_2_timestamp: Date;
-    declare liquidity_pool_timestamp: Date;
-
-    declare total_amount_sale_project_tokens: string;
-    declare token_allocation_size: string;
-    declare token_allocation_price: string;
-    declare allocations_sold: string;
-    declare liquidity_pool_project_tokens: string;
-    declare liquidity_pool_price_tokens: string;
-    declare fraction_instant_release: string;
-    declare fraction_cliff_release: string;
-    declare cliff_timestamp: string;
-    declare end_cliff_timestamp: string;
-    declare fee_price_tokens: string;
-    declare fee_liquidity_tokens: string;
-    declare dex_id: string;
-  }
 
   Listing.init(
     {
@@ -162,21 +189,6 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     }
   );
 
-  class ListingMetadata extends Model<
-    InferAttributes<ListingMetadata>,
-    InferCreationAttributes<ListingMetadata>
-  > {
-    declare listing_id: ForeignKey<Listing["listing_id"]>;
-    declare project_name: string;
-    declare description_token: string;
-    declare description_project: string;
-    declare discord: string;
-    declare twitter: string;
-    declare telegram: string;
-    declare website: string;
-    declare whitepaper: string;
-  }
-
   ListingMetadata.init(
     {
       listing_id: {
@@ -220,18 +232,6 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     },
   });
   ListingMetadata.belongsTo(Listing);
-
-  class Allocation extends Model<
-    InferAttributes<Allocation>,
-    InferCreationAttributes<Allocation>
-  > {
-    declare account_id: string;
-    declare listing_id: ForeignKey<Listing["listing_id"]>;
-
-    declare quantity_withdrawn: string;
-    declare total_quantity: string;
-    declare total_allocation: string;
-  }
 
   Allocation.init(
     {
