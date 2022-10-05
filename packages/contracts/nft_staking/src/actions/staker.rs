@@ -4,11 +4,13 @@ use crate::{
   events,
   ext_interfaces::{ext_fungible_token, ext_non_fungible_token, ext_self},
   models::{StakedNFT, StakingProgram},
-  types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID},
+  types::{FungibleTokenID, NFTCollection, NonFungibleTokenID, SerializableFungibleTokenBalance},
   Contract, ContractExt,
 };
 use near_sdk::{
-  assert_one_yocto, env, is_promise_success, json_types::U128, near_bindgen, AccountId, Promise,
+  assert_one_yocto, env, is_promise_success,
+  json_types::{U128, U64},
+  near_bindgen, AccountId, Promise,
 };
 
 impl StakingProgram {
@@ -38,7 +40,7 @@ impl Contract {
 
     self.track_storage_usage(&owner_id, initial_storage);
 
-    events::stake_nft(&staked_nft);
+    events::stake_nft(&staked_nft.into());
   }
 }
 
@@ -49,15 +51,15 @@ impl Contract {
     &mut self,
     token_id: NonFungibleTokenID,
     owner_id: AccountId,
-    staked_timestamp: u64,
-    balance: FungibleTokenBalance,
+    staked_timestamp: U64,
+    balance: SerializableFungibleTokenBalance,
   ) {
     if is_promise_success() {
       events::unstake_nft(&token_id, balance);
     } else {
       let collection = token_id.0.clone();
 
-      let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp);
+      let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp.0);
       let mut staking_program = self.staking_programs.get(&collection).unwrap();
       staking_program.insert_staked_nft(&staked_nft);
 
@@ -93,8 +95,8 @@ impl Contract {
             .compensate_unstake(
               staked_nft.token_id,
               staked_nft.owner_id,
-              staked_nft.staked_timestamp,
-              balance,
+              U64(staked_nft.staked_timestamp),
+              balance.into(),
             ),
         ),
     }
@@ -157,7 +159,7 @@ impl Contract {
     &mut self,
     collection: NFTCollection,
     token_id: NonFungibleTokenID,
-  ) -> FungibleTokenBalance {
+  ) -> SerializableFungibleTokenBalance {
     assert_one_yocto();
 
     let initial_storage = env::storage_usage();
@@ -171,6 +173,6 @@ impl Contract {
 
     self.track_storage_usage(&caller_id, initial_storage);
 
-    balance
+    balance.into()
   }
 }
