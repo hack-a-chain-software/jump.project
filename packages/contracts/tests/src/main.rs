@@ -1,5 +1,5 @@
 use std::path::Path;
-use workspaces::{Contract, Account, AccountId, DevNetwork, Worker};
+use workspaces::{Contract, Account, AccountId, Worker};
 use workspaces::network::Sandbox;
 use std::vec::Vec;
 use std::io::Error;
@@ -8,12 +8,13 @@ use std::collections::HashMap;
 use near_units::parse_near;
 use futures::future::{try_join_all};
 
-
+mod lib;
 mod methods;
 mod tests_launchpad;
-mod tests_x_token;
 mod tests_locked_jump;
+mod tests_nft_staking;
 mod tests_token_launcher;
+mod tests_x_token;
 
 pub use methods::*;
 

@@ -7,12 +7,14 @@ mod tests {
   use workspaces::{Account, network::Sandbox, Worker, Contract};
 
   use crate::{
-    token::initialize_ft_contract,
-    nft_staking::{
-      initialize_nft_staking, add_guardian, transfer, deposit, create_staking_program, stake,
-      unstake, withdraw_reward, DENOM,
+    methods::{
+      token::initialize_ft_contract,
+      nft_staking::{
+        initialize_nft_staking, add_guardian, transfer, deposit, create_staking_program, stake,
+        unstake, withdraw_reward, DENOM,
+      },
+      nft::{initialize_nft_contract, nft_mint, view_nft_token},
     },
-    nft::{initialize_nft_contract, nft_mint, view_nft_token},
     create_user_account, get_wasm, deploy_contract, deploy_contract_from_wasm_path, time_travel,
     register_user,
     lib::events::{parse_event_logs, find_event_type},

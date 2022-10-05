@@ -30,53 +30,54 @@ mod tests {
     let root = worker.root_account().unwrap();
 
     // CREATE USER ACCOUNTS
-    let owner = create_user_account(&root, &worker, "owner").await;
-    let guardian = create_user_account(&root, &worker, "guardian").await;
-    let project_owner = create_user_account(&root, &worker, "project_owner").await;
-    let investor_1 = create_user_account(&root, &worker, "investor1").await;
-    let investor_2 = create_user_account(&root, &worker, "investor2").await;
-    let investor_3 = create_user_account(&root, &worker, "investor3").await;
+    let owner = create_user_account(&root, "owner").await;
+    let guardian = create_user_account(&root, "guardian").await;
+    let project_owner = create_user_account(&root, "project_owner").await;
+    let investor_1 = create_user_account(&root, "investor1").await;
+    let investor_2 = create_user_account(&root, "investor2").await;
+    let investor_3 = create_user_account(&root, "investor3").await;
 
     // 1. Initialize contracts
     // DEPLOY & INITIALIZE FT CONTRACTS
 
     let ft_wasm = get_wasm("token_contract.wasm")?;
-    let ft_price = deploy_contract(&root, &worker, "ft_contract_price", &ft_wasm).await;
-    initialize_ft_contract(&worker, &ft_price, &root).await;
-    let ft_project = deploy_contract(&root, &worker, "ft_contract_project", &ft_wasm).await;
-    initialize_ft_contract(&worker, &ft_project, &project_owner).await;
-    let ft_xtoken = deploy_contract(&root, &worker, "ft_contract_xtoken", &ft_wasm).await;
-    initialize_ft_contract(&worker, &ft_xtoken, &root).await;
+    let ft_price = deploy_contract(&root, "ft_contract_price", &ft_wasm).await;
+    initialize_ft_contract(&ft_price, &root).await;
+    let ft_project = deploy_contract(&root, "ft_contract_project", &ft_wasm).await;
+    initialize_ft_contract(&ft_project, &project_owner).await;
+    let ft_xtoken = deploy_contract(&root, "ft_contract_xtoken", &ft_wasm).await;
+    initialize_ft_contract(&ft_xtoken, &root).await;
 
     // SPOON REF.FINANCE FROM MAINNET
 
     let ref_finance = spoon_contract(REF_FINANCE_ID, &worker).await?;
-    owner
-      .call(&worker, ref_finance.id(), "new")
-      .args_json(json!({
-        "owner_id": owner.id(),
-        "exchange_fee": 10u32,
-        "referral_fee": 10u32
-      }))?
-      .gas(DEFAULT_GAS)
-      .transact()
-      .await?;
+    transact_call(
+      owner
+        .call(ref_finance.id(), "new")
+        .args_json(json!({
+          "owner_id": owner.id(),
+          "exchange_fee": 10u32,
+          "referral_fee": 10u32
+        }))
+        .gas(DEFAULT_GAS),
+    )
+    .await;
 
     // initialize relevant ref state
-    owner
-      .call(&worker, ref_finance.id(), "extend_whitelisted_tokens")
-      .args_json(json!({
-        "tokens": vec![ft_project.id().to_string(), ft_price.id().to_string()]
-      }))?
-      .deposit(1)
-      .gas(GAS_LIMIT)
-      .transact()
-      .await?;
-
+    transact_call(
+      owner
+        .call(ref_finance.id(), "extend_whitelisted_tokens")
+        .args_json(json!({
+          "tokens": vec![ft_project.id().to_string(), ft_price.id().to_string()]
+        }))
+        .deposit(1)
+        .gas(GAS_LIMIT),
+    )
+    .await;
     // DEPLOY & INITIALIZE LAUNCHPAD CONTRACT
 
     let launchpad_wasm = get_wasm("launchpad.wasm").unwrap();
-    let launchpad = deploy_contract(&root, &worker, "launchpad", &launchpad_wasm).await;
+    let launchpad = deploy_contract(&root, "launchpad", &launchpad_wasm).await;
 
     let token_lock_period: u64 = 60 * 60 * 24 * 14 * TO_NANO;
     let tiers_minimum_tokens: Vec<u128> = vec![1000, 2000, 3000, 4000, 5000, 6000, 7000]
@@ -86,22 +87,23 @@ mod tests {
     let tiers_entitled_allocations: Vec<u64> = vec![1, 2, 3, 4, 5, 6, 7];
     let allowance_phase_2: u64 = 2;
 
-    launchpad
-    .call(&worker, "new")
-    .args_json(json!({
-      "owner": owner.id(),
-      "contract_settings": {
-        "membership_token": ft_xtoken.id(),
-        "token_lock_period": token_lock_period.to_string(),
-        "tiers_minimum_tokens": tiers_minimum_tokens.iter().map(|v| v.to_string()).collect::<Vec<String>>(),
-        "tiers_entitled_allocations": tiers_entitled_allocations.iter().map(|v| v.to_string()).collect::<Vec<String>>(),
-        "allowance_phase_2": allowance_phase_2.to_string(),
-        "partner_dex": ref_finance.id(),
-      }
-    }))?
-    .gas(DEFAULT_GAS)
-    .transact()
-    .await?;
+    transact_call(
+      launchpad
+      .call("new")
+      .args_json(json!({
+        "owner": owner.id(),
+        "contract_settings": {
+          "membership_token": ft_xtoken.id(),
+          "token_lock_period": token_lock_period.to_string(),
+          "tiers_minimum_tokens": tiers_minimum_tokens.iter().map(|v| v.to_string()).collect::<Vec<String>>(),
+          "tiers_entitled_allocations": tiers_entitled_allocations.iter().map(|v| v.to_string()).collect::<Vec<String>>(),
+          "allowance_phase_2": allowance_phase_2.to_string(),
+          "partner_dex": ref_finance.id(),
+        }
+      }))
+      .gas(DEFAULT_GAS)
+    )
+    .await;
 
     let accounts = vec![
       &owner,
@@ -116,17 +118,18 @@ mod tests {
 
     let contracts = vec![&launchpad, &ref_finance, &ft_price, &ft_project, &ft_xtoken];
 
-    bulk_register_storage(&worker, accounts, contracts).await?;
+    bulk_register_storage(accounts, contracts).await?;
 
     // 2. Assign guardian
-    owner
-      .call(&worker, launchpad.id(), "assign_guardian")
-      .args_json(json!({
-        "new_guardian": guardian.id()
-      }))?
-      .deposit(1)
-      .transact()
-      .await?;
+    transact_call(
+      owner
+        .call(launchpad.id(), "assign_guardian")
+        .args_json(json!({
+          "new_guardian": guardian.id()
+        }))
+        .deposit(1),
+    )
+    .await;
 
     // 3. Create new listing
 
@@ -156,40 +159,40 @@ mod tests {
     let fee_price_tokens = 100;
     let fee_liquidity_tokens = 100;
 
-    let listing_id: u64 = guardian
-      .call(&worker, launchpad.id(), "create_new_listing")
-      .args_json(json!({
-        "listing_data": {
-          "project_owner": project_owner.id(),
-          "project_token": ft_project.id(),
-          "price_token": ft_price.id(),
-          "listing_type": "Public",
-          "open_sale_1_timestamp_seconds": open_sale_1_timestamp_seconds.to_string(),
-          "open_sale_2_timestamp_seconds": open_sale_2_timestamp_seconds.to_string(),
-          "final_sale_2_timestamp_seconds": final_sale_2_timestamp_seconds.to_string(),
-          "liquidity_pool_timestamp_seconds": liquidity_pool_timestamp_seconds.to_string(),
-          "total_amount_sale_project_tokens": total_amount_sale_project_tokens.to_string(),
-          "token_allocation_size": token_allocation_size.to_string(),
-          "token_allocation_price": token_allocation_price.to_string(),
-          "liquidity_pool_project_tokens": liquidity_pool_project_tokens.to_string(),
-          "liquidity_pool_price_tokens": liquidity_pool_price_tokens.to_string(),
-          "fraction_instant_release": fraction_instant_release.to_string(),
-          "fraction_cliff_release": fraction_cliff_release.to_string(),
-          "cliff_timestamp_seconds": cliff_timestamp_seconds.to_string(),
-          "end_cliff_timestamp_seconds": end_cliff_timestamp_seconds.to_string(),
-          "fee_price_tokens": fee_price_tokens.to_string(),
-          "fee_liquidity_tokens": fee_liquidity_tokens.to_string(),
-        }
-      }))?
-      .deposit(1)
-      .transact()
-      .await?
-      .json()?;
+    let listing_id: u64 = transact_call(
+      guardian
+        .call(launchpad.id(), "create_new_listing")
+        .args_json(json!({
+          "listing_data": {
+            "project_owner": project_owner.id(),
+            "project_token": ft_project.id(),
+            "price_token": ft_price.id(),
+            "listing_type": "Public",
+            "open_sale_1_timestamp_seconds": open_sale_1_timestamp_seconds.to_string(),
+            "open_sale_2_timestamp_seconds": open_sale_2_timestamp_seconds.to_string(),
+            "final_sale_2_timestamp_seconds": final_sale_2_timestamp_seconds.to_string(),
+            "liquidity_pool_timestamp_seconds": liquidity_pool_timestamp_seconds.to_string(),
+            "total_amount_sale_project_tokens": total_amount_sale_project_tokens.to_string(),
+            "token_allocation_size": token_allocation_size.to_string(),
+            "token_allocation_price": token_allocation_price.to_string(),
+            "liquidity_pool_project_tokens": liquidity_pool_project_tokens.to_string(),
+            "liquidity_pool_price_tokens": liquidity_pool_price_tokens.to_string(),
+            "fraction_instant_release": fraction_instant_release.to_string(),
+            "fraction_cliff_release": fraction_cliff_release.to_string(),
+            "cliff_timestamp_seconds": cliff_timestamp_seconds.to_string(),
+            "end_cliff_timestamp_seconds": end_cliff_timestamp_seconds.to_string(),
+            "fee_price_tokens": fee_price_tokens.to_string(),
+            "fee_liquidity_tokens": fee_liquidity_tokens.to_string(),
+          }
+        }))
+        .deposit(1),
+    )
+    .await
+    .json()?;
 
     // 4. Fund listing
 
     ft_transfer_call(
-      &worker,
       &project_owner,
       &ft_project,
       launchpad.as_account(),
@@ -200,7 +203,7 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     // 5. Time travel to phase 1 sale
     time_travel(&worker, 60 * 30).await?;
@@ -210,21 +213,20 @@ mod tests {
 
     let seed_size = 1_000_000;
     // seed all investors with price tokens
-    ft_transfer(&worker, &root, &ft_price, &investor_1, seed_size).await?;
-    ft_transfer(&worker, &root, &ft_price, &investor_2, seed_size).await?;
-    ft_transfer(&worker, &root, &ft_price, &investor_3, seed_size).await?;
+    ft_transfer(&root, &ft_price, &investor_1, seed_size).await;
+    ft_transfer(&root, &ft_price, &investor_2, seed_size).await;
+    ft_transfer(&root, &ft_price, &investor_3, seed_size).await;
 
     // seed all investors with xtokens
-    ft_transfer(&worker, &root, &ft_xtoken, &investor_1, seed_size).await?;
-    ft_transfer(&worker, &root, &ft_xtoken, &investor_2, seed_size).await?;
-    ft_transfer(&worker, &root, &ft_xtoken, &investor_3, seed_size).await?;
+    ft_transfer(&root, &ft_xtoken, &investor_1, seed_size).await;
+    ft_transfer(&root, &ft_xtoken, &investor_2, seed_size).await;
+    ft_transfer(&root, &ft_xtoken, &investor_3, seed_size).await;
 
     let tier_investor_1 = 2;
     let tier_investor_2 = 5;
 
     // stake membership tokens
     ft_transfer_call(
-      &worker,
       &investor_1,
       &ft_xtoken,
       launchpad.as_account(),
@@ -235,10 +237,9 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     ft_transfer_call(
-      &worker,
       &investor_2,
       &ft_xtoken,
       launchpad.as_account(),
@@ -249,12 +250,11 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     // buy allocations
 
     ft_transfer_call(
-      &worker,
       &investor_1,
       &ft_price,
       launchpad.as_account(),
@@ -265,10 +265,9 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     ft_transfer_call(
-      &worker,
       &investor_2,
       &ft_price,
       launchpad.as_account(),
@@ -279,10 +278,9 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     ft_transfer_call(
-      &worker,
       &investor_3,
       &ft_price,
       launchpad.as_account(),
@@ -293,15 +291,15 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     // assert allocations owned
     let investor_1_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_1, listing_id).await?;
     let investor_2_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_2, listing_id).await?;
     let investor_3_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_3, listing_id).await?;
 
     let investor_1_allocations = investor_1_allocations.unwrap_or((0.to_string(), 0.to_string()));
     let investor_2_allocations = investor_2_allocations.unwrap_or((0.to_string(), 0.to_string()));
@@ -325,19 +323,19 @@ mod tests {
 
     // assert price token balances
     // launchpad balance must equal cost of all purchased allocations
-    let launchpad_balance = ft_balance_of(&worker, &ft_price, launchpad.as_account())
+    let launchpad_balance = ft_balance_of(&ft_price, launchpad.as_account())
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_1_balance = ft_balance_of(&worker, &ft_price, &investor_1)
+    let investor_1_balance = ft_balance_of(&ft_price, &investor_1)
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_2_balance = ft_balance_of(&worker, &ft_price, &investor_2)
+    let investor_2_balance = ft_balance_of(&ft_price, &investor_2)
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_3_balance = ft_balance_of(&worker, &ft_price, &investor_3)
+    let investor_3_balance = ft_balance_of(&ft_price, &investor_3)
       .await?
       .parse::<u128>()
       .unwrap();
@@ -372,7 +370,6 @@ mod tests {
       investor_3_allocations.0.parse::<u64>().unwrap() + allowance_phase_2;
 
     ft_transfer_call(
-      &worker,
       &investor_1,
       &ft_price,
       launchpad.as_account(),
@@ -383,10 +380,9 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     ft_transfer_call(
-      &worker,
       &investor_2,
       &ft_price,
       launchpad.as_account(),
@@ -397,10 +393,9 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     ft_transfer_call(
-      &worker,
       &investor_3,
       &ft_price,
       launchpad.as_account(),
@@ -411,15 +406,15 @@ mod tests {
       })
       .to_string(),
     )
-    .await?;
+    .await;
 
     // assert allocations owned
     let investor_1_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_1, listing_id).await?;
     let investor_2_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_2, listing_id).await?;
     let investor_3_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_3, listing_id).await?;
 
     let investor_1_allocations = investor_1_allocations.unwrap_or((0.to_string(), 0.to_string()));
     let investor_2_allocations = investor_2_allocations.unwrap_or((0.to_string(), 0.to_string()));
@@ -431,19 +426,19 @@ mod tests {
 
     // assert price token balances
     // launchpad balance must equal cost of all purchased allocations
-    let launchpad_balance_2 = ft_balance_of(&worker, &ft_price, launchpad.as_account())
+    let launchpad_balance_2 = ft_balance_of(&ft_price, launchpad.as_account())
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_1_balance_2 = ft_balance_of(&worker, &ft_price, &investor_1)
+    let investor_1_balance_2 = ft_balance_of(&ft_price, &investor_1)
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_2_balance_2 = ft_balance_of(&worker, &ft_price, &investor_2)
+    let investor_2_balance_2 = ft_balance_of(&ft_price, &investor_2)
       .await?
       .parse::<u128>()
       .unwrap();
-    let investor_3_balance_2 = ft_balance_of(&worker, &ft_price, &investor_3)
+    let investor_3_balance_2 = ft_balance_of(&ft_price, &investor_3)
       .await?
       .parse::<u128>()
       .unwrap();
@@ -472,7 +467,7 @@ mod tests {
     time_travel(&worker, 60 * 30).await?;
 
     // 11. Project owner withdraws
-    let op_listing_data = view_listing(&worker, &launchpad, listing_id).await?;
+    let op_listing_data = view_listing(&launchpad, listing_id).await?;
     let listing_data = op_listing_data.unwrap();
 
     let allocations_sold = listing_data["allocations_sold"]
@@ -500,29 +495,22 @@ mod tests {
       - effective_price_tokens_liquidity)
       - expected_fee_price_tokens_withdraw;
 
-    let pre_balance_price: u128 = ft_balance_of(&worker, &ft_price, &project_owner)
-      .await?
-      .parse()?;
-    let pre_balance_project: u128 = ft_balance_of(&worker, &ft_project, &project_owner)
-      .await?
-      .parse()?;
+    let pre_balance_price: u128 = ft_balance_of(&ft_price, &project_owner).await?.parse()?;
+    let pre_balance_project: u128 = ft_balance_of(&ft_project, &project_owner).await?.parse()?;
 
-    project_owner
-      .call(&worker, launchpad.id(), "withdraw_tokens_project")
-      .args_json(json!({
-        "listing_id": listing_id.to_string()
-      }))?
-      .deposit(1)
-      .gas(GAS_LIMIT)
-      .transact()
-      .await?;
+    transact_call(
+      project_owner
+        .call(launchpad.id(), "withdraw_tokens_project")
+        .args_json(json!({
+          "listing_id": listing_id.to_string()
+        }))
+        .deposit(1)
+        .gas(GAS_LIMIT),
+    )
+    .await;
 
-    let after_balance_price: u128 = ft_balance_of(&worker, &ft_price, &project_owner)
-      .await?
-      .parse()?;
-    let after_balance_project: u128 = ft_balance_of(&worker, &ft_project, &project_owner)
-      .await?
-      .parse()?;
+    let after_balance_price: u128 = ft_balance_of(&ft_price, &project_owner).await?.parse()?;
+    let after_balance_project: u128 = ft_balance_of(&ft_project, &project_owner).await?.parse()?;
 
     assert_eq!(
       pre_balance_price + expected_price_tokens_withdraw,
@@ -534,7 +522,7 @@ mod tests {
     );
 
     // assert fee was charged
-    let contract_treasury_balance = view_contract_treasury_balance(&worker, &launchpad).await?;
+    let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
     for pair in contract_treasury_balance.iter() {
       match pair.0.get("FT") {
         Some(value) => {
@@ -566,27 +554,27 @@ mod tests {
       * fraction_instant_release)
       / FRACTION_BASE;
 
-    let pre_balance_investor_1 = ft_balance_of(&worker, &ft_project, &investor_1)
+    let pre_balance_investor_1 = ft_balance_of(&ft_project, &investor_1)
       .await?
       .parse::<u128>()?;
-    let pre_balance_investor_2 = ft_balance_of(&worker, &ft_project, &investor_2)
+    let pre_balance_investor_2 = ft_balance_of(&ft_project, &investor_2)
       .await?
       .parse::<u128>()?;
-    let pre_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
+    let pre_balance_investor_3 = ft_balance_of(&ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
 
-    withdraw_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_1, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_2, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_3, listing_id).await?;
 
-    let after_balance_investor_1 = ft_balance_of(&worker, &ft_project, &investor_1)
+    let after_balance_investor_1 = ft_balance_of(&ft_project, &investor_1)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_2 = ft_balance_of(&worker, &ft_project, &investor_2)
+    let after_balance_investor_2 = ft_balance_of(&ft_project, &investor_2)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
+    let after_balance_investor_3 = ft_balance_of(&ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
 
@@ -605,11 +593,11 @@ mod tests {
 
     // assert contract keeping track of withdrawn tokens correctly
     let investor_1_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_1, listing_id).await?;
     let investor_2_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_2, listing_id).await?;
     let investor_3_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_3, listing_id).await?;
 
     let investor_1_allocations = investor_1_allocations.unwrap_or((0.to_string(), 0.to_string()));
     let investor_2_allocations = investor_2_allocations.unwrap_or((0.to_string(), 0.to_string()));
@@ -624,7 +612,7 @@ mod tests {
 
     // 14. Launch on dex
 
-    let op_listing_data = view_listing(&worker, &launchpad, listing_id).await?;
+    let op_listing_data = view_listing(&launchpad, listing_id).await?;
     let listing_data = op_listing_data.unwrap();
     let mut project_tokens_liquidity = listing_data["listing_treasury"]
       ["liquidity_pool_project_token_balance"]
@@ -645,10 +633,10 @@ mod tests {
     price_tokens_liquidity -= price_liquidity_fee;
 
     // assert creation of new pool
-    let initial_pool_quantity = get_number_of_pools(&worker, &ref_finance).await?;
-    launch_on_dex(&worker, &launchpad, &root, listing_id).await?;
-    let final_pool_quantity = get_number_of_pools(&worker, &ref_finance).await?;
-    let pool_info = get_pool(&worker, &ref_finance, final_pool_quantity - 1).await?;
+    let initial_pool_quantity = get_number_of_pools(&ref_finance).await?;
+    launch_on_dex(&launchpad, &root, listing_id).await?;
+    let final_pool_quantity = get_number_of_pools(&ref_finance).await?;
+    let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
     assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
     assert_eq!(
       pool_info["token_account_ids"]
@@ -670,9 +658,9 @@ mod tests {
     );
 
     // assert deposit of project token
-    let initial_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
-    launch_on_dex(&worker, &launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
+    let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    launch_on_dex(&launchpad, &root, listing_id).await?;
+    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
     assert_eq!(
       initial_balances
         .get(&ft_project.id().to_string())
@@ -686,7 +674,7 @@ mod tests {
     );
 
     // assert fee was charged
-    let contract_treasury_balance = view_contract_treasury_balance(&worker, &launchpad).await?;
+    let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
     for pair in contract_treasury_balance.iter() {
       match pair.0.get("FT") {
         Some(value) => {
@@ -705,9 +693,9 @@ mod tests {
     }
 
     // assert deposit of price token
-    let initial_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
-    launch_on_dex(&worker, &launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
+    let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    launch_on_dex(&launchpad, &root, listing_id).await?;
+    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
     assert_eq!(
       initial_balances
         .get(&ft_price.id().to_string())
@@ -721,7 +709,7 @@ mod tests {
     );
 
     // assert fee was charged
-    let contract_treasury_balance = view_contract_treasury_balance(&worker, &launchpad).await?;
+    let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
     for pair in contract_treasury_balance.iter() {
       match pair.0.get("FT") {
         Some(value) => {
@@ -740,8 +728,8 @@ mod tests {
     }
 
     // assert provisioning of liquidity
-    launch_on_dex(&worker, &launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&worker, &ref_finance, launchpad.as_account()).await?;
+    launch_on_dex(&launchpad, &root, listing_id).await?;
+    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
     assert_eq!(
       final_balances
         .get(&ft_price.id().to_string())
@@ -757,7 +745,7 @@ mod tests {
       0
     );
 
-    let pool_info = get_pool(&worker, &ref_finance, final_pool_quantity - 1).await?;
+    let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
     assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
     assert_eq!(
       pool_info["token_account_ids"]
@@ -795,27 +783,27 @@ mod tests {
       (investor_3_allocations.0.parse::<u128>()? * token_allocation_size * fraction_cliff_release)
         / FRACTION_BASE;
 
-    let pre_balance_investor_1 = ft_balance_of(&worker, &ft_project, &investor_1)
+    let pre_balance_investor_1 = ft_balance_of(&ft_project, &investor_1)
       .await?
       .parse::<u128>()?;
-    let pre_balance_investor_2 = ft_balance_of(&worker, &ft_project, &investor_2)
+    let pre_balance_investor_2 = ft_balance_of(&ft_project, &investor_2)
       .await?
       .parse::<u128>()?;
-    let pre_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
+    let pre_balance_investor_3 = ft_balance_of(&ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
 
-    withdraw_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_1, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_2, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_3, listing_id).await?;
 
-    let after_balance_investor_1 = ft_balance_of(&worker, &ft_project, &investor_1)
+    let after_balance_investor_1 = ft_balance_of(&ft_project, &investor_1)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_2 = ft_balance_of(&worker, &ft_project, &investor_2)
+    let after_balance_investor_2 = ft_balance_of(&ft_project, &investor_2)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
+    let after_balance_investor_3 = ft_balance_of(&ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
 
@@ -828,11 +816,11 @@ mod tests {
 
     // assert contract keeping track of withdrawn tokens correctly
     let investor_1_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_1, listing_id).await?;
     let investor_2_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_2, listing_id).await?;
     let investor_3_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_3, listing_id).await?;
 
     let investor_1_allocations = investor_1_allocations.unwrap_or((0.to_string(), 0.to_string()));
     let investor_2_allocations = investor_2_allocations.unwrap_or((0.to_string(), 0.to_string()));
@@ -859,17 +847,17 @@ mod tests {
     let expected_withdraw_2 = investor_2_allocations.0.parse::<u128>()? * token_allocation_size;
     let expected_withdraw_3 = investor_3_allocations.0.parse::<u128>()? * token_allocation_size;
 
-    withdraw_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
-    withdraw_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_1, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_2, listing_id).await?;
+    withdraw_allocations(&launchpad, &investor_3, listing_id).await?;
 
-    let after_balance_investor_1 = ft_balance_of(&worker, &ft_project, &investor_1)
+    let after_balance_investor_1 = ft_balance_of(&ft_project, &investor_1)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_2 = ft_balance_of(&worker, &ft_project, &investor_2)
+    let after_balance_investor_2 = ft_balance_of(&ft_project, &investor_2)
       .await?
       .parse::<u128>()?;
-    let after_balance_investor_3 = ft_balance_of(&worker, &ft_project, &investor_3)
+    let after_balance_investor_3 = ft_balance_of(&ft_project, &investor_3)
       .await?
       .parse::<u128>()?;
 
@@ -879,11 +867,11 @@ mod tests {
 
     // assert contract keeping track of withdrawn tokens correctly
     let investor_1_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_1, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_1, listing_id).await?;
     let investor_2_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_2, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_2, listing_id).await?;
     let investor_3_allocations: Option<(String, String)> =
-      view_investor_allocations(&worker, &launchpad, &investor_3, listing_id).await?;
+      view_investor_allocations(&launchpad, &investor_3, listing_id).await?;
 
     let investor_1_allocations = investor_1_allocations.unwrap_or((0.to_string(), 0.to_string()));
     let investor_2_allocations = investor_2_allocations.unwrap_or((0.to_string(), 0.to_string()));

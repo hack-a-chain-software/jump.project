@@ -17,30 +17,27 @@ mod tests {
 
     let root = worker.root_account().unwrap();
     // CREATE USER ACCOUNTS
-    let owner = create_user_account(&root, &worker, "owner").await;
-    let user = create_user_account(&root, &worker, "user").await;
-    let user2 = create_user_account(&root, &worker, "user2").await;
+    let owner = create_user_account(&root, "owner").await;
+    let user = create_user_account(&root, "user").await;
+    let user2 = create_user_account(&root, "user2").await;
 
     // 1. Initialize contracts
     // DEPLOY BASE TOKEN
     let ft_wasm = get_wasm("token_contract.wasm")?;
-    let ft_token = deploy_contract(&root, &worker, "ft_contract_price", &ft_wasm).await;
-    initialize_ft_contract(&worker, &ft_token, &owner).await;
+    let ft_token = deploy_contract(&root, "ft_contract_price", &ft_wasm).await;
+    initialize_ft_contract(&ft_token, &owner).await;
     // DEPLOY X_TOKEN
     let x_wasm = get_wasm("x_token.wasm")?;
-    let x_token = deploy_contract(&root, &worker, "x_token", &x_wasm).await;
+    let x_token = deploy_contract(&root, "x_token", &x_wasm).await;
 
-    owner
-      .call(&worker, x_token.id(), "new")
-      .args_json(json!({
-          "x_token_name": "x_jump".to_string(),
-          "x_token_symbol": "symbol".to_string(),
-          "x_token_icon": "icon".to_string(),
-          "x_token_decimals": FT_DECIMALS,
-          "base_token_address": ft_token.id().to_string(),
-      }))?
-      .transact()
-      .await?;
+    transact_call(owner.call(x_token.id(), "new").args_json(json!({
+      "x_token_name": "x_jump".to_string(),
+      "x_token_symbol": "symbol".to_string(),
+      "x_token_icon": "icon".to_string(),
+      "x_token_decimals": FT_DECIMALS,
+      "base_token_address": ft_token.id().to_string(),
+    })))
+    .await;
 
     let accounts = vec![
       &owner,
@@ -51,22 +48,18 @@ mod tests {
     ];
     let contracts = vec![&ft_token, &x_token];
 
-    bulk_register_storage(&worker, accounts, contracts).await?;
-    ft_transfer(&worker, &owner, &ft_token, &user, 1_000_000).await?;
+    bulk_register_storage(accounts, contracts).await?;
+    ft_transfer(&owner, &ft_token, &user, 1_000_000).await;
 
     // 2. User mints x_tokens - assert 1:1 ratio
 
-    let initial_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let initial_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let initial_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let initial_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
-    let initial_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let initial_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let initial_x_token_supply = view_token_ratio(&worker, &x_token)
+    let initial_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
@@ -77,26 +70,21 @@ mod tests {
 
     let transfer_amount = 500;
     ft_transfer_call(
-      &worker,
       &user,
       &ft_token,
       x_token.as_account(),
       transfer_amount,
       "mint".to_string(),
     )
-    .await?;
+    .await;
 
-    let final_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let final_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let final_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let final_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
-    let final_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let final_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let final_x_token_supply = view_token_ratio(&worker, &x_token)
+    let final_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
@@ -113,10 +101,10 @@ mod tests {
 
     // 3. Owner deposits reward tokens
 
-    let initial_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let initial_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let initial_x_token_supply = view_token_ratio(&worker, &x_token)
+    let initial_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
@@ -124,56 +112,48 @@ mod tests {
 
     let increase_amount = 500;
     ft_transfer_call(
-      &worker,
       &owner,
       &ft_token,
       x_token.as_account(),
       increase_amount,
       "deposit_profit".to_string(),
     )
-    .await?;
+    .await;
 
-    let final_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let final_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let final_x_token_supply = view_token_ratio(&worker, &x_token)
+    let final_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
       .parse::<u128>()?;
 
-    assert_eq!(final_contract_balance, initial_contract_balance + increase_amount);
     assert_eq!(
-      final_x_token_supply,
-      initial_x_token_supply 
+      final_contract_balance,
+      initial_contract_balance + increase_amount
     );
+    assert_eq!(final_x_token_supply, initial_x_token_supply);
 
     // 4. User withdraws x_tokens - assert new ratio
 
-    let initial_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let initial_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let initial_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let initial_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
     let quantity_to_burn = 200;
-    user
-      .call(&worker, x_token.id(), "burn_x_token")
-      .args_json(json!({
-        "quantity_to_burn": quantity_to_burn.to_string()
-      }))?
-      .deposit(1)
-      .gas(GAS_LIMIT)
-      .transact()
-      .await?;
+    transact_call(
+      user
+        .call(x_token.id(), "burn_x_token")
+        .args_json(json!({
+          "quantity_to_burn": quantity_to_burn.to_string()
+        }))
+        .deposit(1)
+        .gas(GAS_LIMIT),
+    )
+    .await;
 
-    let final_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let final_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let final_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let final_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
     assert_eq!(
       initial_x_token_balance - quantity_to_burn,
@@ -186,17 +166,13 @@ mod tests {
 
     // 5. User mints new x_tokens - assert new ratio
 
-    let initial_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let initial_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let initial_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let initial_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
-    let initial_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let initial_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let initial_x_token_supply = view_token_ratio(&worker, &x_token)
+    let initial_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
@@ -204,26 +180,21 @@ mod tests {
 
     let transfer_amount = 100;
     ft_transfer_call(
-      &worker,
       &user,
       &ft_token,
       x_token.as_account(),
       transfer_amount,
       "mint".to_string(),
     )
-    .await?;
+    .await;
 
-    let final_token_balance = ft_balance_of(&worker, &ft_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let final_x_token_balance = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
+    let final_token_balance = ft_balance_of(&ft_token, &user).await?.parse::<u128>()?;
+    let final_x_token_balance = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
 
-    let final_contract_balance = ft_balance_of(&worker, &ft_token, x_token.as_account())
+    let final_contract_balance = ft_balance_of(&ft_token, x_token.as_account())
       .await?
       .parse::<u128>()?;
-    let final_x_token_supply = view_token_ratio(&worker, &x_token)
+    let final_x_token_supply = view_token_ratio(&x_token)
       .await?
       .get("x_token")
       .unwrap()
@@ -245,22 +216,14 @@ mod tests {
     );
 
     // 6. User transfer x_tokens to user2 - assert normal behaviour for NEP-141
-    let initial_x_token_balance_1 = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let initial_x_token_balance_2 = ft_balance_of(&worker, &x_token, &user2)
-      .await?
-      .parse::<u128>()?;
+    let initial_x_token_balance_1 = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
+    let initial_x_token_balance_2 = ft_balance_of(&x_token, &user2).await?.parse::<u128>()?;
 
     let amount = 200;
-    ft_transfer(&worker, &user, &x_token, &user2, amount).await?;
+    ft_transfer(&user, &x_token, &user2, amount).await;
 
-    let final_x_token_balance_1 = ft_balance_of(&worker, &x_token, &user)
-      .await?
-      .parse::<u128>()?;
-    let final_x_token_balance_2 = ft_balance_of(&worker, &x_token, &user2)
-      .await?
-      .parse::<u128>()?;
+    let final_x_token_balance_1 = ft_balance_of(&x_token, &user).await?.parse::<u128>()?;
+    let final_x_token_balance_2 = ft_balance_of(&x_token, &user2).await?.parse::<u128>()?;
 
     assert_eq!(initial_x_token_balance_1 - amount, final_x_token_balance_1);
     assert_eq!(initial_x_token_balance_2 + amount, final_x_token_balance_2);
