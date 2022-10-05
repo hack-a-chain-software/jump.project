@@ -1,7 +1,7 @@
 use serde_json::json;
 use workspaces::{Contract, result::ExecutionResult, Account};
 
-use crate::{transact_call, GAS_LIMIT, token::ft_transfer_call, nft::nft_transfer_call};
+use crate::methods::{transact_call, GAS_LIMIT, token::ft_transfer_call, nft::nft_transfer_call};
 
 pub const DENOM: u128 = 1_000_000_000_000_000_000_000;
 
