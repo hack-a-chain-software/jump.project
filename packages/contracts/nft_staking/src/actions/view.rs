@@ -1,8 +1,10 @@
 use near_sdk::{near_bindgen, AccountId};
 
 use crate::{
-  models::StakedNFT,
-  types::{FungibleTokenBalance, NFTCollection, NonFungibleTokenID, SerializableStakingProgram},
+  types::{
+    NFTCollection, NonFungibleTokenID, SerializableFungibleTokenBalance, SerializableStakedNFT,
+    SerializableStakingProgram,
+  },
   Contract, ContractExt,
 };
 
@@ -15,13 +17,16 @@ impl Contract {
     self.staking_programs.get(&collection).map(From::from)
   }
 
-  pub fn view_staked_nft_balance(&self, nft_id: NonFungibleTokenID) -> FungibleTokenBalance {
+  pub fn view_staked_nft_balance(
+    &self,
+    nft_id: NonFungibleTokenID,
+  ) -> SerializableFungibleTokenBalance {
     let collection = &nft_id.0;
     let mut staking_program = self.staking_programs.get(collection).unwrap();
 
     let staked_nft = staking_program.view_unclaimed_rewards(&nft_id);
 
-    staked_nft.balance
+    staked_nft.balance.into()
   }
 
   pub fn view_guardians(&self, from_index: Option<u16>, limit: Option<u16>) -> Vec<String> {
@@ -68,24 +73,25 @@ impl Contract {
     }
   }
 
-  pub fn view_staked_nft(&self, nft_id: NonFungibleTokenID) -> Option<StakedNFT> {
+  pub fn view_staked_nft(&self, nft_id: NonFungibleTokenID) -> Option<SerializableStakedNFT> {
     let collection = &nft_id.0;
 
     self
       .staking_programs
       .get(collection)
       .and_then(|staking_program| staking_program.staked_nfts.get(&nft_id))
+      .map(|nft| nft.into())
   }
 
   pub fn view_inner_balance(
     &self,
     collection: NFTCollection,
     account_id: AccountId,
-  ) -> FungibleTokenBalance {
+  ) -> SerializableFungibleTokenBalance {
     let staking_program = self.staking_programs.get(&collection).unwrap();
 
     let balance = staking_program.stakers_balances.get(&account_id).unwrap();
 
-    balance
+    balance.into()
   }
 }
