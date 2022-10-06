@@ -27,11 +27,11 @@ export async function processTransaction(
 
         const transactionHash = executionOutcome.executionOutcome.id;
         const eventId: EventId = {
-          blockHeight,
+          blockHeight: blockHeight.toString(),
           transactionHash,
-          eventIndex,
+          eventIndex: eventIndex.toString(),
         };
-        // await processEvent(executorId, eventJsonString, eventId, sequelize);
+        await processEvent(executorId, eventJsonString, eventId, sequelize);
       }
     }
   }

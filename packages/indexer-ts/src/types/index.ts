@@ -1,9 +1,9 @@
 export * from "./launchpad";
 
 export type EventId = {
-  blockHeight: number;
+  blockHeight: string;
   transactionHash: string;
-  eventIndex: number;
+  eventIndex: string;
 };
 
 export type NearEvent = {

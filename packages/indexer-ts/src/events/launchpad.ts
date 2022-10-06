@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { Sequelize } from "sequelize/types";
+import { Sequelize, Transaction } from "sequelize/types";
 import {
   NearEvent,
   CREATE_LISTING,
@@ -14,11 +14,13 @@ import {
   InvestorBuyAllocationsData,
   INVESTOR_WITHDRAW_ALLOCATIONS,
   InvestorWithdrawAllocationsData,
+  EventId,
 } from "../types";
-import { Listing, Allocation } from "../models";
+import { Listing, Allocation, ProcessedEvent } from "../models";
 
 export async function handleLaunchpadEvent(
   event: NearEvent,
+  eventId: EventId,
   sequelize: Sequelize
 ): Promise<void> {
   switch (event.event) {
@@ -26,6 +28,8 @@ export async function handleLaunchpadEvent(
       let data: CreateListingData = event.data[0];
       let objectData = data.listing_data.V1;
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         await Listing.create(
           {
             listing_id: objectData.listing_id,
@@ -67,6 +71,8 @@ export async function handleLaunchpadEvent(
       let entry: Listing = (await Listing.findByPk(entryPk))!;
 
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         entry.listing_status = "cancelled";
         await entry.save({ transaction });
       });
@@ -80,6 +86,8 @@ export async function handleLaunchpadEvent(
       let entry: Listing = (await Listing.findByPk(entryPk))!;
 
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         entry.listing_status = "funded";
         await entry.save({ transaction });
       });
@@ -93,6 +101,8 @@ export async function handleLaunchpadEvent(
       let entry: Listing = (await Listing.findByPk(entryPk))!;
 
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         entry.listing_status = data.project_status;
         await entry.save({ transaction });
       });
@@ -111,6 +121,8 @@ export async function handleLaunchpadEvent(
         },
       });
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         if (entry === null) {
           await Allocation.create(
             {
@@ -133,6 +145,7 @@ export async function handleLaunchpadEvent(
           });
           await entry.save({ transaction });
         }
+
         listing.set({
           listing_status: data.project_status,
           allocations_sold: data.total_allocations_sold,
@@ -156,6 +169,8 @@ export async function handleLaunchpadEvent(
       }))!;
 
       await sequelize.transaction(async (transaction) => {
+        await processEvent(eventId, transaction);
+
         entry.quantity_withdrawn = new Big(entry.quantity_withdrawn)
           .plus(new Big(data.project_tokens_withdrawn))
           .toFixed();
@@ -167,4 +182,15 @@ export async function handleLaunchpadEvent(
       break;
     }
   }
+}
+
+async function processEvent(eventId: EventId, transaction: Transaction) {
+  await ProcessedEvent.create(
+    {
+      block_height: eventId.blockHeight,
+      transaction_hash: eventId.transactionHash,
+      event_index: eventId.transactionHash,
+    },
+    { transaction }
+  );
 }

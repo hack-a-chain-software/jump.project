@@ -16,7 +16,7 @@ export async function processEvent(
   const event: NearEvent = JSON.parse(eventJsonString);
   switch (executorId) {
     case LAUNCHPAD_CONTRACT: {
-      await handleLaunchpadEvent(event, sequelize);
+      await handleLaunchpadEvent(event, eventId, sequelize);
       break;
     }
     case NFT_STAKING_CONTRACT: {
