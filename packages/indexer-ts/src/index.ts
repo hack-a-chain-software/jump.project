@@ -23,18 +23,14 @@ const lakeConfig: types.LakeConfig = {
 async function handleStreamerMessage(
   streamerMessage: types.StreamerMessage
 ): Promise<void> {
-  // const sequelize = await sequelizeConnect();
-  for (let shard of streamerMessage.shards) {
-    for (let receipt of shard.receiptExecutionOutcomes) {
-      let outcome = receipt.executionOutcome.outcome;
-      let status: any = outcome.status;
-      console.log({
-        receipt: receipt.receipt?.receiptId,
-        outcome: receipt.executionOutcome.id,
-      });
+  const sequelize = await sequelizeConnect();
+  for (const shard of streamerMessage.shards) {
+    for (const receipt of shard.receiptExecutionOutcomes) {
+      const outcome = receipt.executionOutcome.outcome;
+      const status: any = outcome.status;
       if (status.Failure !== null && status.Unknown !== null) {
-        let blockHeight = streamerMessage.block.header.height;
-        // await processTransaction(receipt, blockHeight, sequelize);
+        const blockHeight = streamerMessage.block.header.height;
+        await processTransaction(receipt, blockHeight, sequelize);
       }
     }
   }

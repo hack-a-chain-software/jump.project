@@ -23,10 +23,10 @@ export async function processTransaction(
   if (executorId in INTERESTED_CONTRACTS) {
     for (const [eventIndex, log] of outcome.logs.entries()) {
       if (log.startsWith(JSON_EVENT_PREFIX)) {
-        let eventJsonString = log.replace(JSON_EVENT_PREFIX, "");
-        // event id not guaranteed to be unique
+        const eventJsonString = log.replace(JSON_EVENT_PREFIX, "");
+
         const transactionHash = executionOutcome.executionOutcome.id;
-        let eventId: EventId = {
+        const eventId: EventId = {
           blockHeight,
           transactionHash,
           eventIndex,
