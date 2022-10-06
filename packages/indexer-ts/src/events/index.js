@@ -33,29 +33,30 @@ var __awaiter =
     });
   };
 Object.defineProperty(exports, "__esModule", { value: true });
-const near_lake_framework_1 = require("near-lake-framework");
-const dotenv_1 = require("dotenv");
-(0, dotenv_1.config)();
-const lakeConfig = {
-  s3BucketName:
-    process.env.NETWORK === "mainnet"
-      ? "near-lake-data-mainnet"
-      : "near-lake-data-testnet",
-  s3RegionName: "eu-central-1",
-  startBlockHeight: parseInt(process.env.START_BLOCK) || 63804051,
-};
-function handleStreamerMessage(streamerMessage) {
+exports.processEvent = void 0;
+const env_1 = require("../env");
+const launchpad_1 = require("./launchpad");
+function processEvent(executorId, eventJsonString, eventId, sequelize) {
   return __awaiter(this, void 0, void 0, function* () {
-    for (let shard of streamerMessage.shards) {
-      for (let receipt of shard.receiptExecutionOutcomes) {
-        console.log(receipt.executionOutcome.outcome);
+    const event = JSON.parse(eventJsonString);
+    switch (executorId) {
+      case env_1.LAUNCHPAD_CONTRACT: {
+        yield (0, launchpad_1.handleLaunchpadEvent)(event, sequelize);
+        break;
+      }
+      case env_1.NFT_STAKING_CONTRACT: {
+        break;
+      }
+      case env_1.XTOKEN_CONTRACT: {
         break;
       }
     }
   });
 }
-(() =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    yield (0,
-    near_lake_framework_1.startStream)(lakeConfig, handleStreamerMessage);
-  }))();
+exports.processEvent = processEvent;
+/*
+Inside each:
+    Check if is one of interested events, else discard;
+    Coerce JSON to event type, if convertion fails, throw;
+    Perform relevant operation.
+*/

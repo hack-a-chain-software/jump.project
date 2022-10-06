@@ -21,15 +21,17 @@ export async function processTransaction(
   const executorId = outcome.executorId;
 
   if (executorId in INTERESTED_CONTRACTS) {
-    for (const [index, log] of outcome.logs.entries()) {
+    for (const [eventIndex, log] of outcome.logs.entries()) {
       if (log.startsWith(JSON_EVENT_PREFIX)) {
         let eventJsonString = log.replace(JSON_EVENT_PREFIX, "");
         // event id not guaranteed to be unique
+        const transactionHash = executionOutcome.executionOutcome.id;
         let eventId: EventId = {
           blockHeight,
-          index,
+          transactionHash,
+          eventIndex,
         };
-        await processEvent(executorId, eventJsonString, eventId, sequelize);
+        // await processEvent(executorId, eventJsonString, eventId, sequelize);
       }
     }
   }
