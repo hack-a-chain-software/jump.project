@@ -5,7 +5,7 @@ import { Button, ValueBox } from "@/components";
 import { WalletIcon } from "@/assets/svg";
 import { useTheme } from "../../../hooks/theme";
 import { useMemo, useState } from "react";
-import { formatNumber, getUTCDate } from "@near/ts";
+import { getUTCDate } from "@near/ts";
 import {
   useVestingStore,
   Vesting,
@@ -16,6 +16,7 @@ import { BuyFastPass } from "@/modals";
 import { useNearQuery } from "react-near";
 import { JUMP_TOKEN } from "@/env/contract";
 import { useWalletSelector } from "@/context/wallet-selector";
+import Big from "big.js";
 
 export function VestingCard(
   props: Vesting & BoxProps & { token: Token; contractData: ContractData }
@@ -56,6 +57,22 @@ export function VestingCard(
     poolInterval: 1000 * 60,
     skip: !accountId,
   });
+
+  const decimals = useMemo(() => {
+    return new Big(10).pow(props?.token?.decimals || 1);
+  }, [props]);
+
+  const totalAmount = useMemo(() => {
+    return new Big(props.locked_value).div(decimals).toFixed(2);
+  }, [props, decimals]);
+
+  const avaialbleToClaim = useMemo(() => {
+    return new Big(props.available_to_withdraw).div(decimals).toFixed(2);
+  }, [props, decimals]);
+
+  const withdrawnAmount = useMemo(() => {
+    return new Big(props.withdrawn_tokens).div(decimals).toFixed(2);
+  }, [props, decimals]);
 
   return (
     <Box
@@ -105,10 +122,7 @@ export function VestingCard(
               maxW="100%"
             >
               <Text color="black" fontSize="16px" fontWeight="700">
-                {`Total amount - ${formatNumber(
-                  Number(props.locked_value),
-                  props?.token?.decimals || 0
-                )} JUMP`}
+                {`Total amount - ${totalAmount} JUMP`}
               </Text>
             </Flex>
 
@@ -153,10 +167,7 @@ export function VestingCard(
               minWidth="250px"
               borderColor={glassyWhiteOpaque}
               title="Available to Claim"
-              value={`${formatNumber(
-                Number(props.available_to_withdraw),
-                props.token?.decimals || 0
-              )} ${props.token?.symbol}`}
+              value={`${avaialbleToClaim} ${props.token?.symbol}`}
               bottomText="Unlocked amount"
             />
 
@@ -164,10 +175,7 @@ export function VestingCard(
               minWidth="250px"
               borderColor={glassyWhiteOpaque}
               title="Claimed Amount"
-              value={`${formatNumber(
-                Number(props.withdrawn_tokens),
-                props.token?.decimals || 0
-              )} ${props.token?.symbol}`}
+              value={`${withdrawnAmount} ${props.token?.symbol}`}
               bottomText="Withdrawn amount"
             />
 
