@@ -2,7 +2,6 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import reactRefresh from "@vitejs/plugin-react-refresh";
-import NodeGlobalsPolyfillPlugin from "@esbuild-plugins/node-globals-polyfill";
 
 const inject = require("@rollup/plugin-inject");
 
@@ -29,7 +28,6 @@ export default defineConfig({
     },
   ],
   define: {
-    global: "window",
     "process.env": {},
   },
   build: {
@@ -42,17 +40,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["buffer", "process"],
-    esbuildOptions: {
-      define: {
-        global: "globalThis",
-      },
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          buffer: true,
-          process: false,
-        }),
-      ],
-    },
   },
   resolve: {
     alias: {
