@@ -5,6 +5,8 @@ import {
   EventId,
   CREATE_STAKING_PRGRAM,
   CreateStakingProgramData,
+  UPDATE_STAKING_PROGRAM,
+  UpdateStakingProgramData,
 } from "../types";
 import { StakingProgram, StakedNft } from "../models";
 import { unixTsToDate, sleep } from "../types";
@@ -43,6 +45,49 @@ export async function handleNftStakingEvent(
             },
             { transaction }
           );
+
+          await transaction.commit();
+        } catch {
+          await transaction.rollback();
+
+          if (counter < MAX_COUNT) {
+            counter += 1;
+            await sleep(2000, counter);
+            await query();
+          }
+        }
+      }
+
+      await query();
+      break;
+    }
+
+    case UPDATE_STAKING_PROGRAM: {
+      let counter = 0;
+      const MAX_COUNT = 3;
+      async function query() {
+        let data: UpdateStakingProgramData = event.data[0];
+
+        const transaction = await sequelize.transaction();
+
+        try {
+          await processEventId(eventId, transaction);
+        } catch (err) {
+          await transaction.rollback();
+          return;
+        }
+
+        try {
+          let entry: StakingProgram = (await StakingProgram.findByPk(
+            data.collection_address
+          ))!;
+
+          if (data.early_withdraw_penalty)
+            entry.early_withdraw_penalty = data.early_withdraw_penalty;
+          if (data.min_staking_period)
+            entry.min_staking_period = data.min_staking_period;
+
+          entry.save({ transaction });
 
           await transaction.commit();
         } catch {
