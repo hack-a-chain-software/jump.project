@@ -2,12 +2,8 @@ import {
   Model,
   InferAttributes,
   InferCreationAttributes,
-  CreationOptional,
   DataTypes,
-  Optional,
   Sequelize,
-  NonAttribute,
-  ForeignKey,
 } from "sequelize";
 
 export class ProcessedEvent extends Model<

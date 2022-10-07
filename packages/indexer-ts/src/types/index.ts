@@ -23,7 +23,6 @@ export function unixTsToDate(date: string): Date {
   let dateObject = new Date(
     parseInt(new Big(date).div(NANO).mul(new Big("1000")).toFixed(0))
   );
-  console.log(dateObject.toUTCString());
   return dateObject;
 }
 

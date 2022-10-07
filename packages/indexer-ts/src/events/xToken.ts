@@ -1,4 +1,3 @@
-import Big from "big.js";
 import { Sequelize, Transaction } from "sequelize/types";
 import {
   NearEvent,
@@ -17,6 +16,7 @@ export async function handleXTokenEvent(
 ): Promise<void> {
   switch (event.event) {
     case PROFIT_DEPOSIT: {
+      console.log("HERE");
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
@@ -42,7 +42,8 @@ export async function handleXTokenEvent(
           );
 
           await transaction.commit();
-        } catch {
+        } catch (err) {
+          console.log(err);
           await transaction.rollback();
 
           if (counter < MAX_COUNT) {

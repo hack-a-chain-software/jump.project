@@ -22,6 +22,7 @@ export async function handleNftStakingEvent(
 ): Promise<void> {
   switch (event.event) {
     case CREATE_STAKING_PRGRAM: {
+      console.log("HERE 2");
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
@@ -50,9 +51,9 @@ export async function handleNftStakingEvent(
           );
 
           await transaction.commit();
-        } catch {
+        } catch (err) {
           await transaction.rollback();
-
+          console.log(err);
           if (counter < MAX_COUNT) {
             counter += 1;
             await sleep(2000, counter);
@@ -113,7 +114,7 @@ export async function handleNftStakingEvent(
       const MAX_COUNT = 3;
       async function query() {
         let data: StakeNftData = event.data[0];
-
+        console.log("STAKE NFT");
         const transaction = await sequelize.transaction();
 
         try {
@@ -135,7 +136,8 @@ export async function handleNftStakingEvent(
           );
 
           await transaction.commit();
-        } catch {
+        } catch (err) {
+          console.log(err);
           await transaction.rollback();
 
           if (counter < MAX_COUNT) {

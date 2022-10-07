@@ -3,18 +3,12 @@ import { S3_BUCKET, START_BLOCK } from "./env";
 import { sequelizeConnect } from "./connector";
 import { processTransaction } from "./processor";
 import { Sequelize } from "sequelize/types";
+import { ProcessedEvent } from "./models";
 
-/* Sets environment to run indexer on
- * @param s3BucketName defines which S3 bucket to read data from
- *        can choose between testnet and mainnet in main implementations
- *        or custom bucket
- * @param startBlockHeight
+/* Amount of blocks to reparse after rebooting indexer
+ * from shutdown
  */
-const lakeConfig: types.LakeConfig = {
-  s3BucketName: S3_BUCKET,
-  s3RegionName: "eu-central-1",
-  startBlockHeight: START_BLOCK,
-};
+const BLOCK_REDUNDANCY = 1000;
 
 /* Handles each indexed block
  * @param streamerMessage Block of indexed data and sends all non failed transactions
@@ -42,5 +36,32 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
 
 (async () => {
   const sequelize = await sequelizeConnect();
+
+  // get highest block in DB
+  const lastProcessedTransaction = (await ProcessedEvent.findOne({
+    attributes: [
+      [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
+    ],
+    raw: true,
+  }))!;
+
+  // const lastProcessedBlock = lastProcessedTransaction.block_height
+  //   ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
+  //   : START_BLOCK;
+  const lastProcessedBlock = START_BLOCK;
+
+  const lakeConfig: types.LakeConfig = {
+    s3BucketName: S3_BUCKET,
+    s3RegionName: "eu-central-1",
+    startBlockHeight: lastProcessedBlock,
+  };
+
   await startStream(lakeConfig, closureHandleStreamerMessage(sequelize));
 })();
+
+/* testar contratos do zero:
+ * 1. deployar contratos novos
+ * 2. indexar
+ * 3. buildar site
+ * 4. interagir para testar stakeNft e xTokenDeposit
+ */
