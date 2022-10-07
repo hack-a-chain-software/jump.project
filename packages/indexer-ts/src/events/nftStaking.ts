@@ -1,4 +1,3 @@
-import Big from "big.js";
 import { Sequelize } from "sequelize/types";
 import {
   NearEvent,
@@ -7,6 +6,10 @@ import {
   CreateStakingProgramData,
   UPDATE_STAKING_PROGRAM,
   UpdateStakingProgramData,
+  STAKE_NFT,
+  StakeNftData,
+  UNSTAKE_NFT,
+  UnstakeNftData,
 } from "../types";
 import { StakingProgram, StakedNft } from "../models";
 import { unixTsToDate, sleep } from "../types";
@@ -88,6 +91,89 @@ export async function handleNftStakingEvent(
             entry.min_staking_period = data.min_staking_period;
 
           entry.save({ transaction });
+
+          await transaction.commit();
+        } catch {
+          await transaction.rollback();
+
+          if (counter < MAX_COUNT) {
+            counter += 1;
+            await sleep(2000, counter);
+            await query();
+          }
+        }
+      }
+
+      await query();
+      break;
+    }
+
+    case STAKE_NFT: {
+      let counter = 0;
+      const MAX_COUNT = 3;
+      async function query() {
+        let data: StakeNftData = event.data[0];
+
+        const transaction = await sequelize.transaction();
+
+        try {
+          await processEventId(eventId, transaction);
+        } catch (err) {
+          await transaction.rollback();
+          return;
+        }
+
+        try {
+          await StakedNft.create(
+            {
+              nft_id: data.token_id[1],
+              collection_id: data.token_id[0].account_id,
+              owner_id: data.owner_id,
+              staked_timestamp: unixTsToDate(data.staked_timestamp),
+            },
+            { transaction }
+          );
+
+          await transaction.commit();
+        } catch {
+          await transaction.rollback();
+
+          if (counter < MAX_COUNT) {
+            counter += 1;
+            await sleep(2000, counter);
+            await query();
+          }
+        }
+      }
+
+      await query();
+      break;
+    }
+
+    case UNSTAKE_NFT: {
+      let counter = 0;
+      const MAX_COUNT = 3;
+      async function query() {
+        let data: UnstakeNftData = event.data[0];
+
+        const transaction = await sequelize.transaction();
+
+        try {
+          await processEventId(eventId, transaction);
+        } catch (err) {
+          await transaction.rollback();
+          return;
+        }
+
+        try {
+          const entry: StakedNft = (await StakedNft.findOne({
+            where: {
+              nft_id: data.token_id[1],
+              collection_id: data.token_id[0].account_id,
+            },
+          }))!;
+
+          await entry.destroy({ transaction });
 
           await transaction.commit();
         } catch {

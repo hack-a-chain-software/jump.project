@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { Sequelize, Transaction } from "sequelize/types";
+import { Sequelize } from "sequelize/types";
 import {
   NearEvent,
   CREATE_LISTING,
@@ -16,7 +16,7 @@ import {
   InvestorWithdrawAllocationsData,
   EventId,
 } from "../types";
-import { Listing, Allocation, ProcessedEvent } from "../models";
+import { Listing, Allocation } from "../models";
 import { unixTsToDate, sleep } from "../types";
 import { processEventId } from ".";
 
