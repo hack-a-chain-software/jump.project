@@ -126,7 +126,7 @@ export const Staking = () => {
       const withdraw = getAmountRaw(amount);
 
       try {
-        await burnXToken(amount, accountId!, selector);
+        await burnXToken(withdraw, accountId!, selector);
         toast.success(`You have staked ${amount} JUMP into ${amount} xJUMP`);
       } catch (error) {
         console.warn(error);
