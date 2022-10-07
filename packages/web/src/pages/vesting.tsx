@@ -13,9 +13,10 @@ import isEmpty from "lodash/isEmpty";
 import { useTheme } from "@/hooks/theme";
 import { addMilliseconds, isBefore } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
-import { formatNumber, getUTCDate } from "@near/ts";
+import { getUTCDate } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
+import Big from "big.js";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
@@ -79,6 +80,22 @@ export const Vesting = () => {
     return isEmpty(investorInfo);
   }, [investorInfo, accountId]);
 
+  const decimals = useMemo(() => {
+    return new Big(10).pow(investorInfo?.token?.decimals || 1);
+  }, [investorInfo]);
+
+  const totalLocked = useMemo(() => {
+    return new Big(investorInfo?.totalLocked || 1).div(decimals).toFixed(2);
+  }, [investorInfo, decimals]);
+
+  const totalUnlocked = useMemo(() => {
+    return new Big(investorInfo?.totalUnlocked || 1).div(decimals).toFixed(2);
+  }, [investorInfo, decimals]);
+
+  const totalWithdrawn = useMemo(() => {
+    return new Big(investorInfo?.totalWithdrawn || 1).div(decimals).toFixed(2);
+  }, [investorInfo, decimals]);
+
   return (
     <PageContainer>
       <TopCard
@@ -100,10 +117,7 @@ export const Vesting = () => {
                 title="Total Locked"
                 value={
                   accountId
-                    ? `${formatNumber(
-                        investorInfo?.totalLocked || 0,
-                        investorInfo?.token?.decimals || 0
-                      )} ${investorInfo?.token?.symbol}`
+                    ? `${totalLocked} ${investorInfo?.token?.symbol}`
                     : "Connect Wallet"
                 }
                 bottomText="All amount locked"
@@ -122,10 +136,7 @@ export const Vesting = () => {
                 title="Total Unlocked"
                 value={
                   accountId
-                    ? `${formatNumber(
-                        investorInfo?.totalUnlocked || 0,
-                        investorInfo?.token?.decimals || 0
-                      )} ${investorInfo?.token?.symbol}`
+                    ? `${totalUnlocked} ${investorInfo?.token?.symbol}`
                     : "Connect Wallet"
                 }
                 bottomText="Unlocked amount"
@@ -144,10 +155,7 @@ export const Vesting = () => {
                 title="Total Withdrawn"
                 value={
                   accountId
-                    ? `${formatNumber(
-                        investorInfo?.totalWithdrawn || 0,
-                        investorInfo?.token?.decimals || 0
-                      )} ${investorInfo?.token?.symbol}`
+                    ? `${totalWithdrawn} ${investorInfo?.token?.symbol}`
                     : "Connect Wallet"
                 }
                 bottomText="Total quantity "
