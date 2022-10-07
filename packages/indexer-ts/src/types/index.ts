@@ -3,6 +3,7 @@ import Big from "big.js";
 const NANO = new Big("1000000000");
 
 export * from "./launchpad";
+export * from "./nftStaking";
 export * from "./xToken";
 
 export type EventId = {

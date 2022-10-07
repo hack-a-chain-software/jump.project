@@ -1,26 +1,26 @@
 import Big from "big.js";
-import { Sequelize, Transaction } from "sequelize/types";
+import { Sequelize } from "sequelize/types";
 import {
   NearEvent,
-  PROFIT_DEPOSIT,
-  ProfitDepositData,
   EventId,
+  CREATE_STAKING_PRGRAM,
+  CreateStakingProgramData,
 } from "../types";
-import { xTokenRatio } from "../models";
+import { StakingProgram, StakedNft } from "../models";
 import { unixTsToDate, sleep } from "../types";
 import { processEventId } from ".";
 
-export async function handleXTokenEvent(
+export async function handleNftStakingEvent(
   event: NearEvent,
   eventId: EventId,
   sequelize: Sequelize
 ): Promise<void> {
   switch (event.event) {
-    case PROFIT_DEPOSIT: {
+    case CREATE_STAKING_PRGRAM: {
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
-        let data: ProfitDepositData = event.data[0];
+        let data: CreateStakingProgramData = event.data[0];
 
         const transaction = await sequelize.transaction();
 
@@ -32,11 +32,14 @@ export async function handleXTokenEvent(
         }
 
         try {
-          await xTokenRatio.create(
+          await StakingProgram.create(
             {
-              time_event: unixTsToDate(data.timestamp),
-              base_token_amount: data.base_token_treasury_after_deposit,
-              x_token_amount: data.x_token_supply_after_deposit,
+              collection_id: data.collection_address,
+              collection_owner_id: data.collection_owner,
+              token_address: data.token_address,
+              min_staking_period: data.min_staking_period,
+              early_withdraw_penalty: data.early_withdraw_penalty,
+              round_interval: data.round_interval,
             },
             { transaction }
           );

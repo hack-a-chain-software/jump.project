@@ -7,6 +7,8 @@ import {
 } from "../env";
 import { EventId, NearEvent } from "../types";
 import { handleLaunchpadEvent } from "./launchpad";
+import { handleNftStakingEvent } from "./nftStaking";
+import { handleXTokenEvent } from "./xToken";
 import { ProcessedEvent } from "../models";
 
 export async function processEvent(
@@ -22,9 +24,11 @@ export async function processEvent(
       break;
     }
     case NFT_STAKING_CONTRACT: {
+      await handleNftStakingEvent(event, eventId, sequelize);
       break;
     }
     case XTOKEN_CONTRACT: {
+      await handleXTokenEvent(event, eventId, sequelize);
       break;
     }
   }
