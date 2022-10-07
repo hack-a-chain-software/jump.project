@@ -77,6 +77,7 @@ export const Staking = () => {
 
   const { data: jumpMetadata } = useNearQuery<{
     decimals: number;
+    symbol: string;
   }>("ft_metadata", {
     contract: JUMP_TOKEN,
     poolInterval: 1000 * 60,
@@ -138,9 +139,33 @@ export const Staking = () => {
     return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
   }, [loadingBalance, loadingTokenRatio]);
 
-  const jumpExponent = useMemo(() => {
-    return new BN(jumpMetadata?.decimals ?? 0).neg();
+  const decimals = useMemo(() => {
+    return Big(10).pow(18);
   }, [jumpMetadata]);
+
+  const jumpRatio = useMemo(() => {
+    return new Big(baseToken).div(decimals);
+  }, [baseToken, decimals]);
+
+  const xJumpRatio = useMemo(() => {
+    return new Big(xToken).div(decimals);
+  }, [xToken, decimals]);
+
+  const jumpValue = useMemo(() => {
+    return jumpRatio.div(xJumpRatio).toFixed(2);
+  }, [jumpRatio, xJumpRatio]);
+
+  const xJumpValue = useMemo(() => {
+    return xJumpRatio.div(jumpRatio).toFixed(2);
+  }, [jumpRatio, xJumpRatio]);
+
+  const xTokenBalance = useMemo(() => {
+    return new Big(balanceXToken).div(decimals);
+  }, [balanceXToken, decimals]);
+
+  const xTokenInToken = useMemo(() => {
+    return xTokenBalance.div(jumpValue).toFixed(2);
+  }, [xTokenBalance, jumpValue]);
 
   return (
     <PageContainer>
@@ -187,33 +212,9 @@ export const Staking = () => {
               >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
-                  value={new BigDecimalFloat(
-                    new BN(baseToken),
-                    jumpExponent
-                  ).formatQuotient(
-                    new BigDecimalFloat(new BN(xToken), jumpExponent),
-                    new BN(9),
-                    {
-                      unit: "JUMP",
-                      formatOptions: CURRENCY_FORMAT_OPTIONS,
-                    }
-                  )}
+                  value={jumpValue + jumpMetadata?.symbol}
                   title="xJUMP Value"
-                  bottomText={
-                    "1 JUMP = " + (xToken !== "0" && baseToken !== "0")
-                      ? new BigDecimalFloat(
-                          new BN(xToken),
-                          jumpExponent
-                        ).formatQuotient(
-                          new BigDecimalFloat(new BN(baseToken), jumpExponent),
-                          new BN(9),
-                          {
-                            unit: "xJUMP",
-                            formatOptions: CURRENCY_FORMAT_OPTIONS,
-                          }
-                        )
-                      : "1.00 xJUMP"
-                  }
+                  bottomText={`1 JUMP = ${xJumpValue} xJump`}
                   className="h-full w-full"
                 />
               </Skeleton>
@@ -225,40 +226,9 @@ export const Staking = () => {
                 <ValueBox
                   title="You own"
                   className="h-full w-full"
-                  bottomText={
-                    "worth " +
-                    new BigDecimalFloat(
-                      new BN(balanceXToken).mul(new BN(baseToken)),
-                      jumpExponent.mul(new BN(2))
-                    ).formatQuotient(
-                      new BigDecimalFloat(new BN(xToken), jumpExponent),
-                      new BN(9),
-                      {
-                        unit: "JUMP",
-                        formatOptions: CURRENCY_FORMAT_OPTIONS,
-                      }
-                    )
-                  }
+                  bottomText={"worth " + xTokenInToken + " JUMP"}
                   borderColor={glassyWhiteOpaque}
-                  value={
-                    /*
-                     *     TODO: create another format function that encapsulates unit logic so we don't
-                     * have to use the quotient by 1 just in order to declaratively get unit suffixes.
-                     * Maybe hack the Intl.NumberFormatOptions unit field so we can use toLocaleString
-                     * for this purpose?
-                     */
-                    new BigDecimalFloat(
-                      new BN(balanceXToken),
-                      jumpExponent
-                    ).formatQuotient(
-                      new BigDecimalFloat(new BN(1)),
-                      new BN(0),
-                      {
-                        unit: "xJUMP",
-                        formatOptions: CURRENCY_FORMAT_OPTIONS,
-                      }
-                    )
-                  }
+                  value={xTokenBalance.toFixed(2) + " xJump"}
                 />
               </Skeleton>
 
