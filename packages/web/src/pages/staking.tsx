@@ -138,7 +138,7 @@ export const Staking = () => {
   }, [loadingBalance, loadingTokenRatio]);
 
   const decimals = useMemo(() => {
-    return Big(10).pow(18);
+    return Big(10).pow(jumpMetadata?.decimals || 1);
   }, [jumpMetadata]);
 
   const jumpRatio = useMemo(() => {
