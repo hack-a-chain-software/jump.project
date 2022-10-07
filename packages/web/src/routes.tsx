@@ -13,6 +13,7 @@ export const routes = {
   nftStaking: "/nft-staking",
   vesting: "/vesting",
   nftStakingProject: "/nft-staking/:id",
+  tokenLauncher: "/token-launcher",
 };
 
 export const navRoutes = [
@@ -41,11 +42,17 @@ export const navRoutes = [
     subroutePrefix: "vesting",
   },
   {
-    title: "Swap",
-    icon: <SwapIcon />,
-    route: "/swap",
-    subroutePrefix: "swap",
+    title: "Create Token",
+    icon: <WalletIcon />,
+    route: "/token-launcher",
+    subroutePrefix: "token-launcher",
   },
+  // {
+  //   title: "Swap",
+  //   icon: <SwapIcon />,
+  //   route: "/swap",
+  //   subroutePrefix: "swap",
+  // },
   {
     title: "Pools",
     icon: <PoolsIcon />,

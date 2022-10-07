@@ -7,6 +7,7 @@ import { Home } from "./pages/home";
 import { NFTStaking } from "./pages/nft-staking";
 import { Vesting } from "./pages/vesting";
 import { NFTStakingProject } from "./pages/nft-staking-project";
+import { TokenLauncher } from "./pages/token-launcher";
 import { Project } from "./pages/project";
 import { Staking } from "./pages/staking";
 import { routes } from "./routes";
@@ -49,6 +50,7 @@ function Router() {
               path={routes.nftStakingProject}
               element={<NFTStakingProject />}
             />
+            <Route path={routes.tokenLauncher} element={<TokenLauncher />} />
           </Routes>
         </Flex>
       </BrowserRouter>
