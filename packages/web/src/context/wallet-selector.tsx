@@ -51,11 +51,8 @@ export const WalletSelectorContextProvider: React.FC<
   const init = useCallback(async () => {
     const _selector = await setupWalletSelector({
       network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
+      debug: true,
       modules: [
-        setupSender({
-          iconUrl: "/assets/sender-icon.png",
-        }),
-        // setupLedger(),
         setupNearWallet({
           iconUrl: "/assets/near-wallet-icon.png",
         }),
@@ -86,6 +83,8 @@ export const WalletSelectorContextProvider: React.FC<
         distinctUntilChanged()
       )
       .subscribe((nextAccounts) => {
+        console.log("Accounts Update", nextAccounts);
+
         setAccounts(nextAccounts);
       });
 
