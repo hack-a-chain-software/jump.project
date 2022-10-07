@@ -1,5 +1,5 @@
 import { types } from "near-lake-framework";
-import { INTERESTED_CONTRACTS } from "./env";
+import { INTERESTED_CONTRACTS, LAUNCHPAD_CONTRACT } from "./env";
 import { processEvent } from "./events";
 import { EventId } from "./types";
 import { Sequelize } from "sequelize/types";
@@ -20,7 +20,7 @@ export async function processTransaction(
   const outcome = executionOutcome.executionOutcome.outcome;
   const executorId = outcome.executorId;
 
-  if (executorId in INTERESTED_CONTRACTS) {
+  if (INTERESTED_CONTRACTS.includes(executorId)) {
     for (const [eventIndex, log] of outcome.logs.entries()) {
       if (log.startsWith(JSON_EVENT_PREFIX)) {
         const eventJsonString = log.replace(JSON_EVENT_PREFIX, "");

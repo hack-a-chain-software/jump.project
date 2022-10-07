@@ -16,7 +16,7 @@ export class LaunchpadInvestor extends Model<
 > {
   declare account_id: string;
   declare staked_token: string;
-  declare last_check: string;
+  declare last_check: Date;
 }
 
 export class Listing extends Model<
@@ -25,15 +25,15 @@ export class Listing extends Model<
 > {
   declare listing_id: string;
   declare public: boolean;
-  declare listing_status: string;
+  declare status: string;
   declare project_owner: string;
   declare project_token: string;
   declare price_token: string;
 
-  declare open_sale_1_timestamp: string;
-  declare open_sale_2_timestamp: string;
-  declare final_sale_2_timestamp: string;
-  declare liquidity_pool_timestamp: string;
+  declare open_sale_1_timestamp: Date;
+  declare open_sale_2_timestamp: Date;
+  declare final_sale_2_timestamp: Date;
+  declare liquidity_pool_timestamp: Date;
 
   declare total_amount_sale_project_tokens: string;
   declare token_allocation_size: string;
@@ -43,8 +43,8 @@ export class Listing extends Model<
   declare liquidity_pool_price_tokens: string;
   declare fraction_instant_release: string;
   declare fraction_cliff_release: string;
-  declare cliff_timestamp: string;
-  declare end_cliff_timestamp: string;
+  declare cliff_timestamp: Date;
+  declare end_cliff_timestamp: Date;
   declare fee_price_tokens: string;
   declare fee_liquidity_tokens: string;
   declare dex_id: string;
@@ -88,12 +88,13 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         type: DataTypes.TEXT,
       },
       last_check: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
     },
     {
       tableName: "launchpad_investors",
       sequelize,
+      timestamps: false,
     }
   );
 
@@ -118,7 +119,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
-      listing_status: {
+      status: {
         type: DataTypes.ENUM(...statusEnum),
       },
       project_owner: {
@@ -131,16 +132,16 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         type: DataTypes.TEXT,
       },
       open_sale_1_timestamp: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
       open_sale_2_timestamp: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
       final_sale_2_timestamp: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
       liquidity_pool_timestamp: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
 
       total_amount_sale_project_tokens: {
@@ -168,10 +169,10 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         type: DataTypes.TEXT,
       },
       cliff_timestamp: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DATE,
       },
       end_cliff_timestamp: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DATE,
       },
       fee_price_tokens: {
         type: DataTypes.TEXT,
@@ -186,6 +187,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     {
       tableName: "listings",
       sequelize,
+      timestamps: false,
     }
   );
 
@@ -223,6 +225,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     {
       tableName: "listings_metadata",
       sequelize,
+      timestamps: false,
     }
   );
 
@@ -256,6 +259,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
     {
       tableName: "allocations",
       sequelize,
+      timestamps: false,
     }
   );
 

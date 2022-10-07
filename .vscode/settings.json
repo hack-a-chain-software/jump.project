@@ -30,6 +30,17 @@
       "database": "jump_testnet",
       "username": "postgres",
       "password": "JDX-secret_password-1683413286"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "local",
+      "database": "test",
+      "username": "postgres",
+      "password": "secretpassword",
+      "connectString": "postgresql://postgres:1234@localhost:5438/postgres"
     }
   ]
 }

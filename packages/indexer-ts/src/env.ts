@@ -7,6 +7,7 @@ if (
     process.env.DB_USER,
     process.env.DB_PASS,
     process.env.DB_HOST,
+    process.env.DB_PORT,
     process.env.NETWORK,
     process.env.START_BLOCK,
     process.env.LAUNCHPAD_CONTRACT,
@@ -20,6 +21,7 @@ export const DB_NAME = process.env.DB_NAME!;
 export const DB_USER = process.env.DB_USER!;
 export const DB_PASS = process.env.DB_PASS!;
 export const DB_HOST = process.env.DB_HOST!;
+export const DB_PORT = parseInt(process.env.DB_PORT!);
 
 export const S3_BUCKET =
   process.env.NETWORK === "mainnet"

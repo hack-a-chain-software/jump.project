@@ -1,3 +1,4 @@
+import { Transaction } from "sequelize";
 import { Sequelize } from "sequelize/types";
 import {
   LAUNCHPAD_CONTRACT,
@@ -6,6 +7,7 @@ import {
 } from "../env";
 import { EventId, NearEvent } from "../types";
 import { handleLaunchpadEvent } from "./launchpad";
+import { ProcessedEvent } from "../models";
 
 export async function processEvent(
   executorId: string,
@@ -28,9 +30,19 @@ export async function processEvent(
   }
 }
 
-/*
-Inside each:
-    Check if is one of interested events, else discard;
-    Coerce JSON to event type, if convertion fails, throw;
-    Perform relevant operation.
-*/
+/* Method to insert evetnIds into table
+ * must be called on every event write to DB
+ */
+export async function processEventId(
+  eventId: EventId,
+  transaction: Transaction
+) {
+  await ProcessedEvent.create(
+    {
+      block_height: eventId.blockHeight,
+      transaction_hash: eventId.transactionHash,
+      event_index: eventId.eventIndex,
+    },
+    { transaction }
+  );
+}

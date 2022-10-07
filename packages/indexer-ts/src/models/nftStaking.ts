@@ -38,7 +38,7 @@ export class StakedNft extends Model<
   declare nft_id: string;
   declare collection_id: ForeignKey<StakingProgram["collection_id"]>;
   declare owner_id: string;
-  declare staked_timestamp: string;
+  declare staked_timestamp: Date;
 }
 
 export function initializeNftStaking(sequelize: Sequelize) {
@@ -67,6 +67,7 @@ export function initializeNftStaking(sequelize: Sequelize) {
     {
       tableName: "staking_programs",
       sequelize,
+      timestamps: false,
     }
   );
 
@@ -86,6 +87,7 @@ export function initializeNftStaking(sequelize: Sequelize) {
     {
       tableName: "staking_programs_metadata",
       sequelize,
+      timestamps: false,
     }
   );
 
@@ -110,12 +112,13 @@ export function initializeNftStaking(sequelize: Sequelize) {
         type: DataTypes.TEXT,
       },
       staked_timestamp: {
-        type: "TIMESTAMPTZ",
+        type: DataTypes.DATE,
       },
     },
     {
       tableName: "staking_programs_metadata",
       sequelize,
+      timestamps: false,
     }
   );
 

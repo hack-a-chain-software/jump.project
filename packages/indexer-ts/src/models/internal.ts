@@ -38,6 +38,7 @@ export function initializeInternalTables(sequelize: Sequelize) {
     {
       tableName: "processed_events",
       sequelize,
+      timestamps: false,
     }
   );
 }

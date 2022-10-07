@@ -2,6 +2,7 @@ import { startStream, types } from "near-lake-framework";
 import { S3_BUCKET, START_BLOCK } from "./env";
 import { sequelizeConnect } from "./connector";
 import { processTransaction } from "./processor";
+import { Sequelize } from "sequelize/types";
 
 /* Sets environment to run indexer on
  * @param s3BucketName defines which S3 bucket to read data from
@@ -20,22 +21,26 @@ const lakeConfig: types.LakeConfig = {
  *        to processing
  * @dev  must handle all logic for treating the indexed data
  */
-async function handleStreamerMessage(
-  streamerMessage: types.StreamerMessage
-): Promise<void> {
-  const sequelize = await sequelizeConnect();
-  for (const shard of streamerMessage.shards) {
-    for (const receipt of shard.receiptExecutionOutcomes) {
-      const outcome = receipt.executionOutcome.outcome;
-      const status: any = outcome.status;
-      if (status.Failure !== null && status.Unknown !== null) {
-        const blockHeight = streamerMessage.block.header.height;
-        await processTransaction(receipt, blockHeight, sequelize);
+function closureHandleStreamerMessage(sequelize: Sequelize) {
+  return async function handleStreamerMessage(
+    streamerMessage: types.StreamerMessage
+  ): Promise<void> {
+    const blockHeight = streamerMessage.block.header.height;
+    if (blockHeight % 100 == 0) console.log(blockHeight);
+
+    for (const shard of streamerMessage.shards) {
+      for (const receipt of shard.receiptExecutionOutcomes) {
+        const outcome = receipt.executionOutcome.outcome;
+        const status: any = outcome.status;
+        if (status.Failure !== null && status.Unknown !== null) {
+          await processTransaction(receipt, blockHeight, sequelize);
+        }
       }
     }
-  }
+  };
 }
 
 (async () => {
-  await startStream(lakeConfig, handleStreamerMessage);
+  const sequelize = await sequelizeConnect();
+  await startStream(lakeConfig, closureHandleStreamerMessage(sequelize));
 })();
