@@ -19,18 +19,18 @@ window.Buffer = window.Buffer || Buffer;
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ApolloProvider client={buildClient(import.meta.env.VITE_GRAPHQL_API_URI)}>
-      <ChakraProvider theme={theme}>
-        <ProviderNear
-          environment={import.meta.env.VITE_NEAR_NETWORK || "testnet"}
-        >
-          <WalletSelectorContextProvider>
+      <WalletSelectorContextProvider>
+        <ChakraProvider theme={theme}>
+          <ProviderNear
+            environment={import.meta.env.VITE_NEAR_NETWORK || "testnet"}
+          >
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
             <Router />
 
             <WalletSelectorModal />
-          </WalletSelectorContextProvider>
-        </ProviderNear>
-      </ChakraProvider>
+          </ProviderNear>
+        </ChakraProvider>
+      </WalletSelectorContextProvider>
     </ApolloProvider>
   </React.StrictMode>
 );
