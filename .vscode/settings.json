@@ -41,6 +41,15 @@
       "username": "postgres",
       "password": "secretpassword",
       "connectString": "postgresql://postgres:1234@localhost:5438/postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "local2",
+      "connectString": "postgresql://postgres:1234@localhost:5437/postgres"
     }
   ]
 }

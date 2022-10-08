@@ -5,7 +5,9 @@
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
-    "start": "tsc && node src/index.js"
+    "compile": "tsc",
+    "entry": "node src/index.js",
+    "start": "yarn compile && yarn entry"
   },
   "dependencies": {
     "big.js": "^6.2.1",

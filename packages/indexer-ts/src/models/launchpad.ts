@@ -85,7 +85,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         primaryKey: true,
       },
       staked_token: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       last_check: {
         type: DataTypes.DATE,
@@ -112,7 +112,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
   Listing.init(
     {
       listing_id: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
         primaryKey: true,
       },
       public: {
@@ -145,28 +145,28 @@ export function initializeLaunchpad(sequelize: Sequelize) {
       },
 
       total_amount_sale_project_tokens: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       token_allocation_size: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       token_allocation_price: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       allocations_sold: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
       },
       liquidity_pool_project_tokens: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       liquidity_pool_price_tokens: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       fraction_instant_release: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       fraction_cliff_release: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       cliff_timestamp: {
         type: DataTypes.DATE,
@@ -175,13 +175,13 @@ export function initializeLaunchpad(sequelize: Sequelize) {
         type: DataTypes.DATE,
       },
       fee_price_tokens: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       fee_liquidity_tokens: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       dex_id: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
       },
     },
     {
@@ -194,7 +194,7 @@ export function initializeLaunchpad(sequelize: Sequelize) {
   ListingMetadata.init(
     {
       listing_id: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
         primaryKey: true,
       },
       project_name: {

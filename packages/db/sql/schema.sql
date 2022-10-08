@@ -7,7 +7,6 @@ create table if not exists x_token_ratios (
 );
 
 /* Launchpad */
-
 create table if not exists launchpad_investors (
     account_id text primary key,
     staked_token numeric(40),

@@ -29,10 +29,10 @@ export function initializeXToken(sequelize: Sequelize) {
         type: DataTypes.DATE,
       },
       base_token_amount: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       x_token_amount: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
     },
     {

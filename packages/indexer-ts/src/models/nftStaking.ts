@@ -55,13 +55,13 @@ export function initializeNftStaking(sequelize: Sequelize) {
         type: DataTypes.TEXT,
       },
       min_staking_period: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
       },
       early_withdraw_penalty: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(40),
       },
       round_interval: {
-        type: DataTypes.TEXT,
+        type: DataTypes.DECIMAL(21),
       },
     },
     {

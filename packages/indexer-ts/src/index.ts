@@ -64,4 +64,6 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
  * 2. indexar
  * 3. buildar site
  * 4. interagir para testar stakeNft e xTokenDeposit
+ * 5. Se xToken funcionar com Decimal no Postgres
+ *    e string no sequelize, converter todas as tabelas para usar Decimal
  */
