@@ -58,10 +58,3 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
 
   await startStream(lakeConfig, closureHandleStreamerMessage(sequelize));
 })();
-
-/* testar contratos do zero:
- * 1. deployar contratos novos
- * 2. indexar
- * 3. buildar site
- * 4. interagir para testar stakeNft e xTokenDeposit
- */
