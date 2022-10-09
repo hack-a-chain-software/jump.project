@@ -32,13 +32,11 @@ export function AirdropModal({
 
   const getJumpTokens = async () => {
     const wallet = await selector.wallet();
-    console.log("A");
     const tokens = await viewFunction(
       selector,
       import.meta.env.VITE_FAUCET_CONTRACT,
       "view_tokens"
     );
-    console.log("B");
 
     const transactions: Transaction[] = [];
 

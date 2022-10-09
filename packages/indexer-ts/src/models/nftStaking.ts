@@ -91,12 +91,16 @@ export function initializeNftStaking(sequelize: Sequelize) {
     }
   );
 
+  StakingProgramMetadata.belongsTo(StakingProgram, {
+    foreignKey: {
+      name: "collection_id",
+    },
+  });
   StakingProgram.hasOne(StakingProgramMetadata, {
     foreignKey: {
       name: "collection_id",
     },
   });
-  StakingProgramMetadata.belongsTo(StakingProgram);
 
   StakedNft.init(
     {
@@ -116,16 +120,20 @@ export function initializeNftStaking(sequelize: Sequelize) {
       },
     },
     {
-      tableName: "staking_programs_metadata",
+      tableName: "staked_nfts",
       sequelize,
       timestamps: false,
     }
   );
 
+  StakedNft.belongsTo(StakingProgram, {
+    foreignKey: {
+      name: "collection_id",
+    },
+  });
   StakingProgram.hasMany(StakedNft, {
     foreignKey: {
       name: "collection_id",
     },
   });
-  StakedNft.belongsTo(StakingProgram);
 }

@@ -16,6 +16,7 @@
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
     "contract:lib:tests": "yarn workspace @near/contracts test:lib",
     "indexer:build": "yarn workspace @near/indexer build",
+    "db:dev": "docker run --rm -P -p 127.0.0.1:5438:5432 -it $(docker build -q services/db)",
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged",

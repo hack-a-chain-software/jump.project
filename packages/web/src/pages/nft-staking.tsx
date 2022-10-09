@@ -34,8 +34,6 @@ export const NFTStaking = () => {
     return data?.nft_staking_projects?.data;
   }, [loading]);
 
-  console.log(items);
-
   return (
     <PageContainer>
       <TopCard

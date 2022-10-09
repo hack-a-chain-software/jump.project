@@ -21,7 +21,6 @@ export async function processTransaction(
   const executorId = outcome.executorId;
 
   if (INTERESTED_CONTRACTS.includes(executorId)) {
-    // console.log(executorId);
     for (const [eventIndex, log] of outcome.logs.entries()) {
       if (log.startsWith(JSON_EVENT_PREFIX)) {
         const eventJsonString = log.replace(JSON_EVENT_PREFIX, "");

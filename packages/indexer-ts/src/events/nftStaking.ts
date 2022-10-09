@@ -22,7 +22,6 @@ export async function handleNftStakingEvent(
 ): Promise<void> {
   switch (event.event) {
     case CREATE_STAKING_PRGRAM: {
-      console.log("HERE 2");
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
@@ -153,6 +152,7 @@ export async function handleNftStakingEvent(
     }
 
     case UNSTAKE_NFT: {
+      console.log("UNSTAKE_NFT");
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
@@ -178,7 +178,8 @@ export async function handleNftStakingEvent(
           await entry.destroy({ transaction });
 
           await transaction.commit();
-        } catch {
+        } catch (err) {
+          console.log(err);
           await transaction.rollback();
 
           if (counter < MAX_COUNT) {

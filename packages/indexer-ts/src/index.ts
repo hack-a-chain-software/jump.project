@@ -8,7 +8,7 @@ import { ProcessedEvent } from "./models";
 /* Amount of blocks to reparse after rebooting indexer
  * from shutdown
  */
-const BLOCK_REDUNDANCY = 1000;
+const BLOCK_REDUNDANCY = 100;
 
 /* Handles each indexed block
  * @param streamerMessage Block of indexed data and sends all non failed transactions
@@ -45,10 +45,10 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
     raw: true,
   }))!;
 
-  // const lastProcessedBlock = lastProcessedTransaction.block_height
-  //   ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
-  //   : START_BLOCK;
-  const lastProcessedBlock = START_BLOCK;
+  const lastProcessedBlock = lastProcessedTransaction.block_height
+    ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
+    : START_BLOCK;
+  // const lastProcessedBlock = 102302400;
 
   const lakeConfig: types.LakeConfig = {
     s3BucketName: S3_BUCKET,
@@ -64,6 +64,4 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
  * 2. indexar
  * 3. buildar site
  * 4. interagir para testar stakeNft e xTokenDeposit
- * 5. Se xToken funcionar com Decimal no Postgres
- *    e string no sequelize, converter todas as tabelas para usar Decimal
  */

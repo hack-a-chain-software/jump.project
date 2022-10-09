@@ -16,7 +16,6 @@ export async function handleXTokenEvent(
 ): Promise<void> {
   switch (event.event) {
     case PROFIT_DEPOSIT: {
-      console.log("HERE");
       let counter = 0;
       const MAX_COUNT = 3;
       async function query() {
@@ -42,8 +41,7 @@ export async function handleXTokenEvent(
           );
 
           await transaction.commit();
-        } catch (err) {
-          console.log(err);
+        } catch {
           await transaction.rollback();
 
           if (counter < MAX_COUNT) {
