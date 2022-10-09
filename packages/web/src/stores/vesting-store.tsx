@@ -1,4 +1,4 @@
-import BN from "bn.js";
+import Big from "big.js";
 import create from "zustand";
 import {
   viewFunction,
@@ -23,9 +23,9 @@ export interface Vesting {
 export interface InvestorInfo {
   token: Token;
   contractData: ContractData;
-  totalLocked: BN;
-  totalUnlocked: BN;
-  totalWithdrawn: BN;
+  totalLocked: Big;
+  totalUnlocked: Big;
+  totalWithdrawn: Big;
 }
 
 export interface Token {
@@ -91,9 +91,9 @@ export const useVestingStore = create<{
 
     const investorInfo = get().vestings.reduce(
       (info: InvestorInfo, vesting: Vesting) => {
-        const locked = new BN(vesting.locked_value);
-        const available = new BN(vesting.available_to_withdraw);
-        const totalWithdrawn = new BN(vesting.withdrawn_tokens);
+        const locked = new Big(vesting.locked_value);
+        const available = new Big(vesting.available_to_withdraw);
+        const totalWithdrawn = new Big(vesting.withdrawn_tokens);
 
         info.totalLocked = info.totalLocked.add(
           locked.sub(available).sub(totalWithdrawn)
@@ -107,9 +107,9 @@ export const useVestingStore = create<{
       {
         token,
         contractData,
-        totalLocked: new BN(0),
-        totalUnlocked: new BN(0),
-        totalWithdrawn: new BN(0),
+        totalLocked: new Big(0),
+        totalUnlocked: new Big(0),
+        totalWithdrawn: new Big(0),
       }
     );
 
