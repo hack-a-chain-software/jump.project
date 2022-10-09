@@ -11,23 +11,6 @@ use near_sdk::{assert_one_yocto, env, json_types::U128, near_bindgen, Promise};
 #[near_bindgen]
 impl Contract {
   #[payable]
-  pub fn move_beneficiary_funds_to_collection(
-    &mut self,
-    collection: NFTCollection,
-    token_id: FungibleTokenID,
-  ) {
-    assert_one_yocto();
-
-    self.move_treasury(
-      TreasuryOperation::BeneficiaryToCollection,
-      &env::predecessor_account_id(),
-      Some(&collection),
-      token_id,
-      None,
-    );
-  }
-
-  #[payable]
   pub fn withdraw_collection_treasury(
     &mut self,
     collection: NFTCollection,

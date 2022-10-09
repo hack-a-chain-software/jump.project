@@ -18,10 +18,12 @@ impl Contract {
   ) {
     assert_one_yocto();
 
-    self.move_treasury(
-      TreasuryOperation::CollectionToDistribution,
-      &env::predecessor_account_id(),
-      Some(&collection),
+    let operator = env::predecessor_account_id();
+
+    self.transfer_funds(
+      operation,
+      &operator,
+      &collection,
       token_id,
       amount.map(|x| x.0),
     );
