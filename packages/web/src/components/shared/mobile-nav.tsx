@@ -18,6 +18,7 @@ const enabledRoutes = [
   routes.home,
   routes.nftStaking,
   routes.vesting,
+  routes.tokenLauncher,
 ];
 
 export const MobileNav = ({

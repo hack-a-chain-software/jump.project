@@ -14,3 +14,5 @@ export * from "./lock";
 export * from "./menu";
 export * from "./logout";
 export * from "./jump-big-logo";
+export * from "./jump-kangaroo";
+export * from "./jump-kangaroo-upsidedown";

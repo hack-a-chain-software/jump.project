@@ -1,17 +1,8 @@
-import {
-  Box,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  Text,
-} from "@chakra-ui/react";
-import { JumpBigIcon } from "../../../assets/svg";
-import { GradientText, Card } from "../../shared";
-import { GlobeAltIcon } from "@heroicons/react/outline";
+import { Box, Flex, FormControl, FormLabel, Text } from "@chakra-ui/react";
+import { Card } from "../../shared";
 import { FormButton } from "./form-button";
 import { FormInputAndLabel } from "./form-input-label";
+import { FormHeader } from "./form-header";
 import { useEffect, useRef, useState, RefObject } from "react";
 import { ChevronDownIcon, ChevronLeftIcon } from "@heroicons/react/solid";
 import { ExclamationCircleIcon } from "@heroicons/react/outline";
@@ -71,42 +62,7 @@ export function FormCardStep2({
         height="100%"
         width="100%"
       >
-        <Flex
-          width="100%"
-          direction={{ base: "column", md: "row" }}
-          alignItems={{ base: "start", md: "end" }}
-          justifyContent="flex-start"
-          pl={4}
-          gap="30px"
-          height="fit-content"
-        >
-          <GradientText
-            fontSize="40px"
-            fontWeight="700"
-            letterSpacing="-3%"
-            lineHeight="40px"
-          >
-            Set up the Tokenomics
-          </GradientText>
-          <Box
-            width="109px"
-            height="33.4px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            backgroundColor="#6E3A85"
-            borderRadius="43.95px"
-          >
-            <GradientText
-              fontSize="16px"
-              fontWeight="600"
-              letterSpacing="-3%"
-              lineHeight="16px"
-            >
-              Step 2/2
-            </GradientText>
-          </Box>
-        </Flex>
+        <FormHeader title="Set up the Tokenomics" step="Step 2/2" />
         <FormControl mt="37px" pl={4}>
           <form id="form-step-2" onSubmit={onSubmitStep2Form}>
             <FormLabel
@@ -209,7 +165,11 @@ export function FormCardStep2({
                   height="40px"
                   pl="20px"
                 >
-                  <Text color="#FFF" lineHeight="40px" fontSize="14px">
+                  <Text
+                    color="rgba(255,255,255,0.5)"
+                    lineHeight="40px"
+                    fontSize="14px"
+                  >
                     Unlimited
                   </Text>
                 </Box>
@@ -247,13 +207,17 @@ export function FormCardStep2({
                   height="40px"
                   pl="20px"
                 >
-                  <Text color="#FFF" lineHeight="40px" fontSize="14px">
+                  <Text
+                    color="rgba(255,255,255,0.5)"
+                    lineHeight="40px"
+                    fontSize="14px"
+                  >
                     Fixed
                   </Text>
                 </Box>
                 <FormInputAndLabel
                   placeholder="Ex: 10000"
-                  label="Supply"
+                  label="Maximum Supply"
                   inputName="supply"
                 />
                 <div className="flex flex-row">

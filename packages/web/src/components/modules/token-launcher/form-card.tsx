@@ -1,10 +1,10 @@
-import { Box, Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
-import { JumpBigIcon } from "../../../assets/svg";
-import { GradientText, Card } from "../../shared";
+import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
+import { Card } from "../../shared";
 import { GlobeAltIcon } from "@heroicons/react/outline";
 import { FormButton } from "./form-button";
 import { FormInputAndLabel } from "./form-input-label";
 import { useFormContext } from "react-hook-form";
+import { FormHeader } from "./form-header";
 
 interface FormCardProps {
   onSubmitStepForm: (data: any) => void;
@@ -46,42 +46,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
         alignItems="center"
         height="100%"
       >
-        <Flex
-          width="100%"
-          direction={{ base: "column", md: "row" }}
-          alignItems={{ base: "start", md: "end" }}
-          justifyContent="flex-start"
-          pl={4}
-          gap="30px"
-          height="fit-content"
-        >
-          <GradientText
-            fontSize="40px"
-            fontWeight="700"
-            letterSpacing="-3%"
-            lineHeight="40px"
-          >
-            Set the basics
-          </GradientText>
-          <Box
-            width="109px"
-            height="33.4px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            backgroundColor="#6E3A85"
-            borderRadius="43.95px"
-          >
-            <GradientText
-              fontSize="16px"
-              fontWeight="600"
-              letterSpacing="-3%"
-              lineHeight="16px"
-            >
-              Step 1/2
-            </GradientText>
-          </Box>
-        </Flex>
+        <FormHeader title="Set the basics" step="Step 1/2" />
         <FormControl id="form-step-1" mt="37px" pl={4}>
           <form id="form-step-1" onSubmit={onSubmitStepForm}>
             <FormInputAndLabel

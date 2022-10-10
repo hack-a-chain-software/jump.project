@@ -4,8 +4,9 @@ import {
   FormCardStep1,
   TokenLauncherTopCard,
   FormCardStep2,
+  FormIntroModal,
 } from "../components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 
 export type TokenDataProps = {
@@ -23,6 +24,7 @@ export type TokenDataProps = {
 export const TokenLauncher = () => {
   const [step, setStep] = useState<string>("step 1");
   const [tokenData, setTokenData] = useState({});
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const newTokenForm = useForm<TokenDataProps>();
 
@@ -65,11 +67,29 @@ export const TokenLauncher = () => {
     reset();
   });
 
+  const handleOpenModal = () => {
+    if (localStorage.getItem("@token-launcher-first-interaction")) {
+      return;
+    } else {
+      setShowModal(true);
+      localStorage.setItem("@token-launcher-first-interaction", "false");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  useEffect(() => {
+    handleOpenModal();
+  }, []);
+
   console.log(tokenData);
 
   return (
     <PageContainer>
       <FormProvider {...newTokenForm}>
+        <FormIntroModal isOpen={showModal} handleClose={handleCloseModal} />
         <TokenLauncherTopCard />
         {step == "step 1" && (
           <FormCardStep1 onSubmitStepForm={handleStep1FormSubmit} />
