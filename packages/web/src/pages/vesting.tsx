@@ -16,11 +16,8 @@ import { useEffect, useState, useMemo } from "react";
 import { getUTCDate } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-<<<<<<< HEAD
 import Big from "big.js";
-=======
 import { Steps } from "intro.js-react";
->>>>>>> feat(web): added live tutorials, needs validation
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
@@ -84,7 +81,6 @@ export const Vesting = () => {
     return isEmpty(investorInfo);
   }, [investorInfo, accountId]);
 
-<<<<<<< HEAD
   const decimals = useMemo(() => {
     return new Big(10).pow(investorInfo?.token?.decimals || 1);
   }, [investorInfo]);
@@ -100,7 +96,6 @@ export const Vesting = () => {
   const totalWithdrawn = useMemo(() => {
     return new Big(investorInfo?.totalWithdrawn || 1).div(decimals).toFixed(2);
   }, [investorInfo, decimals]);
-=======
   const [showSteps, setShowSteps] = useState(false);
 
   const stepItems = [
@@ -151,7 +146,6 @@ export const Vesting = () => {
       ),
     },
   ];
->>>>>>> feat(web): added live tutorials, needs validation
 
   return (
     <PageContainer>
