@@ -17,9 +17,9 @@ import {
   TwitterIcon,
   WebIcon,
   WhitepaperIcon,
-} from "../assets/svg";
-import { BackButton } from "../components/shared/back-button";
-import { useTheme } from "../hooks/theme";
+} from "@/assets/svg";
+import { BackButton } from "@/components/shared/back-button";
+import { useTheme } from "@/hooks/theme";
 import { useWalletSelector } from "@/context/wallet-selector";
 import {
   If,
@@ -273,3 +273,5 @@ export const Project = () => {
     </PageContainer>
   );
 };
+
+export default Project;

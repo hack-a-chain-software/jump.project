@@ -37,7 +37,7 @@ import {
   TopCard,
   LoadingIndicator,
   IconButton,
-} from "../components";
+} from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { BigDecimalFloat, getUTCDate } from "@near/ts";
 import { useNearQuery } from "react-near";
@@ -53,7 +53,7 @@ const PAGINATE_LIMIT = 30;
  * @description - This is the landing page for the near application
  * @name Home
  */
-export function Home() {
+export function Index() {
   const [filterMine, setMine] = useState<boolean | null>(null);
   const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
   const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
@@ -460,3 +460,5 @@ export function Home() {
     </Flex>
   );
 }
+
+export default Index;

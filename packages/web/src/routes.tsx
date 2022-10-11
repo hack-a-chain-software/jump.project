@@ -6,35 +6,30 @@ import { RocketIcon } from "./assets/svg/rocket";
 import { SwapIcon } from "./assets/svg/swap";
 import { LockIcon } from "./assets/svg/lock";
 
-export const routes = {
-  home: "/launchpad",
-  projectDetails: "/launchpad/:id",
-  staking: "/coin-staking",
-  nftStaking: "/nft-staking",
-  vesting: "/vesting",
-  nftStakingProject: "/nft-staking/:id",
-};
-
 export const navRoutes = [
   {
+    enabled: true,
     title: "Jump Pad",
     icon: <RocketIcon />,
-    route: "/launchpad",
-    subroutePrefix: "/launchpad",
+    route: "/",
+    subroutePrefix: "/",
   },
   {
+    enabled: true,
     title: "xJump",
     icon: <WalletIcon />,
     route: "/coin-staking",
     subroutePrefix: "coin-staking",
   },
   {
+    enabled: true,
     title: "Jump NFT Staking",
     icon: <WalletIcon />,
     route: "/nft-staking",
     subroutePrefix: "nft-staking",
   },
   {
+    enabled: true,
     title: "Jump Vesting",
     icon: <LockIcon />,
     route: "/vesting",

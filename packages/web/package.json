@@ -53,6 +53,7 @@
     "tailwindcss": "^3.0.24",
     "typed-assert": "^1.0.9",
     "use-mediaquery": "^1.0.1",
+    "vite-plugin-pages": "^0.26.0",
     "xstate": "^4.32.0",
     "yup": "^0.32.11",
     "zustand": "^4.0.0-rc.1"

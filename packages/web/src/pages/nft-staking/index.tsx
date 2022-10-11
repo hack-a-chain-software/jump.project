@@ -6,7 +6,7 @@ import {
   NFTStakingCard,
   PageContainer,
   Empty,
-} from "../components";
+} from "../../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { useMemo } from "react";
@@ -94,3 +94,5 @@ export const NFTStaking = () => {
     </PageContainer>
   );
 };
+
+export default NFTStaking;

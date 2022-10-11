@@ -4,7 +4,7 @@ import { Flex, Grid, Text, Button } from "@chakra-ui/react";
 import isEqual from "lodash/isEqual";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { WalletIcon } from "../assets/svg";
+import { WalletIcon } from "../../assets/svg";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   If,
@@ -17,7 +17,7 @@ import {
   NFTStakingUserActions,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
-import { useNftStaking } from "../stores/nft-staking-store";
+import { useNftStaking } from "../../stores/nft-staking-store";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
@@ -202,3 +202,5 @@ export function NFTStakingProject() {
     </PageContainer>
   );
 }
+
+export default NFTStakingProject;
