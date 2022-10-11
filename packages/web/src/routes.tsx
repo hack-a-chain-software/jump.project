@@ -36,12 +36,6 @@ export const navRoutes = [
     subroutePrefix: "vesting",
   },
   {
-    title: "Swap",
-    icon: <SwapIcon />,
-    route: "/swap",
-    subroutePrefix: "swap",
-  },
-  {
     title: "Pools",
     icon: <PoolsIcon />,
     route: "/pools",
@@ -52,11 +46,5 @@ export const navRoutes = [
     icon: <FarmIcon />,
     route: "/farm",
     subroutePrefix: "farm",
-  },
-  {
-    title: "Analytics",
-    icon: <AnalyticsIcon />,
-    route: "/analytics",
-    subroutePrefix: "analytics",
   },
 ];
