@@ -1,6 +1,6 @@
 import Big from "big.js";
 import { isBefore, format } from "date-fns";
-import { formatNumber, getUTCDate } from "@near/ts";
+import { getUTCDate } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Fragment, useMemo, useState, useCallback } from "react";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
@@ -128,6 +128,18 @@ export function ProjectAllocations({
     },
   ];
 
+  const decimals = useMemo(() => {
+    return new Big(10).pow(launchpadProject?.price_token_info?.decimals ?? 0);
+  }, [launchpadProject]);
+
+  const balance = useMemo(() => {
+    return new Big(priceTokenBalance ?? "0").div(decimals).toFixed(2);
+  }, [priceTokenBalance, decimals]);
+
+  const total = useMemo(() => {
+    return ticketsAmount.div(decimals);
+  }, [ticketsAmount, decimals]);
+
   return (
     <>
       {!isLoading && (
@@ -204,11 +216,7 @@ export function ProjectAllocations({
           <Flex gap="5px" direction="column" maxWidth="380px">
             <Flex flexWrap="wrap" justifyContent="space-between">
               <Text>
-                Your Balance:{" "}
-                {formatNumber(
-                  new Big(priceTokenBalance ?? "0"),
-                  launchpadProject?.price_token_info?.decimals!
-                )}{" "}
+                Your Balance: {balance}{" "}
                 {launchpadProject?.price_token_info?.symbol}
               </Text>
             </Flex>
@@ -221,7 +229,7 @@ export function ProjectAllocations({
             />
 
             <Text>
-              You can buy: {formatNumber(allocationsAvailable, 0) + " "}
+              You can buy: {allocationsAvailable.toNumber() + " "}
               allocations
             </Text>
           </Flex>
@@ -256,12 +264,7 @@ export function ProjectAllocations({
               Join{" "}
               {tickets > 0 ? (
                 <Fragment>
-                  For:{" "}
-                  {formatNumber(
-                    ticketsAmount,
-                    new Big(launchpadProject?.price_token_info?.decimals!)
-                  )}{" "}
-                  {launchpadProject?.price_token_info?.symbol}
+                  For: {total} {launchpadProject?.price_token_info?.symbol}
                 </Fragment>
               ) : (
                 "Project"

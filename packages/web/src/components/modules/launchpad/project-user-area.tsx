@@ -1,11 +1,9 @@
-import BN from "bn.js";
 import Big from "big.js";
 import { useMemo } from "react";
 import { isBefore } from "date-fns";
-import { formatNumber } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Flex, Skeleton } from "@chakra-ui/react";
-import { Card, GradientText, Button, IconButton } from "@/components";
+import { GradientText, Button, IconButton } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import {
@@ -108,6 +106,18 @@ export function ProjectUserArea({
     },
   ];
 
+  const formattedUnlocked = useMemo(() => {
+    return (
+      unlockedAmount.div(decimals).toFixed(2) + metadataProjectToken?.symbol!
+    );
+  }, [metadataProjectToken, unlockedAmount, decimals]);
+
+  const formattedClaimed = useMemo(() => {
+    return (
+      claimedAmount.div(decimals).toFixed(2) + metadataProjectToken?.symbol!
+    );
+  }, [metadataProjectToken?.symbol!, claimedAmount, decimals]);
+
   return (
     <>
       {!isLoading && (
@@ -183,13 +193,7 @@ export function ProjectUserArea({
 
               <div>
                 <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? formatNumber(
-                        unlockedAmount,
-                        decimals,
-                        metadataProjectToken?.symbol!
-                      )
-                    : CONNECT_WALLET_MESSAGE}
+                  {accountId ? formattedUnlocked : CONNECT_WALLET_MESSAGE}
                 </span>
               </div>
             </Skeleton>
@@ -206,13 +210,7 @@ export function ProjectUserArea({
 
               <div>
                 <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? formatNumber(
-                        claimedAmount,
-                        decimals,
-                        metadataProjectToken?.symbol!
-                      )
-                    : CONNECT_WALLET_MESSAGE}
+                  {accountId ? formattedClaimed : CONNECT_WALLET_MESSAGE}
                 </span>
               </div>
             </Skeleton>

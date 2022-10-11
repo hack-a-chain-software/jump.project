@@ -1,10 +1,9 @@
 import Big from "big.js";
 import { useMemo } from "react";
 import { Card } from "@/components";
-import { formatNumber } from "@near/ts";
 import { tokenMetadata, launchpadProject } from "@/interfaces";
-import { Flex, Skeleton, Image, Text, Box } from "@chakra-ui/react";
-import { useTheme } from "../../../hooks/theme";
+import { Flex, Skeleton, Image, Text } from "@chakra-ui/react";
+import { useTheme } from "@/hooks/theme";
 
 export function ProjectInfo({
   isLoading,

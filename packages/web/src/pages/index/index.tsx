@@ -39,7 +39,6 @@ import {
   IconButton,
 } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { BigDecimalFloat, getUTCDate } from "@near/ts";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
 import { FolderOpenIcon } from "@heroicons/react/solid";
@@ -200,6 +199,12 @@ export function Index() {
       ),
     },
   ];
+
+  const formatBig = (value, decimals) => {
+    const decimalsBig = new Big(10).pow(decimals ?? 0);
+
+    return new Big(value ?? 0).div(decimalsBig);
+  };
 
   return (
     <Flex
@@ -379,60 +384,52 @@ export function Index() {
                   </Td>
                   <Td>{e?.project_name}</Td>
                   <Td>
-                    {new BigDecimalFloat(
-                      new BN(e?.token_allocation_price ?? 0),
-                      new BN(e?.price_token_info?.decimals ?? 0).neg()
-                    ).formatQuotient(
-                      new BigDecimalFloat(
-                        new BN(e?.token_allocation_size ?? 0),
-                        new BN(e?.project_token_info?.decimals ?? 0).neg()
-                      ),
-                      new BN(5),
-                      {
-                        unit: e?.price_token_info?.symbol ?? "",
-                        formatOptions: { maximumFractionDigits: 2 },
-                      }
-                    )}
+                    {formatBig(
+                      e?.token_allocation_price,
+                      e?.price_token_info?.decimals
+                    )
+                      .div(
+                        formatBig(
+                          e?.token_allocation_size,
+                          e?.project_token_info?.decimals
+                        )
+                      )
+                      .toFixed(2)}
                   </Td>
                   <Td>{e?.public ? "Public" : "Private"}</Td>
                   <Td>
-                    {new BigDecimalFloat(
-                      new BN(e?.token_allocation_price ?? 0).mul(
-                        new BN(e?.total_amount_sale_project_tokens ?? 1)
-                      ),
-                      new BN(e?.project_token_info?.decimals ?? 0)
-                        .add(new BN(e?.price_token_info?.decimals ?? 0))
-                        .neg()
-                    ).formatQuotient(
-                      new BigDecimalFloat(
-                        new BN(e?.token_allocation_size ?? 0),
-                        new BN(e?.project_token_info?.decimals ?? 0).neg()
-                      ),
-                      new BN(5),
-                      {
-                        unit: e?.price_token_info?.symbol ?? "",
-                        formatOptions: { maximumFractionDigits: 0 },
-                      }
-                    )}
+                    {formatBig(
+                      new Big(e?.token_allocation_price ?? 0)
+                        .mul(new Big(e?.total_amount_sale_project_tokens ?? 1))
+                        .toString(),
+                      new Big(e?.total_amount_sale_project_tokens ?? 0)
+                        .add(new Big(e?.price_token_info?.decimals ?? 0))
+                        .toString()
+                    )
+                      .div(
+                        formatBig(
+                          e?.token_allocation_size,
+                          e?.project_token_info?.decimals
+                        )
+                      )
+                      .toFixed(0)}
                   </Td>
                   <Td>
-                    {
-                      new BigDecimalFloat(
-                        new BN(e?.allocations_sold ?? 0).mul(
-                          new BN(e?.total_amount_sale_project_tokens ?? 0)
-                        ),
-                        new BN(e?.project_token_info?.decimals ?? 0)
-                          .neg()
-                          .add(new BN(2)) // %
-                      ).formatQuotient(
-                        new BigDecimalFloat(
-                          new BN(e?.token_allocation_size ?? 0),
-                          new BN(e?.project_token_info?.decimals ?? 0)
-                        ),
-                        new BN(5),
-                        { formatOptions: { maximumFractionDigits: 2 } }
-                      ) + "%" // TODO: refactor so unit logic can apply to %?
-                    }
+                    {formatBig(
+                      new Big(e?.allocations_sold ?? 0)
+                        .mul(new Big(e?.total_amount_sale_project_tokens ?? 0))
+                        .toString(),
+                      new Big(e?.project_token_info?.decimals ?? 0)
+                        .sub(2)
+                        .toString()
+                    )
+                      .div(
+                        formatBig(
+                          e?.token_allocation_size,
+                          e?.project_token_info?.decimals
+                        )
+                      )
+                      .toFixed(2) + "%"}
                   </Td>
                   <Td
                     borderTopRightRadius="16px"
