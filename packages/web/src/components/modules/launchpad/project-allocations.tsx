@@ -1,4 +1,4 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { isBefore, format } from "date-fns";
 import { formatNumber, getUTCDate } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
@@ -9,7 +9,6 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { launchpadProject, investorAllocation } from "@/interfaces";
 import { Steps } from "intro.js-react";
 import {
-  Card,
   If,
   GradientText,
   NumberInput,
@@ -21,8 +20,6 @@ export function ProjectAllocations({
   isLoading,
   launchpadProject,
   priceTokenBalance,
-  totalAllowanceData,
-  investorAllocation,
   investorAllowance,
 }: {
   isLoading: boolean;
@@ -38,7 +35,7 @@ export function ProjectAllocations({
   const [tickets, setTickets] = useState(0);
 
   const allocationsAvailable = useMemo(() => {
-    return new BN(investorAllowance ?? "0");
+    return new Big(investorAllowance ?? "0");
   }, [investorAllowance]);
 
   const onJoinProject = useCallback(
@@ -48,8 +45,8 @@ export function ProjectAllocations({
         launchpadProject?.price_token
       ) {
         buyTickets(
-          new BN(amount)
-            .mul(new BN(launchpadProject.token_allocation_price || 0))
+          new Big(amount)
+            .mul(new Big(launchpadProject.token_allocation_price || 0))
             .toString(),
           launchpadProject.price_token,
           launchpadProject.listing_id,
@@ -81,13 +78,13 @@ export function ProjectAllocations({
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
-    return new BN(launchpadProject?.token_allocation_price!).mul(
-      new BN(tickets.toString())
+    return new Big(launchpadProject?.token_allocation_price!).mul(
+      new Big(tickets.toString())
     );
   }, [tickets]);
 
   const hasTicketsAmount = useMemo(() => {
-    return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
+    return new Big(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
 
   const [showSteps, setShowSteps] = useState(false);
@@ -209,7 +206,7 @@ export function ProjectAllocations({
               <Text>
                 Your Balance:{" "}
                 {formatNumber(
-                  new BN(priceTokenBalance ?? "0"),
+                  new Big(priceTokenBalance ?? "0"),
                   launchpadProject?.price_token_info?.decimals!
                 )}{" "}
                 {launchpadProject?.price_token_info?.symbol}
@@ -262,7 +259,7 @@ export function ProjectAllocations({
                   For:{" "}
                   {formatNumber(
                     ticketsAmount,
-                    new BN(launchpadProject?.price_token_info?.decimals!)
+                    new Big(launchpadProject?.price_token_info?.decimals!)
                   )}{" "}
                   {launchpadProject?.price_token_info?.symbol}
                 </Fragment>

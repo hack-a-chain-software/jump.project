@@ -1,4 +1,5 @@
 import BN from "bn.js";
+import Big from "big.js";
 import { useMemo } from "react";
 import { isBefore } from "date-fns";
 import { formatNumber } from "@near/ts";
@@ -43,21 +44,20 @@ export function ProjectUserArea({
   }, [launchpadProject]);
 
   const decimals = useMemo(() => {
-    return new BN(metadataProjectToken?.decimals ?? "0");
+    return new Big(metadataProjectToken?.decimals ?? 0);
   }, [metadataProjectToken]);
 
   const claimedAmount = useMemo(() => {
-    return new BN(investorAllocation.totalTokensBought!);
+    return new Big(investorAllocation.totalTokensBought!);
   }, [investorAllocation]);
 
   const unlockedAmount = useMemo(() => {
-    return new BN(vestedAllocations);
+    return new Big(vestedAllocations);
   }, [vestedAllocations]);
 
   const totalAmount = useMemo(() => {
-    return formatNumber(
-      claimedAmount.add(unlockedAmount),
-      decimals,
+    return (
+      claimedAmount.add(unlockedAmount).div(decimals) +
       metadataProjectToken?.symbol!
     );
   }, [claimedAmount, unlockedAmount]);

@@ -1,17 +1,14 @@
-import BN from "bn.js";
+import Big from "big.js";
 import UpgradeModal from "./upgrade-modal";
 import { useMemo, Fragment, useState } from "react";
 import { Button, Card, IconButton } from "@/components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { Flex, Text, Stack, Skeleton, Icon } from "@chakra-ui/react";
-import { formatNumber } from "@near/ts";
+import { Flex, Text, Stack, Skeleton } from "@chakra-ui/react";
 import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
 import { InvestorInfo } from "@/hooks/modules/launchpad";
-import { BigDecimalFloat } from "@near/ts";
 import { tokenMetadata } from "@/interfaces";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 import { Steps } from "intro.js-react";
 
 export function MemberArea({
@@ -43,12 +40,12 @@ export function MemberArea({
   const [showModal, setShowModal] = useState(false);
 
   const stakedTokens = useMemo(
-    () => new BN(investor?.staked_token ?? 0),
+    () => new Big(investor?.staked_token ?? 0),
     [investor?.staked_token]
   );
 
   const minimumTokens = useMemo(
-    () => launchpadSettings?.tiers_minimum_tokens.map((t) => new BN(t)),
+    () => launchpadSettings?.tiers_minimum_tokens.map((t) => new Big(t)),
     [launchpadSettings]
   );
 
@@ -81,12 +78,13 @@ export function MemberArea({
     return isBefore(now, endVesting);
   }, [investor, launchpadSettings]);
 
+  const decimals = useMemo(() => {
+    return new Big(10).pow(metadata?.decimals ?? 0);
+  }, [metadata?.decimals]);
+
   const formattedBalance = useMemo(() => {
-    return new BigDecimalFloat(
-      stakedTokens ?? new BN(0),
-      new BN(metadata?.decimals ?? 0).neg()
-    ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS);
-  }, [metadata, stakedTokens]);
+    return stakedTokens.div(decimals).toFixed(2);
+  }, [stakedTokens, decimals]);
 
   const [showSteps, setShowSteps] = useState(false);
 
@@ -224,7 +222,7 @@ export function MemberArea({
                         fontSize={18}
                         fontWeight="semibold"
                         children={
-                          formatNumber(new BN(totalAllowance ?? 0), 0) +
+                          new Big(totalAllowance ?? 0).toFixed(2) +
                           " Allocations"
                         }
                       />

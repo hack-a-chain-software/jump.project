@@ -1,4 +1,4 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { useMemo } from "react";
 import { Card } from "@/components";
 import { formatNumber } from "@near/ts";
@@ -17,16 +17,19 @@ export function ProjectInfo({
 }) {
   const { glassyWhiteOpaque } = useTheme();
 
+  const decimals = useMemo(() => {
+    return new Big(10).pow(metadataPriceToken?.decimals || 1);
+  }, [metadataPriceToken?.decimals]);
+
   const finalPrice = useMemo(() => {
     if (!metadataPriceToken?.decimals && launchpadProject) {
       return "0";
     }
 
-    return formatNumber(
-      new BN(launchpadProject?.token_allocation_price ?? "0"),
-      metadataPriceToken?.decimals!
-    );
-  }, [launchpadProject, metadataPriceToken?.decimals]);
+    return new Big(launchpadProject?.token_allocation_price ?? 0)
+      .div(decimals)
+      .toFixed(2);
+  }, [launchpadProject, decimals]);
 
   return (
     <Card className="col-span-12 lg:col-span-6">

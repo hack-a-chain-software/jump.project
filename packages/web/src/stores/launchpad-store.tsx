@@ -1,4 +1,4 @@
-import bn from "bn.js";
+import Big from "big.js";
 import toast from "react-hot-toast";
 import create from "zustand";
 
@@ -175,7 +175,7 @@ export const useLaunchpadStore = create<{
           "ft_transfer_call",
           {
             receiver_id: import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-            amount: new bn(minTokens).sub(new bn(staked_token)).toString(),
+            amount: new Big(minTokens).sub(new Big(staked_token)).toString(),
             memo: null,
             msg: JSON.stringify({
               type: "VerifyAccount",
@@ -242,8 +242,8 @@ export const useLaunchpadStore = create<{
           import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
           "decrease_membership_tier",
           {
-            withdraw_amount: new bn(staked_token)
-              .sub(new bn(minTokens))
+            withdraw_amount: new Big(staked_token)
+              .sub(new Big(minTokens))
               .toString(),
           }
         )

@@ -1,6 +1,6 @@
-import BN from "bn.js";
+import Big from "big.js";
 import isEmpty from "lodash/isEmpty";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash-es";
 import {
   useViewInvestor,

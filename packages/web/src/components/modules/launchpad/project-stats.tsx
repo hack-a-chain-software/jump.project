@@ -1,8 +1,8 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { useMemo } from "react";
-import { format, isBefore } from "date-fns";
+import { format } from "date-fns";
 import { Card } from "@/components";
-import { formatNumber, getUTCDate } from "@near/ts";
+import { getUTCDate } from "@near/ts";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
 import {
@@ -35,6 +35,12 @@ export function ProjectStats({
     return format(date, "mm/dd/yyyy");
   };
 
+  const formatNumber = (value, decimals) => {
+    const decimalsBig = new Big(10).pow(decimals ?? 1);
+
+    return new Big(value ?? 0).div(decimalsBig);
+  };
+
   const totalRaise = useMemo(() => {
     const {
       total_amount_sale_project_tokens = "",
@@ -42,9 +48,9 @@ export function ProjectStats({
       token_allocation_size = "",
     } = launchpadProject || {};
 
-    const totalAmount = new BN(total_amount_sale_project_tokens!);
-    const allocationPrice = new BN(token_allocation_price!);
-    const allocationSize = new BN(token_allocation_size || "1");
+    const totalAmount = new Big(total_amount_sale_project_tokens!);
+    const allocationPrice = new Big(token_allocation_price!);
+    const allocationSize = new Big(token_allocation_size || 1);
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [launchpadProject]);
@@ -56,20 +62,20 @@ export function ProjectStats({
         items: [
           {
             label: "Total raise (in price token)",
-            value: formatNumber(totalRaise, metadataPriceToken?.decimals ?? 0),
+            value: formatNumber(totalRaise, metadataPriceToken?.decimals),
           },
           {
             label: "Project tokens for sale",
             value: formatNumber(
-              new BN(launchpadProject?.total_amount_sale_project_tokens ?? "0"),
-              metadataProjectToken?.decimals ?? 0
+              launchpadProject?.total_amount_sale_project_tokens,
+              metadataProjectToken?.decimals
             ),
           },
           {
             label: "Allocation size",
             value: formatNumber(
-              new BN(launchpadProject?.token_allocation_size ?? "0"),
-              metadataProjectToken?.decimals ?? 0
+              launchpadProject?.token_allocation_size,
+              metadataProjectToken?.decimals
             ),
           },
           {
@@ -79,19 +85,21 @@ export function ProjectStats({
           {
             label: "How many allocations you already bought",
             value: accountId
-              ? investorAllocation.allocationsBought ?? "0"
+              ? investorAllocation.allocationsBought
               : CONNECT_WALLET_MESSAGE,
           },
           {
             label: "Total allocations bought / total allocations",
             value:
               formatNumber(
-                new BN(launchpadProject?.allocations_sold ?? "0").div(
-                  new BN(
-                    launchpadProject?.total_amount_sale_project_tokens ?? "1"
+                new Big(launchpadProject?.allocations_sold ?? 0)
+                  .div(
+                    new Big(
+                      launchpadProject?.total_amount_sale_project_tokens ?? 1
+                    )
                   )
-                ),
-                metadataProjectToken?.decimals ?? 0
+                  .toString(),
+                metadataProjectToken?.decimals
               ) + "%",
           },
         ],
@@ -113,7 +121,7 @@ export function ProjectStats({
           },
           {
             label: "DEX Launch date",
-            value: formatDate(launchpadProject?.liquidity_pool_timestamp!), // TODO
+            value: formatDate(launchpadProject?.liquidity_pool_timestamp!),
           },
           {
             label: "Vesting initial release %",

@@ -1,4 +1,4 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { useMemo, useState } from "react";
 import { RadioGroup } from "@headlessui/react";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
@@ -8,8 +8,6 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { InvestorInfo } from "@/hooks/modules/launchpad";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { tokenMetadata } from "@/interfaces";
-import { BigDecimalFloat } from "@near/ts";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 const classNames = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -42,14 +40,14 @@ export default function ({
   const { increaseMembership } = useLaunchpadStore();
 
   const stakedTokens = useMemo(
-    () => new BN(investor?.staked_token ?? 0),
+    () => new Big(investor?.staked_token ?? 0),
     [investor?.staked_token]
   );
 
   const tiers = useMemo(
     () =>
       launchpadSettings?.tiers_minimum_tokens.map((t, index) => {
-        const amount = new BN(t);
+        const amount = new Big(t);
 
         return {
           amount,
@@ -68,15 +66,16 @@ export default function ({
     return tiers?.find(({ level }) => level === selected!)?.amount!;
   }, [stakedTokens, tiers, selected]);
 
+  const decimals = useMemo(() => {
+    return new Big(10).pow(metadata?.decimals ?? 0);
+  }, [metadata]);
+
   const formatedAmountToSelectedLevel = useMemo(() => {
-    return new BigDecimalFloat(
-      amountToSelectedLevel ?? new BN(0),
-      new BN(metadata?.decimals ?? 0).neg()
-    ).toLocaleString("en", CURRENCY_FORMAT_OPTIONS);
+    return new Big(amountToSelectedLevel ?? 0).div(decimals).toFixed(2);
   }, [metadata, amountToSelectedLevel, selected]);
 
   const isInsuficcientBalance = useMemo(() => {
-    return new BN(balance ?? 0).lt(amountToSelectedLevel ?? new BN(0));
+    return new Big(balance ?? 0).lt(amountToSelectedLevel ?? new Big(0));
   }, [balance, amountToSelectedLevel]);
 
   const upgradeLevel = () =>

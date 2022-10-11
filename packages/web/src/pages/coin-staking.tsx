@@ -15,12 +15,8 @@ import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
-import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
-import BN from "bn.js";
 import Big from "big.js";
-import { BigDecimalFloat } from "@near/ts";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
 
 interface TokenRatio {
   x_token: string;
@@ -165,6 +161,12 @@ export const Staking = () => {
     return xTokenBalance.div(jumpValue).toFixed(2);
   }, [xTokenBalance, jumpValue]);
 
+  const apr = useMemo(() => {
+    const base = new Big(jumpYearlyDistributionCompromise).mul(100);
+
+    return base.div(jumpRatio).toFixed(2);
+  }, [jumpYearlyDistributionCompromise, baseToken]);
+
   return (
     <PageContainer>
       <Flex gap={4} w="100%" flexWrap="wrap">
@@ -236,17 +238,7 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="APR"
-                  value={
-                    new BigDecimalFloat(
-                      new BN(jumpYearlyDistributionCompromise).mul(
-                        new BN("100")
-                      )
-                    ).formatQuotient(
-                      new BigDecimalFloat(new BN(baseToken)),
-                      new BN(9),
-                      { formatOptions: CURRENCY_FORMAT_OPTIONS }
-                    ) + "%" // TODO: refactor so unit logic can apply to %?
-                  }
+                  value={apr + "%"}
                   className="h-full w-full"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}
