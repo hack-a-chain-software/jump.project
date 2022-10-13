@@ -201,7 +201,7 @@ export function Index() {
   ];
 
   const formatBig = (value, decimals) => {
-    const decimalsBig = new Big(10).pow(decimals ?? 0);
+    const decimalsBig = new Big(10).pow(Number(decimals) ?? 0);
 
     return new Big(value ?? 0).div(decimalsBig);
   };
@@ -363,7 +363,7 @@ export function Index() {
                   borderRadius="20px"
                   onClick={() => {
                     if (e) {
-                      navigate(`/launchpad/${e?.listing_id}`);
+                      navigate(`/${e?.listing_id}`);
                     }
                   }}
                   key={`launchpad-project-${e?.listing_id}-${index}`}
@@ -402,7 +402,7 @@ export function Index() {
                       new Big(e?.token_allocation_price ?? 0)
                         .mul(new Big(e?.total_amount_sale_project_tokens ?? 1))
                         .toString(),
-                      new Big(e?.total_amount_sale_project_tokens ?? 0)
+                      new Big(e?.project_token_info?.decimals ?? 0)
                         .add(new Big(e?.price_token_info?.decimals ?? 0))
                         .toString()
                     )

@@ -164,7 +164,11 @@ export const Staking = () => {
   const apr = useMemo(() => {
     const base = new Big(jumpYearlyDistributionCompromise).mul(100);
 
-    return base.div(jumpRatio).toFixed(2);
+    const baseBig = new Big(baseToken);
+
+    const denom = new Big(10).pow(9);
+
+    return base.div(baseBig).div(denom).toFixed(2);
   }, [jumpYearlyDistributionCompromise, baseToken]);
 
   return (

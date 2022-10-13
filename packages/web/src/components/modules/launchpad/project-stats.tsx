@@ -38,19 +38,19 @@ export function ProjectStats({
   const formatNumber = (value, decimals) => {
     const decimalsBig = new Big(10).pow(decimals ?? 1);
 
-    return new Big(value ?? 0).div(decimalsBig);
+    return new Big(value ?? 0).div(decimalsBig).toFixed(2);
   };
 
   const totalRaise = useMemo(() => {
     const {
-      total_amount_sale_project_tokens = "",
-      token_allocation_price = "",
-      token_allocation_size = "",
+      total_amount_sale_project_tokens = 0,
+      token_allocation_price = 0,
+      token_allocation_size = 1,
     } = launchpadProject || {};
 
-    const totalAmount = new Big(total_amount_sale_project_tokens!);
-    const allocationPrice = new Big(token_allocation_price!);
-    const allocationSize = new Big(token_allocation_size || 1);
+    const totalAmount = new Big(total_amount_sale_project_tokens);
+    const allocationPrice = new Big(token_allocation_price);
+    const allocationSize = new Big(token_allocation_size);
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [launchpadProject]);
@@ -190,7 +190,7 @@ export function ProjectStats({
           className="flex-col md:flex-row md:space-x-[12px]"
         >
           {Object.keys(stats).map((key) => {
-            const table = stats[key];
+            const { name, items } = stats[key];
 
             return (
               <Flex
@@ -207,12 +207,12 @@ export function ProjectStats({
                     letterSpacing="-0.05em"
                     fontSize="24px"
                     as="h1"
-                    children={table.name}
+                    children={name}
                   />
                 </Flex>
 
                 <Flex flexDirection="column" width="100%" gap={2}>
-                  {table.items.map(({ label, value }, index) => (
+                  {items.map(({ label, value }, index) => (
                     <Skeleton
                       className="rounded-[16px]"
                       isLoaded={!isLoading}

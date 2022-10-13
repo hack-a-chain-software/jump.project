@@ -42,15 +42,15 @@ export function ProjectUserArea({
   }, [launchpadProject]);
 
   const decimals = useMemo(() => {
-    return new Big(metadataProjectToken?.decimals ?? 0);
+    return new Big(10).pow(metadataProjectToken?.decimals ?? 0);
   }, [metadataProjectToken]);
 
   const claimedAmount = useMemo(() => {
-    return new Big(investorAllocation.totalTokensBought!);
+    return new Big(investorAllocation.totalTokensBought! ?? 0);
   }, [investorAllocation]);
 
   const unlockedAmount = useMemo(() => {
-    return new Big(vestedAllocations);
+    return new Big(vestedAllocations ?? 0);
   }, [vestedAllocations]);
 
   const totalAmount = useMemo(() => {

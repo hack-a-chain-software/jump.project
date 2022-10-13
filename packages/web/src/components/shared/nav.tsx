@@ -6,6 +6,8 @@ import { JumpIcon } from "../../assets/svg/jump-logo";
 export const Nav = () => {
   const navigate = useNavigate();
 
+  console.log(window.location);
+
   return (
     <Flex
       // minH="100vh"
@@ -52,9 +54,7 @@ export const Nav = () => {
                 flexDirection="column"
                 fontSize="12px"
                 pt={2}
-                opacity={
-                  window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
-                }
+                opacity={window.location.pathname === e.route ? 1 : 0.3}
               >
                 {e.icon}
                 {e.title}

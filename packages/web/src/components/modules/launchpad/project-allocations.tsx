@@ -78,7 +78,7 @@ export function ProjectAllocations({
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
-    return new Big(launchpadProject?.token_allocation_price!).mul(
+    return new Big(launchpadProject?.token_allocation_price! ?? 0).mul(
       new Big(tickets.toString())
     );
   }, [tickets]);
@@ -129,11 +129,17 @@ export function ProjectAllocations({
   ];
 
   const decimals = useMemo(() => {
-    return new Big(10).pow(launchpadProject?.price_token_info?.decimals ?? 0);
-  }, [launchpadProject]);
+    if (!launchpadProject?.price_token_info?.decimals) {
+      return new Big(1);
+    }
+
+    return new Big(10).pow(
+      Number(launchpadProject?.price_token_info?.decimals)
+    );
+  }, [launchpadProject?.price_token_info]);
 
   const balance = useMemo(() => {
-    return new Big(priceTokenBalance ?? "0").div(decimals).toFixed(2);
+    return new Big(priceTokenBalance ?? 0).div(decimals).toFixed(2);
   }, [priceTokenBalance, decimals]);
 
   const total = useMemo(() => {
