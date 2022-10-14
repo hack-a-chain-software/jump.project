@@ -29,7 +29,7 @@ pub struct Contract {
 #[near_bindgen]
 impl Contract {
   #[init]
-  pub fn new(owner_id: AccountId, metadata: FungibleTokenMetadata) -> Self {
+  pub fn new(owner_id: AccountId, init_supply: U128, metadata: FungibleTokenMetadata) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
     let mut this = Self {
@@ -38,6 +38,15 @@ impl Contract {
       metadata: LazyOption::new(b"m".to_vec(), Some(&metadata)),
     };
     this.token.internal_register_account(&owner_id);
+    //transfering an initial supply to the owner - helps with visualization for the user
+    this.token.internal_deposit(&owner_id, init_supply.into());
+    FtMint {
+      user_id: &owner_id,
+      amount: &init_supply.0.to_string(),
+      memo: Some("Initital Mint event on contract creation"),
+    }
+    .emit();
+
     this
   }
 
@@ -102,6 +111,7 @@ mod tests {
   pub const TOKEN_SYMBOL: &str = "XTK";
   pub const TOKEN_ICON: &str = "some.url";
   pub const TOKEN_DECIMALS: u8 = 18; //     x_token_decimals: u8,
+  pub const INIT_SUPPLY: u128 = 1000;
 
   pub fn get_context(
     input: Vec<u8>,
@@ -154,16 +164,19 @@ mod tests {
   fn test_new() {
     let context = get_context(vec![], false, 0, 0, OWNER_ACCOUNT.to_string()); // vec!() -> da pra inicializar assim, tem otimizacao ( macro vec)
     testing_env!(context);
-    let contract = Contract::new(OWNER_ACCOUNT.to_string(), get_test_meta());
+    let contract = Contract::new(
+      OWNER_ACCOUNT.to_string(),
+      U128(INIT_SUPPLY),
+      get_test_meta(),
+    );
     let contract_metadata = contract.metadata.get().unwrap();
 
-    //assert that the contract is initialized with 0 tokens
-    assert_eq!(contract.ft_total_supply().0, 0 as u128);
+    assert_eq!(contract.ft_total_supply().0, INIT_SUPPLY);
     assert_eq!(
       contract
         .ft_balance_of(ValidAccountId::try_from(OWNER_ACCOUNT).unwrap())
         .0,
-      0 as u128
+      INIT_SUPPLY
     );
     assert_eq!(contract_metadata.spec, get_test_meta().spec)
   }
