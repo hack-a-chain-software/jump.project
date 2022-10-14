@@ -12,14 +12,6 @@ async function restartDb() {
     port: 5432,
   });
 
-  // const client = new Client({
-  //   user: "postgres",
-  //   host: "staging-db.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
-  //   database: "jump_testnet",
-  //   password: "JDX-secret_password-1683413286",
-  //   port: 5432,
-  // });
-
   await client.connect();
 
   const dropQuery = "DROP SCHEMA public CASCADE";
