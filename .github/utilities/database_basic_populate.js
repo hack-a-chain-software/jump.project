@@ -13,20 +13,12 @@ const prefix = JSON.parse(
 restartDb();
 
 async function restartDb() {
-  // const client = new Client({
-  //   user: process.env.DB_USER,
-  //   host: process.env.DB_HOST,
-  //   database: process.env.DB_NAME,
-  //   password: process.env.DB_PASS,
-  //   port: 5432,
-  // });
-
   const client = new Client({
-    user: "postgres",
-    host: "localhost",
-    database: "postgres",
-    password: "1234",
-    port: 5438,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASS,
+    port: 5432,
   });
 
   await client.connect();
