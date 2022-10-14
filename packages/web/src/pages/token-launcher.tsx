@@ -8,6 +8,11 @@ import {
 import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useWalletSelector } from "@/context/wallet-selector";
+import {
+  executeMultipleTransactions,
+  getTransaction,
+  viewFunction,
+} from "@/tools";
 
 export type TokenDataProps = {
   name: string;
@@ -26,7 +31,7 @@ export const TokenLauncher = () => {
   const [tokenData, setTokenData] = useState({});
   const [showModal, setShowModal] = useState<boolean>(false);
 
-  const { accountId } = useWalletSelector();
+  const { accountId, selector } = useWalletSelector();
 
   const newTokenForm = useForm<TokenDataProps>();
 
@@ -80,12 +85,47 @@ export const TokenLauncher = () => {
     handleFormStepChange();
   });
 
-  const handleStep2FormSubmit = handleSubmit((data) => {
+  const handleStep2FormSubmit = handleSubmit(async (data) => {
     setTokenData((prevState) => {
       return { ...prevState, ...data };
     });
+
     const contract_args = createArgsForTokenContract({ ...tokenData, ...data });
-    console.log(contract_args);
+
+    const storageCost = await viewFunction(
+      selector,
+      "launcher.testnet",
+      "view_storage_cost_near",
+      {
+        contract_name: "",
+      }
+    );
+
+    const deploymentCost = await viewFunction(
+      selector,
+      "launcher.testnet",
+      "view_deployment_cost",
+      {
+        contract_name: "",
+      }
+    );
+
+    const transaction = getTransaction(
+      accountId!,
+      "launcher.testnet",
+      "deploy_new_contract",
+      {
+        contract_to_be_deployed: "",
+        deploy_prefix: "",
+        args: contract_args,
+      }
+      // storageCost + deploymentCost,
+    );
+
+    const wallet = await selector.wallet();
+
+    await executeMultipleTransactions([transaction], wallet);
+
     reset();
     handleFormStepChange();
   });
