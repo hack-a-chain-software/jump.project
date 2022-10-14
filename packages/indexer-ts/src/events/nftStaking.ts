@@ -19,179 +19,115 @@ export async function handleNftStakingEvent(
   event: NearEvent,
   eventId: EventId,
   sequelize: Sequelize
-): Promise<void> {
+): Promise<boolean> {
   switch (event.event) {
     case CREATE_STAKING_PRGRAM: {
-      let counter = 0;
-      const MAX_COUNT = 3;
-      async function query() {
-        let data: CreateStakingProgramData = event.data[0];
+      let data: CreateStakingProgramData = event.data[0];
 
-        const transaction = await sequelize.transaction();
+      const transaction = await sequelize.transaction();
 
-        try {
-          await processEventId(eventId, transaction);
-        } catch (err) {
-          await transaction.rollback();
-          return;
-        }
+      if (!(await processEventId(eventId, transaction))) return true;
+      try {
+        await StakingProgram.create(
+          {
+            collection_id: data.collection_address,
+            collection_owner_id: data.collection_owner,
+            token_address: data.token_address,
+            min_staking_period: data.min_staking_period,
+            early_withdraw_penalty: data.early_withdraw_penalty,
+            round_interval: data.round_interval,
+          },
+          { transaction }
+        );
 
-        try {
-          await StakingProgram.create(
-            {
-              collection_id: data.collection_address,
-              collection_owner_id: data.collection_owner,
-              token_address: data.token_address,
-              min_staking_period: data.min_staking_period,
-              early_withdraw_penalty: data.early_withdraw_penalty,
-              round_interval: data.round_interval,
-            },
-            { transaction }
-          );
-
-          await transaction.commit();
-        } catch (err) {
-          await transaction.rollback();
-          console.log(err);
-          if (counter < MAX_COUNT) {
-            counter += 1;
-            await sleep(2000, counter);
-            await query();
-          }
-        }
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        return false;
       }
 
-      await query();
-      break;
+      return true;
     }
 
     case UPDATE_STAKING_PROGRAM: {
-      let counter = 0;
-      const MAX_COUNT = 3;
-      async function query() {
-        let data: UpdateStakingProgramData = event.data[0];
+      let data: UpdateStakingProgramData = event.data[0];
 
-        const transaction = await sequelize.transaction();
+      const transaction = await sequelize.transaction();
 
-        try {
-          await processEventId(eventId, transaction);
-        } catch (err) {
-          await transaction.rollback();
-          return;
-        }
+      if (!(await processEventId(eventId, transaction))) return true;
+      try {
+        let entry: StakingProgram = (await StakingProgram.findByPk(
+          data.collection_address
+        ))!;
 
-        try {
-          let entry: StakingProgram = (await StakingProgram.findByPk(
-            data.collection_address
-          ))!;
+        if (data.early_withdraw_penalty)
+          entry.early_withdraw_penalty = data.early_withdraw_penalty;
+        if (data.min_staking_period)
+          entry.min_staking_period = data.min_staking_period;
 
-          if (data.early_withdraw_penalty)
-            entry.early_withdraw_penalty = data.early_withdraw_penalty;
-          if (data.min_staking_period)
-            entry.min_staking_period = data.min_staking_period;
+        entry.save({ transaction });
 
-          entry.save({ transaction });
-
-          await transaction.commit();
-        } catch {
-          await transaction.rollback();
-
-          if (counter < MAX_COUNT) {
-            counter += 1;
-            await sleep(2000, counter);
-            await query();
-          }
-        }
+        await transaction.commit();
+      } catch {
+        await transaction.rollback();
+        return false;
       }
 
-      await query();
-      break;
+      return true;
     }
 
     case STAKE_NFT: {
-      let counter = 0;
-      const MAX_COUNT = 3;
-      async function query() {
-        let data: StakeNftData = event.data[0];
-        console.log("STAKE NFT");
-        const transaction = await sequelize.transaction();
+      let data: StakeNftData = event.data[0];
 
-        try {
-          await processEventId(eventId, transaction);
-        } catch (err) {
-          await transaction.rollback();
-          return;
-        }
+      const transaction = await sequelize.transaction();
 
-        try {
-          await StakedNft.create(
-            {
-              nft_id: data.token_id[1],
-              collection_id: data.token_id[0].account_id,
-              owner_id: data.owner_id,
-              staked_timestamp: unixTsToDate(data.staked_timestamp),
-            },
-            { transaction }
-          );
+      if (!(await processEventId(eventId, transaction))) return true;
+      try {
+        await StakedNft.create(
+          {
+            nft_id: data.token_id[1],
+            collection_id: data.token_id[0].account_id,
+            owner_id: data.owner_id,
+            staked_timestamp: unixTsToDate(data.staked_timestamp),
+          },
+          { transaction }
+        );
 
-          await transaction.commit();
-        } catch (err) {
-          console.log(err);
-          await transaction.rollback();
-
-          if (counter < MAX_COUNT) {
-            counter += 1;
-            await sleep(2000, counter);
-            await query();
-          }
-        }
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        return false;
       }
 
-      await query();
-      break;
+      return true;
     }
 
     case UNSTAKE_NFT: {
-      console.log("UNSTAKE_NFT");
-      let counter = 0;
-      const MAX_COUNT = 3;
-      async function query() {
-        let data: UnstakeNftData = event.data[0];
+      let data: UnstakeNftData = event.data[0];
 
-        const transaction = await sequelize.transaction();
+      const transaction = await sequelize.transaction();
 
-        try {
-          await processEventId(eventId, transaction);
-        } catch (err) {
-          await transaction.rollback();
-          return;
-        }
+      if (!(await processEventId(eventId, transaction))) return true;
+      try {
+        const entry: StakedNft = (await StakedNft.findOne({
+          where: {
+            nft_id: data.token_id[1],
+            collection_id: data.token_id[0].account_id,
+          },
+        }))!;
 
-        try {
-          const entry: StakedNft = (await StakedNft.findOne({
-            where: {
-              nft_id: data.token_id[1],
-              collection_id: data.token_id[0].account_id,
-            },
-          }))!;
+        await entry.destroy({ transaction });
 
-          await entry.destroy({ transaction });
-
-          await transaction.commit();
-        } catch (err) {
-          console.log(err);
-          await transaction.rollback();
-
-          if (counter < MAX_COUNT) {
-            counter += 1;
-            await sleep(2000, counter);
-            await query();
-          }
-        }
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        return false;
       }
 
-      await query();
-      break;
+      return true;
     }
+
+    default:
+      return true;
   }
 }
