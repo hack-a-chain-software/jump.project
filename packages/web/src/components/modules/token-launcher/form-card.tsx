@@ -14,9 +14,9 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
   const { register, watch } = useFormContext();
 
   const requiredInputs = {
-    tokenName: watch("name"),
+    name: watch("name"),
     symbol: watch("symbol"),
-    tokenImage: watch("tokenImage"),
+    icon: watch("icon"),
     decimals: watch("decimals"),
   };
 
@@ -81,7 +81,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
                 lineHeight="40px"
                 _placeholder={{ color: "#FFF", opacity: "0.5" }}
                 placeholder="Paste URL here"
-                {...register("tokenImage")}
+                {...register("icon")}
               />
               <div
                 className="h-[40px] w-[40px] border-r-[1px] 
@@ -113,7 +113,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
                 </>
               }
               placeholder="Ex: 18"
-              inputName="hashReference"
+              inputName="reference_hash"
             />
           </form>
         </FormControl>

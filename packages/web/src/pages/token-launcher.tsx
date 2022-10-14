@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import {
   PageContainer,
   FormCardStep1,
@@ -8,23 +7,26 @@ import {
 } from "../components";
 import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export type TokenDataProps = {
   name: string;
   symbol: string;
-  tokenImage: string;
+  icon: string;
   decimals: number;
-  reference?: string;
-  hashReference?: string;
+  reference?: string | null;
+  reference_hash?: string | null;
   type: string;
-  supplyType: string;
-  supply?: string;
+  supply_type: string;
+  total_supply?: number;
 };
 
 export const TokenLauncher = () => {
   const [step, setStep] = useState<string>("step 1");
   const [tokenData, setTokenData] = useState({});
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  const { accountId } = useWalletSelector();
 
   const newTokenForm = useForm<TokenDataProps>();
 
@@ -40,7 +42,7 @@ export const TokenLauncher = () => {
         return {
           ...prevState,
           type: "mintable",
-          supplyType: "unlimited",
+          supply_type: "unlimited",
         };
       });
     }
@@ -49,10 +51,28 @@ export const TokenLauncher = () => {
         return {
           ...prevState,
           type: "simple",
-          supplyType: "fixed",
+          supply_type: "fixed",
         };
       });
     }
+  }
+
+  function createArgsForTokenContract(obj: TokenDataProps) {
+    const params = {
+      owner_id: accountId,
+      total_supply: obj.total_supply,
+      metadata: {
+        spec: "ft-1.0.0",
+        name: obj.name,
+        symbol: obj.symbol,
+        icon: obj.icon,
+        reference: obj.reference || null,
+        reference_hash: obj.reference_hash || null,
+        decimals: obj.decimals,
+      },
+    };
+    const json_args = JSON.stringify(params);
+    return json_args;
   }
 
   const handleStep1FormSubmit = handleSubmit((data) => {
@@ -64,7 +84,10 @@ export const TokenLauncher = () => {
     setTokenData((prevState) => {
       return { ...prevState, ...data };
     });
+    const contract_args = createArgsForTokenContract({ ...tokenData, ...data });
+    console.log(contract_args);
     reset();
+    handleFormStepChange();
   });
 
   const handleOpenModal = () => {
@@ -83,8 +106,6 @@ export const TokenLauncher = () => {
   useEffect(() => {
     handleOpenModal();
   }, []);
-
-  console.log(tokenData);
 
   return (
     <PageContainer>
