@@ -177,6 +177,7 @@ export function FormCardStep2({
                   placeholder="Ex: 10000"
                   label="Initial Supply"
                   inputName="total_supply"
+                  type="number"
                 />
                 <div className="flex flex-row">
                   <div className="flex flex-column h-[40px] items-center  mr-[7px]">
@@ -219,6 +220,7 @@ export function FormCardStep2({
                   placeholder="Ex: 10000"
                   label="Maximum Supply"
                   inputName="total_supply"
+                  type="number"
                 />
                 <div className="flex flex-row">
                   <div className="flex flex-column h-[40px] items-center mr-[7px]">

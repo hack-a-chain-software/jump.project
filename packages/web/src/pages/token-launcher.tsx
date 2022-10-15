@@ -8,11 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useWalletSelector } from "@/context/wallet-selector";
-import {
-  executeMultipleTransactions,
-  getTransaction,
-  viewFunction,
-} from "@/tools";
+import { useTokenLauncher } from "@/stores/token-louncher-store";
 
 export type TokenDataProps = {
   name: string;
@@ -28,10 +24,22 @@ export type TokenDataProps = {
 
 export const TokenLauncher = () => {
   const [step, setStep] = useState<string>("step 1");
-  const [tokenData, setTokenData] = useState({});
+  const [tokenData, setTokenData] = useState<TokenDataProps>({
+    name: "",
+    symbol: "",
+    icon: "",
+    decimals: 0,
+    reference: null,
+    reference_hash: null,
+    type: "",
+    supply_type: "",
+    total_supply: 0,
+  });
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const { accountId, selector } = useWalletSelector();
+
+  const { createToken } = useTokenLauncher();
 
   const newTokenForm = useForm<TokenDataProps>();
 
@@ -63,9 +71,11 @@ export const TokenLauncher = () => {
   }
 
   function createArgsForTokenContract(obj: TokenDataProps) {
+    const supply_type =
+      obj?.supply_type == "fixed" ? "total_supply" : "initial_supply";
     const params = {
       owner_id: accountId,
-      total_supply: obj.total_supply,
+      [supply_type]: obj.total_supply,
       metadata: {
         spec: "ft-1.0.0",
         name: obj.name,
@@ -91,43 +101,26 @@ export const TokenLauncher = () => {
     });
 
     const contract_args = createArgsForTokenContract({ ...tokenData, ...data });
+    // const storageCost = await viewFunction(
+    //   selector,
+    //   "launcher.testnet",
+    //   "view_storage_cost_near",
+    //   {
+    //     contract_name: "token",
+    //   }
+    // );
 
-    const storageCost = await viewFunction(
-      selector,
-      "launcher.testnet",
-      "view_storage_cost_near",
-      {
-        contract_name: "",
-      }
-    );
+    const deployCost = "20756340000000000000000010";
 
-    const deploymentCost = await viewFunction(
-      selector,
-      "launcher.testnet",
-      "view_deployment_cost",
-      {
-        contract_name: "",
-      }
-    );
-
-    const transaction = getTransaction(
+    createToken(
+      deployCost,
       accountId!,
-      "launcher.testnet",
-      "deploy_new_contract",
-      {
-        contract_to_be_deployed: "",
-        deploy_prefix: "",
-        args: contract_args,
-      }
-      // storageCost + deploymentCost,
+      tokenData?.name,
+      contract_args,
+      selector
     );
-
-    const wallet = await selector.wallet();
-
-    await executeMultipleTransactions([transaction], wallet);
 
     reset();
-    handleFormStepChange();
   });
 
   const handleOpenModal = () => {

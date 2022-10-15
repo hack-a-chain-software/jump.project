@@ -5,12 +5,14 @@ interface FormInputAndLabelProps {
   placeholder: string;
   label: JSX.Element | string;
   inputName: string;
+  type?: string;
 }
 
 export function FormInputAndLabel({
   placeholder,
   label,
   inputName,
+  type,
 }: FormInputAndLabelProps) {
   const { register } = useFormContext();
 
@@ -38,6 +40,7 @@ export function FormInputAndLabel({
         _placeholder={{ color: "#FFF", opacity: "0.5" }}
         placeholder={placeholder}
         {...register(inputName)}
+        type={type}
       />
     </>
   );

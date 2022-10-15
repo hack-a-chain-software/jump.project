@@ -96,6 +96,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
               label="Decimals"
               placeholder="Ex: 18"
               inputName="decimals"
+              type="number"
             />
             <FormInputAndLabel
               label={
