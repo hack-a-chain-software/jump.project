@@ -10,6 +10,11 @@ impl Contract {
     binary.deployment_cost
   }
 
+  pub fn view_init_cost(&self, contract_name: String) -> U128 {
+    let binary = self.binaries.get(&contract_name).expect(ERR_301);
+    binary.init_cost
+  }
+
   pub fn view_storage_cost_bytes(&self, contract_name: String) -> U128 {
     let binary = self.binaries.get(&contract_name).expect(ERR_301);
     let storage_cost = self
@@ -37,7 +42,7 @@ impl Contract {
       .0;
 
     let binary = self.binaries.get(&contract_name).expect(ERR_301);
-    let final_cost = storage_cost * env::storage_byte_cost() + binary.deployment_cost.0;
+    let final_cost = storage_cost * env::storage_byte_cost() + binary.deployment_cost.0 + binary.init_cost.0;
 
     U128(final_cost)
   }

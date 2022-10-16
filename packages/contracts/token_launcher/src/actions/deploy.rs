@@ -51,10 +51,10 @@ impl Contract {
     //the cost of storage is composed by the cost of deployment(deployment fee charged
     // by the factory) +  blockchain storage cost
     assert!(
-      env::attached_deposit() >= (storage_cost + binary.deployment_cost.0),
+      env::attached_deposit() >= (storage_cost + binary.deployment_cost.0 + binary.init_cost.0),
       "{}{}{}",
       ERR_104,
-      (storage_cost + binary.deployment_cost.0),
+      (storage_cost + binary.deployment_cost.0 + binary.init_cost.0),
       " N "
     );
 
@@ -106,6 +106,7 @@ pub fn deploy_contract(
   binary: Binary,
   contract_to_be_deployed: String,
 ) {
+  // change this to be only stoarage cost and send fee to treasury
   let attached_deposit = env::attached_deposit();
   let encoded_args = near_sdk::serde_json::to_vec(&args).expect(ERR_105);
   let factory_account_id = env::current_account_id().as_bytes().to_vec();
@@ -173,12 +174,10 @@ pub fn create_deploy_address(prefix: String) -> String {
 
 #[cfg(test)]
 mod tests {
-  use std::ptr::null;
 
-  use near_sdk::{testing_env, serde_json};
+  use near_sdk::testing_env;
 
   use crate::tests::*;
-  use crate::*;
 
   use super::*;
 
@@ -203,7 +202,7 @@ mod tests {
     testing_env!(context);
 
     let mut contract: Contract = init_contract();
-    let mut contract_deployed = create_deploy_address(DEPLOYED.to_string());
+    let contract_deployed = create_deploy_address(DEPLOYED.to_string());
     contract
       .deployed_contracts
       .insert(&contract_deployed.parse().unwrap(), &"token".to_string());
@@ -230,7 +229,7 @@ mod tests {
     testing_env!(context);
 
     let mut contract: Contract = init_contract();
-    let mut contract_deployed = create_deploy_address(LONG.to_string());
+    let contract_deployed = create_deploy_address(LONG.to_string());
 
     contract.deploy_new_contract("token".to_string(), contract_deployed, json!(null));
   }

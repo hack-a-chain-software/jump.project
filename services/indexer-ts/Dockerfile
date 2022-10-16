@@ -1,5 +1,7 @@
 FROM node:18.9.1
 WORKDIR /project
+COPY ./package.json ./package.json
+COPY ./yarn.lock ./yarn.lock
 COPY ./packages/indexer-ts ./packages/indexer-ts
 RUN yarn
 RUN yarn workspace @near/indexer-ts compile

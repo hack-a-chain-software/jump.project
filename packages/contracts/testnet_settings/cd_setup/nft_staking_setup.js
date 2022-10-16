@@ -295,7 +295,10 @@ async function nftStakingSetup(execution_data) {
     args: {
       receiver_id: connAccountMap.nftStaking.accountId,
       amount: partnerSupply,
-      msg: JSON.stringify({ type: "DepositToContract" }),
+      msg: JSON.stringify({
+        type: "Deposit",
+        data: { type: "ContractTreasury" },
+      }),
     },
     attachedDeposit: new BN(1),
     gas: new BN("300000000000000"),
@@ -325,7 +328,10 @@ async function nftStakingSetup(execution_data) {
     args: {
       receiver_id: connAccountMap.nftStaking.accountId,
       amount: lockedAmount,
-      msg: JSON.stringify({ type: "DepositToContract" }),
+      msg: JSON.stringify({
+        type: "Deposit",
+        data: { type: "ContractTreasury" },
+      }),
     },
     attachedDeposit: new BN(1),
     gas: new BN("300000000000000"),
@@ -333,7 +339,6 @@ async function nftStakingSetup(execution_data) {
 
   // deploy all reward tokens
   for (token in projectTokens) {
-    let tokenName = execution_data.accountMap.prefix + token + ".testnet";
     await deployToken(
       token,
       projectTokens[token].totalSupply,
@@ -387,8 +392,8 @@ async function nftStakingSetup(execution_data) {
       collection_rps,
       min_staking_period: "10000000000000",
       early_withdraw_penalty: "500000000000",
-      round_interval: 10,
-      start_in: 0,
+      round_interval: "10",
+      start_in: "0",
     };
 
     await connAccountMap.ownerAccount.functionCall({
@@ -404,8 +409,9 @@ async function nftStakingSetup(execution_data) {
     // deposit tokens to program
     await connAccountMap.ownerAccount.functionCall({
       contractId: connAccountMap.nftStaking.accountId,
-      methodName: "move_contract_funds_to_collection",
+      methodName: "transfer",
       args: {
+        operation: { type: "ContractToCollection" },
         collection: {
           type: "NFTContract",
           account_id: collectionAddress,
@@ -419,8 +425,41 @@ async function nftStakingSetup(execution_data) {
 
     await connAccountMap.ownerAccount.functionCall({
       contractId: connAccountMap.nftStaking.accountId,
-      methodName: "move_contract_funds_to_collection",
+      methodName: "transfer",
       args: {
+        operation: { type: "CollectionToDistribution" },
+        collection: {
+          type: "NFTContract",
+          account_id: collectionAddress,
+        },
+        token_id: connAccountMap.lockedTokenAccount.accountId,
+        amount: "1000000000000000000000000",
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
+
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
+      methodName: "transfer",
+      args: {
+        operation: { type: "ContractToCollection" },
+        collection: {
+          type: "NFTContract",
+          account_id: collectionAddress,
+        },
+        token_id: connAccountMap.partnertoken.accountId,
+        amount: "1000000000000000000000000",
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
+
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
+      methodName: "transfer",
+      args: {
+        operation: { type: "CollectionToDistribution" },
         collection: {
           type: "NFTContract",
           account_id: collectionAddress,
@@ -439,12 +478,31 @@ async function nftStakingSetup(execution_data) {
         receiver_id: connAccountMap.nftStaking.accountId,
         amount: "1000000000000",
         msg: JSON.stringify({
-          type: "DepositToDistribution",
-          collection: {
-            type: "NFTContract",
-            account_id: collectionAddress,
+          type: "Deposit",
+          data: {
+            type: "CollectionTreasury",
+            collection: {
+              type: "NFTContract",
+              account_id: collectionAddress,
+            },
           },
         }),
+      },
+      attachedDeposit: new BN(1),
+      gas: new BN(300000000000000),
+    });
+
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.nftStaking.accountId,
+      methodName: "transfer",
+      args: {
+        operation: { type: "CollectionToDistribution" },
+        collection: {
+          type: "NFTContract",
+          account_id: collectionAddress,
+        },
+        token_id: tokenAddress,
+        amount: "1000000000000",
       },
       attachedDeposit: new BN(1),
       gas: new BN(300000000000000),
