@@ -1,13 +1,5 @@
 const nearAPI = require("near-api-js");
-const { BN, KeyPair } = require("near-workspaces");
-const fs = require("fs");
-const crypto = require("crypto");
-
-const {
-  connect,
-  keyStores,
-  accountCreator: { UrlAccountCreator },
-} = nearAPI;
+const { BN } = require("near-workspaces");
 
 const {
   registerContracts,
@@ -253,7 +245,7 @@ async function launchpadSetup(execution_data) {
     const listingLPprice = "0";
     const listing_data = {
       project_owner: connAccountMap.ownerAccount.accountId,
-      project_token: connAccountMap.jumpTokenAccount.accountId,
+      project_token: connAccountMap[name].accountId,
       price_token: connAccountMap.usdtTokenAccount.accountId,
       listing_type: "Public",
       open_sale_1_timestamp_seconds: increaseTimeStamp(nowTimestamp, 1),
@@ -280,7 +272,7 @@ async function launchpadSetup(execution_data) {
       attachedDeposit: new BN(1),
     });
     await connAccountMap.ownerAccount.functionCall({
-      contractId: connAccountMap.jumpTokenAccount.accountId,
+      contractId: connAccountMap[name].accountId,
       methodName: "ft_transfer_call",
       args: {
         receiver_id: connAccountMap.launchpad.accountId,

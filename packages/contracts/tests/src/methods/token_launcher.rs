@@ -18,6 +18,7 @@ pub async fn register_contract(
   contract_name: String,
   contract_hash: String,
   contract_cost: u128,
+  init_cost: u128,
   init_fn_name: String,
   init_fn_params: String,
 ) -> ExecutionResult<String> {
@@ -28,6 +29,7 @@ pub async fn register_contract(
         "contract_name": contract_name,
         "contract_hash": contract_hash,
         "contract_cost": contract_cost.to_string(),
+        "init_cost": init_cost.to_string(),
         "init_fn_name": init_fn_name,
         "init_fn_params": init_fn_params
       })),
@@ -50,7 +52,7 @@ pub async fn deploy_new_contract(
         "deploy_prefix": deploy_prefix,
         "args": args
       }))
-      .deposit(30_000_000_000_000_000_000_000_000)
+      .deposit(35_000_000_000_000_000_000_000_000)
       .gas(300_000_000_000_000),
   )
   .await

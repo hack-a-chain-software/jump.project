@@ -1,4 +1,3 @@
-const nearAPI = require("near-api-js");
 const { BN, KeyPair } = require("near-workspaces");
 const fs = require("fs");
 

@@ -74,10 +74,13 @@ mod tests {
       CONTRACT_NAME.to_string(),
       hash.clone(),
       5,
+      5_000_000_000_000_000_000_000_000,
       INIT.to_string(),
       "new".to_string(),
     )
     .await;
+
+    println!("{}", 1);
 
     deploy_new_contract(
       &owner,
@@ -87,6 +90,8 @@ mod tests {
       params,
     )
     .await;
+
+    println!("{}", 2);
 
     let deployed_name: workspaces::AccountId =
       format!("{}.{}", PREFIX, factory.id()).parse().unwrap();
@@ -100,10 +105,14 @@ mod tests {
     //Assert that owner received the tokens at initialization
     assert_eq!(balance, INITIAL_TOKEN_SUPPLY.to_string());
 
+    println!("{}", 3);
+
     // try to deploy contract with wrong parameters
     // verify if the tokens where returned to the owner
 
     let owner_balance_before_callback = owner.view_account().await?.balance;
+
+    println!("{}", 4);
 
     println!(
       "{}{}",
@@ -118,6 +127,8 @@ mod tests {
       wrong_params,
     )
     .await;
+
+    println!("{}", 5);
 
     let owner_balance_after_callback = owner.view_account().await?.balance;
 

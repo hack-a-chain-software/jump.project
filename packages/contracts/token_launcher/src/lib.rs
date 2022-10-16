@@ -66,6 +66,7 @@ impl Contract {
     contract_name: String,
     contract_hash: Base58CryptoHash,
     contract_cost: U128,
+    init_cost: U128,
     init_fn_name: String,
     init_fn_params: String,
   ) {
@@ -79,6 +80,7 @@ impl Contract {
       contract_name.clone(),
       contract_hash.into(),
       contract_cost,
+      init_cost,
       init_fn_name,
       init_fn_params,
     );
@@ -93,18 +95,13 @@ mod tests {
   use std::convert::TryInto;
   use std::str::FromStr;
 
-  use near_sdk::env::sha256;
-  use near_sdk::serde::private::de::IdentifierDeserializer;
-  use near_sdk::test_utils::{VMContextBuilder};
-  use near_sdk::{testing_env, PromiseResult, VMContext, Gas};
+  use near_sdk::{testing_env, VMContext, Gas};
 
   use super::*;
 
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
-  pub const TOKEN_ACCOUNT: &str = "token.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
-  pub const MINTER_ACCOUNT: &str = "minter.testnet";
-  pub const USER_ACCOUNT: &str = "user.testnet";
+
 
   pub fn get_context(
     input: Vec<u8>,
@@ -204,6 +201,7 @@ mod tests {
       "token".to_string(),
       CryptoHash::from(contract_hash_58),
       U128(10),
+      U128(10),
       "new".to_string(),
       "params".to_string(),
     );
@@ -212,6 +210,7 @@ mod tests {
     contract.register_contract(
       "token".to_string(),
       contract_hash_58,
+      U128(10),
       U128(10),
       "new".to_string(),
       "params".to_string(),
@@ -244,6 +243,7 @@ mod tests {
     contract.register_contract(
       "token".to_string(),
       contract_hash_58,
+      U128(10),
       U128(10),
       "new".to_string(),
       "params".to_string(),
