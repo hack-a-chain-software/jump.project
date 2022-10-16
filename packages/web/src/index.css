@@ -101,3 +101,11 @@ body {
 .introjs-helperLayer {
   border-radius: 25px !important;
 }
+
+.diamond {
+  background: linear-gradient(90deg, #9795F0 0%, #FBC8D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

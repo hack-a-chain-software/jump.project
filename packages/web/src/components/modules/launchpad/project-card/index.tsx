@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { launchpadProject } from "@/interfaces";
 import { StatusEnum } from "@near/apollo";
 import { useMemo } from "react";
@@ -6,6 +7,7 @@ import isBefore from "date-fns/isBefore";
 import { getUTCDate } from "@near/ts";
 import { RocketIcon } from "@/assets/svg/rocket";
 import { JumpGradient } from "@/assets/svg";
+import { useTokenMetadata } from "@/hooks/modules/token";
 
 const closedArray = [
   "sale_finalized",
@@ -21,12 +23,17 @@ export const ProjectCard = ({
   status,
   project_token_info,
   public: publicProject,
+  price_token,
   open_sale_1_timestamp,
   final_sale_2_timestamp,
-}: Partial<launchpadProject>) => {
-  const projectStatus = useMemo(() => {
-    return StatusEnum.Open;
+  total_amount_sale_project_tokens = "0",
+  token_allocation_price = "0",
+  token_allocation_size = "1",
+}: Partial<launchpadProject> & { public: boolean }) => {
+  const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
+    useTokenMetadata(price_token!);
 
+  const projectStatus = useMemo(() => {
     if (status !== "funded" && closedArray.includes(status!)) {
       return StatusEnum.Closed;
     }
@@ -51,13 +58,37 @@ export const ProjectCard = ({
     return StatusEnum.Open;
   }, [status, open_sale_1_timestamp, final_sale_2_timestamp]);
 
+  const totalRaise = useMemo(() => {
+    const totalAmount = new Big(total_amount_sale_project_tokens);
+    const allocationPrice = new Big(token_allocation_price);
+    const allocationSize = new Big(token_allocation_size);
+
+    return totalAmount.mul(allocationPrice).div(allocationSize);
+  }, [
+    total_amount_sale_project_tokens,
+    token_allocation_price,
+    token_allocation_size,
+  ]);
+
+  const tokensForSale = useMemo(() => {}, []);
+
+  const formatNumber = (value, decimals) => {
+    const decimalsBig = new Big(10).pow(decimals ?? 1);
+
+    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+
+    return new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2 }).format(
+      formattedBig
+    );
+  };
+
   return (
     <div
       className="
         relative
         bg-[#FFFFFF]/[.10] 
         border-box
-        min-w-[325px] w-[313px]
+        min-w-[313px] w-[313px]
         rounded-[9.37553px]
         px-[18.75px] pt-[35px] pb-[23px]
         font-sans
@@ -66,7 +97,7 @@ export const ProjectCard = ({
       <div className="absolute right-[19px] top-[20px] flex space-x-[8px]">
         <Badge type={projectStatus} />
 
-        {!publicProject && <Badge type="whitelist" />}
+        {!!!publicProject && <Badge type="whitelist" />}
       </div>
 
       <div className="flex space-x-[6.25px] mb-[24px]">
@@ -104,9 +135,13 @@ export const ProjectCard = ({
             </div>
 
             <div className="mb-[16px]">
-              <span className="text-[20px] font-[700] tracking-[-0.04em]">
-                $50.000,00 USDT
-              </span>
+              <span
+                className="text-[20px] font-[700] tracking-[-0.04em]"
+                children={`$ ${formatNumber(
+                  totalRaise,
+                  metadataPriceToken?.decimals
+                )} ${metadataPriceToken?.symbol}`}
+              />
             </div>
 
             <div>
@@ -160,9 +195,13 @@ export const ProjectCard = ({
             </div>
 
             <div>
-              <span className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]">
-                10 USDT
-              </span>
+              <span
+                className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
+                children={`${formatNumber(
+                  token_allocation_price,
+                  metadataPriceToken?.decimals
+                )} ${metadataPriceToken?.symbol}`}
+              />
             </div>
           </div>
         </>

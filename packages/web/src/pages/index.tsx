@@ -1,161 +1,11 @@
 import Big from "big.js";
-import isEmpty from "lodash/isEmpty";
-import { useState, useCallback, useEffect } from "react";
-import { debounce } from "lodash-es";
-import {
-  useViewInvestor,
-  useViewLaunchpadSettings,
-  useViewTotalEstimatedInvestorAllowance,
-} from "@/hooks/modules/launchpad";
-import {
-  Flex,
-  Image,
-  Input,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useColorModeValue,
-  Skeleton,
-} from "@chakra-ui/react";
-import { X_JUMP_TOKEN } from "@/env/contract";
-import {
-  LaunchpadConenctionQueryVariables,
-  StatusEnum,
-  useLaunchpadConenctionQuery,
-  VisibilityEnum,
-} from "@near/apollo";
-import { useMemo } from "react";
-import { useTheme } from "@/hooks/theme";
-import { useNavigate } from "react-router";
-import {
-  Button,
-  Select,
-  TopCard,
-  LoadingIndicator,
-  PreviewProjects,
-} from "@/components";
-import { useWalletSelector } from "@/context/wallet-selector";
-import { useNearQuery } from "react-near";
-import { useTokenMetadata } from "@/hooks/modules/token";
-import { FolderOpenIcon } from "@heroicons/react/solid";
+import { useState } from "react";
+import { Flex } from "@chakra-ui/react";
+import { StatusEnum } from "@near/apollo";
+import { TopCard, PreviewProjects } from "@/components";
 import { Steps } from "intro.js-react";
 
-const PAGINATE_LIMIT = 30;
-
-/**
- * @route - '/'
- * @description - This is the landing page for the near application
- * @name Home
- */
 export function Index() {
-  const [filterMine, setMine] = useState<boolean | null>(null);
-  const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
-  const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
-    null
-  );
-  const [filterSearch, setSearch] = useState<string | null>(null);
-  const [loadingItems, setLoadingItems] = useState(false);
-
-  const navigate = useNavigate();
-
-  const { accountId } = useWalletSelector();
-
-  const { darkPurpleOpaque, glassyWhite, blackAndWhite, glassyWhiteOpaque } =
-    useTheme();
-
-  const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
-
-  const investor = useViewInvestor(accountId!);
-
-  const { data: totalAllowanceData = "0" } =
-    useViewTotalEstimatedInvestorAllowance(accountId!);
-
-  const { data: launchpadSettings, loading: loadingLaunchpadSettings } =
-    useViewLaunchpadSettings();
-
-  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
-    useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: X_JUMP_TOKEN,
-      variables: {
-        account_id: accountId!,
-      },
-      poolInterval: 1000 * 60,
-      skip: !accountId,
-    });
-
-  const { data: baseTokenMetadata, loading: loadingProjectToken } =
-    useTokenMetadata(X_JUMP_TOKEN);
-
-  const queryVariables: LaunchpadConenctionQueryVariables = useMemo(() => {
-    return {
-      limit: PAGINATE_LIMIT,
-      accountId: accountId ?? "",
-
-      showMineOnly: filterMine,
-      visibility: filterVisibility,
-      status: filterStatus,
-      search: filterSearch,
-    };
-  }, [accountId, filterStatus, filterMine, filterVisibility, filterSearch]);
-
-  // const {
-  //   data: {
-  //     launchpad_projects: { data: launchpadProjects, hasNextPage = false } = {
-  //       data: [],
-  //     },
-  //   } = {},
-  //   loading: loadingProjects,
-  //   fetchMore,
-  //   refetch,
-  // } = useLaunchpadConenctionQuery({
-  //   variables: {
-  //     limit: PAGINATE_LIMIT,
-  //     accountId: accountId ?? "",
-  //   },
-  //   notifyOnNetworkStatusChange: true,
-  // });
-
-  // useEffect(() => {
-  //   (async () => {
-  //     await refetch({
-  //       ...queryVariables,
-  //       offset: 0,
-  //     });
-  //   })();
-  // }, [queryVariables]);
-
-  // const fetchMoreItems = useCallback(
-  //   debounce(async (queryVariables: LaunchpadConenctionQueryVariables) => {
-  //     if (loadingProjects || !hasNextPage) {
-  //       return;
-  //     }
-
-  //     setLoadingItems(true);
-
-  //     await fetchMore({
-  //       variables: {
-  //         offset: (launchpadProjects ?? []).length,
-  //         ...queryVariables,
-  //       },
-  //     });
-
-  //     setLoadingItems(false);
-  //   }, 240),
-  //   [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
-  // );
-
-  const isLoaded = useMemo(() => {
-    return (
-      !loadingLaunchpadSettings &&
-      !loadingBaseTokenBalance &&
-      !loadingProjectToken
-    );
-  }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
-
   const [showSteps, setShowSteps] = useState(false);
 
   const stepItems = [
@@ -206,14 +56,7 @@ export function Index() {
   };
 
   return (
-    <Flex
-      direction="column"
-      p="30px"
-      w="100%"
-      overflow="hidden"
-      pt="150px"
-      className="relative"
-    >
+    <div className="relative flex-col p-[30px] w-full overflow-hidden pt-[150px]">
       <Steps
         enabled={showSteps}
         steps={stepItems}
@@ -226,7 +69,7 @@ export function Index() {
         }}
       />
 
-      <Flex gap={5} className="flex-col lg:flex-row">
+      <Flex gap={5} className="flex-col lg:flex-row mb-[72px]">
         <TopCard
           gradientText="Launchpad "
           bigText="Welcome to Jump Pad"
@@ -241,7 +84,7 @@ export function Index() {
         <PreviewProjects title="Upcoming sales" status={StatusEnum.Waiting} />
         <PreviewProjects title="Closed sales" status={StatusEnum.Closed} />
       </div>
-    </Flex>
+    </div>
   );
 }
 

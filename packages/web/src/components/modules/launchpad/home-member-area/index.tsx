@@ -147,13 +147,17 @@ export function MemberArea({
   ];
 
   return (
-    <Card
-      minWidth="315px"
-      className="lg:flex-grow lg:max-w-[500px] member-area relative"
+    <div
+      className="
+        rounded-[20px]
+        bg-[rgba(255,_255,_255,_0.1)] 
+        max-w-[548px] h-max flex-1
+        member-area relative px-[24px] pt-[16px] pb-[26px]
+      "
     >
-      <div className="absolute right-[24px] top-[24px]">
+      {/* <div className="absolute right-[24px] top-[24px]">
         <IconButton onClick={() => setShowSteps(true)} />
-      </div>
+      </div> */}
 
       <Steps
         enabled={showSteps}
@@ -167,134 +171,81 @@ export function MemberArea({
         }}
       />
 
-      <Flex w="100%" h="100%" flexDirection="column">
-        <Text
-          justifyContent="space-between"
-          fontSize={22}
-          fontWeight="900"
-          pb="5"
-        >
-          Member Area
-        </Text>
+      <div className="flex flex-col h-full">
+        <div className="mb-[15px]">
+          <span className="text-[14px] font-[800] leading-[17px] tracking-[-0.03em]">
+            Jump Pad Allocation Tier
+          </span>
+        </div>
 
-        <Stack>
-          <Skeleton
-            flex={1}
-            width="100%"
-            borderRadius="18px"
-            isLoaded={isLoaded}
-            endColor="rgba(255,255,255,0.3)"
-          >
-            <Flex direction="column" flex={1} mt={5}>
-              <Flex
-                mb="5px"
-                flexWrap="wrap"
-                justifyContent="space-between"
-                className="space-y-[8px]"
-                flex={1}
-              >
-                {accountId ? (
-                  <>
-                    <div className="flex justify-between w-full current-level relative">
-                      <Text fontSize={18}>Current Level</Text>
+        <div className="mb-[22px] flex justify-between space-x-[17px]">
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+            <div className="mb-[5px]">
+              <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
+                Current Tier
+              </span>
+            </div>
 
-                      <Text
-                        fontSize={18}
-                        children={"LVL " + level}
-                        fontWeight="semibold"
-                      />
-                    </div>
-
-                    <div className="flex justify-between w-full staked-xjump relative">
-                      <Text>Staked xJump</Text>
-
-                      <Text
-                        fontSize={18}
-                        fontWeight="semibold"
-                        children={formattedBalance + " " + metadata?.symbol}
-                      />
-                    </div>
-
-                    <div className="flex justify-between w-full base-allowance relative">
-                      <Text>Base Allowance</Text>
-
-                      <Text
-                        fontSize={18}
-                        fontWeight="semibold"
-                        children={
-                          new Big(totalAllowance ?? 0).toFixed(2) +
-                          " Allocations"
-                        }
-                      />
-                    </div>
-                  </>
-                ) : (
-                  "Connect Wallet"
-                )}
-              </Flex>
-            </Flex>
-          </Skeleton>
-
-          <div className="mt-[25px] space-y-[12px] md:space-y-0 md:flex md:space-x-[12px]">
-            <Skeleton
-              flex={1}
-              width="100%"
-              borderRadius="18px"
-              isLoaded={isLoaded}
-              endColor="rgba(255,255,255,0.3)"
-            >
-              <Button
-                onClick={() => setShowModal(!showModal)}
-                disabled={!accountId}
-                w="100%"
-                bg="white"
-                color="black"
-                justifyContent="space-between"
-                className="upgrade-button relative"
-              >
-                Upgrade Level
-                {(launchpadSettings?.tiers_minimum_tokens.length ?? 0) <=
-                level ? (
-                  <LockIcon />
-                ) : (
-                  <WalletIcon />
-                )}
-              </Button>
-            </Skeleton>
-
-            <Skeleton
-              flex={1}
-              width="100%"
-              borderRadius="18px"
-              isLoaded={isLoaded}
-              endColor="rgba(255,255,255,0.3)"
-            >
-              <Button
-                w="100%"
-                bg="transparent"
-                border="1px solid white"
-                color="white"
-                onClick={downgradeLevel}
-                justifyContent="space-between"
-                disabled={!level || isLocked || !accountId}
-                className="text-center withdraw-button relative"
-              >
-                {isLocked ? (
-                  <span
-                    children={format(endVesting, "MM/dd/yyyy HH:mm")}
-                    className="block mx-auto"
-                  />
-                ) : (
-                  <Fragment>
-                    Withdraw Tokens
-                    {!!level ? <WalletIcon /> : <LockIcon />}
-                  </Fragment>
-                )}
-              </Button>
-            </Skeleton>
+            <div>
+              <span className="font-[800] text-[16px] leading-[19px] tracking-[-0.03em] bg-clip-text diamond">
+                Diamond
+              </span>
+            </div>
           </div>
-        </Stack>
-      </Flex>
+
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+            <div className="mb-[5px]">
+              <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
+                Allocation tier
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white">
+                60
+              </span>
+            </div>
+          </div>
+
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+            <div className="mb-[5px]">
+              <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
+                xJUMP staked
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white">
+                6
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between space-x-[26px]">
+          <div className="flex-1">
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-[#894DA0] rounded-[9.5px] p-[10px] w-full hover:opacity-[0.8]"
+            >
+              <span className="text-[#FFFFFF] font-[600] text-[14px] leading-[18px]">
+                Upgrade tier
+              </span>
+            </button>
+          </div>
+
+          <div className="flex-1">
+            <button
+              onClick={() => downgradeLevel()}
+              className="bg-[#FFFFFF] rounded-[9.5px] p-[10px] w-full hover:opacity-[0.8]"
+            >
+              <span className="text-[#431E5A] font-[600] text-[14px] leading-[18px]">
+                Withdraw tokens
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <UpgradeModal
         isOpen={showModal}
@@ -303,6 +254,6 @@ export function MemberArea({
         launchpadSettings={launchpadSettings}
         onClose={() => setShowModal(!showModal)}
       />
-    </Card>
+    </div>
   );
 }

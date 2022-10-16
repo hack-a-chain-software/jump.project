@@ -1,5 +1,3 @@
-import Big from "big.js";
-import isEmpty from "lodash/isEmpty";
 import { useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash-es";
 import {
@@ -7,20 +5,6 @@ import {
   useViewLaunchpadSettings,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
-import {
-  Flex,
-  Image,
-  Input,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useColorModeValue,
-  Skeleton,
-} from "@chakra-ui/react";
 import { X_JUMP_TOKEN } from "@/env/contract";
 import {
   LaunchpadConenctionQueryVariables,
@@ -29,20 +13,16 @@ import {
   VisibilityEnum,
 } from "@near/apollo";
 import { useMemo } from "react";
-import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
-import {
-  Button,
-  Select,
-  TopCard,
-  LoadingIndicator,
-  PreviewProjects,
-} from "@/components";
+import { Button, TopCard, LoadingIndicator } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useNearQuery } from "react-near";
 import { useTokenMetadata } from "@/hooks/modules/token";
-import { FolderOpenIcon } from "@heroicons/react/solid";
+import { MemberArea } from "@/components/modules/launchpad/home-member-area";
 import { Steps } from "intro.js-react";
+import { ProjectCard } from "@/components";
+import { twMerge } from "tailwind-merge";
+import { SearchIcon } from "@heroicons/react/outline";
 
 const PAGINATE_LIMIT = 30;
 
@@ -58,11 +38,6 @@ export const Projects = () => {
   const navigate = useNavigate();
 
   const { accountId } = useWalletSelector();
-
-  const { darkPurpleOpaque, glassyWhite, blackAndWhite, glassyWhiteOpaque } =
-    useTheme();
-
-  const tableHover = useColorModeValue(darkPurpleOpaque, glassyWhite);
 
   const investor = useViewInvestor(accountId!);
 
@@ -194,21 +169,8 @@ export const Projects = () => {
     },
   ];
 
-  const formatBig = (value, decimals) => {
-    const decimalsBig = new Big(10).pow(Number(decimals) ?? 0);
-
-    return new Big(value ?? 0).div(decimalsBig);
-  };
-
   return (
-    <Flex
-      direction="column"
-      p="30px"
-      w="100%"
-      overflow="hidden"
-      pt="150px"
-      className="relative"
-    >
+    <div className="p-[30px] w-full overflow-hidden pt-[150px] relative">
       <Steps
         enabled={showSteps}
         steps={stepItems}
@@ -221,22 +183,108 @@ export const Projects = () => {
         }}
       />
 
-      <Flex gap={5} className="flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row space-x-[24px] mb-[86px]">
         <TopCard
-          gradientText="Launchpad "
-          bigText="Welcome to Jump Pad"
-          bottomDescription="Jump Pad is a NEAR native token launchpad that empowers crypto currency projects with the ability to distribute tokens and raise capital from the community or private investors for raise liquidity. "
+          gradientText=""
+          bigText="Boost your Jump Pad experience with xJUMP"
+          bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by only using xJUMP "
           jumpLogo
           onClick={() => setShowSteps(true)}
         />
-      </Flex>
 
-      <div>
-        <PreviewProjects title="Sales in progress" status={StatusEnum.Open} />
-        <PreviewProjects title="Upcoming sales" status={StatusEnum.Waiting} />
-        <PreviewProjects title="Closed sales" status={StatusEnum.Closed} />
+        <MemberArea
+          isLoaded={isLoaded}
+          investor={investor?.data!}
+          totalAllowance={totalAllowanceData}
+          launchpadSettings={launchpadSettings!}
+          baseToken={{
+            balance: baseTokenBalance!,
+            metadata: baseTokenMetadata!,
+          }}
+        />
       </div>
-    </Flex>
+
+      <div className="flex items-center mb-[49px]">
+        <div className="flex-grow space-x-[52px]">
+          <button
+            className={twMerge(
+              "p-[10px] rounded-[10px] text-white",
+              !filterVisibility && !filterMine && "bg-white text-[#431E5A]"
+            )}
+          >
+            <span className="font-[700] text-[16px] tracking-[-0.04em]">
+              All sales
+            </span>
+          </button>
+
+          <button
+            className={twMerge(
+              "p-[10px] rounded-[10px] text-white",
+              filterVisibility && "bg-white text-[#431E5A]"
+            )}
+          >
+            <span className="font-[700] text-[16px] tracking-[-0.04em]">
+              Whitelist
+            </span>
+          </button>
+
+          <button
+            className={twMerge(
+              "p-[10px] rounded-[10px] text-white",
+              filterMine && "bg-white text-[#431E5A]"
+            )}
+          >
+            <span className="font-[700] text-[16px] tracking-[-0.04em]">
+              My sales
+            </span>
+          </button>
+        </div>
+
+        <div>
+          <div className="relative">
+            <input
+              placeholder="Search project"
+              className="bg-[rgba(255,255,255,0.1)] px-[16px] py-[10px] rounded-[10px] text-[14px] font-[400] leading-[18px] text-white w-[355px] placeholder:text-[rgba(255,255,255,0.5)] placeholder:text-[14px] placeholder:font-[400]"
+            />
+
+            <SearchIcon
+              className="
+                w-[18px] h-[18px] text-white
+                pointer-none opacity-[0.5]
+                absolute right-[12px] top-[calc(50%-9px)]
+              "
+            />
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="
+          grid
+          place-items-center
+          gap-x-[18px] gap-y-[48px]
+          grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-3 web:grid-cols-4
+        "
+      >
+        {(launchpadProjects ?? []).map((project, index) => (
+          <ProjectCard
+            {...(project as any)}
+            key={"jumpad-projects-project-" + index}
+          />
+        ))}
+      </div>
+
+      {hasNextPage && (
+        <div className="flex items-center justify-center">
+          <Button
+            className="w-[168px]"
+            onClick={() => fetchMoreItems(queryVariables)}
+          >
+            {loadingItems ? <LoadingIndicator /> : "Load more items"}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

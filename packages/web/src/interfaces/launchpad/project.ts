@@ -6,7 +6,7 @@ export interface investorAllocation {
 export interface launchpadProject {
   __typename?: "LaunchpadListing";
   listing_id: string;
-  public: boolean;
+  public: any;
   project_owner: string;
   project_token: string;
   price_token?: string | null;

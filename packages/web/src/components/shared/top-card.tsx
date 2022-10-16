@@ -30,7 +30,6 @@ export const TopCard = ({
   return (
     <Box
       flex={1}
-      minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
       className="launchpad"
@@ -46,7 +45,7 @@ export const TopCard = ({
         color="white"
         flex="1"
         p="25px 24px"
-        // h="100%"
+        h="100%"
         borderRadius="24px"
         position="relative"
         bg={glassyWhite}

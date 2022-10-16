@@ -1,4 +1,5 @@
 import isEmpty from "lodash/isEmpty";
+import { useNavigate } from "react-router";
 import { ProjectCard } from "./project-card";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { StatusEnum, useLaunchpadConenctionQuery } from "@near/apollo";
@@ -10,6 +11,8 @@ export const PreviewProjects = ({
   title: string;
   status: StatusEnum;
 }) => {
+  const navigate = useNavigate();
+
   const { accountId } = useWalletSelector();
 
   const {
@@ -36,7 +39,10 @@ export const PreviewProjects = ({
         </div>
 
         <div>
-          <button className="bg-[#6E3A85] px-[33px] py-[10px] rounded-[9.5px] hover:opacity-[.8]">
+          <button
+            onClick={() => navigate("/projects")}
+            className="bg-[#6E3A85] px-[33px] py-[10px] rounded-[9.5px] hover:opacity-[.8]"
+          >
             <span className="text-white text-[13px] font-[700]">
               View all sales
             </span>
