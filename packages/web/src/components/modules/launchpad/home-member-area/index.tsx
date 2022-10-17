@@ -272,9 +272,16 @@ export function MemberArea({
           </div>
 
           <div className="flex-1">
+            {isLocked && (
+              <span
+                children={format(endVesting, "MM/dd/yyyy HH:mm")}
+                className="block mx-auto"
+              />
+            )}
             <button
               onClick={() => downgradeLevel()}
-              className="bg-[#FFFFFF] rounded-[9.5px] p-[10px] w-full hover:opacity-[0.8]"
+              disabled={!level || isLocked || !accountId}
+              className="bg-[#FFFFFF] rounded-[9.5px] p-[10px] w-full hover:opacity-[0.8] disabled:cursor-not-allowed disabled:opacity-[.5]"
             >
               <span className="text-[#431E5A] font-[600] text-[14px] leading-[18px]">
                 Withdraw tokens
