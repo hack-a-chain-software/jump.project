@@ -1,6 +1,7 @@
 import isEmpty from "lodash/isEmpty";
 import { useNavigate } from "react-router";
 import { ProjectCard } from "./project-card";
+import { FolderOpenIcon } from "@heroicons/react/outline";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { StatusEnum, useLaunchpadConenctionQuery } from "@near/apollo";
 
@@ -20,12 +21,13 @@ export const PreviewProjects = ({
     loading,
   } = useLaunchpadConenctionQuery({
     variables: {
-      // status: status,
+      status,
       limit: 4,
       offset: 0,
       accountId: accountId ?? "",
     },
     skip: !accountId || !status,
+    fetchPolicy: "no-cache",
   });
 
   return (
@@ -50,17 +52,22 @@ export const PreviewProjects = ({
         </div>
       </div>
 
+      {isEmpty(projects) && !loading && (
+        <div className="flex items-center">
+          <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
+          No items here
+        </div>
+      )}
+
       <div className="flex justify-between flex-wrap">
         {!isEmpty(projects) &&
           !loading &&
-          projects
-            ?.slice(0, 4)
-            .map((project, i) => (
-              <ProjectCard
-                {...(project as any)}
-                key={"launchpad-preview-" + title + "-" + i}
-              />
-            ))}
+          projects?.map((project, i) => (
+            <ProjectCard
+              {...(project as any)}
+              key={"launchpad-preview-" + title + "-" + i}
+            />
+          ))}
       </div>
     </div>
   );
