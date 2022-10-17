@@ -54,7 +54,13 @@ export const Nav = () => {
                 flexDirection="column"
                 fontSize="12px"
                 pt={2}
-                opacity={window.location.pathname === e.route ? 1 : 0.3}
+                opacity={
+                  window.location.pathname === e.route ||
+                  (e.route === "/" &&
+                    window.location.pathname.includes("/projects"))
+                    ? 1
+                    : 0.3
+                }
               >
                 {e.icon}
                 {e.title}

@@ -1,9 +1,7 @@
 import { WalletIcon } from "./assets/svg";
-import { AnalyticsIcon } from "./assets/svg/analytics";
 import { FarmIcon } from "./assets/svg/farm";
 import { PoolsIcon } from "./assets/svg/pools";
 import { RocketIcon } from "./assets/svg/rocket";
-import { SwapIcon } from "./assets/svg/swap";
 import { LockIcon } from "./assets/svg/lock";
 
 export const navRoutes = [

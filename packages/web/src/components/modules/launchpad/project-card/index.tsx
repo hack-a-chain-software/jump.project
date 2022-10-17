@@ -3,9 +3,11 @@ import { launchpadProject } from "@/interfaces";
 import { StatusEnum } from "@near/apollo";
 import { useMemo } from "react";
 import Badge from "./badge";
+import format from "date-fns/format";
 import isBefore from "date-fns/isBefore";
 import { getUTCDate } from "@near/ts";
 import { RocketIcon } from "@/assets/svg/rocket";
+import { useNavigate } from "react-router";
 import { JumpGradient } from "@/assets/svg";
 import { useTokenMetadata } from "@/hooks/modules/token";
 
@@ -17,21 +19,36 @@ const closedArray = [
   "liquidity_pool_finalized",
 ];
 
-const progress = 50;
+const formatConfig = {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+};
 
 export const ProjectCard = ({
   status,
-  project_token_info,
-  public: publicProject,
+  listing_id,
   price_token,
+  project_token_info,
+  allocations_sold,
+  public: publicProject,
   open_sale_1_timestamp,
   final_sale_2_timestamp,
   total_amount_sale_project_tokens = "0",
   token_allocation_price = "0",
   token_allocation_size = "1",
 }: Partial<launchpadProject> & { public: boolean }) => {
+  const navigate = useNavigate();
+
   const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
     useTokenMetadata(price_token!);
+
+  const openSale = useMemo(() => {
+    return getUTCDate(Number(open_sale_1_timestamp));
+  }, [open_sale_1_timestamp]);
+
+  const finalSale = useMemo(() => {
+    return getUTCDate(Number(final_sale_2_timestamp));
+  }, [final_sale_2_timestamp]);
 
   const projectStatus = useMemo(() => {
     if (status !== "funded" && closedArray.includes(status!)) {
@@ -40,47 +57,53 @@ export const ProjectCard = ({
 
     const now = getUTCDate();
 
-    const open = getUTCDate(Number(open_sale_1_timestamp));
-    const final = getUTCDate(Number(final_sale_2_timestamp));
-
-    if (status === "funded" && isBefore(now, open)) {
+    if (status === "funded" && isBefore(now, openSale)) {
       return StatusEnum.Waiting;
     }
 
-    if (status === "funded" && isBefore(final, now)) {
+    if (status === "funded" && isBefore(finalSale, now)) {
       return StatusEnum.Closed;
     }
 
-    if (status === "funded" && isBefore(open, now) && isBefore(now, final)) {
+    if (
+      status === "funded" &&
+      isBefore(openSale, now) &&
+      isBefore(now, finalSale)
+    ) {
       return StatusEnum.Open;
     }
 
     return StatusEnum.Open;
-  }, [status, open_sale_1_timestamp, final_sale_2_timestamp]);
+  }, [status, openSale, finalSale]);
+
+  const totalAmount = useMemo(() => {
+    return new Big(total_amount_sale_project_tokens);
+  }, [total_amount_sale_project_tokens]);
 
   const totalRaise = useMemo(() => {
-    const totalAmount = new Big(total_amount_sale_project_tokens);
     const allocationPrice = new Big(token_allocation_price);
     const allocationSize = new Big(token_allocation_size);
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
-  }, [
-    total_amount_sale_project_tokens,
-    token_allocation_price,
-    token_allocation_size,
-  ]);
+  }, [totalAmount, token_allocation_price, token_allocation_size]);
 
-  const tokensForSale = useMemo(() => {}, []);
-
-  const formatNumber = (value, decimals) => {
-    const decimalsBig = new Big(10).pow(decimals ?? 1);
+  const formatNumber = (value, decimals, config: any = formatConfig) => {
+    const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
     const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
 
-    return new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2 }).format(
-      formattedBig
-    );
+    return new Intl.NumberFormat("en-IN", config).format(formattedBig);
   };
+
+  const allocationsSold = useMemo(() => {
+    return new Big(allocations_sold ?? 0);
+  }, [allocations_sold]);
+
+  const progress = useMemo(() => {
+    const decimals = new Big(10).pow(Number(project_token_info?.decimals) || 0);
+
+    return allocationsSold.div(totalAmount).div(decimals).toString();
+  }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
 
   return (
     <div
@@ -181,9 +204,14 @@ export const ProjectCard = ({
             </div>
 
             <div>
-              <span className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]">
-                250.000 UNI
-              </span>
+              <span
+                className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
+                children={`${formatNumber(
+                  total_amount_sale_project_tokens,
+                  project_token_info?.decimals,
+                  { notation: "compact", compactDisplay: "long" }
+                )} ${project_token_info?.symbol}`}
+              />
             </div>
           </div>
 
@@ -245,16 +273,17 @@ export const ProjectCard = ({
               rounded-[10px] mb-[8px] space-x-[29px]
             "
           >
-            <div className="w-[108px]">
+            <div>
               <span className="font-[700] text-[14px] tracking-[-0.04em]">
                 Sales start:
               </span>
             </div>
 
             <div>
-              <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
-                01:05:26:40
-              </span>
+              <span
+                children={format(openSale, "MM/dd/yyyy HH:mm")}
+                className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
+              />
             </div>
           </div>
         </>
@@ -270,30 +299,32 @@ export const ProjectCard = ({
         ) : (
           <>
             <div className="mb-[4px] flex space-x-[29px] items-center">
-              <div className="w-[108px]">
+              <div className="w-[80px]">
                 <span className="font-[700] text-[14px] tracking-[-0.04em]">
-                  Open sales start:
+                  Sales start:
                 </span>
               </div>
 
               <div>
-                <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
-                  02:05:26:40
-                </span>
+                <span
+                  children={format(openSale, "MM/dd/yyyy HH:mm")}
+                  className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
+                />
               </div>
             </div>
 
             <div className="flex space-x-[29px] items-center">
-              <div className="w-[108px]">
+              <div className="w-[80px]">
                 <span className="font-[700] text-[14pxx] tracking-[-0.04em]">
                   Sales end:
                 </span>
               </div>
 
               <div>
-                <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
-                  07:04:15:31
-                </span>
+                <span
+                  children={format(finalSale, "MM/dd/yyyy HH:mm")}
+                  className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
+                />
               </div>
             </div>
           </>
@@ -301,7 +332,10 @@ export const ProjectCard = ({
       </div>
 
       <div className="flex justify-center">
-        <button className="rounded-[8.5px] bg-[#6E3A85] py-[9px] px-[33px] hover:opacity-[.8]">
+        <button
+          onClick={() => navigate("/projects/" + listing_id)}
+          className="rounded-[8.5px] bg-[#6E3A85] py-[9px] px-[33px] hover:opacity-[.8]"
+        >
           <span className="font-[700] text-[12px] relative top-[-2px]">
             Join project
           </span>

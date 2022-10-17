@@ -267,12 +267,13 @@ export const Projects = () => {
           grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-3 web:grid-cols-4
         "
       >
-        {(launchpadProjects ?? []).map((project, index) => (
-          <ProjectCard
-            {...(project as any)}
-            key={"jumpad-projects-project-" + index}
-          />
-        ))}
+        {!loadingProjects &&
+          (launchpadProjects ?? []).map((project, index) => (
+            <ProjectCard
+              {...(project as any)}
+              key={"jumpad-projects-project-" + index}
+            />
+          ))}
       </div>
 
       {!loadingProjects && isEmpty(launchpadProjects) && (
