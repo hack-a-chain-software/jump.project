@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import isEmpty from "lodash/isEmpty";
 import { debounce } from "lodash-es";
 import {
   useViewInvestor,
@@ -8,12 +9,10 @@ import {
 import { X_JUMP_TOKEN } from "@/env/contract";
 import {
   LaunchpadConenctionQueryVariables,
-  StatusEnum,
   useLaunchpadConenctionQuery,
   VisibilityEnum,
 } from "@near/apollo";
 import { useMemo } from "react";
-import { useNavigate } from "react-router";
 import { Button, TopCard, LoadingIndicator } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useNearQuery } from "react-near";
@@ -22,20 +21,15 @@ import { MemberArea } from "@/components/modules/launchpad/home-member-area";
 import { Steps } from "intro.js-react";
 import { ProjectCard } from "@/components";
 import { twMerge } from "tailwind-merge";
-import { SearchIcon } from "@heroicons/react/outline";
+import { FolderOpenIcon, SearchIcon } from "@heroicons/react/outline";
 
 const PAGINATE_LIMIT = 30;
 
 export const Projects = () => {
-  const [filterMine, setMine] = useState<boolean | null>(null);
-  const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
-  const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
-    null
-  );
+  const [filter, setFilter] = useState({});
   const [filterSearch, setSearch] = useState<string | null>(null);
-  const [loadingItems, setLoadingItems] = useState(false);
 
-  const navigate = useNavigate();
+  const [loadingItems, setLoadingItems] = useState(false);
 
   const { accountId } = useWalletSelector();
 
@@ -64,13 +58,10 @@ export const Projects = () => {
     return {
       limit: PAGINATE_LIMIT,
       accountId: accountId ?? "",
-
-      showMineOnly: filterMine,
-      visibility: filterVisibility,
-      status: filterStatus,
       search: filterSearch,
+      ...filter,
     };
-  }, [accountId, filterStatus, filterMine, filterVisibility, filterSearch]);
+  }, [accountId, filterSearch, filter]);
 
   const {
     data: {
@@ -86,17 +77,23 @@ export const Projects = () => {
       limit: PAGINATE_LIMIT,
       accountId: accountId ?? "",
     },
-    notifyOnNetworkStatusChange: true,
   });
 
-  useEffect(() => {
-    (async () => {
-      await refetch({
-        ...queryVariables,
-        offset: 0,
-      });
-    })();
-  }, [queryVariables]);
+  const refetchItems = (
+    variables: Partial<LaunchpadConenctionQueryVariables> = {},
+    search?: string
+  ) => {
+    setFilter(variables);
+    setSearch(search || null);
+
+    refetch({
+      search,
+      offset: 0,
+      visibility: null,
+      showMineOnly: false,
+      ...variables,
+    });
+  };
 
   const fetchMoreItems = useCallback(
     debounce(async (queryVariables: LaunchpadConenctionQueryVariables) => {
@@ -117,14 +114,6 @@ export const Projects = () => {
     }, 240),
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
-
-  const isLoaded = useMemo(() => {
-    return (
-      !loadingLaunchpadSettings &&
-      !loadingBaseTokenBalance &&
-      !loadingProjectToken
-    );
-  }, [launchpadSettings, loadingBaseTokenBalance, loadingProjectToken]);
 
   const [showSteps, setShowSteps] = useState(false);
 
@@ -193,7 +182,7 @@ export const Projects = () => {
         />
 
         <MemberArea
-          isLoaded={isLoaded}
+          isLoaded={true}
           investor={investor?.data!}
           totalAllowance={totalAllowanceData}
           launchpadSettings={launchpadSettings!}
@@ -207,9 +196,10 @@ export const Projects = () => {
       <div className="flex items-center mb-[49px]">
         <div className="flex-grow space-x-[52px]">
           <button
+            onClick={() => refetchItems({})}
             className={twMerge(
               "p-[10px] rounded-[10px] text-white",
-              !filterVisibility && !filterMine && "bg-white text-[#431E5A]"
+              isEmpty(filter) && "bg-white text-[#431E5A]"
             )}
           >
             <span className="font-[700] text-[16px] tracking-[-0.04em]">
@@ -218,9 +208,11 @@ export const Projects = () => {
           </button>
 
           <button
+            onClick={() => refetchItems({ visibility: VisibilityEnum.Private })}
             className={twMerge(
               "p-[10px] rounded-[10px] text-white",
-              filterVisibility && "bg-white text-[#431E5A]"
+              Object.keys(filter).includes("visibility") &&
+                "bg-white text-[#431E5A]"
             )}
           >
             <span className="font-[700] text-[16px] tracking-[-0.04em]">
@@ -231,8 +223,10 @@ export const Projects = () => {
           <button
             className={twMerge(
               "p-[10px] rounded-[10px] text-white",
-              filterMine && "bg-white text-[#431E5A]"
+              Object.keys(filter).includes("showMineOnly") &&
+                "bg-white text-[#431E5A]"
             )}
+            onClick={() => refetchItems({ showMineOnly: true })}
           >
             <span className="font-[700] text-[16px] tracking-[-0.04em]">
               My sales
@@ -245,6 +239,12 @@ export const Projects = () => {
             <input
               placeholder="Search project"
               className="bg-[rgba(255,255,255,0.1)] px-[16px] py-[10px] rounded-[10px] text-[14px] font-[400] leading-[18px] text-white w-[355px] placeholder:text-[rgba(255,255,255,0.5)] placeholder:text-[14px] placeholder:font-[400]"
+              onInput={(event) =>
+                refetchItems(
+                  { ...filter },
+                  (event.target as HTMLInputElement).value
+                )
+              }
             />
 
             <SearchIcon
@@ -274,8 +274,22 @@ export const Projects = () => {
         ))}
       </div>
 
-      {hasNextPage && (
-        <div className="flex items-center justify-center">
+      {!loadingProjects && isEmpty(launchpadProjects) && (
+        <div className="flex items-center">
+          <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />
+          No items here
+        </div>
+      )}
+
+      {loadingProjects && !loadingItems && (
+        <div className="flex items-center justify-center mt-[48px]">
+          <div className="animate-spin h-[24px] w-[24px] mr-3 border border-l-white rounded-full" />
+          Loading Items...
+        </div>
+      )}
+
+      {!loadingProjects && hasNextPage && (
+        <div className="flex items-center justify-center mt-[48px]">
           <Button
             className="w-[168px]"
             onClick={() => fetchMoreItems(queryVariables)}

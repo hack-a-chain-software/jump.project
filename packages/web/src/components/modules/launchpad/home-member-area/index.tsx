@@ -5,11 +5,42 @@ import { Button, Card, IconButton } from "@/components";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { Flex, Text, Stack, Skeleton } from "@chakra-ui/react";
-import { LockIcon, WalletIcon } from "@/assets/svg";
 import { format, addMilliseconds, isBefore } from "date-fns";
 import { InvestorInfo } from "@/hooks/modules/launchpad";
 import { tokenMetadata } from "@/interfaces";
 import { Steps } from "intro.js-react";
+import { twMerge } from "tailwind-merge";
+
+const tiers = [
+  {
+    name: "No Tier",
+    class: "no-tier",
+  },
+  {
+    name: "Bronze",
+    class: "bronze",
+  },
+  {
+    name: "Silver",
+    class: "silver",
+  },
+  {
+    name: "Gold",
+    class: "gold",
+  },
+  {
+    name: "Tungsten",
+    class: "tungsten",
+  },
+  {
+    name: "Platinum",
+    class: "platinum",
+  },
+  {
+    name: "Diamond",
+    class: "diamond",
+  },
+];
 
 export function MemberArea({
   isLoaded,
@@ -187,9 +218,13 @@ export function MemberArea({
             </div>
 
             <div>
-              <span className="font-[800] text-[16px] leading-[19px] tracking-[-0.03em] bg-clip-text diamond">
-                Diamond
-              </span>
+              <span
+                className={twMerge(
+                  "font-[800] text-[16px] leading-[19px] tracking-[-0.03em] bg-clip-text",
+                  tiers[level].class
+                )}
+                children={tiers[level].name}
+              />
             </div>
           </div>
 
@@ -201,9 +236,10 @@ export function MemberArea({
             </div>
 
             <div>
-              <span className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white">
-                60
-              </span>
+              <span
+                children={totalAllowance}
+                className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white"
+              />
             </div>
           </div>
 
@@ -215,9 +251,10 @@ export function MemberArea({
             </div>
 
             <div>
-              <span className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white">
-                6
-              </span>
+              <span
+                children={formattedBalance}
+                className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white"
+              />
             </div>
           </div>
         </div>
