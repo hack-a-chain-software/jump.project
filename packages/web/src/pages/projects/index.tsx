@@ -77,6 +77,7 @@ export const Projects = () => {
       limit: PAGINATE_LIMIT,
       accountId: accountId ?? "",
     },
+    notifyOnNetworkStatusChange: true,
   });
 
   const refetchItems = (
@@ -288,7 +289,7 @@ export const Projects = () => {
         </div>
       )}
 
-      {!loadingProjects && hasNextPage && (
+      {hasNextPage && (
         <div className="flex items-center justify-center mt-[48px]">
           <Button
             className="w-[168px]"
