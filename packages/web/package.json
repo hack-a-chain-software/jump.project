@@ -25,6 +25,7 @@
     "@rollup/plugin-inject": "^4.0.4",
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/line-clamp": "^0.4.0",
+    "@types/big.js": "^6.1.6",
     "@types/bn.js": "^5.1.0",
     "@types/ramda": "^0.28.14",
     "@types/yup": "^0.29.14",

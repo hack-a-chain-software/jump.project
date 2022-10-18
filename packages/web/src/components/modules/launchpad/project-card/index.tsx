@@ -77,12 +77,12 @@ export const ProjectCard = ({
   }, [status, openSale, finalSale]);
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens);
+    return new Big(total_amount_sale_project_tokens || "0");
   }, [total_amount_sale_project_tokens]);
 
   const totalRaise = useMemo(() => {
-    const allocationPrice = new Big(token_allocation_price);
-    const allocationSize = new Big(token_allocation_size);
+    const allocationPrice = new Big(token_allocation_price || "0");
+    const allocationSize = new Big(token_allocation_size || "0");
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [totalAmount, token_allocation_price, token_allocation_size]);
@@ -92,7 +92,7 @@ export const ProjectCard = ({
 
     const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
 
-    return new Intl.NumberFormat("en-IN", config).format(formattedBig);
+    return new Intl.NumberFormat("en-IN", config).format(Number(formattedBig));
   };
 
   const allocationsSold = useMemo(() => {

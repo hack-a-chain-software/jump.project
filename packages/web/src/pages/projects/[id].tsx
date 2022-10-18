@@ -142,7 +142,15 @@ export const Project = () => {
               />
             )}
 
-            {tab === "investiments" && <ProjectInvestments />}
+            {tab === "investiments" && (
+              <ProjectInvestments
+                launchpadProject={launchpadProject!}
+                investorAllowance={investorAllowance!}
+                investorAllocation={investorAllocation!}
+                vestedAllocations={vestedAllocations!}
+                metadataProjectToken={metadataProjectToken!}
+              />
+            )}
           </div>
         </div>
 

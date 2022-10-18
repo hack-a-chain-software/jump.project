@@ -269,9 +269,9 @@ export function ProjectAllocations({
             >
               Join{" "}
               {tickets > 0 ? (
-                <Fragment>
+                <>
                   For: {total} {launchpadProject?.price_token_info?.symbol}
-                </Fragment>
+                </>
               ) : (
                 "Project"
               )}
