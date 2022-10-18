@@ -6,6 +6,9 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { launchpadProject } from "@/interfaces";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { getUTCDate } from "@near/ts";
+import format from "date-fns/format";
+import { StatusEnum } from "@near/apollo";
 import { Steps } from "intro.js-react";
 
 import { NumberInput } from "@/components";
@@ -16,6 +19,14 @@ const formatConfig = {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 };
+
+const closedArray = [
+  "sale_finalized",
+  "pool_created",
+  "pool_project_token_sent",
+  "pool_price_token_sent",
+  "liquidity_pool_finalized",
+];
 
 export function ProjectUserArea({
   isLoading,
@@ -146,6 +157,60 @@ export function ProjectUserArea({
       ),
     },
   ];
+
+  const formatDate = (date) => format(date, "MM/dd/yyyy HH:mm");
+
+  const openSale = useMemo(() => {
+    return getUTCDate(Number(launchpadProject.open_sale_1_timestamp));
+  }, [launchpadProject]);
+
+  const finalSale = useMemo(() => {
+    return getUTCDate(Number(launchpadProject.final_sale_2_timestamp));
+  }, [launchpadProject]);
+
+  const status = useMemo(() => {
+    if (
+      launchpadProject.status !== "funded" &&
+      closedArray.includes(launchpadProject.status!)
+    ) {
+      return {
+        status: StatusEnum.Closed,
+        label: `Sales closed at: ${"a"}`,
+      };
+    }
+
+    const now = getUTCDate();
+
+    if (launchpadProject.status === "funded" && isBefore(now, openSale)) {
+      return {
+        status: StatusEnum.Waiting,
+        label: `Sales start: ${"a"}`,
+      };
+    }
+
+    if (launchpadProject.status === "funded" && isBefore(finalSale, now)) {
+      return {
+        status: StatusEnum.Closed,
+        label: `Sales closed at: `,
+      };
+    }
+
+    if (
+      launchpadProject.status === "funded" &&
+      isBefore(openSale, now) &&
+      isBefore(now, finalSale)
+    ) {
+      return {
+        status: StatusEnum.Open,
+        label: `Open sales ends at: ${"a"}`,
+      };
+    }
+
+    return {
+      status: StatusEnum.Open,
+      label: `Open sales ends at: ${"a"}`,
+    };
+  }, [launchpadProject]);
 
   return (
     <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
