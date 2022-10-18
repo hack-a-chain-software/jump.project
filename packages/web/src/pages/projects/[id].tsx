@@ -95,15 +95,15 @@ export const Project = () => {
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
 
-      <div className="flex space-x-[24px]">
-        <div>
+      <div className="flex space-x-[24px] justify-center">
+        <div className="max-w-[748px] w-full">
           <ProjectInfo
             isLoading={isLoading}
             launchpadProject={launchpadProject!}
             metadataPriceToken={metadataPriceToken!}
           />
 
-          <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] col-span-6 relative">
+          <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative">
             <div className="flex-grow space-x-[24px] mb-[67px]">
               <button
                 onClick={() => setTab("pool")}
@@ -156,10 +156,10 @@ export const Project = () => {
 
         <ProjectUserArea
           isLoading={isLoading}
-          vestedAllocations={vestedAllocations!}
+          priceTokenBalance={priceTokenBalance!}
           launchpadProject={launchpadProject!}
-          metadataProjectToken={metadataProjectToken!}
-          investorAllocation={investorAllocation!}
+          metadataPriceToken={metadataPriceToken!}
+          investorAllowance={investorAllowance!}
         />
       </div>
     </PageContainer>

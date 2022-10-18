@@ -83,7 +83,7 @@ export function ProjectInfo({
   }, [status, openSale, finalSale]);
 
   return (
-    <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] col-span-6 relative mb-[24px]">
+    <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] relative mb-[24px]">
       <div className="absolute right-[19px] top-[20px] flex space-x-[8px]">
         <Badge type={projectStatus} />
       </div>

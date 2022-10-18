@@ -3,26 +3,32 @@ import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
-import { launchpadProject, investorAllocation } from "@/interfaces";
+import { launchpadProject } from "@/interfaces";
 import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { Steps } from "intro.js-react";
 
 import { NumberInput } from "@/components";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
+const formatConfig = {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+};
+
 export function ProjectUserArea({
   isLoading,
   launchpadProject,
   priceTokenBalance,
   investorAllowance,
+  metadataPriceToken,
 }: {
   isLoading: boolean;
+  metadataPriceToken: any;
   investorAllowance: string;
   priceTokenBalance: string;
-  totalAllowanceData: string;
   launchpadProject: launchpadProject;
-  investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
   const { buyTickets } = useLaunchpadStore();
@@ -41,10 +47,10 @@ export function ProjectUserArea({
       ) {
         buyTickets(
           new Big(amount)
-            .mul(new Big(launchpadProject.token_allocation_price || 0))
+            .mul(new Big(launchpadProject?.token_allocation_price || 0))
             .toString(),
-          launchpadProject.price_token,
-          launchpadProject.listing_id,
+          launchpadProject?.price_token,
+          launchpadProject?.listing_id,
           accountId!,
           selector
         );
@@ -57,12 +63,6 @@ export function ProjectUserArea({
       launchpadProject?.token_allocation_price,
     ]
   );
-
-  const formatDate = (start_timestamp?: string) => {
-    const date = getUTCDate(Number(start_timestamp ?? "0"));
-    return format(date, "mm/dd/yyyy");
-  };
-
   const enabledSales = useMemo(() => {
     const now = new Date();
     const startSale = new Date(
@@ -100,6 +100,18 @@ export function ProjectUserArea({
     return ticketsAmount.div(decimals);
   }, [ticketsAmount, decimals]);
 
+  const ticketPrice = useMemo(() => {
+    return new Big(launchpadProject?.token_allocation_price || 0);
+  }, [launchpadProject]);
+
+  const formatNumber = (value, decimals, config: any = formatConfig) => {
+    const decimalsBig = new Big(10).pow(Number(decimals) || 1);
+
+    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+
+    return new Intl.NumberFormat("en-IN", config).format(Number(formattedBig));
+  };
+
   const [showSteps, setShowSteps] = useState(false);
 
   const stepItems = [
@@ -136,7 +148,7 @@ export function ProjectUserArea({
   ];
 
   return (
-    <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px]">
+    <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
       <div className="px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]">
         <span className="tracking-[-0.04em] font-[500] text-[16px]">
           Open sales ends at:
@@ -165,7 +177,7 @@ export function ProjectUserArea({
 
         <div>
           <span
-            children={`Your allocation balance: 500`}
+            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
         </div>
@@ -181,32 +193,46 @@ export function ProjectUserArea({
 
           <div className="mb-[8px]">
             <span
-              children={0}
+              children={`${formatNumber(
+                launchpadProject?.token_allocation_price,
+                metadataPriceToken?.decimals
+              )} ${metadataPriceToken?.symbol}`}
               className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
             />
           </div>
 
           <div>
             <span
-              children={`Your ballance: 500 USDT`}
+              children={`Your ballance: ${balance} ${launchpadProject?.price_token_info?.symbol}`}
               className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
             />
           </div>
         </div>
-
-        <div>
-          <button className="p-[8px] rounded-[10px] bg-white min-w-[58px]">
-            <span className="text-[#431E5A] tracking-[-0.04em] font-[600] text-[14px]">
-              USDT
-            </span>
-          </button>
-        </div>
       </div>
 
       <div className="w-full">
-        <button className="bg-white rounded-[10px] px-[16px] py-[10px] w-full">
+        <button
+          onClick={() => onJoinProject(tickets)}
+          disabled={!hasTicketsAmount || tickets === 0}
+          className={twMerge(
+            "rounded-[10px] px-[16px] py-[10px] w-full disabled:opacity-[0.5] disabled:cursor-not-allowed",
+            [hasTicketsAmount ? "bg-white" : "bg-[#EB5757] cursor-not-allowed"]
+          )}
+        >
           <span className="font-[600] text-[14px] text-[#431E5A]">
-            Join project
+            Join{" "}
+            {tickets > 0 ? (
+              <>
+                For:{" "}
+                {formatNumber(
+                  ticketsAmount,
+                  new Big(launchpadProject?.price_token_info?.decimals! || "0")
+                )}{" "}
+                {launchpadProject?.price_token_info?.symbol}
+              </>
+            ) : (
+              "Project"
+            )}
           </span>
         </button>
       </div>
