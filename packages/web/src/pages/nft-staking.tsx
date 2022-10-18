@@ -170,7 +170,7 @@ export const NFTStaking = () => {
             ] as const}
 
           /> */}
-          <Select
+          {/* <Select
             value={filterStaked}
             placeholder="Staked"
             onChange={(value: StakedEnum | null) =>
@@ -182,7 +182,7 @@ export const NFTStaking = () => {
                 { label: "No", value: StakedEnum.No },
               ] as const
             }
-          />
+          /> */}
         </Flex>
 
         {/* <Flex className="md:max-w-[330px]" w="100%">
