@@ -8,9 +8,8 @@ import {
 import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { useTokenLauncher } from "@/stores/token-louncher-store";
+import { useTokenLauncher } from "@/stores/token-launcher-store";
 import Big from "big.js";
-import { viewFunction } from "@/tools";
 
 export type TokenDataProps = {
   name: string;
