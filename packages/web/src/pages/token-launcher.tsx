@@ -13,7 +13,7 @@ import { useTokenLauncher } from "@/stores/token-louncher-store";
 export type TokenDataProps = {
   name: string;
   symbol: string;
-  icon: string;
+  icon?: string | null;
   decimals: number;
   reference?: string | null;
   reference_hash?: string | null;
@@ -72,7 +72,7 @@ export const TokenLauncher = () => {
 
   function createArgsForTokenContract(obj: TokenDataProps) {
     const supply_type =
-      obj?.supply_type == "fixed" ? "total_supply" : "initial_supply";
+      obj?.supply_type == "fixed" ? "total_supply" : "init_supply";
     const params = {
       owner_id: accountId,
       [supply_type]: obj.total_supply,
@@ -80,7 +80,7 @@ export const TokenLauncher = () => {
         spec: "ft-1.0.0",
         name: obj.name,
         symbol: obj.symbol,
-        icon: obj.icon,
+        icon: obj.icon || null,
         reference: obj.reference || null,
         reference_hash: obj.reference_hash || null,
         decimals: Number(obj.decimals),

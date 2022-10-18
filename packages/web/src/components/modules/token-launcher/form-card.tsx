@@ -16,7 +16,6 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
   const requiredInputs = {
     name: watch("name"),
     symbol: watch("symbol"),
-    icon: watch("icon"),
     decimals: watch("decimals"),
   };
 

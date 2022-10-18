@@ -28,7 +28,7 @@ export const useTokenLauncher = create<{
         "deploy_new_contract",
         {
           contract_to_be_deployed: "token",
-          deploy_prefix: prefix,
+          deploy_prefix: prefix.toLowerCase(),
           args: args,
         },
         nearDeployCostFormatterd
