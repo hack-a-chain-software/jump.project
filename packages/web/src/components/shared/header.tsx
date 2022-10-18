@@ -16,7 +16,7 @@ export function Header() {
   const { accountId, toggleModal, signOut } = useWalletSelector();
 
   return (
-    <div className="z-10 pt-[30px] absolute top-0 right-0 z-2 left-0 flex items-center justify-center ml-[120px]">
+    <div className="z-10 pt-[30px] absolute top-0 right-0 z-2 left-0 flex items-center justify-center md:ml-[120px]">
       <AirdropModal
         isOpen={showTokenModal}
         onClose={() => setShowTokenModal(false)}
@@ -33,7 +33,7 @@ export function Header() {
             onClick={() => setShowTokenModal(!showTokenModal)}
           >
             <Text fontSize={20} fontWeight="800" letterSpacing="-0.03em">
-              Need Tokens?
+              Get Testnet Tokens
             </Text>
           </Flex>
 

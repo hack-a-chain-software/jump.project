@@ -163,7 +163,7 @@ export default function ({
             </div>
 
             <div className="flex w-full space-x-[4px] pb-[12px]">
-              <Text fontSize={18}>Next level cost: </Text>
+              <Text fontSize={18}>Next level deposit: </Text>
 
               <Text
                 fontSize={18}

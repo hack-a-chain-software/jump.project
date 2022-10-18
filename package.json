@@ -9,15 +9,22 @@
     "gql:dev:mainnet": "yarn workspace @near/graphql dev:mainnet",
     "gql:start:mainnet": "yarn workspace @near/graphql start:mainnet",
     "gql:start:testnet": "yarn workspace @near/graphql start:testnet",
+    "gql:start": "yarn workspace @near/graphql start",
     "web:dev": "yarn workspace @near/web dev",
     "web:build": "yarn workspace @near/web build",
     "contract:build": "yarn workspace @near/contracts build:contract",
     "contract:cargo:tests": "yarn workspace @near/contracts test:rust",
     "contract:lib:tests": "yarn workspace @near/contracts test:lib",
+    "indexer:build": "yarn workspace @near/indexer build",
+    "db:dev": "docker run --rm -P -p 127.0.0.1:5438:5432 -it $(docker build -q services/db)",
     "postinstall": "husky install",
     "format:rust": "sh ./format_rust.sh",
     "precommit": "lint-staged",
-    "setup:testnet:web": "node .github/utilities/set_testnet_environments.js"
+    "setup:lake:consumer": "node .github/utilities/build_aws_lake_credentials.js",
+    "setup:testnet:env": "node .github/utilities/set_testnet_environments.js",
+    "setup:staging:env": "node .github/utilities/set_staging_environments.js",
+    "setup:staging:db": "node .github/utilities/database_reset.js",
+    "setup:staging:db:populate": "node .github/utilities/database_basic_populate.js"
   },
   "husky": {
     "hooks": {

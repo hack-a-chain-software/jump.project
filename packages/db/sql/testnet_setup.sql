@@ -53,8 +53,8 @@ INSERT INTO listings_metadata (
 VALUES (
     2,
     'NEKO',
-    'NEKO is NEAR Protocol`s first meme coin. It features a deflationary design and intuitive tokenomics that reward holders by taxing sellers.',
-    'It`s quite difficult to get the general public excited about cryptocurrencies and NFTs. The space can be intimidating for some newcomers, but meme coins have proven to be an effective onboarding strategy in the past.',
+    'NEKO is NEAR Protocol s first meme coin. It features a deflationary design and intuitive tokenomics that reward holders by taxing sellers.',
+    'It is quite difficult to get the general public excited about cryptocurrencies and NFTs. The space can be intimidating for some newcomers, but meme coins have proven to be an effective onboarding strategy in the past.',
     'https://twitter.com/goodfortuneNFT'
   );
 

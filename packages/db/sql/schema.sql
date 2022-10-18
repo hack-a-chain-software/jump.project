@@ -7,7 +7,6 @@ create table if not exists x_token_ratios (
 );
 
 /* Launchpad */
-
 create table if not exists launchpad_investors (
     account_id text primary key,
     staked_token numeric(40),
@@ -102,60 +101,9 @@ create table if not exists staked_nfts (
     staked_timestamp timestamptz
 );
 
-create or replace function investor_buy_allocations(
-    investor_id text,
-    listing_id_var numeric(21),
-    project_status listing_status,
-    allocations_purchased numeric(21),
-    tokens_purchased numeric(40),
-    total_allocations_sold numeric(21)
-)
-returns void
-as $$
-begin
-    insert into allocations (account_id, listing_id, total_allocation, total_quantity, quantity_withdrawn)
-    values ($1, $2, $4, $5, 0)
-    on conflict (account_id, listing_id)
-    do
-        update
-        set
-            total_allocation = allocations.total_allocation + $4,
-            total_quantity = allocations.total_quantity + $5;
-
-    update listings
-    set
-        status = $3,
-        allocations_sold = $6
-    where listing_id = $2;
-end
-$$
-language plpgsql volatile;
-
-create or replace function investor_withdraw_allocations(
-    investor_id text,
-    listing_id text,
-    project_status listing_status,
-    project_tokens_withdrawn u128
-)
-returns void
-as $$
-begin;
-    update allocations
-    set quantity_withdrawn = quantity_withdrawn + $4
-    where account_id = $1
-    and listing_id = $2;
-
-    update listings
-    set status = $3
-    where listing_id = $2;
-end;
-$$ language plpgsql volatile;
-
 create table if not exists processed_events (
     block_height numeric(21) not null,
-    log_index numeric(21) not null,
-    primary key (block_height, log_index),
-
-    succeeded boolean not null,
-    error text
+    transaction_hash text,
+    event_index numeric(21) not null,
+    primary key (block_height, transaction_hash, event_index)
 );

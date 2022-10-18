@@ -13,10 +13,7 @@ export function ReportButton() {
       <Flex
         bg={cardBg}
         onClick={() => {
-          window.open(
-            "https://docs.google.com/forms/d/e/1FAIpQLSemWrQk223Uf0OsSrJ-lfuAZmd2CWrC9okmduxA_MLZO0HcvQ/viewform",
-            "_blank"
-          );
+          window.open("https://forms.gle/sSFQeJX7WgYcHzrEA", "_blank");
         }}
         borderRadius="24px"
       >
@@ -41,10 +38,7 @@ export function ReportButton() {
       <Flex
         bg={cardBg}
         onClick={() => {
-          window.open(
-            "https://docs.google.com/forms/d/e/1FAIpQLSdFwl4C7HKeYZxfgeZu62BakWBHBM9-WihDMJ4w2Rl2nMcV_Q/viewform",
-            "_blank"
-          );
+          window.open("https://forms.gle/iRDLrncnSvQ7ZB4ZA", "_blank");
         }}
         borderRadius="24px"
       >

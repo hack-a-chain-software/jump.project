@@ -15,6 +15,7 @@ const {
 
 const sequelize = new Sequelize({
   port: db_port,
+  // host: db_host,
   host: db_host,
   database: db_name,
   dialect: db_dialect,
@@ -40,6 +41,7 @@ const app = new ApolloServer({
 });
 
 async function main(): Promise<void> {
+  console.log(sequelize);
   try {
     console.log(
       "Running the GraphQL Server with the following ENV for NEAR = " +
