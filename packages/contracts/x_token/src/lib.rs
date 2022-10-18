@@ -86,11 +86,11 @@ impl Contract {
     if self.base_token_treasury == 0 {
       x_token_emission = quantity_deposited;
     } else {
-      x_token_emission =
-        (
-          (U256::from(quantity_deposited) * U256::from(self.ft_functionality.total_supply)) 
-          / U256::from(self.base_token_treasury)
-        ).try_into().unwrap();
+      x_token_emission = ((U256::from(quantity_deposited)
+        * U256::from(self.ft_functionality.total_supply))
+        / U256::from(self.base_token_treasury))
+      .try_into()
+      .unwrap();
     }
     // add tokens to recipient
     self
@@ -118,10 +118,11 @@ impl Contract {
   // in case ft_transfer fails, will call revert burn_x_token
   pub fn internal_burn_x_token(&mut self, quantity_to_burn: u128, recipient: AccountId) -> u128 {
     // calculate correct proportion
-    let normal_token_withdraw =
-      (
-        (U256::from(quantity_to_burn) * U256::from(self.base_token_treasury)) / U256::from(self.ft_functionality.total_supply)
-    ).try_into().unwrap();
+    let normal_token_withdraw = ((U256::from(quantity_to_burn)
+      * U256::from(self.base_token_treasury))
+      / U256::from(self.ft_functionality.total_supply))
+    .try_into()
+    .unwrap();
     // burn xTokens
     self
       .ft_functionality

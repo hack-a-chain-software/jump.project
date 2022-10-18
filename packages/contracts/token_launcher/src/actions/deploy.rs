@@ -7,7 +7,7 @@ use near_sdk::serde_json::value::Value;
 use events::event_contract_deploy;
 
 const NO_DEPOSIT: Balance = 0;
-const BASE: Gas = Gas(70_000_000_000_000);   
+const BASE: Gas = Gas(70_000_000_000_000);
 const CALLBACK_GAS: Gas = Gas(10_000_000_000_000);
 const CALLBACK: &str = "callback";
 
@@ -39,7 +39,6 @@ impl Contract {
     {
       panic!("{}", ERR_101)
     }
-    
 
     let binary = self.binaries.get(&contract_to_be_deployed).expect(ERR_103);
 
@@ -113,13 +112,11 @@ pub fn deploy_contract(
   let code_hash = binary.contract_hash;
   let init_fn = binary.init_fn_name;
   // arguments for callback function - initial deposit is used to return funds on callback
-  let callback_args = near_sdk::serde_json::to_vec(
-    &json!({ "deploy_address": deploy_address,
-     "type_of_contract":contract_to_be_deployed,
-      "initial_deposit":env::attached_deposit().to_string(),
-      "user_deploying": env::predecessor_account_id()
-    }),
-  )
+  let callback_args = near_sdk::serde_json::to_vec(&json!({ "deploy_address": deploy_address,
+   "type_of_contract":contract_to_be_deployed,
+    "initial_deposit":env::attached_deposit().to_string(),
+    "user_deploying": env::predecessor_account_id()
+  }))
   .expect("Failed to serialize callback args");
 
   unsafe {
