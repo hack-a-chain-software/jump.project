@@ -7,7 +7,6 @@ import { BrowserRouter as Router, useRoutes } from "react-router-dom";
 import routes from "virtual:generated-pages-react";
 
 const Pages = () => {
-  console.log(routes);
   return useRoutes(routes);
 };
 
@@ -28,7 +27,9 @@ function App() {
 
         <Flex w="100vw" ml="auto" minH="100vh" position="relative">
           <Nav />
-          <Pages />
+          <div className="w-full max-w-[1512px] mx-auto">
+            <Pages />
+          </div>
         </Flex>
       </Router>
 

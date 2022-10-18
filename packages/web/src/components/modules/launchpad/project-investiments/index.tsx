@@ -31,7 +31,7 @@ export const ProjectInvestments = ({
   }, [metadataProjectToken]);
 
   const claimedAmount = useMemo(() => {
-    return new Big(investorAllocation.totalTokensBought || "1");
+    return new Big(investorAllocation.totalTokensBought || "0");
   }, [investorAllocation]);
 
   const unlockedAmount = useMemo(() => {
@@ -43,7 +43,9 @@ export const ProjectInvestments = ({
       claimedAmount
         .add(unlockedAmount || 1)
         .div(decimals || 1)
-        .toFixed(2) + metadataProjectToken?.symbol!
+        .toFixed(2) +
+      " " +
+      metadataProjectToken?.symbol!
     );
   }, [claimedAmount, unlockedAmount]);
 

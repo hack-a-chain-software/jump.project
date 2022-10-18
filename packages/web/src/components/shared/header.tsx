@@ -37,7 +37,7 @@ export function Header() {
             </Text>
           </Flex>
 
-          <Button onClick={toggleColorMode}>
+          <Button isDisabled={true} onClick={toggleColorMode}>
             <MoonIcon />
           </Button>
           <If

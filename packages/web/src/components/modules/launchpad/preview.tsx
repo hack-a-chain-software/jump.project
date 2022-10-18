@@ -52,6 +52,12 @@ export const PreviewProjects = ({
         </div>
       </div>
 
+      {loading && (
+        <div className="flex items-center justify-start h-[80px]">
+          <div className="animate-spin h-[32px] w-[32px] border border-l-white rounded-full" />
+        </div>
+      )}
+
       {isEmpty(projects) && !loading && (
         <div className="flex items-center">
           <FolderOpenIcon className="h-[28px] text-white mr-[4px]" />

@@ -113,7 +113,7 @@ export function ProjectInfo({
         </div>
       </div>
 
-      <div className="mb-[24px] pl-[54px] mx-auto max-w-[622px]">
+      <div className="mb-[24px] pl-[54px] max-w-[622px]">
         <span
           children={description_project}
           className="text-white text-[14px] font-[500]"

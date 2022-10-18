@@ -26,15 +26,9 @@ import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
  */
 export const Project = () => {
   const { id } = useParams();
-  const { jumpGradient } = useTheme();
   const { accountId } = useWalletSelector();
 
   const navigate = useNavigate();
-
-  const navigateToExternalURL = (uri: string) => {
-    window.open(uri);
-  };
-
   const {
     data: { launchpad_project: launchpadProject } = {},
     loading: loadingLaunchpadProject,
@@ -61,8 +55,8 @@ export const Project = () => {
   const { data: investorAllowance, loading: loadingAllowance } =
     useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
 
-  const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
-    useViewTotalEstimatedInvestorAllowance(accountId!);
+  // const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
+  //   useViewTotalEstimatedInvestorAllowance(accountId!);
 
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(launchpadProject?.price_token!, accountId!);
@@ -72,7 +66,6 @@ export const Project = () => {
       loadingAllocation ||
       loadingAllowance ||
       loadingProjectToken ||
-      loadingTotalAllowance ||
       loadingLaunchpadProject ||
       loadingPriceTokenBalance ||
       loadingVestedAllocations ||
@@ -81,7 +74,6 @@ export const Project = () => {
       loadingAllowance,
       loadingAllocation,
       loadingProjectToken,
-      loadingTotalAllowance,
       loadingLaunchpadProject,
       loadingPriceTokenBalance,
       loadingVestedAllocations,
@@ -93,75 +85,89 @@ export const Project = () => {
 
   return (
     <PageContainer>
-      <BackButton onClick={() => navigate("/")} />
+      <BackButton text="All Projects" onClick={() => navigate("/projects")} />
 
-      <div className="flex space-x-[24px] justify-center">
-        <div className="max-w-[748px] w-full">
-          <ProjectInfo
+      {isLoading && (
+        <div className="flex items-center justify-center pt-[72px]">
+          <div className="animate-spin h-[32px] w-[32px] border border-l-white rounded-full" />
+        </div>
+      )}
+      {!isLoading && (
+        <div
+          className="
+            flex justify-center flex-col 
+            space-y-[24px]
+            xl:space-y-[0xp] xl:space-x-[24px] xl:flex-row
+          "
+        >
+          <div className="xl:max-w-[748px] w-full">
+            <ProjectInfo
+              isLoading={isLoading}
+              launchpadProject={launchpadProject!}
+              metadataPriceToken={metadataPriceToken!}
+            />
+
+            <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative">
+              <div className="flex-grow space-x-[24px] mb-[67px]">
+                <button
+                  onClick={() => setTab("pool")}
+                  className={twMerge(
+                    "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)]",
+                    tab === "pool" && "bg-white text-[#431E5A] border-white"
+                  )}
+                >
+                  <span className="font-[700] text-[16px] tracking-[-0.04em]">
+                    Pool details
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setTab("investiments")}
+                  disabled={!accountId}
+                  className={twMerge(
+                    "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)] disabled:cursor-not-allowed disabled:opacity-[0.5]",
+                    tab === "investiments" &&
+                      "bg-white text-[#431E5A] border-white"
+                  )}
+                >
+                  <span className="font-[700] text-[16px] tracking-[-0.04em]">
+                    My investments
+                  </span>
+                </button>
+              </div>
+
+              {tab === "pool" && (
+                <ProjectStats
+                  isLoading={isLoading}
+                  launchpadProject={launchpadProject!}
+                  investorAllowance={investorAllowance!}
+                  investorAllocation={investorAllocation!}
+                  metadataPriceToken={metadataPriceToken!}
+                  metadataProjectToken={metadataProjectToken!}
+                />
+              )}
+
+              {tab === "investiments" && (
+                <ProjectInvestments
+                  launchpadProject={launchpadProject!}
+                  investorAllowance={investorAllowance!}
+                  investorAllocation={investorAllocation!}
+                  vestedAllocations={vestedAllocations!}
+                  metadataProjectToken={metadataProjectToken!}
+                />
+              )}
+            </div>
+          </div>
+
+          <ProjectUserArea
             isLoading={isLoading}
+            priceTokenBalance={priceTokenBalance!}
             launchpadProject={launchpadProject!}
             metadataPriceToken={metadataPriceToken!}
+            investorAllowance={investorAllowance!}
           />
-
-          <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative">
-            <div className="flex-grow space-x-[24px] mb-[67px]">
-              <button
-                onClick={() => setTab("pool")}
-                className={twMerge(
-                  "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)]",
-                  tab === "pool" && "bg-white text-[#431E5A] border-white"
-                )}
-              >
-                <span className="font-[700] text-[16px] tracking-[-0.04em]">
-                  Pool details
-                </span>
-              </button>
-
-              <button
-                onClick={() => setTab("investiments")}
-                className={twMerge(
-                  "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)]",
-                  tab === "investiments" &&
-                    "bg-white text-[#431E5A] border-white"
-                )}
-              >
-                <span className="font-[700] text-[16px] tracking-[-0.04em]">
-                  My investments
-                </span>
-              </button>
-            </div>
-
-            {tab === "pool" && (
-              <ProjectStats
-                isLoading={isLoading}
-                launchpadProject={launchpadProject!}
-                investorAllowance={investorAllowance!}
-                investorAllocation={investorAllocation!}
-                metadataPriceToken={metadataPriceToken!}
-                metadataProjectToken={metadataProjectToken!}
-              />
-            )}
-
-            {tab === "investiments" && (
-              <ProjectInvestments
-                launchpadProject={launchpadProject!}
-                investorAllowance={investorAllowance!}
-                investorAllocation={investorAllocation!}
-                vestedAllocations={vestedAllocations!}
-                metadataProjectToken={metadataProjectToken!}
-              />
-            )}
-          </div>
         </div>
-
-        <ProjectUserArea
-          isLoading={isLoading}
-          priceTokenBalance={priceTokenBalance!}
-          launchpadProject={launchpadProject!}
-          metadataPriceToken={metadataPriceToken!}
-          investorAllowance={investorAllowance!}
-        />
-      </div>
+      )}
     </PageContainer>
   );
 };

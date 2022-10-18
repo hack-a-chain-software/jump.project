@@ -202,6 +202,14 @@ export function MemberArea({
         }}
       />
 
+      {!accountId && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-[20px] bg-white/[.25] backdrop-blur-[3px] z-[20]">
+          <span className="text-[18px] font-[800] leading-[17px] tracking-[-0.03em] text-[#431E5A] uppercase">
+            Connect Wallet
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col h-full">
         <div className="mb-[15px]">
           <span className="text-[14px] font-[800] leading-[17px] tracking-[-0.03em]">

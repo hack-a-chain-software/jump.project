@@ -173,9 +173,10 @@ export const Projects = () => {
         }}
       />
 
-      <div className="flex flex-col lg:flex-row space-x-[24px] mb-[86px]">
+      <div className="flex flex-col space-y-[24px] xl:space-y-[0px] xl:flex-row xl:space-x-[24px] mb-[86px]">
         <TopCard
           gradientText=""
+          maxW="max-w-[548px] xl:max-w-[none]"
           bigText="Boost your Jump Pad experience with xJUMP"
           bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by only using xJUMP "
           jumpLogo
@@ -236,7 +237,7 @@ export const Projects = () => {
         </div>
 
         <div>
-          <div className="relative">
+          <div className="relative hidden log:block">
             <input
               placeholder="Search project"
               className="bg-[rgba(255,255,255,0.1)] px-[16px] py-[10px] rounded-[10px] text-[14px] font-[400] leading-[18px] text-white w-[355px] placeholder:text-[rgba(255,255,255,0.5)] placeholder:text-[14px] placeholder:font-[400]"
@@ -262,7 +263,7 @@ export const Projects = () => {
       <div
         className="
           grid
-          place-items-center
+          place-items-start
           gap-x-[18px] gap-y-[48px]
           grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-3 web:grid-cols-4
         "
@@ -285,8 +286,7 @@ export const Projects = () => {
 
       {loadingProjects && !loadingItems && (
         <div className="flex items-center justify-center mt-[48px]">
-          <div className="animate-spin h-[24px] w-[24px] mr-3 border border-l-white rounded-full" />
-          Loading Items...
+          <div className="animate-spin h-[32px] w-[32px] border border-l-white rounded-full" />
         </div>
       )}
 

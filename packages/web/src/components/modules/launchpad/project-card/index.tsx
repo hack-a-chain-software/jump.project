@@ -77,7 +77,9 @@ export const ProjectCard = ({
   }, [status, openSale, finalSale]);
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens || "0");
+    return new Big(total_amount_sale_project_tokens || 1).div(
+      token_allocation_size || 1
+    );
   }, [total_amount_sale_project_tokens]);
 
   const totalRaise = useMemo(() => {
@@ -100,9 +102,7 @@ export const ProjectCard = ({
   }, [allocations_sold]);
 
   const progress = useMemo(() => {
-    const decimals = new Big(10).pow(Number(project_token_info?.decimals) || 0);
-
-    return allocationsSold.div(totalAmount).div(decimals).toString();
+    return allocationsSold.mul(100).div(totalAmount).toString();
   }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
 
   return (

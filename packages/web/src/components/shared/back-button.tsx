@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "../../assets/svg/arrow-right";
 
 type Props = Partial<FlexProps>;
 
-export const BackButton = (props: Props) => {
+export const BackButton = (props: Props & { text?: string }) => {
   return (
     <Flex
       cursor="pointer"
@@ -15,7 +15,7 @@ export const BackButton = (props: Props) => {
     >
       <ArrowRightIcon width="30px" className="rotate-180" />
       <Text fontWeight="bold" fontSize="20px">
-        Go Back
+        {props.text || "Go Back"}
       </Text>
     </Flex>
   );
