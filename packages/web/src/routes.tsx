@@ -34,6 +34,19 @@ export const navRoutes = [
     subroutePrefix: "vesting",
   },
   {
+    enabled: true,
+    title: "Create Token",
+    icon: <WalletIcon />,
+    route: "/token-launcher",
+    subroutePrefix: "token-launcher",
+  },
+  // {
+  //   title: "Swap",
+  //   icon: <SwapIcon />,
+  //   route: "/swap",
+  //   subroutePrefix: "swap",
+  // },
+  {
     title: "Pools",
     icon: <PoolsIcon />,
     route: "/pools",
