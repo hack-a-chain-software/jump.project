@@ -9,7 +9,7 @@ export const useTokenLauncher = create<{
     deployCost: string,
     accountId: string,
     prefix: string,
-    args: string,
+    args: any,
     connection: WalletSelector
   ) => Promise<void>;
 }>(() => ({

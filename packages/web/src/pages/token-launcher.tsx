@@ -83,11 +83,11 @@ export const TokenLauncher = () => {
         icon: obj.icon,
         reference: obj.reference || null,
         reference_hash: obj.reference_hash || null,
-        decimals: obj.decimals,
+        decimals: Number(obj.decimals),
       },
     };
-    const json_args = JSON.stringify(params);
-    return json_args;
+
+    return params;
   }
 
   const handleStep1FormSubmit = handleSubmit((data) => {
