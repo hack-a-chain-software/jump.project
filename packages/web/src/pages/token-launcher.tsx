@@ -160,3 +160,5 @@ export const TokenLauncher = () => {
     </PageContainer>
   );
 };
+
+export default TokenLauncher;
