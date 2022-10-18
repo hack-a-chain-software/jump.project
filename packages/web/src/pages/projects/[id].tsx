@@ -1,35 +1,15 @@
-import { useMemo } from "react";
-import {
-  Box,
-  Flex,
-  Text,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-} from "@chakra-ui/react";
+import { useMemo, useState } from "react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
-import {
-  DiscordIcon,
-  TelegramIcon,
-  TwitterIcon,
-  WebIcon,
-  WhitepaperIcon,
-} from "@/assets/svg";
 import { BackButton } from "@/components/shared/back-button";
 import { useTheme } from "@/hooks/theme";
 import { useWalletSelector } from "@/context/wallet-selector";
 import {
-  If,
   ProjectInfo,
   ProjectStats,
-  ProjectAbout,
   PageContainer,
+  ProjectInvestments,
   ProjectUserArea,
-  ProjectAllocations,
-  ProjectTabUserAllocations,
 } from "@/components";
 import {
   useViewVestedAllocations,
@@ -37,6 +17,7 @@ import {
   useViewInvestorAllocation,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
+import { twMerge } from "tailwind-merge";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
 
 /**
@@ -108,168 +89,71 @@ export const Project = () => {
     ]
   );
 
+  const [tab, setTab] = useState("pool");
+
   return (
     <PageContainer>
       <BackButton onClick={() => navigate("/")} />
 
-      <div className="grid grid-cols-12 gap-4">
-        <ProjectInfo
-          isLoading={isLoading}
-          launchpadProject={launchpadProject!}
-          metadataPriceToken={metadataPriceToken!}
-        />
+      <div className="flex space-x-[24px]">
+        <div>
+          <ProjectInfo
+            isLoading={isLoading}
+            launchpadProject={launchpadProject!}
+            metadataPriceToken={metadataPriceToken!}
+          />
 
-        <ProjectAbout
-          isLoading={isLoading}
-          launchpadProject={launchpadProject!}
-        />
+          <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] col-span-6 relative">
+            <div className="flex-grow space-x-[24px] mb-[67px]">
+              <button
+                onClick={() => setTab("pool")}
+                className={twMerge(
+                  "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)]",
+                  tab === "pool" && "bg-white text-[#431E5A] border-white"
+                )}
+              >
+                <span className="font-[700] text-[16px] tracking-[-0.04em]">
+                  Pool details
+                </span>
+              </button>
 
-        <ProjectTabUserAllocations
-          projectUserComponent={
-            <ProjectUserArea
-              isLoading={isLoading}
-              launchpadProject={launchpadProject!}
-              vestedAllocations={vestedAllocations!}
-              investorAllocation={investorAllocation}
-              metadataProjectToken={metadataProjectToken!}
-            />
-          }
-          projectAllocationsComponent={
-            <ProjectAllocations
-              isLoading={isLoading}
-              investorAllowance={investorAllowance!}
-              launchpadProject={launchpadProject!}
-              priceTokenBalance={priceTokenBalance!}
-              totalAllowanceData={totalAllowanceData!}
-              investorAllocation={investorAllocation!}
-            />
-          }
-        />
+              <button
+                onClick={() => setTab("investiments")}
+                className={twMerge(
+                  "py-[10px] px-[24px] rounded-[10px] text-white border border-[rgba(255,255,255,0.1)]",
+                  tab === "investiments" &&
+                    "bg-white text-[#431E5A] border-white"
+                )}
+              >
+                <span className="font-[700] text-[16px] tracking-[-0.04em]">
+                  My investments
+                </span>
+              </button>
+            </div>
 
-        <ProjectStats
+            {tab === "pool" && (
+              <ProjectStats
+                isLoading={isLoading}
+                launchpadProject={launchpadProject!}
+                investorAllowance={investorAllowance!}
+                investorAllocation={investorAllocation!}
+                metadataPriceToken={metadataPriceToken!}
+                metadataProjectToken={metadataProjectToken!}
+              />
+            )}
+
+            {tab === "investiments" && <ProjectInvestments />}
+          </div>
+        </div>
+
+        <ProjectUserArea
           isLoading={isLoading}
+          vestedAllocations={vestedAllocations!}
           launchpadProject={launchpadProject!}
-          investorAllowance={investorAllowance!}
-          investorAllocation={investorAllocation!}
-          metadataPriceToken={metadataPriceToken!}
           metadataProjectToken={metadataProjectToken!}
+          investorAllocation={investorAllocation!}
         />
       </div>
-
-      <Box
-        bg={jumpGradient}
-        p="30px"
-        display="flex"
-        flexWrap="wrap"
-        gap={5}
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius={20}
-      >
-        <Flex direction="column">
-          <Text
-            letterSpacing="-0.03em"
-            mb="-5px"
-            color="white"
-            fontWeight="800"
-          >
-            Project
-          </Text>
-          <Text
-            color="white"
-            fontWeight="800"
-            letterSpacing="-0.03em"
-            fontSize="20px"
-          >
-            Social Networks
-          </Text>
-        </Flex>
-        <Flex color="white" gap={1}>
-          <If condition={!!launchpadProject?.discord}>
-            <Flex
-              w="40px"
-              h="40px"
-              alignItems="center"
-              justifyContent="center"
-              bg="black"
-              p="3px"
-              borderRadius={10}
-              onClick={() => navigateToExternalURL(launchpadProject?.discord!)}
-              cursor="pointer"
-              className="hover:bg-white hover:text-black"
-            >
-              <DiscordIcon />
-            </Flex>
-          </If>
-          <If condition={!!launchpadProject?.twitter}>
-            <Flex
-              w="40px"
-              h="40px"
-              alignItems="center"
-              justifyContent="center"
-              bg="black"
-              p="3px"
-              borderRadius={10}
-              onClick={() => navigateToExternalURL(launchpadProject?.twitter!)}
-              cursor="pointer"
-              className="hover:bg-white hover:text-black"
-            >
-              <TwitterIcon />
-            </Flex>
-          </If>
-          <If condition={!!launchpadProject?.telegram}>
-            <Flex
-              w="40px"
-              h="40px"
-              alignItems="center"
-              justifyContent="center"
-              bg="black"
-              p="3px"
-              borderRadius={10}
-              onClick={() => navigateToExternalURL(launchpadProject?.telegram!)}
-              cursor="pointer"
-              className="hover:bg-white hover:text-black"
-            >
-              <TelegramIcon />
-            </Flex>
-          </If>
-
-          <If condition={!!launchpadProject?.website}>
-            <Flex
-              w="40px"
-              h="40px"
-              alignItems="center"
-              justifyContent="center"
-              bg="black"
-              p="3px"
-              borderRadius={10}
-              onClick={() => navigateToExternalURL(launchpadProject?.website!)}
-              cursor="pointer"
-              className="hover:bg-white hover:text-black"
-            >
-              <WebIcon />
-            </Flex>
-          </If>
-          <If condition={!!launchpadProject?.whitepaper}>
-            <Flex
-              w="40px"
-              h="40px"
-              alignItems="center"
-              justifyContent="center"
-              bg="black"
-              p="3px"
-              borderRadius={10}
-              onClick={() =>
-                navigateToExternalURL(launchpadProject?.whitepaper!)
-              }
-              cursor="pointer"
-              className="hover:bg-white hover:text-black"
-            >
-              <WhitepaperIcon />
-            </Flex>
-          </If>
-        </Flex>
-      </Box>
     </PageContainer>
   );
 };

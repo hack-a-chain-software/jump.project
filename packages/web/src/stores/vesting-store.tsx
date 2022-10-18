@@ -23,9 +23,9 @@ export interface Vesting {
 export interface InvestorInfo {
   token: Token;
   contractData: ContractData;
-  totalLocked: BN;
-  totalUnlocked: BN;
-  totalWithdrawn: BN;
+  totalLocked: Big;
+  totalUnlocked: Big;
+  totalWithdrawn: Big;
 }
 
 export interface Token {

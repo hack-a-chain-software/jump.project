@@ -1,75 +1,104 @@
 import Big from "big.js";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
-import { WalletIcon } from "@/assets/svg";
-import { Flex, Skeleton } from "@chakra-ui/react";
-import { GradientText, Button, IconButton } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
-import {
-  launchpadProject,
-  investorAllocation,
-  tokenMetadata,
-} from "@/interfaces";
+import { launchpadProject, investorAllocation } from "@/interfaces";
 import { useState } from "react";
 import { Steps } from "intro.js-react";
+
+import { NumberInput } from "@/components";
 
 const CONNECT_WALLET_MESSAGE = "Connect wallet";
 
 export function ProjectUserArea({
   isLoading,
   launchpadProject,
-  vestedAllocations,
-  investorAllocation,
-  metadataProjectToken,
+  priceTokenBalance,
+  investorAllowance,
 }: {
   isLoading: boolean;
-  vestedAllocations: string;
+  investorAllowance: string;
+  priceTokenBalance: string;
+  totalAllowanceData: string;
   launchpadProject: launchpadProject;
-  metadataProjectToken: tokenMetadata;
   investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
+  const { buyTickets } = useLaunchpadStore();
 
-  const { withdrawAllocations } = useLaunchpadStore();
+  const [tickets, setTickets] = useState(0);
 
-  const enabledSale = useMemo(() => {
+  const allocationsAvailable = useMemo(() => {
+    return new Big(investorAllowance ?? "0");
+  }, [investorAllowance]);
+
+  const onJoinProject = useCallback(
+    (amount: number) => {
+      if (
+        typeof launchpadProject?.listing_id &&
+        launchpadProject?.price_token
+      ) {
+        buyTickets(
+          new Big(amount)
+            .mul(new Big(launchpadProject.token_allocation_price || 0))
+            .toString(),
+          launchpadProject.price_token,
+          launchpadProject.listing_id,
+          accountId!,
+          selector
+        );
+      }
+    },
+    [
+      1,
+      accountId,
+      launchpadProject?.project_token,
+      launchpadProject?.token_allocation_price,
+    ]
+  );
+
+  const formatDate = (start_timestamp?: string) => {
+    const date = getUTCDate(Number(start_timestamp ?? "0"));
+    return format(date, "mm/dd/yyyy");
+  };
+
+  const enabledSales = useMemo(() => {
     const now = new Date();
+    const startSale = new Date(
+      Number(launchpadProject?.open_sale_1_timestamp!)
+    );
 
-    const endAt = new Date(Number(launchpadProject?.final_sale_2_timestamp!));
-
-    return isBefore(now, endAt);
+    return isBefore(startSale, now);
   }, [launchpadProject]);
 
-  const decimals = useMemo(() => {
-    return new Big(10).pow(metadataProjectToken?.decimals ?? 0);
-  }, [metadataProjectToken]);
-
-  const claimedAmount = useMemo(() => {
-    return new Big(investorAllocation.totalTokensBought! ?? 0);
-  }, [investorAllocation]);
-
-  const unlockedAmount = useMemo(() => {
-    return new Big(vestedAllocations ?? 0);
-  }, [vestedAllocations]);
-
-  const totalAmount = useMemo(() => {
-    return (
-      claimedAmount.add(unlockedAmount).div(decimals) +
-      metadataProjectToken?.symbol!
+  const ticketsAmount = useMemo(() => {
+    return new Big(launchpadProject?.token_allocation_price! ?? 0).mul(
+      new Big(tickets.toString())
     );
-  }, [claimedAmount, unlockedAmount]);
+  }, [tickets]);
 
-  const retrieveTokens = () => {
-    if (typeof launchpadProject?.listing_id && launchpadProject?.price_token) {
-      withdrawAllocations(
-        launchpadProject.listing_id,
-        launchpadProject.project_token,
-        accountId!,
-        selector
-      );
+  const hasTicketsAmount = useMemo(() => {
+    return new Big(priceTokenBalance ?? "0").gte(ticketsAmount);
+  }, [ticketsAmount, priceTokenBalance]);
+
+  const decimals = useMemo(() => {
+    if (!launchpadProject?.price_token_info?.decimals) {
+      return new Big(1);
     }
-  };
+
+    return new Big(10).pow(
+      Number(launchpadProject?.price_token_info?.decimals)
+    );
+  }, [launchpadProject?.price_token_info]);
+
+  const balance = useMemo(() => {
+    return new Big(priceTokenBalance ?? 0).div(decimals).toFixed(2);
+  }, [priceTokenBalance, decimals]);
+
+  const total = useMemo(() => {
+    return ticketsAmount.div(decimals);
+  }, [ticketsAmount, decimals]);
 
   const [showSteps, setShowSteps] = useState(false);
 
@@ -106,133 +135,81 @@ export function ProjectUserArea({
     },
   ];
 
-  const formattedUnlocked = useMemo(() => {
-    return (
-      unlockedAmount.div(decimals).toFixed(2) + metadataProjectToken?.symbol!
-    );
-  }, [metadataProjectToken, unlockedAmount, decimals]);
-
-  const formattedClaimed = useMemo(() => {
-    return (
-      claimedAmount.div(decimals).toFixed(2) + metadataProjectToken?.symbol!
-    );
-  }, [metadataProjectToken?.symbol!, claimedAmount, decimals]);
-
   return (
-    <>
-      {!isLoading && (
-        <div className="absolute right-[24px] top-[24px]">
-          <IconButton onClick={() => setShowSteps(true)} />
+    <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px]">
+      <div className="px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]">
+        <span className="tracking-[-0.04em] font-[500] text-[16px]">
+          Open sales ends at:
+        </span>
+
+        <span className="font-[800] text-[16px] tracking-[-0.04em]">
+          03:05:07:00
+        </span>
+      </div>
+
+      <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full mb-[8px]">
+        <div className="mb-[16px]">
+          <span className="font-[600] text-[14px] tracking-[-0.03em]">
+            Allocation amount
+          </span>
         </div>
-      )}
 
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
+        <div className="mb-[23px]">
+          <NumberInput
+            min={0}
+            value={tickets}
+            max={allocationsAvailable.toNumber()}
+            onChange={(value) => setTickets(value || 0)}
+          />
+        </div>
 
-      <Flex className="flex-col space-y-[12px] h-5/6 w-full">
-        <Flex className="flex-col space-y-[12px] justify-evenly h-5/6 w-full">
-          <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
-            User Area
-          </GradientText>
+        <div>
+          <span
+            children={`Your allocation balance: 500`}
+            className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
+          />
+        </div>
+      </div>
 
-          <div className="flex-col space-y-[4px]">
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Allocations:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? investorAllocation.allocationsBought ?? "0"
-                    : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Total amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId ? totalAmount : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Unlocked amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId ? formattedUnlocked : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Claimed amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId ? formattedClaimed : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
+      <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full flex justify-between items-center mb-[16px]">
+        <div>
+          <div className="mb-[8px]">
+            <span className="font-[600] text-[14px] tracking-[-0.03em]">
+              Price
+            </span>
           </div>
-        </Flex>
-        <Skeleton
-          isLoaded={!isLoading}
-          w="100%"
-          borderRadius="15px"
-          className="relative project-user-area-retrieve"
-        >
-          <Button
-            disabled={enabledSale || vestedAllocations === "0" || !accountId}
-            onClick={() => retrieveTokens()}
-            justifyContent="space-between"
-            w="100%"
-          >
-            Retrieve Tokens
-            <WalletIcon />
-          </Button>
-        </Skeleton>
-      </Flex>
-    </>
+
+          <div className="mb-[8px]">
+            <span
+              children={0}
+              className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
+            />
+          </div>
+
+          <div>
+            <span
+              children={`Your ballance: 500 USDT`}
+              className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <button className="p-[8px] rounded-[10px] bg-white min-w-[58px]">
+            <span className="text-[#431E5A] tracking-[-0.04em] font-[600] text-[14px]">
+              USDT
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="w-full">
+        <button className="bg-white rounded-[10px] px-[16px] py-[10px] w-full">
+          <span className="font-[600] text-[14px] text-[#431E5A]">
+            Join project
+          </span>
+        </button>
+      </div>
+    </div>
   );
 }
