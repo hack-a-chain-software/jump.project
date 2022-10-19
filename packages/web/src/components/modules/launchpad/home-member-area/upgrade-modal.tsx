@@ -159,7 +159,7 @@ export default function ({
                   </div>
 
                   <div className="absolute top-[-60px] right-[-80px]">
-                    {/* <Coins /> */}
+                    <Coins />
                   </div>
                 </div>
 
@@ -175,13 +175,16 @@ export default function ({
                   {(tiers || []).map(
                     ({ amount, level, disabled, allocations }, i) => (
                       <div
+                        onClick={() => setSelected(level)}
                         className="items-start flex-col text-left"
                         key={"tier-upgrade-modal-tier-" + i}
                       >
                         <div className="px-[10px] py-[4px] rounded-[50px] bg-[linear-gradient(90deg,#510B72_0%,#740B0B_100%)] w-max mb-[8px]">
                           <span
                             className="font-[700] text-[14px] text-white"
-                            // children={amount.div(decimals).toFixed(2)}
+                            children={
+                              amount.div(decimals).toFixed(2) + metadata?.symbol
+                            }
                           />
                         </div>
 
@@ -213,14 +216,19 @@ export default function ({
                   </div>
 
                   <div>
-                    <span className="font-[700] text-[16px] text-[#000000]">
-                      30 xJUMP
-                    </span>
+                    <span
+                      className="font-[700] text-[16px] text-[#000000]"
+                      children={balance + metadata?.symbol}
+                    />
                   </div>
                 </div>
 
                 <div className="mb-[8px]">
-                  <button className="rounded-[10px] bg-[linear-gradient(90deg,_#510B72_0%,_#740B0B_100%)] p-[12px] w-full">
+                  <button
+                    onClick={() => upgradeLevel()}
+                    disabled={onMaxLevel || !selected || isInsuficcientBalance}
+                    className="rounded-[10px] bg-[linear-gradient(90deg,_#510B72_0%,_#740B0B_100%)] p-[12px] w-full disabled:opacity-[0.5] disabled:cursor-not-allowed"
+                  >
                     <span className="font-[600] text-[16px] text-white">
                       Upgrade tier
                     </span>

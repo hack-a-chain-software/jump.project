@@ -22,37 +22,55 @@ import { Steps } from "intro.js-react";
 import { ProjectCard } from "@/components";
 import { twMerge } from "tailwind-merge";
 import { FolderOpenIcon, SearchIcon } from "@heroicons/react/outline";
+import { viewFunction } from "@/tools";
 
 const PAGINATE_LIMIT = 30;
 
 export const Projects = () => {
   const [filter, setFilter] = useState({});
   const [filterSearch, setSearch] = useState<string | null>(null);
+  const [launchpadSettings, setlaunchpad] = useState<any>();
+  const [baseTokenMetadata, setBaseTokenMetadata] = useState<any>();
 
   const [loadingItems, setLoadingItems] = useState(false);
 
-  const { accountId } = useWalletSelector();
+  const { accountId, selector } = useWalletSelector();
 
   const investor = useViewInvestor(accountId!);
 
   const { data: totalAllowanceData = "0" } =
     useViewTotalEstimatedInvestorAllowance(accountId!);
 
-  const { data: launchpadSettings, loading: loadingLaunchpadSettings } =
-    useViewLaunchpadSettings();
+  useEffect(() => {
+    (async () => {
+      const settings = await viewFunction(
+        selector,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_contract_settings"
+      );
 
-  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
-    useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: X_JUMP_TOKEN,
-      variables: {
-        account_id: accountId!,
-      },
-      poolInterval: 1000 * 60,
-      skip: !accountId,
-    });
+      const metadata = await viewFunction(
+        selector,
+        X_JUMP_TOKEN,
+        "ft_metadata"
+      );
 
-  const { data: baseTokenMetadata, loading: loadingProjectToken } =
-    useTokenMetadata(X_JUMP_TOKEN);
+      setlaunchpad(settings);
+      setBaseTokenMetadata(metadata);
+    })();
+  }, []);
+
+  const { data: baseTokenBalance } = useNearQuery<
+    string,
+    { account_id: string }
+  >("ft_balance_of", {
+    contract: X_JUMP_TOKEN,
+    variables: {
+      account_id: accountId!,
+    },
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+  });
 
   const queryVariables: LaunchpadConenctionQueryVariables = useMemo(() => {
     return {
