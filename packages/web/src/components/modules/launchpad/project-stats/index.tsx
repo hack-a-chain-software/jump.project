@@ -63,31 +63,24 @@ export function ProjectStats({
   };
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens ?? 0);
+    return new Big(total_amount_sale_project_tokens ?? 0).div(
+      token_allocation_size || 1
+    );
   }, [total_amount_sale_project_tokens]);
 
   const totalRaise = useMemo(() => {
-    const {
-      total_amount_sale_project_tokens = 0,
-      token_allocation_price = 0,
-      token_allocation_size = 1,
-    } = launchpadProject || {};
-
-    const totalAmount = new Big(total_amount_sale_project_tokens ?? 0);
-    const allocationPrice = new Big(token_allocation_price ?? 0);
-    const allocationSize = new Big(token_allocation_size ?? 0);
+    const allocationPrice = new Big(token_allocation_price || "0");
+    const allocationSize = new Big(token_allocation_size || "0");
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
-  }, [launchpadProject]);
+  }, [totalAmount, token_allocation_price, token_allocation_size]);
 
   const allocationsSold = useMemo(() => {
     return new Big(allocations_sold ?? 0);
   }, [allocations_sold]);
 
   const progress = useMemo(() => {
-    const decimals = new Big(10).pow(Number(project_token_info?.decimals) || 0);
-
-    return allocationsSold.div(totalAmount).div(decimals).toString();
+    return allocationsSold.mul(100).div(totalAmount).toString();
   }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
 
   const steps = useMemo(() => {

@@ -17,3 +17,4 @@ export * from "./jump-gradient";
 export * from "./jump-big-logo";
 export * from "./jump-kangaroo";
 export * from "./jump-kangaroo-upsidedown";
+export * from "./coins";
