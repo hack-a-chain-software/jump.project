@@ -103,9 +103,9 @@ export const Coins = () => {
           width="106.609"
           height="175.092"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -139,8 +139,8 @@ export const Coins = () => {
           y2="202.947"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#510B72" />
-          <stop offset="1" stop-color="#740B0B" />
+          <stop stopColor="#510B72" />
+          <stop offset="1" stopColor="#740B0B" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_1841_2618"
@@ -150,8 +150,8 @@ export const Coins = () => {
           y2="132.717"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#510B72" />
-          <stop offset="1" stop-color="#740B0B" />
+          <stop stopColor="#510B72" />
+          <stop offset="1" stopColor="#740B0B" />
         </linearGradient>
         <linearGradient
           id="paint2_linear_1841_2618"
@@ -161,8 +161,8 @@ export const Coins = () => {
           y2="89.2519"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#510B72" />
-          <stop offset="1" stop-color="#740B0B" />
+          <stop stopColor="#510B72" />
+          <stop offset="1" stopColor="#740B0B" />
         </linearGradient>
         <linearGradient
           id="paint3_linear_1841_2618"
@@ -172,8 +172,8 @@ export const Coins = () => {
           y2="70.2947"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#510B72" />
-          <stop offset="1" stop-color="#740B0B" />
+          <stop stopColor="#510B72" />
+          <stop offset="1" stopColor="#740B0B" />
         </linearGradient>
       </defs>
     </svg>
