@@ -56,11 +56,16 @@ export const useTokenLauncher = create<{
       );
 
       transactions.push(
-        getTransaction(accountId!, contract_account, "ft_transfer", {
-          receiver_id: accountId!,
-          amount: amount,
-          memo: null,
-        })
+        getTransaction(
+          accountId,
+          contract_account,
+          "storage_deposit",
+          {
+            account_id: contract_account,
+            registration_only: true,
+          },
+          "0.05"
+        )
       );
 
       const wallet = await connection.wallet();
