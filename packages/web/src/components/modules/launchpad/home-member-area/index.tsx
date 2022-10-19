@@ -1,14 +1,11 @@
 import Big from "big.js";
 import UpgradeModal from "./upgrade-modal";
-import { useMemo, Fragment, useState } from "react";
-import { Button, Card, IconButton } from "@/components";
+import { useMemo, useState } from "react";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { Flex, Text, Stack, Skeleton } from "@chakra-ui/react";
 import { format, addMilliseconds, isBefore } from "date-fns";
 import { InvestorInfo } from "@/hooks/modules/launchpad";
 import { tokenMetadata } from "@/interfaces";
-import { Steps } from "intro.js-react";
 import { twMerge } from "tailwind-merge";
 
 const tiers = [
@@ -43,7 +40,6 @@ const tiers = [
 ];
 
 export function MemberArea({
-  isLoaded,
   investor,
   totalAllowance,
   launchpadSettings,
@@ -117,66 +113,6 @@ export function MemberArea({
     return stakedTokens.div(decimals).toFixed(2);
   }, [stakedTokens, decimals]);
 
-  const [showSteps, setShowSteps] = useState(false);
-
-  const stepItems = [
-    {
-      title: "Current Level",
-      element: ".current-level",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            Level is increased based on the total coins you deposited.
-          </span>
-
-          <span>Ex: if you stake 1 xpJump, your level will be 1.</span>
-        </div>
-      ),
-    },
-    {
-      title: "Staked xJump",
-      element: ".staked-xjump",
-      intro: <span>Your total amount staked on xJump.</span>,
-    },
-    {
-      title: "Base Allowance",
-      element: ".base-allowance",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            Allowances are consumed when you invest in vesting campaigns.
-          </span>
-
-          <span>
-            The higher your level, the greater the number of allocations
-            available to use in projects.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Upgrade Button",
-      element: ".upgrade-button",
-      intro: <span>Action button to open upgrade modal.</span>,
-    },
-    {
-      title: "Withdraw Button",
-      element: ".withdraw-button",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            Action button to withdraw all staked xJump tokens and return to
-            level 0.
-          </span>
-
-          <span className="font-[600]">
-            Will be available at the end of lock period
-          </span>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <div
       className="
@@ -186,22 +122,6 @@ export function MemberArea({
         member-area relative px-[24px] pt-[16px] pb-[26px]
       "
     >
-      {/* <div className="absolute right-[24px] top-[24px]">
-        <IconButton onClick={() => setShowSteps(true)} />
-      </div> */}
-
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
-
       {!accountId && (
         <div className="absolute inset-0 flex items-center justify-center rounded-[20px] bg-white/[.25] backdrop-blur-[3px] z-[20]">
           <span className="text-[18px] font-[800] leading-[17px] tracking-[-0.03em] text-[#431E5A] uppercase">

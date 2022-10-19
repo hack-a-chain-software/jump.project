@@ -3,7 +3,6 @@ import isEmpty from "lodash/isEmpty";
 import { debounce } from "lodash-es";
 import {
   useViewInvestor,
-  useViewLaunchpadSettings,
   useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import { X_JUMP_TOKEN } from "@/env/contract";
@@ -134,63 +133,8 @@ export const Projects = () => {
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
 
-  const [showSteps, setShowSteps] = useState(false);
-
-  const stepItems = [
-    {
-      element: ".launchpad",
-      title: "Launchpad",
-      intro: (
-        <div>
-          <span>
-            Jump launchpad is a page where you can stake your xJump, receive
-            allocations and invest in crypto projects.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Member Area",
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <span className="mb-2">This is member area.</span>
-
-          <span>
-            In this section you can stake your xJump tokens, watch your level,
-            check the amount of staked tokens and the total of your allocations.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Projects",
-      element: ".table-projects",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            Here are all the projects that have vesting programs that you can
-            invest with your allocations
-          </span>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <div className="p-[30px] w-full overflow-hidden pt-[150px] relative">
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
-
       <div className="flex flex-col space-y-[24px] xl:space-y-[0px] xl:flex-row xl:space-x-[24px] mb-[86px]">
         <TopCard
           gradientText=""
@@ -198,7 +142,6 @@ export const Projects = () => {
           bigText="Boost your Jump Pad experience with xJUMP"
           bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by only using xJUMP "
           jumpLogo
-          onClick={() => setShowSteps(true)}
         />
 
         <MemberArea
