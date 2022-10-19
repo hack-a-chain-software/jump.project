@@ -36,17 +36,6 @@ export const ProjectInvestments = ({
     return new Big(vestedAllocations || "0");
   }, [vestedAllocations]);
 
-  const totalAmount = useMemo(() => {
-    return (
-      claimedAmount
-        .add(unlockedAmount || 1)
-        .div(decimals || 1)
-        .toFixed(2) +
-      " " +
-      project_token_info?.symbol!
-    );
-  }, [claimedAmount, unlockedAmount, decimals]);
-
   const allocationsAvailable = useMemo(() => {
     return new Big(investorAllowance ?? "0");
   }, [investorAllowance]);
@@ -58,6 +47,17 @@ export const ProjectInvestments = ({
 
     return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
+
+  const totalAmount = useMemo(() => {
+    return (
+      formatNumber(
+        claimedAmount.add(unlockedAmount || 1).toString(),
+        decimals
+      ) +
+      " " +
+      project_token_info?.symbol!
+    );
+  }, [claimedAmount, unlockedAmount, decimals]);
 
   const enabledSale = useMemo(() => {
     const now = new Date();
@@ -139,6 +139,7 @@ export const ProjectInvestments = ({
                 children={
                   accountId
                     ? formatNumber(unlockedAmount, decimals) +
+                      " " +
                       project_token_info?.symbol!
                     : CONNECT_WALLET_MESSAGE
                 }
@@ -164,6 +165,7 @@ export const ProjectInvestments = ({
                 children={
                   accountId
                     ? formatNumber(claimedAmount, decimals) +
+                      " " +
                       project_token_info?.symbol!
                     : CONNECT_WALLET_MESSAGE
                 }

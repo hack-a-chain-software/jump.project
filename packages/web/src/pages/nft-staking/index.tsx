@@ -67,8 +67,6 @@ export const NFTStaking = () => {
     notifyOnNetworkStatusChange: true,
   });
 
-  console.log(nftProjects?.nft_staking_projects.data);
-
   useEffect(() => {
     (async () => {
       await refetch({

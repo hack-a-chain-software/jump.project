@@ -6,8 +6,6 @@ import { JumpIcon } from "../../assets/svg/jump-logo";
 export const Nav = () => {
   const navigate = useNavigate();
 
-  console.log(window.location);
-
   return (
     <Flex
       // minH="100vh"
