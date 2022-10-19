@@ -48,17 +48,21 @@ export const NFTStaking = () => {
   const cardOpacity = useColorModeValue(0.9, 0.7);
   const cardBg = useColorModeValue(jumpGradient, glassyWhiteOpaque);
 
-  const queryVariables: NftStakingProjectsConnectionQueryVariables =
-    useMemo(() => {
+  const queryVariables: NftStakingProjectsConnectionQueryVariables = useMemo(
+    () => {
       return {
         limit: PAGINATE_LIMIT,
         accountId: accountId ?? "",
-        showStaked: filterStaked,
+        // showStaked: filterStaked,
         // visibility: filterVisibility,
         // status: filterStatus,
-        search: filterSearch,
+        // search: filterSearch,
       };
-    }, [/*filterStatus, filterVisibility,*/ filterSearch, filterStaked]);
+    },
+    [
+      /*filterStatus, filterVisibility, filterSearch, filterStaked*/
+    ]
+  );
 
   const {
     data: nftProjects,
@@ -68,19 +72,15 @@ export const NFTStaking = () => {
     notifyOnNetworkStatusChange: true,
   });
 
-<<<<<<< HEAD
-=======
-  const { data } = useNearQuery("nft_tokens_for_owner", {
-    contract: "445ce3679b0536fd4920nearmeerkatking.testnet",
-    variables: {
-      account_id: accountId,
-    },
-    skip: !accountId,
-  });
-  console.log(data);
+  // const { data } = useNearQuery("nft_tokens_for_owner", {
+  //   contract: "445ce3679b0536fd4920nearmeerkatking.testnet",
+  //   variables: {
+  //     account_id: accountId,
+  //   },
+  //   skip: !accountId,
+  // });
   // console.log(nftProjects?.nft_staking_projects.data);
 
->>>>>>> feat(web): adding query to verify staked nfts
   useEffect(() => {
     (async () => {
       await refetch({
@@ -152,9 +152,9 @@ export const NFTStaking = () => {
           </>
         }
       />
-      <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
-        <Flex gap="4" flexGrow="1" flexWrap="wrap">
-          {/* <Select
+      {/* <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
+        <Flex gap="4" flexGrow="1" flexWrap="wrap"> */}
+      {/* <Select
             value={filterStatus}
             placeholder="Status"
             onChange={(value: StatusEnum | null) => setStatus(value)}
@@ -176,7 +176,7 @@ export const NFTStaking = () => {
 
           /> */}
 
-          <Select
+      {/* <Select
             value={filterStaked}
             placeholder="Staked"
             onChange={(value: StakedEnum | null) =>
@@ -188,9 +188,9 @@ export const NFTStaking = () => {
                 { label: "No", value: StakedEnum.No },
               ] as const
             }
-          />
-        </Flex>
-      </Flex>
+          /> */}
+      {/* </Flex>
+      </Flex> */}
 
       {/* <Flex className="md:max-w-[330px]" w="100%">
           <Input
