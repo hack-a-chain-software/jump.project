@@ -13,8 +13,6 @@ import { Steps } from "intro.js-react";
 
 import { NumberInput } from "@/components";
 
-const CONNECT_WALLET_MESSAGE = "Connect wallet";
-
 const formatConfig = {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
@@ -174,6 +172,7 @@ export function ProjectUserArea({
       closedArray.includes(launchpadProject.status!)
     ) {
       return {
+        bg: "bg-[#CE2828]",
         status: StatusEnum.Closed,
         label: `Sales closed at: ${"a"}`,
       };
@@ -183,15 +182,19 @@ export function ProjectUserArea({
 
     if (launchpadProject.status === "funded" && isBefore(now, openSale)) {
       return {
+        bg: "bg-[#5E6DEC]",
         status: StatusEnum.Waiting,
-        label: `Sales start: ${formatDate(openSale)}`,
+        label: "Sales start:",
+        value: formatDate(openSale),
       };
     }
 
     if (launchpadProject.status === "funded" && isBefore(finalSale, now)) {
       return {
+        bg: "bg-[#CE2828]",
         status: StatusEnum.Closed,
-        label: `Sales closed at: ${formatDate(finalSale)}`,
+        label: "Sales closed at:",
+        value: formatDate(finalSale),
       };
     }
 
@@ -201,27 +204,38 @@ export function ProjectUserArea({
       isBefore(now, finalSale)
     ) {
       return {
+        bg: "bg-[#559C71]",
         status: StatusEnum.Open,
-        label: `Open sales ends at: ${formatDate(finalSale)}`,
+        label: "Open sales ends at",
+        value: formatDate(finalSale),
       };
     }
 
     return {
+      bg: "bg-[#559C71]",
       status: StatusEnum.Open,
-      label: `Open sales ends at: ${formatDate(finalSale)}`,
+      label: "Open sales ends at:",
+      value: formatDate(finalSale),
     };
   }, [launchpadProject]);
 
   return (
     <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
-      <div className="px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]">
-        <span className="tracking-[-0.04em] font-[500] text-[16px]">
-          Open sales ends at:
-        </span>
+      <div
+        className={twMerge(
+          "px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]",
+          status.bg
+        )}
+      >
+        <span
+          className="tracking-[-0.04em] font-[500] text-[16px]"
+          children={status.label}
+        />
 
-        <span className="font-[800] text-[16px] tracking-[-0.04em]">
-          03:05:07:00
-        </span>
+        <span
+          className="font-[800] text-[16px] tracking-[-0.04em]"
+          children={status.value}
+        />
       </div>
 
       <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full mb-[8px]">
