@@ -102,13 +102,21 @@ export default function ({
     return new Big(10).pow(metadata?.decimals ?? 0);
   }, [metadata]);
 
-  const formatedAmountToSelectedLevel = useMemo(() => {
-    return new Big(amountToSelectedLevel ?? 0).div(decimals).toFixed(2);
-  }, [metadata, amountToSelectedLevel, selected]);
+  const bigBalance = useMemo(() => {
+    return new Big(balance || 0);
+  }, [balance]);
 
   const isInsuficcientBalance = useMemo(() => {
-    return new Big(balance ?? 0).lt(amountToSelectedLevel ?? new Big(0));
+    return bigBalance.lt(amountToSelectedLevel ?? new Big(0));
   }, [balance, amountToSelectedLevel]);
+
+  const newBalance = useMemo(() => {
+    if (!amountToSelectedLevel) {
+      return "";
+    }
+
+    return bigBalance.sub(amountToSelectedLevel).div(decimals).toFixed(2);
+  }, [bigBalance, amountToSelectedLevel]);
 
   const upgradeLevel = () =>
     increaseMembership(selected!, accountId!, selector);
@@ -169,7 +177,7 @@ export default function ({
                     mb-[31px]
                     place-items-start
                     gap-x-[18px] gap-y-[32px]
-                    grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-2 web:grid-cols-3
+                    grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-2 web:grid-cols-3 cursor-pointer
                   "
                 >
                   {(tiers || []).map(
@@ -196,7 +204,15 @@ export default function ({
                           />
                         </div>
 
-                        <div className="bg-white px-[25px] py-[20px] rounded-[12px] shadow-[0px_2px_10px_1px_rgba(152,73,156,0.25)]">
+                        <div
+                          className={twMerge(
+                            "bg-white px-[25px] py-[20px] rounded-[12px] shadow-[0px_2px_10px_1px_rgba(152,73,156,0.25)]",
+                            [
+                              selected === level &&
+                                "shadow-[0px_2px_15px_2px_rgba(152,73,156,0.6)]",
+                            ]
+                          )}
+                        >
                           <div className="mb-[6px]">
                             <span
                               className="text-[#000000] font-[700] text-[14px]"
@@ -226,7 +242,9 @@ export default function ({
                   <div>
                     <span
                       className="font-[700] text-[16px] text-[#000000]"
-                      children={balance + metadata?.symbol}
+                      children={
+                        bigBalance.div(decimals).toFixed(2) + metadata?.symbol
+                      }
                     />
                   </div>
                 </div>
@@ -251,9 +269,10 @@ export default function ({
                   </div>
 
                   <div>
-                    <span className="font-[700] text-[14px] text-[#000000]">
-                      24 xJUMP
-                    </span>
+                    <span
+                      className="font-[700] text-[14px] text-[#000000]"
+                      children={selected ? newBalance + metadata?.symbol : "-"}
+                    />
                   </div>
                 </div>
 
@@ -265,13 +284,19 @@ export default function ({
                   </div>
 
                   <div>
-                    <span
-                      className={twMerge(
-                        "font-[800] text-[16px] leading-[19px] tracking-[-0.03em] bg-clip-text",
-                        tiersBadge[6].class
-                      )}
-                      children={tiersBadge[6].name}
-                    />
+                    {selected ? (
+                      <span
+                        className={twMerge(
+                          "font-[800] text-[16px] leading-[19px] tracking-[-0.03em]",
+                          tiersBadge[selected].class
+                        )}
+                        children={tiersBadge[selected].name}
+                      />
+                    ) : (
+                      <span className="font-[800] text-[16px] leading-[19px] tracking-[-0.03em] text-[#000000]">
+                        -
+                      </span>
+                    )}
                   </div>
                 </div>
               </Dialog.Panel>
@@ -280,112 +305,5 @@ export default function ({
         </div>
       </Dialog>
     </Transition>
-    // <ModalImageDialog
-    //   image="https://images.unsplash.com/photo-1642525027649-00d7397a6d4a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
-    //   isOpen={isOpen}
-    //   title="Upgrade Level"
-    //   minH="max-content"
-    //   minW="800px"
-    //   onClose={() => {
-    //     setSelected(null);
-    //     onClose();
-    //   }}
-    //   footer={
-    //     !onMaxLevel && (
-    //       <Button
-    //         onClick={() => upgradeLevel()}
-    //         bg="white"
-    //         color="black"
-    //         w="100%"
-    //         disabled={!selected || isInsuficcientBalance}
-    //       >
-    //         Upgrade Now!
-    //         <ArrowRightIcon />
-    //       </Button>
-    //     )
-    //   }
-    //   shouldBlurBackdrop
-    // >
-    //   <Flex w="100%" direction="column">
-    //     <Text color="white" marginTop="-12px" marginBottom="12px">
-    //       Select level to upgrade
-    //     </Text>
-
-    //     <div>
-    //       <RadioGroup value={selected} onChange={setSelected} className="my-2">
-    //         <div className="flex space-x-[6px]">
-    //           {!onMaxLevel &&
-    //             tiers?.map(({ amount, level, disabled }) => (
-    //               <RadioGroup.Option
-    //                 key={amount.toString()}
-    //                 value={level}
-    //                 disabled={disabled}
-    //                 className={({ checked, disabled }) =>
-    //                   classNames(
-    //                     checked
-    //                       ? "bg-gray-200 border-transparent text-black"
-    //                       : "",
-    //                     disabled
-    //                       ? "opacity-[.6] cursor-not-allowed bg-white text-black"
-    //                       : "cursor-pointer",
-    //                     !checked && !disabled
-    //                       ? "border-gray-200 text-gray-900 hover:bg-gray-300 bg-white"
-    //                       : "",
-    //                     "relative border rounded-[15px] p-3 flex items-center justify-center text-sm font-medium uppercase"
-    //                   )
-    //                 }
-    //               >
-    //                 {({ checked }) => (
-    //                   <RadioGroup.Label as="span" className="whitespace-nowrap">
-    //                     <span children={"LVL " + level} />
-
-    //                     {checked && (
-    //                       <div className="absolute inset-0 w-full h-full rounded-[15px] flex items-center justify-center bg-transparent backdrop-blur-[2px]">
-    //                         <CheckIcon className="text-black" />
-    //                       </div>
-    //                     )}
-    //                   </RadioGroup.Label>
-    //                 )}
-    //               </RadioGroup.Option>
-    //             ))}
-    //         </div>
-    //       </RadioGroup>
-    //     </div>
-
-    //     {selected && (
-    //       <>
-    //         <div className="flex w-full space-x-[4px] pt-[12px]">
-    //           <Text fontSize={18}>Next level: </Text>
-
-    //           <Text fontSize={18} children={selected} fontWeight="semibold" />
-    //         </div>
-
-    //         <div className="flex w-full space-x-[4px] pb-[12px]">
-    //           <Text fontSize={18}>Next level deposit: </Text>
-
-    //           <Text
-    //             fontSize={18}
-    //             children={
-    //               formatedAmountToSelectedLevel + " " + metadata?.symbol
-    //             }
-    //             fontWeight="semibold"
-    //           />
-    //         </div>
-    //       </>
-    //     )}
-
-    //     {isInsuficcientBalance && (
-    //       <div>
-    //         <span className="text-[#EB5757]">Insufficient Balance</span>
-    //       </div>
-    //     )}
-
-    //     {onMaxLevel && (
-    //       <div>
-    //         <span className="text-[#EB5757]">Already at maximum level</span>
-    //       </div>
-    //     )}
-    //   </Flex>
-    // </ModalImageDialog>
   );
 }

@@ -65,7 +65,6 @@ export const Projects = () => {
     variables: {
       account_id: accountId!,
     },
-    poolInterval: 1000 * 60,
     skip: !accountId,
   });
 
