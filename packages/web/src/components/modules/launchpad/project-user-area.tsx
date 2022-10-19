@@ -184,14 +184,14 @@ export function ProjectUserArea({
     if (launchpadProject.status === "funded" && isBefore(now, openSale)) {
       return {
         status: StatusEnum.Waiting,
-        label: `Sales start: ${"a"}`,
+        label: `Sales start: ${formatDate(openSale)}`,
       };
     }
 
     if (launchpadProject.status === "funded" && isBefore(finalSale, now)) {
       return {
         status: StatusEnum.Closed,
-        label: `Sales closed at: `,
+        label: `Sales closed at: ${formatDate(finalSale)}`,
       };
     }
 
@@ -202,13 +202,13 @@ export function ProjectUserArea({
     ) {
       return {
         status: StatusEnum.Open,
-        label: `Open sales ends at: ${"a"}`,
+        label: `Open sales ends at: ${formatDate(finalSale)}`,
       };
     }
 
     return {
       status: StatusEnum.Open,
-      label: `Open sales ends at: ${"a"}`,
+      label: `Open sales ends at: ${formatDate(finalSale)}`,
     };
   }, [launchpadProject]);
 
