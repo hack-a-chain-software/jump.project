@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { launchpadProject } from "@/interfaces";
 import { useWalletSelector } from "@/context/wallet-selector";
 import isBefore from "date-fns/isBefore";
+import { useLaunchpadStore } from "@/stores/launchpad-store";
 
 const CONNECT_WALLET_MESSAGE = "Connect Wallet";
 
@@ -15,14 +16,21 @@ export const ProjectInvestments = ({
   investorAllocation,
   investorAllowance,
   vestedAllocations,
-  launchpadProject: { final_sale_2_timestamp, project_token_info },
+  launchpadProject: {
+    final_sale_2_timestamp,
+    project_token_info,
+    listing_id,
+    price_token,
+    project_token,
+  },
 }: {
   vestedAllocations: any;
   investorAllowance: any;
   investorAllocation: any;
   launchpadProject: Partial<launchpadProject>;
 }) => {
-  const { accountId } = useWalletSelector();
+  const { accountId, selector } = useWalletSelector();
+  const { withdrawAllocations } = useLaunchpadStore();
 
   const decimals = useMemo(() => {
     return new Big(project_token_info?.decimals ?? "0");
@@ -66,6 +74,12 @@ export const ProjectInvestments = ({
 
     return isBefore(now, endAt);
   }, [final_sale_2_timestamp]);
+
+  const retrieveTokens = () => {
+    if (listing_id && price_token) {
+      withdrawAllocations(listing_id!, project_token!, accountId!, selector);
+    }
+  };
 
   return (
     <div>
@@ -177,8 +191,9 @@ export const ProjectInvestments = ({
 
         <div>
           <button
-            className="py-[16px] px-[32px] rounded-[10px] bg-white disabled:opacity-[0.5] disabled:cursor-not-allowed"
+            onClick={() => retrieveTokens()}
             disabled={enabledSale || vestedAllocations === "0" || !accountId}
+            className="py-[16px] px-[32px] rounded-[10px] bg-white disabled:opacity-[0.5] disabled:cursor-not-allowed"
           >
             <span className="font-[600] text-[14px] tracking-[-0.04em] text-[#431E5A]">
               Withdraw
