@@ -59,11 +59,11 @@ export function ProjectStats({
     return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
-    }).format(formattedBig);
+    }).format(Number(formattedBig));
   };
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens);
+    return new Big(total_amount_sale_project_tokens ?? 0);
   }, [total_amount_sale_project_tokens]);
 
   const totalRaise = useMemo(() => {
@@ -73,9 +73,9 @@ export function ProjectStats({
       token_allocation_size = 1,
     } = launchpadProject || {};
 
-    const totalAmount = new Big(total_amount_sale_project_tokens);
-    const allocationPrice = new Big(token_allocation_price);
-    const allocationSize = new Big(token_allocation_size);
+    const totalAmount = new Big(total_amount_sale_project_tokens ?? 0);
+    const allocationPrice = new Big(token_allocation_price ?? 0);
+    const allocationSize = new Big(token_allocation_size ?? 0);
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [launchpadProject]);

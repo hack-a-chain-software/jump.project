@@ -77,7 +77,7 @@ export const TokenLauncher = () => {
       obj?.supply_type == "fixed" ? "total_supply" : "init_supply";
 
     const decimals = new Big(10).pow(Number(obj.decimals));
-    const supply = new Big(obj.total_supply).times(decimals).toString();
+    const supply = new Big(obj?.total_supply || 0).times(decimals).toString();
 
     const params = {
       owner_id: accountId,
