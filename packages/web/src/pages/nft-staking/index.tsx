@@ -6,6 +6,7 @@ import {
   NFTStakingCard,
   PageContainer,
   Empty,
+  Select,
 } from "../../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
@@ -19,6 +20,7 @@ import {
   NftStakingProjectsConnectionQueryVariables,
 } from "@near/apollo";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { useNearQuery } from "react-near";
 
 const PAGINATE_LIMIT = 30;
 
@@ -40,8 +42,7 @@ export const NFTStaking = () => {
   //   null
   // );
   const [loadingItems, setLoadingItems] = useState(false);
-  const { accountId } = useWalletSelector();
-
+  const { accountId, selector } = useWalletSelector();
   const { jumpGradient, glassyWhiteOpaque, blackAndWhite } = useTheme();
 
   const cardOpacity = useColorModeValue(0.9, 0.7);
@@ -67,6 +68,19 @@ export const NFTStaking = () => {
     notifyOnNetworkStatusChange: true,
   });
 
+<<<<<<< HEAD
+=======
+  const { data } = useNearQuery("nft_tokens_for_owner", {
+    contract: "445ce3679b0536fd4920nearmeerkatking.testnet",
+    variables: {
+      account_id: accountId,
+    },
+    skip: !accountId,
+  });
+  console.log(data);
+  // console.log(nftProjects?.nft_staking_projects.data);
+
+>>>>>>> feat(web): adding query to verify staked nfts
   useEffect(() => {
     (async () => {
       await refetch({
@@ -138,9 +152,9 @@ export const NFTStaking = () => {
           </>
         }
       />
-      {/* <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
-        <Flex gap="4" flexGrow="1" flexWrap="wrap"> */}
-      {/* <Select
+      <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
+        <Flex gap="4" flexGrow="1" flexWrap="wrap">
+          {/* <Select
             value={filterStatus}
             placeholder="Status"
             onChange={(value: StatusEnum | null) => setStatus(value)}
@@ -161,8 +175,8 @@ export const NFTStaking = () => {
             ] as const}
 
           /> */}
-      {/* <Select
-          {/* <Select
+
+          <Select
             value={filterStaked}
             placeholder="Staked"
             onChange={(value: StakedEnum | null) =>
@@ -175,8 +189,8 @@ export const NFTStaking = () => {
               ] as const
             }
           />
-        </Flex> */}
-      {/* </Flex> */}
+        </Flex>
+      </Flex>
 
       {/* <Flex className="md:max-w-[330px]" w="100%">
           <Input

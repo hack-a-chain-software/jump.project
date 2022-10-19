@@ -7,7 +7,7 @@ import { tokenMetadata } from "@/interfaces";
 import { Dialog, Transition } from "@headlessui/react";
 import { twMerge } from "tailwind-merge";
 import { XIcon } from "@heroicons/react/solid";
-import { Coins } from "@/assets/svg";
+// import { Coins } from "@/assets/svg";
 
 const tiersBadge = [
   {
@@ -167,7 +167,7 @@ export default function ({
                   </div>
 
                   <div className="absolute top-[-60px] right-[-80px]">
-                    <Coins />
+                    {/* <Coins /> */}
                   </div>
                 </div>
 
