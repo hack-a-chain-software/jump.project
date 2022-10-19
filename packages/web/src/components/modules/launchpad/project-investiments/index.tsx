@@ -58,7 +58,7 @@ export const ProjectInvestments = ({
 
     const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
 
-    return new Intl.NumberFormat("en-IN", config).format(Number(formattedBig));
+    return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
 
   const enabledSale = useMemo(() => {

@@ -2,59 +2,33 @@ import Big from "big.js";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { getUTCDate } from "@near/ts";
-import { useWalletSelector } from "@/context/wallet-selector";
-import {
-  launchpadProject,
-  investorAllocation,
-  tokenMetadata,
-} from "@/interfaces";
-
-import { Steps } from "./steps";
-
-const CONNECT_WALLET_MESSAGE = "Connect wallet";
+import { launchpadProject } from "@/interfaces";
 
 export function ProjectStats({
-  isLoading,
-  launchpadProject,
-  investorAllowance,
-  investorAllocation,
-  metadataPriceToken,
-  metadataProjectToken,
-}: {
-  isLoading: boolean;
-  investorAllowance: string;
-  metadataPriceToken: tokenMetadata;
-  launchpadProject: launchpadProject;
-  metadataProjectToken: tokenMetadata;
-  investorAllocation: investorAllocation;
-}) {
-  const { accountId } = useWalletSelector();
-
-  const {
-    allocations_sold,
-    project_token_info,
-    token_allocation_size,
-    token_allocation_price,
-    open_sale_1_timestamp,
-    open_sale_2_timestamp,
-    final_sale_2_timestamp,
-    fraction_cliff_release,
-    liquidity_pool_timestamp,
-    fraction_instant_release,
-    total_amount_sale_project_tokens = 1,
-  } = useMemo(() => {
-    return launchpadProject || {};
-  }, [launchpadProject]);
-
+  cliff_timestamp,
+  price_token_info,
+  allocations_sold,
+  project_token_info,
+  end_cliff_timestamp,
+  open_sale_1_timestamp,
+  open_sale_2_timestamp,
+  fraction_cliff_release,
+  final_sale_2_timestamp,
+  liquidity_pool_timestamp,
+  fraction_instant_release,
+  token_allocation_size = "1",
+  token_allocation_price = "0",
+  total_amount_sale_project_tokens = "1",
+}: launchpadProject) {
   const formatDate = (start_timestamp?: string) => {
     const date = getUTCDate(Number(start_timestamp ?? "0"));
     return format(date, "mm/dd/yyyy");
   };
 
   const formatNumber = (value, decimals) => {
-    const decimalsBig = new Big(10).pow(decimals ?? 1);
+    const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
-    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+    const formattedBig = new Big(value || 0).div(decimalsBig).toFixed(2);
 
     return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
@@ -63,14 +37,14 @@ export function ProjectStats({
   };
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens ?? 0).div(
+    return new Big(total_amount_sale_project_tokens || 0).div(
       token_allocation_size || 1
     );
-  }, [total_amount_sale_project_tokens]);
+  }, [total_amount_sale_project_tokens, token_allocation_size]);
 
   const totalRaise = useMemo(() => {
-    const allocationPrice = new Big(token_allocation_price || "0");
-    const allocationSize = new Big(token_allocation_size || "0");
+    const allocationPrice = new Big(token_allocation_price || "1");
+    const allocationSize = new Big(token_allocation_size || "1");
 
     return totalAmount.mul(allocationPrice).div(allocationSize);
   }, [totalAmount, token_allocation_price, token_allocation_size]);
@@ -96,9 +70,9 @@ export function ProjectStats({
           <span
             className="text-[24px] font-[700] tracking-[-0.04em]"
             children={`$ ${formatNumber(
-              totalRaise,
-              metadataPriceToken?.decimals
-            )} ${metadataPriceToken?.symbol}`}
+              totalRaise.toFixed(2) || 1,
+              price_token_info?.decimals || 1
+            )} ${price_token_info?.symbol}`}
           />
         </div>
 
@@ -235,7 +209,7 @@ export function ProjectStats({
               <span
                 children={formatNumber(
                   total_amount_sale_project_tokens,
-                  metadataProjectToken?.decimals
+                  project_token_info?.decimals
                 )}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
@@ -252,7 +226,7 @@ export function ProjectStats({
               <span
                 children={formatNumber(
                   token_allocation_size,
-                  metadataProjectToken?.decimals
+                  project_token_info?.decimals
                 )}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
@@ -279,8 +253,8 @@ export function ProjectStats({
               <span
                 children={`${formatNumber(
                   token_allocation_price,
-                  metadataPriceToken?.decimals
-                )} ${metadataPriceToken?.symbol}`}
+                  price_token_info?.decimals
+                )} ${price_token_info?.symbol}`}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -294,10 +268,7 @@ export function ProjectStats({
 
             <div>
               <span
-                children={formatNumber(
-                  totalRaise,
-                  metadataPriceToken?.decimals
-                )}
+                children={formatNumber(totalRaise, price_token_info?.decimals)}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -312,8 +283,8 @@ export function ProjectStats({
             <div>
               <span
                 children={formatNumber(
-                  launchpadProject?.total_amount_sale_project_tokens,
-                  metadataProjectToken?.decimals
+                  total_amount_sale_project_tokens,
+                  project_token_info?.decimals
                 )}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
@@ -369,12 +340,8 @@ export function ProjectStats({
               <span
                 children={
                   100 -
-                  Number?.parseInt(
-                    launchpadProject?.fraction_instant_release || "0"
-                  ) -
-                  Number?.parseInt(
-                    launchpadProject?.fraction_cliff_release || "0"
-                  ) +
+                  Number?.parseInt(fraction_instant_release || "0") -
+                  Number?.parseInt(fraction_cliff_release || "0") +
                   "%"
                 }
                 className="text-[16px] font-[800] tracking-[-0.04em]"
@@ -390,7 +357,7 @@ export function ProjectStats({
 
             <div>
               <span
-                children={formatDate(launchpadProject?.cliff_timestamp ?? "")}
+                children={formatDate(cliff_timestamp ?? "")}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -404,9 +371,7 @@ export function ProjectStats({
 
             <div>
               <span
-                children={formatDate(
-                  launchpadProject?.end_cliff_timestamp ?? ""
-                )}
+                children={formatDate(end_cliff_timestamp ?? "")}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -415,7 +380,22 @@ export function ProjectStats({
       </div>,
       "",
     ];
-  }, [launchpadProject, metadataPriceToken, metadataProjectToken]);
+  }, [
+    cliff_timestamp,
+    price_token_info,
+    allocations_sold,
+    project_token_info,
+    end_cliff_timestamp,
+    token_allocation_size,
+    open_sale_1_timestamp,
+    open_sale_2_timestamp,
+    fraction_cliff_release,
+    token_allocation_price,
+    final_sale_2_timestamp,
+    liquidity_pool_timestamp,
+    fraction_instant_release,
+    total_amount_sale_project_tokens,
+  ]);
 
   function classNames(...classes) {
     return classes.filter(Boolean).join(" ");

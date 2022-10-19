@@ -175,9 +175,17 @@ export default function ({
                   {(tiers || []).map(
                     ({ amount, level, disabled, allocations }, i) => (
                       <div
-                        onClick={() => setSelected(level)}
-                        className="items-start flex-col text-left"
+                        onClick={() => {
+                          if (disabled) {
+                            return;
+                          }
+
+                          setSelected(level);
+                        }}
                         key={"tier-upgrade-modal-tier-" + i}
+                        className={twMerge("items-start flex-col text-left", [
+                          disabled && "opacity-[0.5] cursor-not-allowed",
+                        ])}
                       >
                         <div className="px-[10px] py-[4px] rounded-[50px] bg-[linear-gradient(90deg,#510B72_0%,#740B0B_100%)] w-max mb-[8px]">
                           <span

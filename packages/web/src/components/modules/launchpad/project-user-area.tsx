@@ -27,13 +27,11 @@ const closedArray = [
 ];
 
 export function ProjectUserArea({
-  isLoading,
   launchpadProject,
   priceTokenBalance,
   investorAllowance,
   metadataPriceToken,
 }: {
-  isLoading: boolean;
   metadataPriceToken: any;
   investorAllowance: string;
   priceTokenBalance: string;
@@ -118,7 +116,7 @@ export function ProjectUserArea({
 
     const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
 
-    return new Intl.NumberFormat("en-IN", config).format(Number(formattedBig));
+    return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
 
   const [showSteps, setShowSteps] = useState(false);

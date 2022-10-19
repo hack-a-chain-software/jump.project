@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "@/components/shared/back-button";
@@ -15,7 +15,6 @@ import {
   useViewVestedAllocations,
   useViewInvestorAllowance,
   useViewInvestorAllocation,
-  useViewTotalEstimatedInvestorAllowance,
 } from "@/hooks/modules/launchpad";
 import { twMerge } from "tailwind-merge";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
@@ -29,6 +28,7 @@ export const Project = () => {
   const { accountId } = useWalletSelector();
 
   const navigate = useNavigate();
+
   const {
     data: { launchpad_project: launchpadProject } = {},
     loading: loadingLaunchpadProject,
@@ -54,9 +54,6 @@ export const Project = () => {
 
   const { data: investorAllowance, loading: loadingAllowance } =
     useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
-
-  // const { data: totalAllowanceData = "0", loading: loadingTotalAllowance } =
-  //   useViewTotalEstimatedInvestorAllowance(accountId!);
 
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(launchpadProject?.price_token!, accountId!);
@@ -137,14 +134,7 @@ export const Project = () => {
               </div>
 
               {tab === "pool" && (
-                <ProjectStats
-                  isLoading={isLoading}
-                  launchpadProject={launchpadProject!}
-                  investorAllowance={investorAllowance!}
-                  investorAllocation={investorAllocation!}
-                  metadataPriceToken={metadataPriceToken!}
-                  metadataProjectToken={metadataProjectToken!}
-                />
+                <ProjectStats {...(launchpadProject as any)} />
               )}
 
               {tab === "investiments" && (
@@ -160,7 +150,6 @@ export const Project = () => {
           </div>
 
           <ProjectUserArea
-            isLoading={isLoading}
             priceTokenBalance={priceTokenBalance!}
             launchpadProject={launchpadProject!}
             metadataPriceToken={metadataPriceToken!}
