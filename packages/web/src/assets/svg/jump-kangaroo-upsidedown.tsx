@@ -21,9 +21,9 @@ export function JumpKangarooUpsidedown() {
           y2="351.694"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#7000FF" stop-opacity="0" />
-          <stop offset="0.296875" stop-color="#AE59F0" />
-          <stop offset="1" stop-color="#7646FF" />
+          <stop stopColor="#7000FF" stop-opacity="0" />
+          <stop offset="0.296875" stopColor="#AE59F0" />
+          <stop offset="1" stopColor="#7646FF" />
         </linearGradient>
       </defs>
     </svg>

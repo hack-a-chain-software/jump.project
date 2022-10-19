@@ -21,8 +21,8 @@ export const JumpGradient = () => {
           y2="37.12"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#AE00FF" />
-          <stop offset="1" stop-color="#FF1100" />
+          <stop stopColor="#AE00FF" />
+          <stop offset="1" stopColor="#FF1100" />
         </linearGradient>
       </defs>
     </svg>
