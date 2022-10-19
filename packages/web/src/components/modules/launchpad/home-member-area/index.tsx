@@ -148,7 +148,7 @@ export function MemberArea({
             <div>
               <span
                 className={twMerge(
-                  "font-[800] text-[16px] leading-[19px] tracking-[-0.03em] bg-clip-text",
+                  "font-[800] text-[16px] leading-[19px] tracking-[-0.03em]",
                   tiers[level].class
                 )}
                 children={tiers[level].name}

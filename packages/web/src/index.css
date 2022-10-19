@@ -103,7 +103,11 @@ body {
 }
 
 .no-tier {
-  background: '#E2E8F0';
+  background: linear-gradient(90deg, #510B72 0%, #740B0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 }
 
 .diamond {
