@@ -103,7 +103,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
                   Reference <span className="font-normal">(optional)</span>
                 </>
               }
-              placeholder="Ex: 18"
+              placeholder="Paste URL here"
               inputName="reference"
             />
             <FormInputAndLabel
@@ -112,7 +112,7 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
                   Hash reference <span className="font-normal">(optional)</span>
                 </>
               }
-              placeholder="Ex: 18"
+              placeholder="Ex: 0xe96909eAd7598C0B489A881749f87B1e412e2f47"
               inputName="reference_hash"
             />
           </form>

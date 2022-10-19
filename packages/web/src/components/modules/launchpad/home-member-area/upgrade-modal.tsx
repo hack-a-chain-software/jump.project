@@ -78,9 +78,12 @@ export default function ({
       launchpadSettings?.tiers_minimum_tokens.map((t, index) => {
         const amount = new Big(t);
 
+        const level = index + 1;
+
         return {
           amount,
-          level: index + 1,
+          level,
+          allocations: level * 10,
           disabled: amount.lte(stakedTokens),
         };
       }),
@@ -156,7 +159,7 @@ export default function ({
                   </div>
 
                   <div className="absolute top-[-60px] right-[-80px]">
-                    <Coins />
+                    {/* <Coins /> */}
                   </div>
                 </div>
 
@@ -169,29 +172,32 @@ export default function ({
                     grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-2 web:grid-cols-3
                   "
                 >
-                  {(tiers || [1, 2, 3, 4]).map(
-                    ({ amount, level, disabled }, i) => (
+                  {(tiers || []).map(
+                    ({ amount, level, disabled, allocations }, i) => (
                       <div
                         className="items-start flex-col text-left"
                         key={"tier-upgrade-modal-tier-" + i}
                       >
                         <div className="px-[10px] py-[4px] rounded-[50px] bg-[linear-gradient(90deg,#510B72_0%,#740B0B_100%)] w-max mb-[8px]">
-                          <span className="font-[700] text-[14px] text-white">
-                            1 xJUMP
-                          </span>
+                          <span
+                            className="font-[700] text-[14px] text-white"
+                            // children={amount.div(decimals).toFixed(2)}
+                          />
                         </div>
 
                         <div className="bg-white px-[25px] py-[20px] rounded-[12px] shadow-[0px_2px_10px_1px_rgba(152,73,156,0.25)]">
                           <div className="mb-[6px]">
-                            <span className="text-[#000000] font-[700] text-[14px]">
-                              Bronze
-                            </span>
+                            <span
+                              className="text-[#000000] font-[700] text-[14px]"
+                              children={tiersBadge[level].name}
+                            />
                           </div>
 
                           <div>
-                            <span className="text-[#431E5A] font-[800] text-[16px]">
-                              10 Allocations
-                            </span>
+                            <span
+                              className="text-[#431E5A] font-[800] text-[16px]"
+                              children={allocations + " Allocations"}
+                            />
                           </div>
                         </div>
                       </div>

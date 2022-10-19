@@ -65,7 +65,14 @@ export const PreviewProjects = ({
         </div>
       )}
 
-      <div className="flex justify-between flex-wrap">
+      <div
+        className="
+            grid
+            place-items-start
+            gap-x-[18px] gap-y-[48px]
+            grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-3 web:grid-cols-4
+          "
+      >
         {!isEmpty(projects) &&
           !loading &&
           projects?.map((project, i) => (
