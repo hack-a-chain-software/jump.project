@@ -8,7 +8,8 @@ import {
 import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { useTokenLauncher } from "@/stores/token-louncher-store";
+import { useTokenLauncher } from "@/stores/token-launcher-store";
+import Big from "big.js";
 
 export type TokenDataProps = {
   name: string;
@@ -35,6 +36,7 @@ export const TokenLauncher = () => {
     supply_type: "",
     total_supply: 0,
   });
+
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const { accountId, selector } = useWalletSelector();
@@ -73,9 +75,13 @@ export const TokenLauncher = () => {
   function createArgsForTokenContract(obj: TokenDataProps) {
     const supply_type =
       obj?.supply_type == "fixed" ? "total_supply" : "init_supply";
+
+    const decimals = new Big(10).pow(Number(obj.decimals));
+    const supply = new Big(obj.total_supply).times(decimals).toString();
+
     const params = {
       owner_id: accountId,
-      [supply_type]: obj.total_supply,
+      [supply_type]: supply,
       metadata: {
         spec: "ft-1.0.0",
         name: obj.name,
@@ -110,14 +116,19 @@ export const TokenLauncher = () => {
     //   }
     // );
 
-    const deployCost = "20756340000000000000000010";
+    const deployCost = "30000000000000000000000010";
+
+    const contract =
+      tokenData?.supply_type == "fixed" ? "token" : "mintable_token";
 
     createToken(
       deployCost,
       accountId!,
       tokenData?.name,
       contract_args,
-      selector
+      selector,
+      contract,
+      "1"
     );
 
     reset();

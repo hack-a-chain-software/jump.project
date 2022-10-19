@@ -164,6 +164,7 @@ export const NFTStaking = () => {
 
           /> */}
       {/* <Select
+          {/* <Select
             value={filterStaked}
             placeholder="Staked"
             onChange={(value: StakedEnum | null) =>
@@ -177,6 +178,7 @@ export const NFTStaking = () => {
             }
           />
         </Flex> */}
+      {/* </Flex> */}
 
       {/* <Flex className="md:max-w-[330px]" w="100%">
           <Input

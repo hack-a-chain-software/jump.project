@@ -35,27 +35,15 @@ export const navRoutes = [
   },
   {
     enabled: true,
-    title: "Create Token",
-    icon: <WalletIcon />,
+    title: "Jump Token Laboratory",
+    icon: <FarmIcon />,
     route: "/token-launcher",
     subroutePrefix: "token-launcher",
   },
-  // {
-  //   title: "Swap",
-  //   icon: <SwapIcon />,
-  //   route: "/swap",
-  //   subroutePrefix: "swap",
-  // },
   {
     title: "Pools",
     icon: <PoolsIcon />,
     route: "/pools",
     subroutePrefix: "pools",
-  },
-  {
-    title: "Jump Token Laboratory",
-    icon: <FarmIcon />,
-    route: "/farm",
-    subroutePrefix: "farm",
   },
 ];
