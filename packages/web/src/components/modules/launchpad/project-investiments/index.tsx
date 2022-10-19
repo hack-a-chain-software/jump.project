@@ -15,11 +15,9 @@ export const ProjectInvestments = ({
   investorAllocation,
   investorAllowance,
   vestedAllocations,
-  metadataProjectToken,
-  launchpadProject: { final_sale_2_timestamp },
+  launchpadProject: { final_sale_2_timestamp, project_token_info },
 }: {
   vestedAllocations: any;
-  metadataProjectToken: any;
   investorAllowance: any;
   investorAllocation: any;
   launchpadProject: Partial<launchpadProject>;
@@ -27,8 +25,8 @@ export const ProjectInvestments = ({
   const { accountId } = useWalletSelector();
 
   const decimals = useMemo(() => {
-    return new Big(metadataProjectToken?.decimals ?? "0");
-  }, [metadataProjectToken]);
+    return new Big(project_token_info?.decimals ?? "0");
+  }, [project_token_info]);
 
   const claimedAmount = useMemo(() => {
     return new Big(investorAllocation.totalTokensBought || "0");
@@ -45,7 +43,7 @@ export const ProjectInvestments = ({
         .div(decimals || 1)
         .toFixed(2) +
       " " +
-      metadataProjectToken?.symbol!
+      project_token_info?.symbol!
     );
   }, [claimedAmount, unlockedAmount]);
 
@@ -141,7 +139,7 @@ export const ProjectInvestments = ({
                 children={
                   accountId
                     ? formatNumber(unlockedAmount, decimals) +
-                      metadataProjectToken?.symbol!
+                      project_token_info?.symbol!
                     : CONNECT_WALLET_MESSAGE
                 }
               />
@@ -166,7 +164,7 @@ export const ProjectInvestments = ({
                 children={
                   accountId
                     ? formatNumber(claimedAmount, decimals) +
-                      metadataProjectToken?.symbol!
+                      project_token_info?.symbol!
                     : CONNECT_WALLET_MESSAGE
                 }
                 className="font-[800] text-[24px] tracking-[-0.03em]"

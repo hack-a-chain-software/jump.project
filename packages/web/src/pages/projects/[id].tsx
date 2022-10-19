@@ -19,10 +19,6 @@ import {
 import { twMerge } from "tailwind-merge";
 import { useTokenBalance, useTokenMetadata } from "@/hooks/modules/token";
 
-/**
- * @description - Launchpad project details page
- * @name Project
- */
 export const Project = () => {
   const { id } = useParams();
   const { accountId } = useWalletSelector();
@@ -43,12 +39,6 @@ export const Project = () => {
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(accountId!, id!);
 
-  const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
-    useTokenMetadata(launchpadProject?.price_token!);
-
-  const { data: metadataProjectToken, loading: loadingProjectToken } =
-    useTokenMetadata(launchpadProject?.project_token!);
-
   const { data: vestedAllocations, loading: loadingVestedAllocations } =
     useViewVestedAllocations(accountId!, launchpadProject?.listing_id!);
 
@@ -62,19 +52,15 @@ export const Project = () => {
     () =>
       loadingAllocation ||
       loadingAllowance ||
-      loadingProjectToken ||
       loadingLaunchpadProject ||
       loadingPriceTokenBalance ||
-      loadingVestedAllocations ||
-      laodingPriceTokenMetadata,
+      loadingVestedAllocations,
     [
       loadingAllowance,
       loadingAllocation,
-      loadingProjectToken,
       loadingLaunchpadProject,
       loadingPriceTokenBalance,
       loadingVestedAllocations,
-      laodingPriceTokenMetadata,
     ]
   );
 
@@ -98,11 +84,7 @@ export const Project = () => {
           "
         >
           <div className="xl:max-w-[748px] w-full">
-            <ProjectInfo
-              isLoading={isLoading}
-              launchpadProject={launchpadProject!}
-              metadataPriceToken={metadataPriceToken!}
-            />
+            <ProjectInfo {...(launchpadProject as any)} />
 
             <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative">
               <div className="flex-grow space-x-[24px] mb-[67px]">
@@ -143,7 +125,6 @@ export const Project = () => {
                   investorAllowance={investorAllowance!}
                   investorAllocation={investorAllocation!}
                   vestedAllocations={vestedAllocations!}
-                  metadataProjectToken={metadataProjectToken!}
                 />
               )}
             </div>
@@ -152,7 +133,6 @@ export const Project = () => {
           <ProjectUserArea
             priceTokenBalance={priceTokenBalance!}
             launchpadProject={launchpadProject!}
-            metadataPriceToken={metadataPriceToken!}
             investorAllowance={investorAllowance!}
           />
         </div>

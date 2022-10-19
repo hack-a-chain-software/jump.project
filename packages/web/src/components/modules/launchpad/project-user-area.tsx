@@ -9,7 +9,6 @@ import { twMerge } from "tailwind-merge";
 import { getUTCDate } from "@near/ts";
 import format from "date-fns/format";
 import { StatusEnum } from "@near/apollo";
-import { Steps } from "intro.js-react";
 
 import { NumberInput } from "@/components";
 
@@ -27,12 +26,19 @@ const closedArray = [
 ];
 
 export function ProjectUserArea({
-  launchpadProject,
+  launchpadProject: {
+    status: projectStatus,
+    listing_id,
+    price_token,
+    project_token,
+    price_token_info,
+    token_allocation_price,
+    open_sale_1_timestamp,
+    final_sale_2_timestamp,
+  },
   priceTokenBalance,
   investorAllowance,
-  metadataPriceToken,
 }: {
-  metadataPriceToken: any;
   investorAllowance: string;
   priceTokenBalance: string;
   launchpadProject: launchpadProject;
@@ -48,56 +54,36 @@ export function ProjectUserArea({
 
   const onJoinProject = useCallback(
     (amount: number) => {
-      if (
-        typeof launchpadProject?.listing_id &&
-        launchpadProject?.price_token
-      ) {
+      if (typeof listing_id && price_token) {
         buyTickets(
-          new Big(amount)
-            .mul(new Big(launchpadProject?.token_allocation_price || 0))
-            .toString(),
-          launchpadProject?.price_token,
-          launchpadProject?.listing_id,
+          new Big(amount).mul(new Big(token_allocation_price || 0)).toString(),
+          price_token,
+          listing_id,
           accountId!,
           selector
         );
       }
     },
-    [
-      1,
-      accountId,
-      launchpadProject?.project_token,
-      launchpadProject?.token_allocation_price,
-    ]
+    [1, accountId, project_token, token_allocation_price]
   );
-  const enabledSales = useMemo(() => {
-    const now = new Date();
-    const startSale = new Date(
-      Number(launchpadProject?.open_sale_1_timestamp!)
-    );
-
-    return isBefore(startSale, now);
-  }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
-    return new Big(launchpadProject?.token_allocation_price! ?? 0).mul(
+    return new Big(token_allocation_price! ?? 0).mul(
       new Big(tickets.toString())
     );
-  }, [tickets]);
+  }, [tickets, token_allocation_price]);
 
   const hasTicketsAmount = useMemo(() => {
     return new Big(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
 
   const decimals = useMemo(() => {
-    if (!launchpadProject?.price_token_info?.decimals) {
+    if (!price_token_info?.decimals) {
       return new Big(1);
     }
 
-    return new Big(10).pow(
-      Number(launchpadProject?.price_token_info?.decimals)
-    );
-  }, [launchpadProject?.price_token_info]);
+    return new Big(10).pow(Number(price_token_info?.decimals));
+  }, [price_token_info]);
 
   const balance = useMemo(() => {
     return new Big(priceTokenBalance ?? 0).div(decimals).toFixed(2);
@@ -108,8 +94,8 @@ export function ProjectUserArea({
   }, [ticketsAmount, decimals]);
 
   const ticketPrice = useMemo(() => {
-    return new Big(launchpadProject?.token_allocation_price || 0);
-  }, [launchpadProject]);
+    return new Big(token_allocation_price || 0);
+  }, [token_allocation_price]);
 
   const formatNumber = (value, decimals, config: any = formatConfig) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
@@ -119,56 +105,18 @@ export function ProjectUserArea({
     return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
 
-  const [showSteps, setShowSteps] = useState(false);
-
-  const stepItems = [
-    {
-      title: "User Area",
-      element: ".project-user-area",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            In this session you follow the data of your investment in the
-            project, having access to the number of allocations invested, total
-            rewards received, how many rewards were collected and how many are
-            available for collection.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Retrieve Tokens",
-      element: ".project-user-area-retrieve",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            The rewards will be available at the end of the sell phase or when
-            all allocations are sold.
-          </span>
-
-          <span>
-            Your rewards will be updated according to the project timeline.
-          </span>
-        </div>
-      ),
-    },
-  ];
-
   const formatDate = (date) => format(date, "MM/dd/yyyy HH:mm");
 
   const openSale = useMemo(() => {
-    return getUTCDate(Number(launchpadProject.open_sale_1_timestamp));
-  }, [launchpadProject]);
+    return getUTCDate(Number(open_sale_1_timestamp));
+  }, [open_sale_1_timestamp]);
 
   const finalSale = useMemo(() => {
-    return getUTCDate(Number(launchpadProject.final_sale_2_timestamp));
-  }, [launchpadProject]);
+    return getUTCDate(Number(final_sale_2_timestamp));
+  }, [final_sale_2_timestamp]);
 
   const status = useMemo(() => {
-    if (
-      launchpadProject.status !== "funded" &&
-      closedArray.includes(launchpadProject.status!)
-    ) {
+    if (projectStatus !== "funded" && closedArray.includes(projectStatus!)) {
       return {
         bg: "bg-[#CE2828]",
         status: StatusEnum.Closed,
@@ -178,7 +126,7 @@ export function ProjectUserArea({
 
     const now = getUTCDate();
 
-    if (launchpadProject.status === "funded" && isBefore(now, openSale)) {
+    if (projectStatus === "funded" && isBefore(now, openSale)) {
       return {
         bg: "bg-[#5E6DEC]",
         status: StatusEnum.Waiting,
@@ -187,7 +135,7 @@ export function ProjectUserArea({
       };
     }
 
-    if (launchpadProject.status === "funded" && isBefore(finalSale, now)) {
+    if (projectStatus === "funded" && isBefore(finalSale, now)) {
       return {
         bg: "bg-[#CE2828]",
         status: StatusEnum.Closed,
@@ -197,7 +145,7 @@ export function ProjectUserArea({
     }
 
     if (
-      launchpadProject.status === "funded" &&
+      projectStatus === "funded" &&
       isBefore(openSale, now) &&
       isBefore(now, finalSale)
     ) {
@@ -215,7 +163,7 @@ export function ProjectUserArea({
       label: "Open sales ends at:",
       value: formatDate(finalSale),
     };
-  }, [launchpadProject]);
+  }, [projectStatus, openSale, finalSale]);
 
   return (
     <div className="bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
@@ -271,16 +219,16 @@ export function ProjectUserArea({
           <div className="mb-[8px]">
             <span
               children={`${formatNumber(
-                launchpadProject?.token_allocation_price,
-                metadataPriceToken?.decimals
-              )} ${metadataPriceToken?.symbol}`}
+                token_allocation_price,
+                price_token_info?.decimals
+              )} ${price_token_info?.symbol}`}
               className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
             />
           </div>
 
           <div>
             <span
-              children={`Your ballance: ${balance} ${launchpadProject?.price_token_info?.symbol}`}
+              children={`Your ballance: ${balance} ${price_token_info?.symbol}`}
               className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
             />
           </div>
@@ -303,9 +251,9 @@ export function ProjectUserArea({
                 For:{" "}
                 {formatNumber(
                   ticketsAmount,
-                  new Big(launchpadProject?.price_token_info?.decimals! || "0")
+                  new Big(price_token_info?.decimals! || "0")
                 )}{" "}
-                {launchpadProject?.price_token_info?.symbol}
+                {price_token_info?.symbol}
               </>
             ) : (
               "Project"

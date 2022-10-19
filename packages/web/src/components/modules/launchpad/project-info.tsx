@@ -16,38 +16,14 @@ const closedArray = [
 ];
 
 export function ProjectInfo({
-  isLoading,
-  launchpadProject,
-  metadataPriceToken,
-}: {
-  isLoading: boolean;
-  launchpadProject: launchpadProject;
-  metadataPriceToken: tokenMetadata;
-}) {
-  const {
-    status,
-    project_token_info,
-    description_project,
-    open_sale_1_timestamp,
-    final_sale_2_timestamp,
-  } = useMemo(() => {
-    return launchpadProject || {};
-  }, [launchpadProject]);
-
-  const decimals = useMemo(() => {
-    return new Big(10).pow(metadataPriceToken?.decimals || 1);
-  }, [metadataPriceToken?.decimals]);
-
-  const finalPrice = useMemo(() => {
-    if (!metadataPriceToken?.decimals && launchpadProject) {
-      return "0";
-    }
-
-    return new Big(launchpadProject?.token_allocation_price ?? 0)
-      .div(decimals)
-      .toFixed(2);
-  }, [launchpadProject, decimals]);
-
+  status,
+  website,
+  whitepaper,
+  project_token_info,
+  description_project,
+  open_sale_1_timestamp,
+  final_sale_2_timestamp,
+}: launchpadProject) {
   const openSale = useMemo(() => {
     return getUTCDate(Number(open_sale_1_timestamp));
   }, [open_sale_1_timestamp]);
@@ -124,7 +100,7 @@ export function ProjectInfo({
         <div className="flex space-x-[16px]">
           <div>
             <button
-              disabled={!!!launchpadProject?.website}
+              disabled={!!!website}
               className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
             >
               <span className="font-[500] text-[14px] tracking-[-0.04em]">
@@ -137,7 +113,7 @@ export function ProjectInfo({
 
           <div>
             <button
-              disabled={!!!launchpadProject?.whitepaper}
+              disabled={!!!whitepaper}
               className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
             >
               <span className="font-[500] text-[14px] tracking-[-0.04em]">
