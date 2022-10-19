@@ -45,7 +45,7 @@ export const ProjectInvestments = ({
       " " +
       project_token_info?.symbol!
     );
-  }, [claimedAmount, unlockedAmount]);
+  }, [claimedAmount, unlockedAmount, decimals]);
 
   const allocationsAvailable = useMemo(() => {
     return new Big(investorAllowance ?? "0");
