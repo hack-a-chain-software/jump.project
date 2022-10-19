@@ -21,7 +21,7 @@ export function JumpKangaroo() {
           y2="93.9728"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#7000FF" stop-opacity="0" />
+          <stop stopColor="#7000FF" stopOpacity="0" />
           <stop offset="0.296875" stopColor="#AE59F0" />
           <stop offset="1" stopColor="#7646FF" />
         </linearGradient>
