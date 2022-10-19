@@ -22,6 +22,7 @@ export const ProjectInvestments = ({
     listing_id,
     price_token,
     project_token,
+    token_allocation_size,
   },
 }: {
   vestedAllocations: any;
@@ -32,22 +33,6 @@ export const ProjectInvestments = ({
   const { accountId, selector } = useWalletSelector();
   const { withdrawAllocations } = useLaunchpadStore();
 
-  const decimals = useMemo(() => {
-    return new Big(project_token_info?.decimals ?? "0");
-  }, [project_token_info]);
-
-  const claimedAmount = useMemo(() => {
-    return new Big(investorAllocation.totalTokensBought || "0");
-  }, [investorAllocation]);
-
-  const unlockedAmount = useMemo(() => {
-    return new Big(vestedAllocations || "0");
-  }, [vestedAllocations]);
-
-  const allocationsAvailable = useMemo(() => {
-    return new Big(investorAllowance ?? "0");
-  }, [investorAllowance]);
-
   const formatNumber = (value, decimals, config: any = formatConfig) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
@@ -56,16 +41,39 @@ export const ProjectInvestments = ({
     return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
 
+  const decimals = useMemo(() => {
+    return new Big(Number(project_token_info?.decimals) ?? 0);
+  }, [project_token_info]);
+
+  const claimedAmount = useMemo(() => {
+    return new Big(investorAllocation.totalTokensBought || 0);
+  }, [investorAllocation]);
+
+  const availableToClaim = useMemo(() => {
+    return new Big(vestedAllocations || 0);
+  }, [vestedAllocations]);
+
+  const allocationSize = useMemo(() => {
+    return new Big(token_allocation_size || 0);
+  }, [token_allocation_size]);
+
+  const allocationsBought = useMemo(() => {
+    return new Big(investorAllocation?.allocationsBought || 0);
+  }, [investorAllocation]);
+
   const totalAmount = useMemo(() => {
+    const total = allocationsBought.mul(allocationSize);
+
     return (
-      formatNumber(
-        claimedAmount.add(unlockedAmount || 1).toString(),
-        decimals
-      ) +
+      formatNumber(total.toString(), decimals) +
       " " +
       project_token_info?.symbol!
     );
-  }, [claimedAmount, unlockedAmount, decimals]);
+  }, [claimedAmount, availableToClaim, decimals]);
+
+  const allocationsAvailable = useMemo(() => {
+    return new Big(investorAllowance || 0);
+  }, [investorAllowance]);
 
   const enabledSale = useMemo(() => {
     const now = new Date();
@@ -152,7 +160,7 @@ export const ProjectInvestments = ({
                 className="font-[800] text-[24px] tracking-[-0.03em]"
                 children={
                   accountId
-                    ? formatNumber(unlockedAmount, decimals) +
+                    ? formatNumber(availableToClaim, decimals) +
                       " " +
                       project_token_info?.symbol!
                     : CONNECT_WALLET_MESSAGE
