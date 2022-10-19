@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "@/components/shared/back-button";
+import { viewFunction } from "@/tools";
 import { useWalletSelector } from "@/context/wallet-selector";
 import {
   ProjectInfo,
@@ -20,7 +21,9 @@ import { useTokenBalance } from "@/hooks/modules/token";
 
 export const Project = () => {
   const { id } = useParams();
-  const { accountId } = useWalletSelector();
+  const { accountId, selector } = useWalletSelector();
+  const [project, setProject] = useState<any>();
+  const [loadingproject, setLoadingProject] = useState(true);
 
   const navigate = useNavigate();
 
@@ -47,23 +50,61 @@ export const Project = () => {
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(launchpadProject?.price_token!, accountId!);
 
+  useEffect(() => {
+    if (!launchpadProject?.listing_id) {
+      return;
+    }
+
+    (async () => {
+      const project = await viewFunction(
+        selector,
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_listing",
+        {
+          listing_id: launchpadProject?.listing_id,
+        }
+      );
+
+      setProject(project);
+      setLoadingProject(false);
+    })();
+  }, [launchpadProject]);
+
   const isLoading = useMemo(
     () =>
       loadingAllocation ||
       loadingAllowance ||
       loadingLaunchpadProject ||
       loadingPriceTokenBalance ||
-      loadingVestedAllocations,
+      loadingVestedAllocations ||
+      loadingproject,
     [
       loadingAllowance,
       loadingAllocation,
       loadingLaunchpadProject,
       loadingPriceTokenBalance,
       loadingVestedAllocations,
+      loadingproject,
     ]
   );
 
   const [tab, setTab] = useState("pool");
+
+  // provisory...
+  const mergedProjects = useMemo(() => {
+    if (!project) {
+      return launchpadProject;
+    }
+
+    console.log(project);
+
+    return {
+      ...launchpadProject,
+      allocations_sold: project.allocations_sold,
+      total_amount_sale_project_tokens:
+        project.total_amount_sale_project_tokens,
+    };
+  }, [launchpadProject, project]);
 
   return (
     <PageContainer>
@@ -83,7 +124,7 @@ export const Project = () => {
           "
         >
           <div className="xl:max-w-[748px] w-full">
-            <ProjectInfo {...(launchpadProject as any)} />
+            <ProjectInfo {...(mergedProjects as any)} />
 
             <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative">
               <div className="flex-grow space-x-[24px] mb-[67px]">
@@ -114,13 +155,11 @@ export const Project = () => {
                 </button>
               </div>
 
-              {tab === "pool" && (
-                <ProjectStats {...(launchpadProject as any)} />
-              )}
+              {tab === "pool" && <ProjectStats {...(mergedProjects as any)} />}
 
               {tab === "investiments" && (
                 <ProjectInvestments
-                  launchpadProject={launchpadProject!}
+                  launchpadProject={mergedProjects!}
                   investorAllowance={investorAllowance!}
                   investorAllocation={investorAllocation!}
                   vestedAllocations={vestedAllocations!}

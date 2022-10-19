@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { format } from "date-fns";
 import { getUTCDate } from "@near/ts";
 import { launchpadProject } from "@/interfaces";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 export function ProjectStats({
   cliff_timestamp,
@@ -55,7 +56,7 @@ export function ProjectStats({
   }, [allocationsSold, allocationPrice]);
 
   const progress = useMemo(() => {
-    return allocationsSold.mul(100).div(totalAmount).toString();
+    return allocationsSold.mul(100).div(totalAmount).toFixed(2);
   }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
 
   const steps = useMemo(() => {
