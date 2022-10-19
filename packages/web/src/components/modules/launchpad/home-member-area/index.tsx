@@ -110,6 +110,10 @@ export function MemberArea({
   }, [metadata?.decimals]);
 
   const formattedBalance = useMemo(() => {
+    if (!metadata) {
+      return "-";
+    }
+
     return stakedTokens.div(decimals).toFixed(2);
   }, [stakedTokens, decimals]);
 
