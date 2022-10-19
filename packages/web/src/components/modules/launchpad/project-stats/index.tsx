@@ -16,9 +16,9 @@ export function ProjectStats({
   final_sale_2_timestamp,
   liquidity_pool_timestamp,
   fraction_instant_release,
-  token_allocation_size = "1",
-  token_allocation_price = "0",
-  total_amount_sale_project_tokens = "1",
+  token_allocation_size,
+  token_allocation_price,
+  total_amount_sale_project_tokens,
 }: launchpadProject) {
   const formatDate = (start_timestamp?: string) => {
     const date = getUTCDate(Number(start_timestamp ?? "0"));
@@ -42,16 +42,17 @@ export function ProjectStats({
     );
   }, [total_amount_sale_project_tokens, token_allocation_size]);
 
-  const totalRaise = useMemo(() => {
-    const allocationPrice = new Big(token_allocation_price || "1");
-    const allocationSize = new Big(token_allocation_size || "1");
-
-    return totalAmount.mul(allocationPrice).div(allocationSize);
-  }, [totalAmount, token_allocation_price, token_allocation_size]);
-
   const allocationsSold = useMemo(() => {
-    return new Big(allocations_sold ?? 0);
+    return new Big(allocations_sold || 0);
   }, [allocations_sold]);
+
+  const allocationPrice = useMemo(() => {
+    return new Big(token_allocation_price || 0);
+  }, [token_allocation_price]);
+
+  const totalRaise = useMemo(() => {
+    return allocationsSold.mul(allocationPrice);
+  }, [allocationsSold, allocationPrice]);
 
   const progress = useMemo(() => {
     return allocationsSold.mul(100).div(totalAmount).toString();
@@ -70,7 +71,7 @@ export function ProjectStats({
           <span
             className="text-[24px] font-[700] tracking-[-0.04em]"
             children={`$ ${formatNumber(
-              totalRaise.toFixed(2) || 1,
+              totalRaise.toFixed(2) || 0,
               price_token_info?.decimals || 1
             )} ${price_token_info?.symbol}`}
           />
