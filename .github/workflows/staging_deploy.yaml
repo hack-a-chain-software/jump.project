@@ -68,9 +68,9 @@ jobs:
           AWS_SECRET: ${{ secrets.AWS_LAKE_SECRET_KEY }}
         run: yarn setup:lake:consumer
 
-      # Clear staging DB
-      - name: Reset Database
-        run: yarn setup:staging:db
+      # # Clear staging DB
+      # - name: Reset Database
+      #   run: yarn setup:staging:db
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
@@ -83,28 +83,28 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
 
-        # # Set AWS deployments - Graphql
-      # - name: Build, tag, and push GRAPHQL image to Amazon ECR
-      #   id: build-image-graphql
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     ECR_REPOSITORY: jump-graphql
-      #     ECR_IMAGE: graphql
-      #   run: |
-      #     docker build . -f services/graphql/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
-      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
+        # Set AWS deployments - Graphql
+      - name: Build, tag, and push GRAPHQL image to Amazon ECR
+        id: build-image-graphql
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: jump-graphql
+          ECR_IMAGE: graphql
+        run: |
+          docker build . -f services/graphql/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$ECR_IMAGE"
 
-      # - name: Deploy GRAPHQL to EB
-      #   uses: einaregilsson/beanstalk-deploy@v14
-      #   with:
-      #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     application_name: staging-backend-graphql
-      #     environment_name: Stagingbackendgraphql-env
-      #     version_label: "staging-backend-graphql-${{ steps.format-time.outputs.replaced }}"
-      #     region: us-east-1
-      #     deployment_package: services/graphql/Dockerrun.aws.json
+      - name: Deploy GRAPHQL to EB
+        uses: einaregilsson/beanstalk-deploy@v14
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: staging-backend-graphql
+          environment_name: Stagingbackendgraphql-env
+          version_label: "staging-backend-graphql-${{ steps.format-time.outputs.replaced }}"
+          region: us-east-1
+          deployment_package: services/graphql/Dockerrun.aws.json
 
       # # AWS deployment INDEXER
       # # - name: Build indexer
@@ -153,20 +153,20 @@ jobs:
       # #     cluster: ${{ env.ECS_CLUSTER }}
       # #     wait-for-service-stability: true
 
-      # Deploy Vercel app
-      - name: Pull vercel setup
-        run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # # Deploy Vercel app
+      # - name: Pull vercel setup
+      #   run: vercel pull --yes --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # - name: Build Project Artifacts
+      #   run: vercel build --prod --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      - name: Deploy Project Artifacts to Vercel
-        run: >
-          vercel
-          deploy
-          --prebuilt
-          --prod
-          --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
+      # - name: Deploy Project Artifacts to Vercel
+      #   run: >
+      #     vercel
+      #     deploy
+      #     --prebuilt
+      #     --prod
+      #     --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
       # # Populate DB with metadata
       # - name: Populate DB with basic metadata
