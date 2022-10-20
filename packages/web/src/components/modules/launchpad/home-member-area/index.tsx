@@ -169,7 +169,7 @@ export function MemberArea({
 
             <div>
               <span
-                children={totalAllowance > 0 ? totalAllowance : "-"}
+                children={parseInt(totalAllowance) > 0 ? totalAllowance : "-"}
                 className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white"
               />
             </div>
