@@ -31,7 +31,7 @@ export const PreviewProjects = ({
   });
 
   return (
-    <div className="mb-[48px]">
+    <div className="mb-[48px] w-full">
       <div className="flex justify-between items-center mb-[56px]">
         <div>
           <span
@@ -65,14 +65,7 @@ export const PreviewProjects = ({
         </div>
       )}
 
-      <div
-        className="
-            grid
-            place-items-start
-            gap-x-[18px] gap-y-[48px]
-            grid-cols-1 mobile:grid-cols-2 tablet:grid-cols-3 web:grid-cols-4
-          "
-      >
+      <div className="flex space-x-[18px] justify-between w-[1500px] max-w-full overflow-auto">
         {!isEmpty(projects) &&
           !loading &&
           projects?.map((project, i) => (

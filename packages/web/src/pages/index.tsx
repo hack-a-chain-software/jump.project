@@ -79,7 +79,7 @@ export function Index() {
         />
       </Flex>
 
-      <div>
+      <div className="w-full">
         <PreviewProjects title="Sales in progress" status={StatusEnum.Open} />
         <PreviewProjects title="Upcoming sales" status={StatusEnum.Waiting} />
         <PreviewProjects title="Closed sales" status={StatusEnum.Closed} />
