@@ -11,6 +11,8 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { useTokenLauncher } from "@/stores/token-launcher-store";
 import Big from "big.js";
 
+import { viewFunction } from "@/tools";
+
 export type TokenDataProps = {
   name: string;
   symbol: string;
@@ -107,16 +109,18 @@ export const TokenLauncher = () => {
     });
 
     const contract_args = createArgsForTokenContract({ ...tokenData, ...data });
-    // const storageCost = await viewFunction(
-    //   selector,
-    //   "launcher.testnet",
-    //   "view_storage_cost_near",
-    //   {
-    //     contract_name: "token",
-    //   }
-    // );
+    const deployCost1 = await viewFunction(
+      selector,
+      "launcher.testnet",
+      "view_storage_cost_near",
+      {
+        contract_name: "token",
+      }
+    );
 
-    const deployCost = "30000000000000000000000010";
+    console.log(deployCost1);
+
+    const deployCost = "35000000000000000000000010";
 
     const contract =
       tokenData?.supply_type == "fixed" ? "token" : "mintable_token";
