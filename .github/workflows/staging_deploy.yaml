@@ -168,6 +168,6 @@ jobs:
           --prod
           --token=${{ secrets.VERCEL_TESTNET_TOKEN }}
 
-      # Populate DB with metadata
-      - name: Populate DB with basic metadata
-        run: yarn setup:staging:db:populate
+      # # Populate DB with metadata
+      # - name: Populate DB with basic metadata
+      #   run: yarn setup:staging:db:populate
