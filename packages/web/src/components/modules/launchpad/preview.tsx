@@ -26,7 +26,7 @@ export const PreviewProjects = ({
       offset: 0,
       accountId: accountId ?? "",
     },
-    skip: !accountId || !status,
+    skip: !status,
     fetchPolicy: "no-cache",
   });
 
