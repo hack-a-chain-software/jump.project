@@ -81,7 +81,7 @@ export function MemberArea({
       tokenAmount.lte(stakedTokens)
     );
 
-    return metLevels?.length ?? 0;
+    return metLevels?.length;
   }, [minimumTokens, stakedTokens]);
 
   const downgradeLevel = () => {
@@ -153,9 +153,9 @@ export function MemberArea({
               <span
                 className={twMerge(
                   "font-[800] text-[16px] leading-[19px] tracking-[-0.03em]",
-                  tiers[level].class
+                  [level ? tiers[level].class : "text-white"]
                 )}
-                children={tiers[level].name}
+                children={level ? tiers[level].name : "-"}
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ export function MemberArea({
 
             <div>
               <span
-                children={totalAllowance}
+                children={totalAllowance > 0 ? totalAllowance : "-"}
                 className="text-[24px] font-[800] leading-[29px] tracking-[-0.03em] text-white"
               />
             </div>
