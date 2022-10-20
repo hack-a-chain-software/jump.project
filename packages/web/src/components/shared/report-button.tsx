@@ -13,7 +13,7 @@ export function ReportButton() {
       <Flex
         bg={cardBg}
         onClick={() => {
-          window.open("https://forms.gle/sSFQeJX7WgYcHzrEA", "_blank");
+          window.open("https://forms.gle/HKeEJdYBDs22zeyj7", "_blank");
         }}
         borderRadius="24px"
       >
@@ -38,7 +38,7 @@ export function ReportButton() {
       <Flex
         bg={cardBg}
         onClick={() => {
-          window.open("https://forms.gle/iRDLrncnSvQ7ZB4ZA", "_blank");
+          window.open("https://forms.gle/UVsMPce2GeWYELtx7", "_blank");
         }}
         borderRadius="24px"
       >
