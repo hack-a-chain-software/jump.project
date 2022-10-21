@@ -1,13 +1,10 @@
 import Big from "big.js";
-import { useState } from "react";
 import { Flex } from "@chakra-ui/react";
 import { StatusEnum } from "@near/apollo";
 import { TopCard, PreviewProjects } from "@/components";
-import { Steps } from "intro.js-react";
+import { Tutorial } from "@/components";
 
 export function Index() {
-  const [showSteps, setShowSteps] = useState(false);
-
   const stepItems = [
     {
       element: ".launchpad",
@@ -22,27 +19,12 @@ export function Index() {
       ),
     },
     {
-      title: "Member Area",
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <span className="mb-2">This is member area.</span>
-
-          <span>
-            In this section you can stake your xJump tokens, watch your level,
-            check the amount of staked tokens and the total of your allocations.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Projects",
-      element: ".table-projects",
+      title: "Previews",
+      element: ".previews",
       intro: (
         <div className="flex flex-col">
           <span>
-            Here are all the projects that have vesting programs that you can
-            invest with your allocations
+            Here you can find some of the latest projects in different stages
           </span>
         </div>
       ),
@@ -57,29 +39,18 @@ export function Index() {
 
   return (
     <div className="relative flex-col p-[30px] w-full overflow-hidden pt-[150px]">
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
+      <Flex gap={5} className="flex-col lg:flex-row mb-[72px] relative">
+        <Tutorial items={stepItems} />
 
-      <Flex gap={5} className="flex-col lg:flex-row mb-[72px]">
         <TopCard
           gradientText="Launchpad "
           bigText="Welcome to Jump Pad"
           bottomDescription="Jump Pad is a NEAR native token launchpad that empowers crypto currency projects with the ability to distribute tokens and raise capital from the community or private investors for raise liquidity. "
           jumpLogo
-          onClick={() => setShowSteps(true)}
         />
       </Flex>
 
-      <div className="w-full">
+      <div className="w-full previews">
         <PreviewProjects title="Sales in progress" status={StatusEnum.Open} />
         <PreviewProjects title="Upcoming sales" status={StatusEnum.Waiting} />
         <PreviewProjects title="Closed sales" status={StatusEnum.Closed} />

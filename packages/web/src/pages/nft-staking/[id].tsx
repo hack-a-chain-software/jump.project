@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Flex, Grid, Text, Button } from "@chakra-ui/react";
 import isEqual from "lodash/isEqual";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { WalletIcon } from "../../assets/svg";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,6 +24,7 @@ import { useQuery } from "@apollo/client";
 import { StakingProjectDocument } from "@near/apollo";
 import { Token } from "@near/ts";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { Tutorial } from "@/components";
 
 export function NFTStakingProject() {
   const navigate = useNavigate();
@@ -78,6 +79,56 @@ export function NFTStakingProject() {
     },
   });
 
+  const stepItems = useMemo(() => {
+    return [
+      {
+        element: ".nft-staking-card",
+        title: "NFT Staking",
+        intro: (
+          <div>
+            <span>
+              Here is the NFT Staking Project Page, the card displays all the
+              rewards you can get per month if you stake your nfts.
+            </span>
+          </div>
+        ),
+      },
+      {
+        title: "Your Position",
+        element: ".nft-position",
+        intro: (
+          <div className="flex flex-col">
+            <span>
+              In this session you have access to all the rewards available to be
+              redeemed.
+            </span>
+          </div>
+        ),
+      },
+      {
+        title: "User Area",
+        element: ".nft-user",
+        intro: (
+          <div className="flex flex-col">
+            <span>
+              This is the user area, here you will be able to stake/unstake your
+              NFT'S and redeem all available rewards.
+            </span>
+          </div>
+        ),
+      },
+      !isEmpty(tokens) && {
+        title: "Staked NFT's",
+        element: ".nft-staked",
+        intro: (
+          <div className="flex flex-col">
+            <span>Here you can find all your staked NFT's.</span>
+          </div>
+        ),
+      },
+    ].filter((item) => item);
+  }, [tokens]);
+
   return (
     <PageContainer>
       <NFTUnstakeModal
@@ -89,11 +140,15 @@ export function NFTStakingProject() {
 
       <BackButton onClick={() => navigate("/nft-staking")} />
 
-      <NFTStakingCard
-        logo={staking?.collection_image}
-        name={staking?.collection_meta.name}
-        rewards={staking?.rewards}
-      />
+      <div className="relative">
+        <Tutorial items={stepItems as any} />
+
+        <NFTStakingCard
+          logo={staking?.collection_image}
+          name={staking?.collection_meta.name}
+          rewards={staking?.rewards}
+        />
+      </div>
 
       <Flex
         flex={1}
@@ -108,96 +163,99 @@ export function NFTStakingProject() {
       </Flex>
 
       <If condition={!isEmpty(tokens) && !loading}>
-        <Flex
-          paddingTop="66px"
-          alignItems="center"
-          justifyContent="space-between"
-          flexWrap="wrap"
-          gap={5}
-        >
-          <Flex>
-            <Text fontSize="24px" fontWeight="700">
-              Your Staked NFTS:
-            </Text>
-          </Flex>
-
-          <Flex>
-            <Button
-              bg="white"
-              borderRadius="15px"
-              height="60px"
-              w="307px"
-              color="black"
-              display="flex"
-              alignItems="center"
-              onClick={() => toggleUnstakeModal()}
-            >
-              <Text marginRight="16px">Unstake Selected NFTs!</Text>
-
-              <WalletIcon />
-            </Button>
-          </Flex>
-        </Flex>
-
-        <AnimatePresence initial={false}>
-          {focused && (
-            <motion.section
-              initial="collapsed"
-              animate="open"
-              exit="collapsed"
-              variants={{
-                open: { opacity: 1, height: "auto" },
-                collapsed: { opacity: 0, height: 0, overflow: "hidden" },
-              }}
-              transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            >
-              <TokenAccordion
-                {...focused}
-                rewards={staking?.rewards}
-                token={staking.token_address}
-                penalty={staking?.early_withdraw_penalty}
-                minStakedPeriod={staking?.min_staking_period}
-              />
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        <Flex paddingBottom="300px">
-          <Grid
-            columnGap="8px"
-            rowGap="37px"
-            width="100%"
+        <div className="relative nft-staked">
+          <Flex
+            paddingTop="66px"
+            alignItems="center"
             justifyContent="space-between"
-            gridTemplateColumns="repeat(auto-fill, 309px)"
+            flexWrap="wrap"
+            gap={5}
           >
-            {tokens &&
-              tokens.map((token, index) => (
-                <Flex
-                  key={"nft-staked-tokens-" + index}
-                  onClick={() =>
-                    setFocused(
-                      isEqual(token, focused) ? null : (token as Token)
-                    )
-                  }
-                  borderRadius="20px"
-                  border={
-                    isEqual(token, focused)
-                      ? "solid 1px #761BA0"
-                      : "solid 1px transparent"
-                  }
-                >
-                  <TokenCard
-                    {...(token as Token)}
-                    select={() => updateSelectedTokens(token as Token)}
-                    key={"nft-staking-collection-token" + index}
-                    selected={
-                      selected.findIndex((item) => isEqual(token, item)) !== -1
+            <Flex>
+              <Text fontSize="24px" fontWeight="700">
+                Your Staked NFTS:
+              </Text>
+            </Flex>
+
+            <Flex>
+              <Button
+                bg="white"
+                borderRadius="15px"
+                height="60px"
+                w="307px"
+                color="black"
+                display="flex"
+                alignItems="center"
+                onClick={() => toggleUnstakeModal()}
+              >
+                <Text marginRight="16px">Unstake Selected NFTs!</Text>
+
+                <WalletIcon />
+              </Button>
+            </Flex>
+          </Flex>
+
+          <AnimatePresence initial={false}>
+            {focused && (
+              <motion.section
+                initial="collapsed"
+                animate="open"
+                exit="collapsed"
+                variants={{
+                  open: { opacity: 1, height: "auto" },
+                  collapsed: { opacity: 0, height: 0, overflow: "hidden" },
+                }}
+                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+              >
+                <TokenAccordion
+                  {...focused}
+                  rewards={staking?.rewards}
+                  token={staking.token_address}
+                  penalty={staking?.early_withdraw_penalty}
+                  minStakedPeriod={staking?.min_staking_period}
+                />
+              </motion.section>
+            )}
+          </AnimatePresence>
+
+          <Flex paddingBottom="300px">
+            <Grid
+              columnGap="8px"
+              rowGap="37px"
+              width="100%"
+              justifyContent="space-between"
+              gridTemplateColumns="repeat(auto-fill, 309px)"
+            >
+              {tokens &&
+                tokens.map((token, index) => (
+                  <Flex
+                    key={"nft-staked-tokens-" + index}
+                    onClick={() =>
+                      setFocused(
+                        isEqual(token, focused) ? null : (token as Token)
+                      )
                     }
-                  />
-                </Flex>
-              ))}
-          </Grid>
-        </Flex>
+                    borderRadius="20px"
+                    border={
+                      isEqual(token, focused)
+                        ? "solid 1px #761BA0"
+                        : "solid 1px transparent"
+                    }
+                  >
+                    <TokenCard
+                      {...(token as Token)}
+                      select={() => updateSelectedTokens(token as Token)}
+                      key={"nft-staking-collection-token" + index}
+                      selected={
+                        selected.findIndex((item) => isEqual(token, item)) !==
+                        -1
+                      }
+                    />
+                  </Flex>
+                ))}
+            </Grid>
+          </Flex>
+        </div>
       </If>
     </PageContainer>
   );

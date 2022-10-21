@@ -17,7 +17,6 @@ import { getUTCDate } from "@near/ts";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import Big from "big.js";
-import { Steps } from "intro.js-react";
 
 export const Vesting = () => {
   const { glassyWhiteOpaque, darkPurple } = useTheme();
@@ -30,6 +29,7 @@ export const Vesting = () => {
     getInvestorInfo,
     getVestings,
     withdraw,
+    cleanupData,
     investorInfo,
     vestings,
     loading,
@@ -38,6 +38,8 @@ export const Vesting = () => {
   useEffect(() => {
     (async () => {
       if (!accountId) {
+        cleanupData();
+
         return;
       }
 
@@ -96,138 +98,149 @@ export const Vesting = () => {
   const totalWithdrawn = useMemo(() => {
     return new Big(investorInfo?.totalWithdrawn || 1).div(decimals).toFixed(2);
   }, [investorInfo, decimals]);
-  const [showSteps, setShowSteps] = useState(false);
 
-  const stepItems = [
-    {
-      title: "Locked Tokens",
-      element: ".amount-locked",
-      intro: (
-        <div>
-          <span>This section shows your amount of locked tokens.</span>
-        </div>
-      ),
-    },
-    {
-      title: "Unlocked Tokens",
-      element: ".amount-unlocked",
-      intro: (
-        <div className="flex flex-col">
-          <span>Here you can see your amount of unlocked tokens.</span>
-        </div>
-      ),
-    },
-    {
-      title: "Amount",
-      element: ".amount-withdrawn",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            This is the total amount of tokens you have withdrawn so far.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Vesting Card",
-      element: ".vesting-card",
-      intro: (
-        <div className="flex flex-col">
-          <span className="mb-2">
-            This section shows all the currently active programs you invested
-            in.
-          </span>
+  const stepItems = useMemo(() => {
+    const items = [
+      {
+        title: "Jump Vesting",
+        element: ".top-card",
+        intro: (
+          <div>
+            <span>
+              This is the Jump Vesting page, here you can follow and redeem all
+              the rewards received by Jump.
+            </span>
+          </div>
+        ),
+      },
+      {
+        title: "Total Locked",
+        element: ".amount-locked",
+        intro: (
+          <div>
+            <span>This is your amount of locked tokens.</span>
+          </div>
+        ),
+      },
+      {
+        title: "Total Unlocked",
+        element: ".amount-unlocked",
+        intro: (
+          <div className="flex flex-col">
+            <span>Here you can find your amount of unlocked tokens.</span>
+          </div>
+        ),
+      },
+      {
+        title: "Total Withdrawn",
+        element: ".amount-withdrawn",
+        intro: (
+          <div className="flex flex-col">
+            <span>
+              This is the total amount of tokens you have withdrawn so far.
+            </span>
+          </div>
+        ),
+      },
+    ];
 
-          <span>
-            You can claim the available amount of tokens, buy a fast pass or
-            wait until the end of the vesting period.
-          </span>
-        </div>
-      ),
-    },
-  ];
+    if (accountId! && !isEmpty(vestings)) {
+      items.push({
+        title: "Vesting Card",
+        element: ".vesting-card",
+        intro: (
+          <div className="flex flex-col">
+            <span className="mb-2">
+              This section shows all the currently active programs you invested
+              in.
+            </span>
+
+            <span>
+              You can claim the available amount of tokens, buy a fast pass or
+              wait until the end of the vesting period.
+            </span>
+          </div>
+        ),
+      });
+    }
+
+    return items;
+  }, [accountId, vestings]);
 
   return (
     <PageContainer>
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
       <TopCard
         gradientText="Jump Vesting"
         bigText="Lock. Unlock. Withdraw."
         bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
         py
-        onClick={() => setShowSteps(true)}
+        stepItems={stepItems}
         content={
-          <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
-            <Skeleton
-              height="114px"
-              borderRadius={20}
-              className="md:min-w-[240px]"
-              endColor="rgba(255,255,255,0.3)"
-              isLoaded={!isLoading}
-            >
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                className="amount-locked"
-                title="Total Locked"
-                value={
-                  accountId
-                    ? `${totalLocked} ${investorInfo?.token?.symbol}`
-                    : "Connect Wallet"
-                }
-                bottomText="All amount locked"
-              />
-            </Skeleton>
+          accountId ? (
+            <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
+              <Skeleton
+                height="114px"
+                borderRadius={20}
+                className="md:min-w-[240px]"
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  className="amount-locked"
+                  title="Total Locked"
+                  value={
+                    accountId
+                      ? `${totalLocked} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="All amount locked"
+                />
+              </Skeleton>
 
-            <Skeleton
-              height="114px"
-              borderRadius={20}
-              className="md:min-w-[240px]"
-              endColor="rgba(255,255,255,0.3)"
-              isLoaded={!isLoading}
-            >
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                title="Total Unlocked"
-                className="amount-unlocked"
-                value={
-                  accountId
-                    ? `${totalUnlocked} ${investorInfo?.token?.symbol}`
-                    : "Connect Wallet"
-                }
-                bottomText="Unlocked amount"
-              />
-            </Skeleton>
+              <Skeleton
+                height="114px"
+                borderRadius={20}
+                className="md:min-w-[240px]"
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title="Total Unlocked"
+                  className="amount-unlocked"
+                  value={
+                    accountId
+                      ? `${totalUnlocked} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Unlocked amount"
+                />
+              </Skeleton>
 
-            <Skeleton
-              height="114px"
-              borderRadius={20}
-              className="md:min-w-[240px]"
-              endColor="rgba(255,255,255,0.3)"
-              isLoaded={!isLoading}
-            >
-              <ValueBox
-                borderColor={glassyWhiteOpaque}
-                title="Total Withdrawn"
-                className="amount-withdrawn"
-                value={
-                  accountId
-                    ? `${totalWithdrawn} ${investorInfo?.token?.symbol}`
-                    : "Connect Wallet"
-                }
-                bottomText="Total quantity "
-              />
-            </Skeleton>
-          </Flex>
+              <Skeleton
+                height="114px"
+                borderRadius={20}
+                className="md:min-w-[240px]"
+                endColor="rgba(255,255,255,0.3)"
+                isLoaded={!isLoading}
+              >
+                <ValueBox
+                  borderColor={glassyWhiteOpaque}
+                  title={accountId ? "Total Withdrawn" : ""}
+                  className="amount-withdrawn"
+                  value={
+                    accountId
+                      ? `${totalWithdrawn} ${investorInfo?.token?.symbol}`
+                      : "Connect Wallet"
+                  }
+                  bottomText="Total quantity "
+                />
+              </Skeleton>
+            </Flex>
+          ) : (
+            <></>
+          )
         }
       />
 

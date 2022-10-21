@@ -6,6 +6,8 @@ import { StatusEnum } from "@near/apollo";
 import isBefore from "date-fns/isBefore";
 import { getUTCDate } from "@near/ts";
 import { ExternalLinkIcon } from "@heroicons/react/outline";
+import { Tutorial, TutorialItemInterface } from "@/components";
+import isEmpty from "lodash/isEmpty";
 
 const closedArray = [
   "sale_finalized",
@@ -23,7 +25,8 @@ export function ProjectInfo({
   description_project,
   open_sale_1_timestamp,
   final_sale_2_timestamp,
-}: launchpadProject) {
+  stepItems,
+}: launchpadProject & { stepItems?: TutorialItemInterface[] }) {
   const openSale = useMemo(() => {
     return getUTCDate(Number(open_sale_1_timestamp));
   }, [open_sale_1_timestamp]);
@@ -59,8 +62,10 @@ export function ProjectInfo({
   }, [status, openSale, finalSale]);
 
   return (
-    <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] relative mb-[24px]">
-      <div className="absolute right-[19px] top-[20px] flex space-x-[8px]">
+    <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] relative mb-[24px] project-info">
+      {!isEmpty(stepItems) && <Tutorial items={stepItems || []} />}
+
+      <div className="absolute right-[52px] top-[20px] flex space-x-[8px]">
         <Badge type={projectStatus} />
       </div>
 

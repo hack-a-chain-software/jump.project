@@ -40,7 +40,12 @@ export function NFTStakingUserRewards({
   }, [tokens, rewards]);
 
   return (
-    <Flex flex={1} direction="column" flexWrap="wrap">
+    <Flex
+      flex={1}
+      direction="column"
+      flexWrap="wrap"
+      className="relative nft-position"
+    >
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
         Your Position:
       </Text>

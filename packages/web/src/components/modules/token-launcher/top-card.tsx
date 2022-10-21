@@ -1,15 +1,46 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { JumpBigIcon } from "../../../assets/svg";
 import { GradientText, Card } from "../../shared";
+import { Tutorial } from "@/components";
 
 export function TokenLauncherTopCard() {
+  const stepItems = [
+    {
+      element: ".token-launcher-top-card",
+      title: "Token Launcher",
+      intro: (
+        <div>
+          <span>
+            Here is the Jump DEFI Token Launcher, this page is where you can
+            create your tokens.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Token Launcher Form",
+      element: ".token-launcher-form",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            This is the Token Launcher form, complete all the steps to create
+            your token.
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Card
       p="3px"
       flexGrow="1"
       borderRadius="25px"
       height={{ sm: "auto", md: "206px" }}
+      className="relative token-launcher-top-card"
     >
+      <Tutorial items={stepItems} />
+
       <Flex
         pl={{ base: "none", md: "10.3%" }}
         pr="2.5%"

@@ -9,15 +9,10 @@ import {
 } from "../../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/hooks/theme";
 import { NftStakingProjectsConnectionDocument, StakedEnum } from "@near/apollo";
-import { Steps } from "intro.js-react";
-import {
-  StatusEnum,
-  VisibilityEnum,
-  NftStakingProjectsConnectionQueryVariables,
-} from "@near/apollo";
+import { NftStakingProjectsConnectionQueryVariables } from "@near/apollo";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 const PAGINATE_LIMIT = 30;
@@ -32,7 +27,6 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const [showSteps, setShowSteps] = useState(false);
   const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
   // const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
   const [filterSearch, setSearch] = useState<string | null>(null);
@@ -118,24 +112,13 @@ export const NFTStaking = () => {
 
   return (
     <PageContainer>
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
-
       <TopCard
         gradientText="Jump NFT"
         bigText="Staking"
         bottomDescription="Stake your NFT assets in order to get rewards from the collection owners and also from JUMP and Partners!"
         py
-        onClick={() => setShowSteps(true)}
+        jumpLogo
+        stepItems={stepItems}
         renderAsset={
           <>
             {collectionImages.map((imagesrc, i) => (

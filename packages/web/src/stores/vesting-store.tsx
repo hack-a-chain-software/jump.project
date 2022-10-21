@@ -71,10 +71,17 @@ export const useVestingStore = create<{
     account: string,
     token: string
   ) => Promise<any>;
+  cleanupData: () => Promise<void>;
 }>((set, get) => ({
   vestings: [],
   loading: true,
   investorInfo: {},
+
+  cleanupData: async () => {
+    set({
+      vestings: [],
+    });
+  },
 
   getInvestorInfo: async (connection) => {
     const token = await viewFunction(

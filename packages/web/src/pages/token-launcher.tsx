@@ -160,17 +160,19 @@ export const TokenLauncher = () => {
       <FormProvider {...newTokenForm}>
         <FormIntroModal isOpen={showModal} handleClose={handleCloseModal} />
         <TokenLauncherTopCard />
-        {step == "step 1" && (
-          <FormCardStep1 onSubmitStepForm={handleStep1FormSubmit} />
-        )}
+        <div className="relative token-launcher-form">
+          {step == "step 1" && (
+            <FormCardStep1 onSubmitStepForm={handleStep1FormSubmit} />
+          )}
 
-        {step == "step 2" && (
-          <FormCardStep2
-            onSubmitStep2Form={handleStep2FormSubmit}
-            onReturnFunction={handleFormStepChange}
-            onUpdateTokenType={handleUpdateTokenType}
-          />
-        )}
+          {step == "step 2" && (
+            <FormCardStep2
+              onSubmitStep2Form={handleStep2FormSubmit}
+              onReturnFunction={handleFormStepChange}
+              onUpdateTokenType={handleUpdateTokenType}
+            />
+          )}
+        </div>
       </FormProvider>
     </PageContainer>
   );

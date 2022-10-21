@@ -17,6 +17,7 @@ import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
 import { useWalletSelector } from "@/context/wallet-selector";
 import Big from "big.js";
+import { Tutorial } from "@/components";
 
 interface TokenRatio {
   x_token: string;
@@ -171,10 +172,44 @@ export const Staking = () => {
     return base.div(baseBig).div(denom).toFixed(2);
   }, [jumpYearlyDistributionCompromise, baseToken]);
 
+  const stepItems = [
+    {
+      element: ".jump-staking",
+      title: "Jump Staking",
+      intro: (
+        <div>
+          <span>
+            This is where you stake your Jumps in xJump. Required to enter
+            vesting projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "User Area",
+      element: ".user-area",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            In this section you can stake your Jump tokens. Stake now!
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
       <Flex gap={4} w="100%" flexWrap="wrap">
-        <Card p="3px" flexGrow="1" borderRadius="26px">
+        <Card
+          p="3px"
+          flexGrow="1"
+          borderRadius="26px"
+          position="relative"
+          className="jump-staking"
+        >
+          <Tutorial items={stepItems} />
+
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -252,7 +287,7 @@ export const Staking = () => {
           </Flex>
         </Card>
 
-        <Card flex={1} flexGrow="1">
+        <Card flex={1} flexGrow="1" position="relative" className="user-area">
           <Flex
             h="100%"
             direction="column"
