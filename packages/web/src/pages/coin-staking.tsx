@@ -15,12 +15,9 @@ import { useTheme } from "../hooks/theme";
 import { StakeModal } from "../modals";
 import { useStaking } from "../stores/staking-store";
 import { WithdrawModal } from "../modals/staking/withdraw";
-import toast from "react-hot-toast";
 import { useWalletSelector } from "@/context/wallet-selector";
-import BN from "bn.js";
 import Big from "big.js";
-import { BigDecimalFloat } from "@near/ts";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { Tutorial } from "@/components";
 
 interface TokenRatio {
   x_token: string;
@@ -165,10 +162,54 @@ export const Staking = () => {
     return xTokenBalance.div(jumpValue).toFixed(2);
   }, [xTokenBalance, jumpValue]);
 
+  const apr = useMemo(() => {
+    const base = new Big(jumpYearlyDistributionCompromise).mul(100);
+
+    const baseBig = new Big(baseToken);
+
+    const denom = new Big(10).pow(9);
+
+    return base.div(baseBig).div(denom).toFixed(2);
+  }, [jumpYearlyDistributionCompromise, baseToken]);
+
+  const stepItems = [
+    {
+      element: ".jump-staking",
+      title: "Jump Staking",
+      intro: (
+        <div>
+          <span>
+            This is where you stake your Jumps in xJump. Required to enter
+            vesting projects.
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "User Area",
+      element: ".user-area",
+      intro: (
+        <div className="flex flex-col">
+          <span>
+            In this section you can stake your Jump tokens. Stake now!
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
       <Flex gap={4} w="100%" flexWrap="wrap">
-        <Card p="3px" flexGrow="1" borderRadius="26px">
+        <Card
+          p="3px"
+          flexGrow="1"
+          borderRadius="26px"
+          position="relative"
+          className="jump-staking"
+        >
+          <Tutorial items={stepItems} />
+
           <Flex
             flex={1.6}
             flexDirection="column"
@@ -236,17 +277,7 @@ export const Staking = () => {
               >
                 <ValueBox
                   title="APR"
-                  value={
-                    new BigDecimalFloat(
-                      new BN(jumpYearlyDistributionCompromise).mul(
-                        new BN("100")
-                      )
-                    ).formatQuotient(
-                      new BigDecimalFloat(new BN(baseToken)),
-                      new BN(9),
-                      { formatOptions: CURRENCY_FORMAT_OPTIONS }
-                    ) + "%" // TODO: refactor so unit logic can apply to %?
-                  }
+                  value={apr + "%"}
                   className="h-full w-full"
                   bottomText="Earnings Per Year"
                   borderColor={glassyWhiteOpaque}
@@ -256,7 +287,7 @@ export const Staking = () => {
           </Flex>
         </Card>
 
-        <Card flex={1} flexGrow="1">
+        <Card flex={1} flexGrow="1" position="relative" className="user-area">
           <Flex
             h="100%"
             direction="column"
@@ -385,3 +416,5 @@ export const Staking = () => {
     </PageContainer>
   );
 };
+
+export default Staking;

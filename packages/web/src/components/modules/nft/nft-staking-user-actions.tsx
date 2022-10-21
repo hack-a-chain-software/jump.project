@@ -62,7 +62,7 @@ export function NFTStakingUserActions(props: any) {
         onClose={() => toggleUnstakeModal()}
       />
 
-      <Flex flex={1}>
+      <Flex flex={1} className="relative nft-user">
         <Box
           display="flex"
           p="3px"

@@ -1,9 +1,12 @@
 import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import { JumpBigWhite } from "../../assets/svg";
 import { useTheme } from "../../hooks/theme";
-import { IconButton } from "@/components";
+import { twMerge } from "tailwind-merge";
+import { Tutorial, TutorialItemInterface } from "@/components";
+import isEmpty from "lodash/isEmpty";
 
 type Props = {
+  maxW?: string;
   gradientText: string;
   bigText: string;
   bottomDescription: string;
@@ -13,6 +16,7 @@ type Props = {
   py?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
+  stepItems?: TutorialItemInterface[];
 };
 
 export const TopCard = ({
@@ -23,17 +27,18 @@ export const TopCard = ({
   jumpLogo = false,
   py = false,
   content = <></>,
+  maxW = "",
   children,
+  stepItems,
   onClick = () => {},
 }: Props) => {
   const { jumpGradient, glassyWhite } = useTheme();
   return (
     <Box
       flex={1}
-      minHeight="260px"
       borderRadius={25}
       bg={useColorModeValue(jumpGradient, "transparent")}
-      className="launchpad"
+      className={twMerge("launchpad top-card", maxW)}
     >
       <Box
         overflow="hidden"
@@ -45,23 +50,21 @@ export const TopCard = ({
         w="100%"
         color="white"
         flex="1"
-        p="60px"
+        p="25px 24px"
         h="100%"
         borderRadius="24px"
         position="relative"
         bg={glassyWhite}
         gap={5}
       >
-        <div className="absolute right-[24px] top-[24px]">
-          <IconButton onClick={onClick} />
-        </div>
+        {!isEmpty(stepItems) && <Tutorial items={stepItems || []} />}
 
         <Flex direction="column" zIndex="2" position="relative" flexGrow="1">
           <Flex alignItems="center" gap={4} direction="row">
             <Flex direction="column">
               <Text
-                fontSize={24}
-                mb="-15px"
+                fontSize={16}
+                mb="12px"
                 fontWeight="800"
                 letterSpacing="-0.03em"
               >
@@ -71,7 +74,7 @@ export const TopCard = ({
                 fontWeight="800"
                 fontFamily="Inter"
                 letterSpacing="0"
-                fontSize="50px"
+                fontSize="28px"
                 as="h1"
               >
                 {bigText}
@@ -81,9 +84,10 @@ export const TopCard = ({
           <Text
             fontWeight="bold"
             letterSpacing="-0.03em"
-            fontSize="18px"
-            maxW="500px"
+            fontSize="14px"
+            maxW="824px"
             zIndex="2"
+            marginTop="12px"
             position="relative"
           >
             {bottomDescription}
@@ -109,7 +113,7 @@ export const TopCard = ({
           bottom="0"
           maxH="100%"
           overflow="hidden"
-          opacity={0.1}
+          // opacity={0.1}
         >
           {jumpLogo && <JumpBigWhite />}
         </Flex>

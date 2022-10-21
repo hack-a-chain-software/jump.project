@@ -1,5 +1,4 @@
 import Big from "big.js";
-import { useMemo } from "react";
 import { ModalImageDialog, Button } from "@/components";
 import { Flex, Text } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
@@ -9,9 +8,6 @@ import {
   viewFunction,
 } from "@/tools";
 import { Transaction } from "@near/ts";
-import { useTokenMetadata } from "@/hooks/modules/token";
-import { useQuery } from "@apollo/client";
-import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 
 export function AirdropModal({
   isOpen,
@@ -22,16 +18,9 @@ export function AirdropModal({
 }) {
   const { selector, accountId } = useWalletSelector();
 
-  const { data, loading } = useQuery(NftStakingProjectsConnectionDocument);
-
-  const items = useMemo(() => {
-    return data?.nft_staking_projects?.data?.map(
-      ({ collection_id }) => collection_id
-    );
-  }, [loading]);
-
   const getJumpTokens = async () => {
     const wallet = await selector.wallet();
+
     const tokens = await viewFunction(
       selector,
       import.meta.env.VITE_FAUCET_CONTRACT,

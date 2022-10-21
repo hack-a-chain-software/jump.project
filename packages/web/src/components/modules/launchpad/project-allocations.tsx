@@ -1,6 +1,6 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { isBefore, format } from "date-fns";
-import { formatNumber, getUTCDate } from "@near/ts";
+import { getUTCDate } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
 import { Fragment, useMemo, useState, useCallback } from "react";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
@@ -9,7 +9,6 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { launchpadProject, investorAllocation } from "@/interfaces";
 import { Steps } from "intro.js-react";
 import {
-  Card,
   If,
   GradientText,
   NumberInput,
@@ -21,8 +20,6 @@ export function ProjectAllocations({
   isLoading,
   launchpadProject,
   priceTokenBalance,
-  totalAllowanceData,
-  investorAllocation,
   investorAllowance,
 }: {
   isLoading: boolean;
@@ -38,7 +35,7 @@ export function ProjectAllocations({
   const [tickets, setTickets] = useState(0);
 
   const allocationsAvailable = useMemo(() => {
-    return new BN(investorAllowance ?? "0");
+    return new Big(investorAllowance ?? "0");
   }, [investorAllowance]);
 
   const onJoinProject = useCallback(
@@ -48,8 +45,8 @@ export function ProjectAllocations({
         launchpadProject?.price_token
       ) {
         buyTickets(
-          new BN(amount)
-            .mul(new BN(launchpadProject.token_allocation_price || 0))
+          new Big(amount)
+            .mul(new Big(launchpadProject.token_allocation_price || 0))
             .toString(),
           launchpadProject.price_token,
           launchpadProject.listing_id,
@@ -68,7 +65,7 @@ export function ProjectAllocations({
 
   const formatDate = (start_timestamp?: string) => {
     const date = getUTCDate(Number(start_timestamp ?? "0"));
-    return format(date, "mm/dd/yyyy");
+    return format(date, "MM/dd/yyyy");
   };
 
   const enabledSales = useMemo(() => {
@@ -81,13 +78,13 @@ export function ProjectAllocations({
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
-    return new BN(launchpadProject?.token_allocation_price!).mul(
-      new BN(tickets.toString())
+    return new Big(launchpadProject?.token_allocation_price! ?? 0).mul(
+      new Big(tickets.toString())
     );
   }, [tickets]);
 
   const hasTicketsAmount = useMemo(() => {
-    return new BN(priceTokenBalance ?? "0").gte(ticketsAmount);
+    return new Big(priceTokenBalance ?? "0").gte(ticketsAmount);
   }, [ticketsAmount, priceTokenBalance]);
 
   const [showSteps, setShowSteps] = useState(false);
@@ -130,6 +127,24 @@ export function ProjectAllocations({
       ),
     },
   ];
+
+  const decimals = useMemo(() => {
+    if (!launchpadProject?.price_token_info?.decimals) {
+      return new Big(1);
+    }
+
+    return new Big(10).pow(
+      Number(launchpadProject?.price_token_info?.decimals)
+    );
+  }, [launchpadProject?.price_token_info]);
+
+  const balance = useMemo(() => {
+    return new Big(priceTokenBalance ?? 0).div(decimals).toFixed(2);
+  }, [priceTokenBalance, decimals]);
+
+  const total = useMemo(() => {
+    return ticketsAmount.div(decimals);
+  }, [ticketsAmount, decimals]);
 
   return (
     <>
@@ -207,11 +222,7 @@ export function ProjectAllocations({
           <Flex gap="5px" direction="column" maxWidth="380px">
             <Flex flexWrap="wrap" justifyContent="space-between">
               <Text>
-                Your Balance:{" "}
-                {formatNumber(
-                  new BN(priceTokenBalance ?? "0"),
-                  launchpadProject?.price_token_info?.decimals!
-                )}{" "}
+                Your Balance: {balance}{" "}
                 {launchpadProject?.price_token_info?.symbol}
               </Text>
             </Flex>
@@ -224,7 +235,7 @@ export function ProjectAllocations({
             />
 
             <Text>
-              You can buy: {formatNumber(allocationsAvailable, 0) + " "}
+              You can buy: {allocationsAvailable.toNumber() + " "}
               allocations
             </Text>
           </Flex>
@@ -258,14 +269,9 @@ export function ProjectAllocations({
             >
               Join{" "}
               {tickets > 0 ? (
-                <Fragment>
-                  For:{" "}
-                  {formatNumber(
-                    ticketsAmount,
-                    new BN(launchpadProject?.price_token_info?.decimals!)
-                  )}{" "}
-                  {launchpadProject?.price_token_info?.symbol}
-                </Fragment>
+                <>
+                  For: {total} {launchpadProject?.price_token_info?.symbol}
+                </>
               ) : (
                 "Project"
               )}

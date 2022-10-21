@@ -1,4 +1,5 @@
-import { formatNumber } from "@near/ts";
+import Big from "big.js";
+import { useMemo } from "react";
 import { useVestingStore } from "@/stores/vesting-store";
 import { ModalImageDialog, Button } from "@/components";
 import { Flex, Text } from "@chakra-ui/react";
@@ -24,6 +25,14 @@ export function BuyFastPass({
   const { accountId, selector } = useWalletSelector();
 
   const { fastPass } = useVestingStore();
+
+  const decimals = useMemo(() => {
+    return new Big(10).pow(token?.decimals ?? 0);
+  }, [token]);
+
+  const formattedTotal = useMemo(() => {
+    return new Big(totalAmount ?? 0).mul(0.05).div(decimals).toFixed(2);
+  }, [totalAmount, token]);
 
   return (
     <ModalImageDialog
@@ -66,8 +75,7 @@ export function BuyFastPass({
         </Text>
 
         <Text fontWeight="semibold" fontSize="16px">
-          Price: {formatNumber(totalAmount * 0.05, token?.decimals)}{" "}
-          {token?.symbol}
+          Price: {formattedTotal} {token?.symbol}
         </Text>
       </Flex>
     </ModalImageDialog>

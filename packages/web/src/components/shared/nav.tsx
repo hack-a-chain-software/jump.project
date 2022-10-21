@@ -1,14 +1,7 @@
 import { Flex, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { navRoutes, routes } from "../../routes";
+import { navRoutes } from "../../routes";
 import { JumpIcon } from "../../assets/svg/jump-logo";
-
-const enabledRoutes = [
-  routes.staking,
-  routes.home,
-  routes.nftStaking,
-  routes.vesting,
-];
 
 export const Nav = () => {
   const navigate = useNavigate();
@@ -34,7 +27,7 @@ export const Nav = () => {
 
         {navRoutes.map((e) => (
           <Tooltip
-            isDisabled={enabledRoutes.includes(e.route)}
+            isDisabled={e.enabled}
             key={e.route}
             hasArrow
             label="Coming soon"
@@ -44,13 +37,9 @@ export const Nav = () => {
               alignItems="center"
               w="80px"
               minH="80px"
-              cursor={
-                enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"
-              }
+              cursor={e.enabled ? "pointer" : "not-allowed"}
               transition="0.3s"
-              onClick={() =>
-                enabledRoutes.includes(e.route) ? navigate(e.route) : null
-              }
+              onClick={() => (e.enabled ? navigate(e.route) : null)}
               userSelect="none"
               justifyContent="center"
               direction="column"
@@ -64,7 +53,11 @@ export const Nav = () => {
                 fontSize="12px"
                 pt={2}
                 opacity={
-                  window.location.pathname.includes(e.subroutePrefix) ? 1 : 0.3
+                  window.location.pathname === e.route ||
+                  (e.route === "/" &&
+                    window.location.pathname.includes("/projects"))
+                    ? 1
+                    : 0.3
                 }
               >
                 {e.icon}

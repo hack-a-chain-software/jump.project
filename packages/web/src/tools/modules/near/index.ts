@@ -16,7 +16,8 @@ export const getTransaction = (
   receiverId: string,
   method: string,
   args: any,
-  amount?: string
+  amount?: string,
+  callbackUrl?: string
 ): Transaction => {
   return {
     signerId,

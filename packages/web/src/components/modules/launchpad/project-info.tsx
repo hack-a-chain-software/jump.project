@@ -1,98 +1,135 @@
-import BN from "bn.js";
+import Big from "big.js";
 import { useMemo } from "react";
-import { Card } from "@/components";
-import { formatNumber } from "@near/ts";
 import { tokenMetadata, launchpadProject } from "@/interfaces";
-import { Flex, Skeleton, Image, Text, Box } from "@chakra-ui/react";
-import { useTheme } from "../../../hooks/theme";
+import { Badge } from "./project-card/badge";
+import { StatusEnum } from "@near/apollo";
+import isBefore from "date-fns/isBefore";
+import { getUTCDate } from "@near/ts";
+import { ExternalLinkIcon } from "@heroicons/react/outline";
+import { Tutorial, TutorialItemInterface } from "@/components";
+import isEmpty from "lodash/isEmpty";
+
+const closedArray = [
+  "sale_finalized",
+  "pool_created",
+  "pool_project_token_sent",
+  "pool_price_token_sent",
+  "liquidity_pool_finalized",
+];
 
 export function ProjectInfo({
-  isLoading,
-  launchpadProject,
-  metadataPriceToken,
-}: {
-  isLoading: boolean;
-  launchpadProject: launchpadProject;
-  metadataPriceToken: tokenMetadata;
-}) {
-  const { glassyWhiteOpaque } = useTheme();
+  status,
+  website,
+  whitepaper,
+  project_token_info,
+  description_project,
+  open_sale_1_timestamp,
+  final_sale_2_timestamp,
+  stepItems,
+}: launchpadProject & { stepItems?: TutorialItemInterface[] }) {
+  const openSale = useMemo(() => {
+    return getUTCDate(Number(open_sale_1_timestamp));
+  }, [open_sale_1_timestamp]);
 
-  const finalPrice = useMemo(() => {
-    if (!metadataPriceToken?.decimals && launchpadProject) {
-      return "0";
+  const finalSale = useMemo(() => {
+    return getUTCDate(Number(final_sale_2_timestamp));
+  }, [final_sale_2_timestamp]);
+
+  const projectStatus = useMemo(() => {
+    if (status !== "funded" && closedArray.includes(status!)) {
+      return StatusEnum.Closed;
     }
 
-    return formatNumber(
-      new BN(launchpadProject?.token_allocation_price ?? "0"),
-      metadataPriceToken?.decimals!
-    );
-  }, [launchpadProject, metadataPriceToken?.decimals]);
+    const now = getUTCDate();
+
+    if (status === "funded" && isBefore(now, openSale)) {
+      return StatusEnum.Waiting;
+    }
+
+    if (status === "funded" && isBefore(finalSale, now)) {
+      return StatusEnum.Closed;
+    }
+
+    if (
+      status === "funded" &&
+      isBefore(openSale, now) &&
+      isBefore(now, finalSale)
+    ) {
+      return StatusEnum.Open;
+    }
+
+    return StatusEnum.Open;
+  }, [status, openSale, finalSale]);
 
   return (
-    <Card className="col-span-12 lg:col-span-6">
-      <Flex className="flex-col space-y-[8px] w-full">
-        <Flex alignItems="center" mb="5px" gap={3}>
-          <Skeleton
-            className="w-[50px] h-[50px] rounded-full"
-            isLoaded={!isLoading}
-          >
-            <Image
-              borderRadius={99}
-              border="solid 3px"
-              borderColor={glassyWhiteOpaque}
-              outline={glassyWhiteOpaque}
-              boxSizing="content-box"
-              className="w-[50px]"
-              src={launchpadProject?.project_token_info?.image || ""}
+    <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] relative mb-[24px] project-info">
+      {!isEmpty(stepItems) && <Tutorial items={stepItems || []} />}
+
+      <div className="absolute right-[52px] top-[20px] flex space-x-[8px]">
+        <Badge type={projectStatus} />
+      </div>
+
+      <div className="flex items-center space-x-[9px] mb-[16px]">
+        <div>
+          <img
+            src={project_token_info?.image ?? ""}
+            className="w-[43px] h-[43px] rounded-full"
+          />
+        </div>
+
+        <div>
+          <div className="mb-[-4px]">
+            <span
+              className="text-white text-[24px] font-[800] tracking-[-0.04em]"
+              children={project_token_info?.name}
             />
-          </Skeleton>
+          </div>
 
-          <Skeleton
-            className="min-w-[200px] rounded-[16px]"
-            isLoaded={!isLoading}
-          >
-            <Text
-              fontWeight="800"
-              fontFamily="Inter"
-              letterSpacing="-0.06em"
-              fontSize="30px"
-              as="h1"
-              color="white"
+          <div>
+            <span
+              className="text-[20px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]"
+              children={project_token_info?.symbol}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-[24px] pl-[54px] max-w-[622px]">
+        <span
+          children={description_project}
+          className="text-white text-[14px] font-[500]"
+        />
+      </div>
+
+      <div className="flex justify-between pl-[54px]">
+        <div className="flex space-x-[16px]">
+          <div>
+            <button
+              disabled={!!!website}
+              className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
             >
-              {finalPrice} {launchpadProject?.price_token_info?.symbol}
-            </Text>
-          </Skeleton>
-        </Flex>
-        <Skeleton
-          className="w-full rounded-[16px] min-h-[60px]"
-          isLoaded={!isLoading}
-        >
-          <Text
-            fontWeight="800"
-            fontFamily="Inter"
-            letterSpacing="-0.05em"
-            fontSize="40px"
-            as="h1"
-          >
-            {launchpadProject?.project_name}
-          </Text>
-        </Skeleton>
+              <span className="font-[500] text-[14px] tracking-[-0.04em]">
+                Website
+              </span>
 
-        <Skeleton
-          className="w-full rounded-[16px] min-h-[30px]"
-          isLoaded={!isLoading}
-        >
-          <Text
-            fontWeight="500"
-            fontFamily="Inter"
-            letterSpacing="-0.05em"
-            fontSize="20px"
-            as="h1"
-          >
-            {launchpadProject?.description_token}
-          </Text>
-        </Skeleton>
-      </Flex>
-    </Card>
+              <ExternalLinkIcon className="w-[14px] h-[14px] text-white" />
+            </button>
+          </div>
+
+          <div>
+            <button
+              disabled={!!!whitepaper}
+              className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
+            >
+              <span className="font-[500] text-[14px] tracking-[-0.04em]">
+                Whitepaper
+              </span>
+
+              <ExternalLinkIcon className="w-[14px] h-[14px] text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

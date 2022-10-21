@@ -1,240 +1,266 @@
-import BN from "bn.js";
-import { useMemo } from "react";
+import Big from "big.js";
+import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
-import { formatNumber } from "@near/ts";
-import { WalletIcon } from "@/assets/svg";
-import { Flex, Skeleton } from "@chakra-ui/react";
-import { Card, GradientText, Button, IconButton } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
-import {
-  launchpadProject,
-  investorAllocation,
-  tokenMetadata,
-} from "@/interfaces";
+import { launchpadProject } from "@/interfaces";
 import { useState } from "react";
-import { Steps } from "intro.js-react";
+import { twMerge } from "tailwind-merge";
+import { getUTCDate } from "@near/ts";
+import format from "date-fns/format";
+import { StatusEnum } from "@near/apollo";
 
-const CONNECT_WALLET_MESSAGE = "Connect wallet";
+import { NumberInput } from "@/components";
+
+const formatConfig = {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+};
+
+const closedArray = [
+  "sale_finalized",
+  "pool_created",
+  "pool_project_token_sent",
+  "pool_price_token_sent",
+  "liquidity_pool_finalized",
+];
 
 export function ProjectUserArea({
-  isLoading,
-  launchpadProject,
-  vestedAllocations,
-  investorAllocation,
-  metadataProjectToken,
+  launchpadProject: {
+    status: projectStatus,
+    listing_id,
+    price_token,
+    project_token,
+    price_token_info,
+    token_allocation_price,
+    open_sale_1_timestamp,
+    final_sale_2_timestamp,
+  },
+  priceTokenBalance,
+  investorAllowance,
 }: {
-  isLoading: boolean;
-  vestedAllocations: string;
+  investorAllowance: string;
+  priceTokenBalance: string;
   launchpadProject: launchpadProject;
-  metadataProjectToken: tokenMetadata;
-  investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();
+  const { buyTickets } = useLaunchpadStore();
 
-  const { withdrawAllocations } = useLaunchpadStore();
+  const [tickets, setTickets] = useState(0);
 
-  const enabledSale = useMemo(() => {
-    const now = new Date();
+  const allocationsAvailable = useMemo(() => {
+    return new Big(investorAllowance ?? "0");
+  }, [investorAllowance]);
 
-    const endAt = new Date(Number(launchpadProject?.final_sale_2_timestamp!));
+  const onJoinProject = useCallback(
+    (amount: number) => {
+      if (typeof listing_id && price_token) {
+        buyTickets(
+          new Big(amount).mul(new Big(token_allocation_price || 0)).toString(),
+          price_token,
+          listing_id,
+          accountId!,
+          selector
+        );
+      }
+    },
+    [1, accountId, project_token, token_allocation_price]
+  );
 
-    return isBefore(now, endAt);
-  }, [launchpadProject]);
+  const ticketsAmount = useMemo(() => {
+    return new Big(token_allocation_price! ?? 0).mul(
+      new Big(tickets.toString())
+    );
+  }, [tickets, token_allocation_price]);
+
+  const hasTicketsAmount = useMemo(() => {
+    return new Big(priceTokenBalance ?? "0").gte(ticketsAmount);
+  }, [ticketsAmount, priceTokenBalance]);
 
   const decimals = useMemo(() => {
-    return new BN(metadataProjectToken?.decimals ?? "0");
-  }, [metadataProjectToken]);
-
-  const claimedAmount = useMemo(() => {
-    return new BN(investorAllocation.totalTokensBought!);
-  }, [investorAllocation]);
-
-  const unlockedAmount = useMemo(() => {
-    return new BN(vestedAllocations);
-  }, [vestedAllocations]);
-
-  const totalAmount = useMemo(() => {
-    return formatNumber(
-      claimedAmount.add(unlockedAmount),
-      decimals,
-      metadataProjectToken?.symbol!
-    );
-  }, [claimedAmount, unlockedAmount]);
-
-  const retrieveTokens = () => {
-    if (typeof launchpadProject?.listing_id && launchpadProject?.price_token) {
-      withdrawAllocations(
-        launchpadProject.listing_id,
-        launchpadProject.project_token,
-        accountId!,
-        selector
-      );
+    if (!price_token_info?.decimals) {
+      return new Big(1);
     }
+
+    return new Big(10).pow(Number(price_token_info?.decimals));
+  }, [price_token_info]);
+
+  const balance = useMemo(() => {
+    return new Big(priceTokenBalance ?? 0).div(decimals).toFixed(2);
+  }, [priceTokenBalance, decimals]);
+
+  const total = useMemo(() => {
+    return ticketsAmount.div(decimals);
+  }, [ticketsAmount, decimals]);
+
+  const ticketPrice = useMemo(() => {
+    return new Big(token_allocation_price || 0);
+  }, [token_allocation_price]);
+
+  const formatNumber = (value, decimals, config: any = formatConfig) => {
+    const decimalsBig = new Big(10).pow(Number(decimals) || 1);
+
+    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+
+    return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
 
-  const [showSteps, setShowSteps] = useState(false);
+  const formatDate = (date) => format(date, "MM/dd/yyyy HH:mm");
 
-  const stepItems = [
-    {
-      title: "User Area",
-      element: ".project-user-area",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            In this session you follow the data of your investment in the
-            project, having access to the number of allocations invested, total
-            rewards received, how many rewards were collected and how many are
-            available for collection.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Retrieve Tokens",
-      element: ".project-user-area-retrieve",
-      intro: (
-        <div className="flex flex-col space-y-[8px]">
-          <span>
-            The rewards will be available at the end of the sell phase or when
-            all allocations are sold.
-          </span>
+  const openSale = useMemo(() => {
+    return getUTCDate(Number(open_sale_1_timestamp));
+  }, [open_sale_1_timestamp]);
 
-          <span>
-            Your rewards will be updated according to the project timeline.
-          </span>
-        </div>
-      ),
-    },
-  ];
+  const finalSale = useMemo(() => {
+    return getUTCDate(Number(final_sale_2_timestamp));
+  }, [final_sale_2_timestamp]);
+
+  const status = useMemo(() => {
+    if (projectStatus !== "funded" && closedArray.includes(projectStatus!)) {
+      return {
+        bg: "bg-[#CE2828]",
+        status: StatusEnum.Closed,
+        label: `Sales closed at: ${"a"}`,
+      };
+    }
+
+    const now = getUTCDate();
+
+    if (projectStatus === "funded" && isBefore(now, openSale)) {
+      return {
+        bg: "bg-[#5E6DEC]",
+        status: StatusEnum.Waiting,
+        label: "Sales start:",
+        value: formatDate(openSale),
+      };
+    }
+
+    if (projectStatus === "funded" && isBefore(finalSale, now)) {
+      return {
+        bg: "bg-[#CE2828]",
+        status: StatusEnum.Closed,
+        label: "Sales closed at:",
+        value: formatDate(finalSale),
+      };
+    }
+
+    if (
+      projectStatus === "funded" &&
+      isBefore(openSale, now) &&
+      isBefore(now, finalSale)
+    ) {
+      return {
+        bg: "bg-[#559C71]",
+        status: StatusEnum.Open,
+        label: "Open sales ends at",
+        value: formatDate(finalSale),
+      };
+    }
+
+    return {
+      bg: "bg-[#559C71]",
+      status: StatusEnum.Open,
+      label: "Open sales ends at:",
+      value: formatDate(finalSale),
+    };
+  }, [projectStatus, openSale, finalSale]);
 
   return (
-    <>
-      {!isLoading && (
-        <div className="absolute right-[24px] top-[24px]">
-          <IconButton onClick={() => setShowSteps(true)} />
+    <div className="investment relative bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
+      <div
+        className={twMerge(
+          "px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]",
+          status.bg
+        )}
+      >
+        <span
+          className="tracking-[-0.04em] font-[500] text-[16px]"
+          children={status.label}
+        />
+
+        <span
+          className="font-[800] text-[16px] tracking-[-0.04em]"
+          children={status.value}
+        />
+      </div>
+
+      <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full mb-[8px]">
+        <div className="mb-[16px]">
+          <span className="font-[600] text-[14px] tracking-[-0.03em]">
+            Allocation amount
+          </span>
         </div>
-      )}
 
-      <Steps
-        enabled={showSteps}
-        steps={stepItems}
-        initialStep={0}
-        onExit={() => setShowSteps(false)}
-        options={{
-          showProgress: false,
-          showBullets: false,
-          scrollToElement: false,
-        }}
-      />
+        <div className="mb-[23px]">
+          <NumberInput
+            min={0}
+            value={tickets}
+            max={allocationsAvailable.toNumber()}
+            onChange={(value) => setTickets(value || 0)}
+          />
+        </div>
 
-      <Flex className="flex-col space-y-[12px] h-5/6 w-full">
-        <Flex className="flex-col space-y-[12px] justify-evenly h-5/6 w-full">
-          <GradientText fontWeight="800" letterSpacing="-0,03em" fontSize={24}>
-            User Area
-          </GradientText>
+        <div>
+          <span
+            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
+            className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
+          />
+        </div>
+      </div>
 
-          <div className="flex-col space-y-[4px]">
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Allocations:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? investorAllocation.allocationsBought ?? "0"
-                    : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Total amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId ? totalAmount : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Unlocked amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? formatNumber(
-                        unlockedAmount,
-                        decimals,
-                        metadataProjectToken?.symbol!
-                      )
-                    : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
-
-            <Skeleton
-              isLoaded={!isLoading}
-              className="flex space-x-[4px] rounded-[16px]"
-            >
-              <div>
-                <span className="text-[18px] font-[600] tracking-[-0.05em]">
-                  Claimed amount:
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[18px] font-[500] tracking-[-0.05em]">
-                  {accountId
-                    ? formatNumber(
-                        claimedAmount,
-                        decimals,
-                        metadataProjectToken?.symbol!
-                      )
-                    : CONNECT_WALLET_MESSAGE}
-                </span>
-              </div>
-            </Skeleton>
+      <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full flex justify-between items-center mb-[16px]">
+        <div>
+          <div className="mb-[8px]">
+            <span className="font-[600] text-[14px] tracking-[-0.03em]">
+              Price
+            </span>
           </div>
-        </Flex>
-        <Skeleton
-          isLoaded={!isLoading}
-          w="100%"
-          borderRadius="15px"
-          className="relative project-user-area-retrieve"
+
+          <div className="mb-[8px]">
+            <span
+              children={`${formatNumber(
+                token_allocation_price,
+                price_token_info?.decimals
+              )} ${price_token_info?.symbol}`}
+              className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
+            />
+          </div>
+
+          <div>
+            <span
+              children={`Your ballance: ${balance} ${price_token_info?.symbol}`}
+              className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full">
+        <button
+          onClick={() => onJoinProject(tickets)}
+          disabled={!hasTicketsAmount || tickets === 0}
+          className={twMerge(
+            "rounded-[10px] px-[16px] py-[10px] w-full disabled:opacity-[0.5] disabled:cursor-not-allowed",
+            [hasTicketsAmount ? "bg-white" : "bg-[#EB5757] cursor-not-allowed"]
+          )}
         >
-          <Button
-            disabled={enabledSale || vestedAllocations === "0" || !accountId}
-            onClick={() => retrieveTokens()}
-            justifyContent="space-between"
-            w="100%"
-          >
-            Retrieve Tokens
-            <WalletIcon />
-          </Button>
-        </Skeleton>
-      </Flex>
-    </>
+          <span className="font-[600] text-[14px] text-[#431E5A]">
+            Join{" "}
+            {tickets > 0 ? (
+              <>
+                For:{" "}
+                {formatNumber(
+                  ticketsAmount,
+                  new Big(price_token_info?.decimals! || "0")
+                )}{" "}
+                {price_token_info?.symbol}
+              </>
+            ) : (
+              "Project"
+            )}
+          </span>
+        </button>
+      </div>
+    </div>
   );
 }

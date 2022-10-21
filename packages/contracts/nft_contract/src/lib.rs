@@ -23,7 +23,11 @@ pub struct Contract {
 #[near_bindgen]
 impl Contract {
   #[init]
-  pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, media_quantity: Option<U128>) -> Self {
+  pub fn new(
+    owner_id: AccountId,
+    metadata: NFTContractMetadata,
+    media_quantity: Option<U128>,
+  ) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
 
@@ -43,7 +47,10 @@ impl Contract {
 
     let metadata = TokenMetadata {
       title: Some(format!("Generic NFT {}", self.counter)),
-      description: Some(format!("Description of Generic NFT {} goes here", self.counter)),
+      description: Some(format!(
+        "Description of Generic NFT {} goes here",
+        self.counter
+      )),
       media: Some(format!(
         "{}/{}.png",
         self.metadata.get().unwrap().base_uri.unwrap().clone(),

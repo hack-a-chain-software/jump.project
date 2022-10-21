@@ -1,13 +1,12 @@
-import BN from "bn.js";
 import Big from "big.js";
 import { ValueBox, If } from "@/components";
-import { Text, Flex, Image, Skeleton, Box } from "@chakra-ui/react";
+import { Text, Flex, Image, Skeleton } from "@chakra-ui/react";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { StakingToken } from "@near/ts";
 import { useMemo } from "react";
 import isEmpty from "lodash/isEmpty";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { useTheme } from "../../../hooks/theme";
+import { useTheme } from "@/hooks/theme";
 
 export function NFTStakingUserRewards({
   rewards,
@@ -21,10 +20,12 @@ export function NFTStakingUserRewards({
   const tokenRewads = useMemo(() => {
     return rewards?.map((token) => {
       const totalBalance = tokens.reduce((sum, { balance }) => {
-        const tokenBalance = new BN(balance[token.account_id || ""].toString());
+        const tokenBalance = new Big(
+          balance[token.account_id || ""].toString()
+        );
 
         return sum.add(tokenBalance);
-      }, new BN(0));
+      }, new Big(0));
 
       const decimalsBig = Big(10).pow(token.decimals);
       const balanceBig = new Big(totalBalance.toString())
@@ -39,7 +40,12 @@ export function NFTStakingUserRewards({
   }, [tokens, rewards]);
 
   return (
-    <Flex flex={1} direction="column" flexWrap="wrap">
+    <Flex
+      flex={1}
+      direction="column"
+      flexWrap="wrap"
+      className="relative nft-position"
+    >
       <Text fontWeight="800" fontSize={30} letterSpacing="-0.03em" mb={3}>
         Your Position:
       </Text>

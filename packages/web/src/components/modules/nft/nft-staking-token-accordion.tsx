@@ -1,4 +1,3 @@
-import BN from "bn.js";
 import Big from "big.js";
 import { motion } from "framer-motion";
 import { InfoIcon } from "@/assets/svg";
@@ -8,11 +7,9 @@ import { Token, StakingToken } from "@near/ts";
 import { Flex, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { format, isBefore, addMilliseconds } from "date-fns";
-import { BigDecimalFloat, getUTCDate } from "@near/ts";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { getUTCDate } from "@near/ts";
 
 export function TokenAccordion({
-  token,
   rewards,
   metadata,
   token_id,
@@ -43,17 +40,13 @@ export function TokenAccordion({
   }, [staked, endPenalty, token_id]);
 
   const withdrawPenalty = useMemo(() => {
-    // check new value -> 10_000_000_000_000_000_000_000
-    const denom = new BN("10000000000");
-    const penaltyBN = new BN(penalty);
+    const denom = new Big("10000000000");
+    const penaltyBN = new Big(penalty);
 
     return penaltyBN.div(denom).toString() + "%";
   }, [rewards, token_id, penalty]);
 
   const getFormatedBalance = (balance, decimals) => {
-    // const decimalsBN = new BN(decimals).neg();
-    // const balanceBN = new BN(balance);
-
     const decimalsBig = Big(10).pow(decimals);
     const balanceBig = new Big(balance).div(decimalsBig).toFixed(2);
 

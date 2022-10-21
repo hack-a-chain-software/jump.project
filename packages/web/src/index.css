@@ -101,3 +101,59 @@ body {
 .introjs-helperLayer {
   border-radius: 25px !important;
 }
+
+.no-tier {
+  background: linear-gradient(90deg, #510B72 0%, #740B0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.diamond {
+  background: linear-gradient(90deg, #9795F0 0%, #FBC8D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.platinum {
+  background: linear-gradient(90deg, #26B06E 0%, #9EEFC8 64.58%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.tungsten {
+  background: linear-gradient(90deg, #7D85CE 0%, #B7BCE7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.gold {
+  background: linear-gradient(90deg, #EABF28 0%, #DCCE9C 59.38%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.silver {
+  background: linear-gradient(90.15deg, #686868 0.13%, #C8C8C8 61.3%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.bronze {
+  background: linear-gradient(90deg, #CD7F32 -0.39%, #FFC184 72.9%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

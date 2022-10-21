@@ -1,10 +1,10 @@
-import BN from "bn.js";
+import Big from "big.js";
+import { useMemo } from "react";
 import { Flex, Input, Text } from "@chakra-ui/react";
 import { JUMP_TOKEN } from "@/env/contract";
 import { useFormik } from "formik";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../../assets/svg";
-import { formatNumber } from "@near/ts";
 import { ModalImageDialog, DialogParams, Button } from "../../components";
 import { initialValues, validationSchema } from "./form/formStaking";
 import { useWalletSelector } from "@/context/wallet-selector";
@@ -17,7 +17,7 @@ interface IStakeModalProps
 export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
   const { accountId } = useWalletSelector();
 
-  const { data: balanceJump = "0" } = useNearQuery<
+  const { data: balanceJump = 0 } = useNearQuery<
     string,
     { account_id: string }
   >("ft_balance_of", {
@@ -55,6 +55,14 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
     initialValues: initialValues,
     validationSchema: validationSchema,
   });
+
+  const decimals = useMemo(() => {
+    return new Big(10).pow(jumpMetadata?.decimals ?? 0);
+  }, [jumpMetadata]);
+
+  const balance = useMemo(() => {
+    return new Big(balanceJump ?? 0).div(decimals).toFixed(2);
+  }, [balanceJump, decimals]);
 
   return (
     <ModalImageDialog
@@ -103,8 +111,7 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
           _focus={{ bg: "white" }}
         />
         <Text opacity={0.8} mt={1} fontSize={14} color="white">
-          Balance: {formatNumber(new BN(balanceJump), jumpMetadata?.decimals!)}{" "}
-          JUMP
+          Balance: {balance} JUMP
         </Text>
       </Flex>
     </ModalImageDialog>

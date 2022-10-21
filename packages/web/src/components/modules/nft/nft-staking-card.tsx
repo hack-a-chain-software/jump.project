@@ -1,4 +1,4 @@
-import BN from "bn.js";
+import Big from "big.js";
 import * as R from "ramda";
 import {
   Box,
@@ -11,10 +11,9 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import isEmpty from "lodash/isEmpty";
-import { useTheme } from "../../../hooks/theme";
-import { If, ValueBox } from "../../shared";
-import { formatNumber, BigDecimalFloat, StakingToken } from "@near/ts";
-import { CURRENCY_FORMAT_OPTIONS } from "@/constants";
+import { useTheme } from "@/hooks/theme";
+import { If, ValueBox } from "@/components";
+import { StakingToken } from "@near/ts";
 
 export function NFTStakingCard(
   props: BoxProps & { name?: string; logo?: string; rewards?: StakingToken[] }
@@ -28,13 +27,10 @@ export function NFTStakingCard(
   const cardOpacity = useColorModeValue(glassyWhiteOpaque, "transparent");
 
   const getFormatedBalance = (balance, decimals) => {
-    const decimalsBN = new BN(decimals).neg();
-    const balanceBN = new BN(balance);
+    const decimalsBig = new Big(10).pow(decimals ?? 0);
+    const balanceBig = new Big(balance ?? 0);
 
-    return new BigDecimalFloat(balanceBN, decimalsBN).toLocaleString(
-      "en",
-      CURRENCY_FORMAT_OPTIONS
-    );
+    return balanceBig.div(decimalsBig).toFixed(2);
   };
 
   return (
@@ -48,6 +44,7 @@ export function NFTStakingCard(
         ["name", "logo", "tokens", "frequency", "rewards"],
         props
       ) as Record<string, string>)}
+      className="nft-staking-card"
     >
       <Box w="100%" bg={cardBg} borderRadius="24px">
         <Box

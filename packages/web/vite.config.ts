@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import Pages from "vite-plugin-pages";
 import react from "@vitejs/plugin-react";
 import reactRefresh from "@vitejs/plugin-react-refresh";
 
@@ -9,6 +10,10 @@ export default defineConfig({
   plugins: [
     react(),
     reactRefresh(),
+    Pages({
+      pagesDir: "src/pages",
+      importMode: () => "sync",
+    }),
     {
       ...inject({
         global: [

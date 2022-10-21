@@ -450,7 +450,7 @@ impl Listing {
           None
         }
       }
-      _ => None
+      _ => None,
     }
   }
 

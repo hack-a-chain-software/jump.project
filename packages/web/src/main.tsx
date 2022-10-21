@@ -1,11 +1,10 @@
 import "./index.css";
 import { Buffer } from "buffer";
-import React from "react";
+import React, { Suspense } from "react";
 import { ApolloProvider } from "@apollo/client";
 import ReactDOM from "react-dom/client";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
-import Router from "./router";
-import { NearEnvironment } from "react-near";
+import App from "./app";
 import { ProviderNear } from "./hooks/near";
 import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
@@ -25,8 +24,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             environment={import.meta.env.VITE_NEAR_NETWORK || "testnet"}
           >
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-            <Router />
 
+            <Suspense fallback={<p>Loading...</p>}>
+              <App />
+            </Suspense>
             <WalletSelectorModal />
           </ProviderNear>
         </ChakraProvider>

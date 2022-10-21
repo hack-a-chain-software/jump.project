@@ -1,4 +1,5 @@
 import { Flex, Button, Input, useNumberInput } from "@chakra-ui/react";
+import { MinusIcon, PlusIcon } from "@heroicons/react/outline";
 
 export function NumberInput({
   value,
@@ -25,21 +26,23 @@ export function NumberInput({
 
   return (
     <Flex className="space-x-[4px]">
-      <Button {...dec} bg="white" color="black">
-        -
-      </Button>
-
       <Input
         {...input}
-        bg="white"
-        color="black"
-        placeholder="Tickets"
-        variant="filled"
-        _hover={{ bg: "white" }}
-        _focus={{ bg: "white" }}
+        className="rounded-[10px] h-[40px] bg-[rgba(252,252,252,0.2)] border-transparent"
       />
-      <Button {...inc} bg="white" color="black">
-        +
+
+      <Button
+        {...inc}
+        className="w-[40px] h-[40px] bg-white hover:opacity-[0.8] disabled:opacity-[0.5]"
+      >
+        <PlusIcon className="w-[18px] h-[18px] text-[#431E5A]" />
+      </Button>
+
+      <Button
+        {...dec}
+        className="w-[40px] h-[40px] bg-white hover:opacity-[0.8] disabled:opacity-[0.5]"
+      >
+        <MinusIcon className="w-[18px] h-[18px] text-[#431E5A]" />
       </Button>
     </Flex>
   );

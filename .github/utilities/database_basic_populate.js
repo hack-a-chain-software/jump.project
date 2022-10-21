@@ -13,11 +13,19 @@ const prefix = JSON.parse(
 restartDb();
 
 async function restartDb() {
+  // const client = new Client({
+  //   user: process.env.DB_USER,
+  //   host: process.env.DB_HOST,
+  //   database: process.env.DB_NAME,
+  //   password: process.env.DB_PASS,
+  //   port: 5432,
+  // });
+
   const client = new Client({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASS,
+    user: "postgres",
+    host: "staging-db.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
+    database: "jump_testnet",
+    password: "JDX-secret_password-1683413286",
     port: 5432,
   });
 

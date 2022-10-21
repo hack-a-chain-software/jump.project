@@ -11,14 +11,9 @@ import { CloseIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";
 import { BackButton } from "./back-button";
-import { navRoutes, routes } from "../../routes";
+import { navRoutes } from "../../routes";
 
-const enabledRoutes = [
-  routes.staking,
-  routes.home,
-  routes.nftStaking,
-  routes.vesting,
-];
+const enabledRoutes = ["/staking", "/", "nft-staking", "vesting"];
 
 export const MobileNav = ({
   isOpen,
@@ -63,12 +58,10 @@ export const MobileNav = ({
               <Flex
                 w="130px"
                 minH="42px"
-                cursor={
-                  enabledRoutes.includes(e.route) ? "pointer" : "not-allowed"
-                }
+                cursor={e.enabled ? "pointer" : "not-allowed"}
                 transition="0.3s"
                 onClick={() => {
-                  enabledRoutes.includes(e.route) ? navigate(e.route) : null;
+                  e.enabled ? navigate(e.route) : null;
                   onClose();
                 }}
                 userSelect="none"

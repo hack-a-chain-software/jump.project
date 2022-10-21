@@ -1,5 +1,5 @@
-export const getUTCDate = (dateString = Date.now()) => {
-  const date = new Date(dateString);
+export const getUTCDate = (timestamp: number = Date.now()) => {
+  const date = new Date(timestamp);
 
   return new Date(
     date.getUTCFullYear(),

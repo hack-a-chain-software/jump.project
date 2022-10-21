@@ -27,7 +27,12 @@ export function buildClient(uri: string) {
           fields: {
             launchpad_projects: {
               keyArgs: false,
-              merge(existing, incoming) {
+              merge(existing, incoming, { variables }) {
+                // provisory, to do: use multi query without cache;
+                if (variables?.limit === 4) {
+                  return incoming;
+                }
+
                 return {
                   ...incoming,
                   data: [...(existing?.data || []), ...incoming.data],
