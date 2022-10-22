@@ -4,6 +4,8 @@ import { sequelizeConnect } from "./connector";
 import { processTransaction } from "./processor";
 import { Sequelize } from "sequelize/types";
 import { ProcessedEvent } from "./models";
+import { readFileSync } from "fs";
+import path from "path";
 
 /* Amount of blocks to reparse after rebooting indexer
  * from shutdown
@@ -37,18 +39,24 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
 (async () => {
   const sequelize = await sequelizeConnect();
 
-  // get highest block in DB
-  const lastProcessedTransaction = (await ProcessedEvent.findOne({
-    attributes: [
-      [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
-    ],
-    raw: true,
-  }))!;
+  // initialize DB if it is not
+  await sequelize.query(
+    readFileSync(path.resolve(__dirname, "../../db/sql/schema.sql")).toString()
+  );
 
-  const lastProcessedBlock = lastProcessedTransaction.block_height
-    ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
-    : START_BLOCK;
-  // const lastProcessedBlock = 102302400;
+  // get highest block in DB
+  // const lastProcessedTransaction = (await ProcessedEvent.findOne({
+  //   attributes: [
+  //     [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
+  //   ],
+  //   raw: true,
+  // }))!;
+
+  // const lastProcessedBlock = lastProcessedTransaction.block_height
+  //   ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
+  //   : START_BLOCK;
+
+  const lastProcessedBlock = START_BLOCK;
 
   const lakeConfig: types.LakeConfig = {
     s3BucketName: S3_BUCKET,

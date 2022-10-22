@@ -8,7 +8,9 @@ services:
       - "3000:3000"
   
   db:
-    build: ../db
+    image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: "1234"
     ports:
       - "5438:5432"
 
@@ -23,3 +25,5 @@ services:
     build:
         context: ../../.
         dockerfile: ./services/indexer-ts/Dockerfile
+    volumes:
+      - ~/.aws/:/root/.aws:ro

@@ -13,16 +13,21 @@ create table if not exists launchpad_investors (
     last_check timestamptz
 );
 
-create type listing_status as enum (
-    'unfunded',
-    'funded',
-    'sale_finalized',
-    'pool_created',
-    'pool_project_token_sent',
-    'pool_price_token_sent',
-    'liquidity_pool_finalized',
-    'cancelled'
-);
+DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'listing_status') THEN
+            create type listing_status as enum (
+                'unfunded',
+                'funded',
+                'sale_finalized',
+                'pool_created',
+                'pool_project_token_sent',
+                'pool_price_token_sent',
+                'liquidity_pool_finalized',
+                'cancelled'
+            );
+        END IF;
+    END $$;
 
 create table if not exists listings (
     listing_id numeric(21) primary key,
