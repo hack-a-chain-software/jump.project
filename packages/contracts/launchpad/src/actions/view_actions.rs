@@ -72,6 +72,15 @@ impl Contract {
       Some(investor) => match investor.allocation_count.get(&listing_id.0) {
         Some(alloc) => {
           let listing = self.internal_get_listing(listing_id.0);
+          match listing.status {
+            ListingStatus::Unfunded => return U128(0),
+            ListingStatus::Funded => {
+              if env::block_timestamp() < listing.final_sale_2_timestamp {
+                return U128(0)
+              }
+            }
+            _ => ()
+          }
           let vested = listing.calculate_vested_investor_withdraw(alloc.0, env::block_timestamp());
           U128(vested - alloc.1)
         }
