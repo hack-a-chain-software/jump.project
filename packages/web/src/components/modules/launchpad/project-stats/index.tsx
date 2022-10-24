@@ -59,6 +59,9 @@ export function ProjectStats({
     return allocationsSold.mul(100).div(totalAmount).toFixed(2);
   }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
 
+  console.log("penis");
+  console.log(formatNumber(totalRaise, price_token_info?.decimals));
+
   const steps = useMemo(() => {
     return [
       <div className="bg-[rgba(252,252,252,0.2)] rounded-[20px] py-[36px] px-[23px] w-full ml-[36px]">
@@ -311,7 +314,9 @@ export function ProjectStats({
 
             <div>
               <span
-                children={fraction_instant_release + "%"}
+                children={
+                  Number?.parseInt(fraction_instant_release || "0") / 100 + "%"
+                }
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -326,7 +331,9 @@ export function ProjectStats({
 
             <div>
               <span
-                children={fraction_cliff_release + "%"}
+                children={
+                  Number?.parseInt(fraction_cliff_release || "0") / 100 + "%"
+                }
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -341,9 +348,10 @@ export function ProjectStats({
             <div>
               <span
                 children={
-                  100 -
-                  Number?.parseInt(fraction_instant_release || "0") -
-                  Number?.parseInt(fraction_cliff_release || "0") +
+                  (10000 -
+                    Number?.parseInt(fraction_instant_release || "0") -
+                    Number?.parseInt(fraction_cliff_release || "0")) /
+                    100 +
                   "%"
                 }
                 className="text-[16px] font-[800] tracking-[-0.04em]"
