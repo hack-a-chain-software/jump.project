@@ -495,7 +495,6 @@ impl Listing {
     let mut total_release = initial_release;
     if timestamp >= self.cliff_timestamp
       && timestamp < self.end_cliff_timestamp
-      && timestamp >= self.cliff_timestamp
     {
       total_release += (cliff_release * (timestamp - self.cliff_timestamp) as u128)
         / (self.end_cliff_timestamp - self.cliff_timestamp) as u128
