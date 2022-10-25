@@ -13,8 +13,65 @@ This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacf
 ## 11. Potential “million cheap data additions" attack
 
 ## 14. Potential avoidance of launchpad fee
+### Implemented
+
+The auditors claim that the `cancel_listing` method can be called before the start of phase 2 of the sale, which could lead to a potential avoidance of launchpad fees by cancelling the sale shortly before phase 2 starts.
+
+However, a review of the code shows that the error is actually the assertion inside `cancel_listing` internal method. It should assert the current clocktime to be LESS THAN `open_sale_1_timestamp` and not greater than as is currently done.
+
+Previous code:
+```rust
+#[payable]
+pub fn cancel_listing(&mut self, listing_id: U64) {
+  self.assert_owner_or_guardian();
+  self.internal_cancel_listing(listing_id.0);
+}
+
+pub fn internal_cancel_listing(&mut self, listing_id: u64) {
+    let mut listing = self.internal_get_listing(listing_id);
+    listing.cancel_listing();
+    self.internal_update_listing(listing_id, listing);
+    events::cancel_listing(U64(listing_id));
+}
+
+pub fn cancel_listing(&mut self) {
+    match &self.status {
+      ListingStatus::Unfunded => (),
+      _ => {
+        assert!(
+          env::block_timestamp() > self.open_sale_1_timestamp,
+          "{}",
+          ERR_101
+        )
+      }
+    }
+
+    self.status = ListingStatus::Cancelled;
+    self.update_treasury_after_sale();
+}
+```
+
+Updated code:
+```rust
+pub fn cancel_listing(&mut self) {
+    match &self.status {
+      ListingStatus::Unfunded => (),
+      _ => {
+        assert!(
+          env::block_timestamp() < self.open_sale_1_timestamp,
+          "{}",
+          ERR_101
+        )
+      }
+    }
+
+    self.status = ListingStatus::Cancelled;
+    self.update_treasury_after_sale();
+}
+```
 
 ## 17. Inadequate checks on unregister storage
+### Implemented
 
 The `storage_unregister` public method is not supposed to allow project owners to unregister their storage. This check is performed through the `is_listing_owner` boolean attribute of the `investor` struct.
 
