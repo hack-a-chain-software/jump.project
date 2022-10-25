@@ -233,6 +233,14 @@ async function launchpadSetup(execution_data) {
   let counter = 0;
   let nowTimestamp = Math.floor(Date.now() / 1000).toString();
   for (token of tokenArray) {
+    // Allow creation of listing on owner's behalf
+    await connAccountMap.ownerAccount.functionCall({
+      contractId: connAccountMap.launchpad.accountId,
+      methodName: "toggle_authorize_listing_creation",
+      args: {},
+      attachedDeposit: new BN(1),
+    });
+
     let name = parseAccountName(token.name);
     await deployToken(name, token.totalSupply, token, execution_data);
 

@@ -159,6 +159,10 @@ mod tests {
     let fee_price_tokens = 100;
     let fee_liquidity_tokens = 100;
 
+    transact_call(
+      project_owner.call(launchpad.id(), "toggle_authorize_listing_creation").deposit(1)
+    ).await;
+
     let listing_id: u64 = transact_call(
       guardian
         .call(launchpad.id(), "create_new_listing")

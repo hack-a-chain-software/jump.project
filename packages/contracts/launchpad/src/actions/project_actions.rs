@@ -60,6 +60,17 @@ impl Contract {
     project_owner_account.track_storage_usage(initial_storage);
     self.internal_update_investor(&project_owner_id, project_owner_account);
   }
+
+  #[payable]
+  pub fn toggle_authorize_listing_creation(&mut self) {
+    assert_one_yocto();
+    let investor = env::predecessor_account_id();
+    let mut investor_account = self.internal_get_investor(&investor).expect(ERR_010);
+
+    investor_account.authorized_listing_creation = !investor_account.authorized_listing_creation;
+
+    self.internal_update_investor(&investor, investor_account);
+  }
 }
 
 /// Actions to be called through token_receiver functions
@@ -144,7 +155,6 @@ mod tests {
         match listing.status {
           ListingStatus::Cancelled => {
             listing.fund_listing();
-            listing.cancel_listing()
           }
           ListingStatus::SaleFinalized
           | ListingStatus::PoolProjectTokenSent
