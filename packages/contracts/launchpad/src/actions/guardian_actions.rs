@@ -42,6 +42,7 @@ impl Contract {
       .expect(ERR_010);
     let listing_id = self.internal_create_new_listing(listing_data);
     project_owner_account.track_storage_usage(initial_storage);
+    project_owner_account.is_listing_owner = true;
     self.internal_update_investor(&project_owner_account_id, project_owner_account);
     listing_id
   }
