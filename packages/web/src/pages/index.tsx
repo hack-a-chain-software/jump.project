@@ -43,9 +43,9 @@ export function Index() {
         <Tutorial items={stepItems} />
 
         <TopCard
-          gradientText="Launchpad "
-          bigText="Welcome to Jump Pad"
-          bottomDescription="Jump Pad is a NEAR native token launchpad that empowers crypto currency projects with the ability to distribute tokens and raise capital from the community or private investors for raise liquidity. "
+          gradientText="Token Launchpad "
+          bigText="Jump Pad"
+          bottomDescription="Jump Pad is a NEAR native token launchpad that empowers crypto currency projects with the ability to distribute tokens and raise capital from the community or private investors. "
           jumpLogo
         />
       </Flex>

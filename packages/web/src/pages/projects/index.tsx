@@ -165,7 +165,7 @@ export const Projects = () => {
         <div className="flex flex-col">
           <span>
             All Investment projects are listed here, you can filter to show only
-            your projects or whitelisted projects.
+            your projects or provate sale projects.
           </span>
         </div>
       ),
@@ -179,7 +179,7 @@ export const Projects = () => {
           gradientText=""
           maxW="max-w-[548px] xl:max-w-[none]"
           bigText="Boost your Jump Pad experience with xJUMP"
-          bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by only using xJUMP "
+          bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by using xJUMP "
           jumpLogo
           stepItems={stepItems}
         />
@@ -222,7 +222,7 @@ export const Projects = () => {
               )}
             >
               <span className="font-[700] text-[16px] tracking-[-0.04em]">
-                Whitelist
+                Private sales
               </span>
             </button>
 

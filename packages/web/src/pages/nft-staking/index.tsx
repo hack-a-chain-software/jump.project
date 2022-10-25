@@ -113,9 +113,11 @@ export const NFTStaking = () => {
   return (
     <PageContainer>
       <TopCard
-        gradientText="Jump NFT"
-        bigText="Staking"
-        bottomDescription="Stake your NFT assets in order to get rewards from the collection owners and also from JUMP and Partners!"
+        gradientText=""
+        bigText="Jump NFT Staking"
+        bottomDescription={`
+          Welcome to Jump NFT Staking; the portal between NFT technology and decentralized finance on NEAR Protocol!
+        `}
         py
         jumpLogo
         stepItems={stepItems}
