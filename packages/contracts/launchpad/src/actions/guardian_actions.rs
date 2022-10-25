@@ -40,9 +40,13 @@ impl Contract {
     let mut project_owner_account = self
       .internal_get_investor(&project_owner_account_id)
       .expect(ERR_010);
+
+    assert!(project_owner_account.authorized_listing_creation, "{}", ERR_115);
+    
     let listing_id = self.internal_create_new_listing(listing_data);
     project_owner_account.track_storage_usage(initial_storage);
     project_owner_account.is_listing_owner = true;
+    project_owner_account.authorized_listing_creation = false;
     self.internal_update_investor(&project_owner_account_id, project_owner_account);
     listing_id
   }
@@ -132,6 +136,9 @@ mod tests {
             0
           };
           contract.internal_deposit_storage_investor(&listing_data.project_owner, storage_deposit);
+          let mut investor = contract.internal_get_investor(&listing_data.project_owner).unwrap();
+          investor.authorized_listing_creation = true;
+          contract.internal_update_investor(&listing_data.project_owner, investor)
         }
 
         let listing_id = contract.create_new_listing(listing_data.clone());
@@ -443,13 +450,13 @@ mod tests {
       (
         OWNER_ACCOUNT.parse().unwrap(),
         1,
-        false,
+        true,
         Some(ERR_101.to_string()),
       ),
       // 4. change listing status to cancelled;
       // 5. emit cancel listing event;
-      (OWNER_ACCOUNT.parse().unwrap(), 1, true, None),
-      (GUARDIAN_ACCOUNT.parse().unwrap(), 1, true, None),
+      (OWNER_ACCOUNT.parse().unwrap(), 1, false, None),
+      (GUARDIAN_ACCOUNT.parse().unwrap(), 1, false, None),
     ];
 
     let mut counter = 0;
