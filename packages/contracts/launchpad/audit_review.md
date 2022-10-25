@@ -16,6 +16,32 @@ This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacf
 
 ## 17. Inadequate checks on unregister storage
 
+The `storage_unregister` public method is not supposed to allow project owners to unregister their storage. This check is performed through the `is_listing_owner` boolean attribute of the `investor` struct.
+
+However, currently, there is no moment in which `is_listing_owner` is set to true, meaning that the check cannot be properly enforced.
+
+To fix the issue, we changed the `create_new_listing` public method to also update the `is_listing_owner` value of the user assigned as `project_owner`:
+
+```rust
+#[payable]
+  pub fn create_new_listing(&mut self, listing_data: ListingData) -> u64 {
+    self.assert_owner_or_guardian();
+    let initial_storage = env::storage_usage();
+    let project_owner_account_id = listing_data.project_owner.clone();
+    let mut project_owner_account = self
+      .internal_get_investor(&project_owner_account_id)
+      .expect(ERR_010);
+    let listing_id = self.internal_create_new_listing(listing_data);
+    project_owner_account.track_storage_usage(initial_storage);
+    // CHANGE HERE
+    project_owner_account.is_listing_owner = true;
+    //
+    self.internal_update_investor(&project_owner_account_id, project_owner_account);
+    listing_id
+  }
+```
+
+
 ## 21. Redundant code in calculate_vested_investor_withdraw function
 ### Implemented
 
