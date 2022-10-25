@@ -12,6 +12,20 @@ This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacf
 
 ## 11. Potential “million cheap data additions" attack
 
+The auditors found that a malicious `guardian`, either by malicious intent or by hacking of their private keys, might spam the contract with multiple unasked for listings and asssign random investors as their owners, whcih would cause the investors to pay for the storage needed and would make them unable to recover their storage fees forever.
+
+
+The suggested fix was to require a signature of the project_owner for a specific message (if address is a user wallet) or to do a callback to verify the intent (if address is a smart contract).
+
+However, we found that such methods significantly deteriorate the ease of use of the contract, specially when setting up a new sale for a project.
+
+
+As a solution, we implemented the boolean attribute `authorized_listing_creation` in the `investor` struct. It is default false and the user must call the new public method `toggle_authorize_listing_creation` to toggle its value to true.
+
+Guardians can only call `create_new_listing` using the address of the `project_owner` if that address is registered as an investor with the `authorized_listing_creation` attribute set to true.
+
+After creating a new listing, `authorized_listing_creation` is set back to false to prevent the creation of multiple undesired listings.
+
 ## 14. Potential avoidance of launchpad fee
 ### Implemented
 

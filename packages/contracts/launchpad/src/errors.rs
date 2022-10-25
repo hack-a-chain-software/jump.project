@@ -26,6 +26,7 @@ pub const ERR_112: &str =
   "ERR_112: Cannot allocate more price tokens to dex launch than received fom presale";
 pub const ERR_113: &str = "ERR_113: Listing can only be funded once";
 pub const ERR_114: &str = "ERR_114: Cannot fund listing after sale start time";
+pub const ERR_115: &str = "ERR_115: Intended project_owner did not authorize listing creation";
 
 /// Investor errors
 pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transaction";

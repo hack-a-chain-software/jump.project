@@ -27,6 +27,8 @@ pub struct Investor {
 
   // marks whether is listing owner
   pub is_listing_owner: bool,
+  // marks whether investor agreed to the creation of a new listing with them as owner
+  pub authorized_listing_creation: bool, 
 
   // launchpad membership checks
   #[serde(with = "crate::string")]
@@ -46,6 +48,7 @@ impl VInvestor {
       account_id: account_id.clone(),
       storage_deposit: initial_deposit,
       is_listing_owner: false,
+      authorized_listing_creation: false,
       storage_used: 0,
       staked_token: 0,
       last_check: 0,

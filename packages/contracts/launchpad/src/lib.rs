@@ -86,6 +86,7 @@ impl Contract {
       storage_deposit: env::account_balance(),
       storage_used: 0,
       is_listing_owner: true,
+      authorized_listing_creation: false,
       staked_token: 0,
       last_check: 0,
       allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {
@@ -443,6 +444,7 @@ mod tests {
       storage_deposit: 1_000_000_000_000_000_000_000_000,
       storage_used: 10_000,
       is_listing_owner: false,
+      authorized_listing_creation: false,
       staked_token: 0,
       last_check: 0,
       allocation_count: UnorderedMap::new(StorageKey::InvestorTreasury {
