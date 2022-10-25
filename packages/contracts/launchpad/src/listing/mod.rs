@@ -269,7 +269,7 @@ impl Listing {
       ListingStatus::Unfunded => (),
       _ => {
         assert!(
-          env::block_timestamp() > self.open_sale_1_timestamp,
+          env::block_timestamp() < self.open_sale_1_timestamp,
           "{}",
           ERR_101
         )
