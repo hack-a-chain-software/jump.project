@@ -62,7 +62,7 @@ export function TokenLauncherTopCard() {
               letterSpacing="-3%"
               lineHeight="20px"
             >
-              Token launch
+              Token Laboratory
             </GradientText>
             <Text
               fontSize="45px"
@@ -80,7 +80,8 @@ export function TokenLauncherTopCard() {
               letterSpacing="-3%"
               lineHeight="19.36px"
             >
-              Create your own token within minutes with only two steps
+              Create your own token in minutes with only a few clicks of your
+              mouse!
             </Text>
           </Flex>
           <Box

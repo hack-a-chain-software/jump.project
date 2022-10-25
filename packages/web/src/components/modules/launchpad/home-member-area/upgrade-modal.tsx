@@ -161,8 +161,8 @@ export default function ({
 
                   <div className="text-left">
                     <span className="font-[700] text-[14px] leading-[14px]">
-                      Use xJUMPS to upgrade your tier and <br /> get more
-                      allocations to join sales on early access.
+                      Use xJUMP to upgrade your tier and <br /> get more
+                      tickets.
                     </span>
                   </div>
 

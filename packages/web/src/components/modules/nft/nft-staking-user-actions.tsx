@@ -88,7 +88,7 @@ export function NFTStakingUserActions(props: any) {
                 fontSize={16}
                 color="white"
               >
-                User Area
+                User Portal
               </GradientText>
               <Text
                 fontWeight="800"
@@ -105,8 +105,7 @@ export function NFTStakingUserActions(props: any) {
                 fontSize={18}
                 color="white"
               >
-                This is the area wher you can interact with the Staking as a
-                Investor
+                Stake or unstake NFTs and claim rewards
               </Text>
               <Stack mt="50px" gap={1}>
                 <Button

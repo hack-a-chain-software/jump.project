@@ -179,8 +179,8 @@ export const Vesting = () => {
     <PageContainer>
       <TopCard
         gradientText="Jump Vesting"
-        bigText="Lock. Unlock. Withdraw."
-        bottomDescription="Manage and Withdraw your locked tokens that you have vesting  period"
+        bigText="Unlock and Claim JUMP Rewards"
+        bottomDescription=" Claim your JUMP and boost the rate of vested rewards"
         py
         stepItems={stepItems}
         content={
@@ -311,7 +311,7 @@ export const Vesting = () => {
           accountId
             ? !loading && <Empty text="No vestings available" />
             : loading && (
-                <Empty text="You must be logged in to view all vestings" />
+                <Empty text="Connect your wallet to view Jump Vesting" />
               )
         }
         condition={!isEmpty(investorInfo) && !isEmpty(vestings)}
@@ -320,10 +320,10 @@ export const Vesting = () => {
           <Flex justifyContent="space-between">
             <Select
               value={filter}
-              placeholder="Filter"
+              placeholder="Vesting Schedules"
               items={[
                 { label: "Completed", value: "completed" },
-                { label: "Runing", value: "runing" },
+                { label: "Vesting Live", value: "runing" },
               ]}
               onChange={(value: string | null) => setFilter(value)}
             />
