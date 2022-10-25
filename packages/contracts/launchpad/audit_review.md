@@ -9,8 +9,20 @@ This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacf
 ## 1. Improper access controls leads to liquidity theft
 
 ## 8. Improper evaluation of `dex_lock_time`
+### Not Acknowledged
+
+The auditors claim that the `listing.dex_lock_time` is being set back to 0 on every callback from `launch_on_dex`, which would render the lock useless.
+
+However, the audit report does not highlight how that creates any issues with the contract functionality. In fact, this is the intended behavior for the lock, as it is meant as a CONCURRENCY LOCK.
+
+The idea behind it is that if the `launch_on_dex` method is called more than once in the same block, all calls but the first will revert. The lock will only be lifted after the execution of the callback to allow the users to proceed with the next phase of the launch.
+
+The reason it is implemented as a timestamp instead of a boolean value is that in case some unintended bug affects the callback, funds do not get locked forever on the contract.
+
+Therefore, no modifications were done to the contract on this issue's account.
 
 ## 11. Potential “million cheap data additions" attack
+### Implemented
 
 The auditors found that a malicious `guardian`, either by malicious intent or by hacking of their private keys, might spam the contract with multiple unasked for listings and asssign random investors as their owners, whcih would cause the investors to pay for the storage needed and would make them unable to recover their storage fees forever.
 
