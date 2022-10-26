@@ -141,7 +141,7 @@ mod tests {
    * 1. Add guardian (owner)
    * 2. Deposit contract token to contract treasury (anyone)
    * 3. Create staking program (guardian)
-   * 4. Transfer contract token (guardian; contract -> collection -> distribution)
+   * 4. Transfer contract token (owner; contract -> collection -> distribution)
    * 5. Deposit program token to collection treasury (collection owner)
    * 6. Transfer program token (collection owner; collection -> distribution)
    * 7. Mint a NFT (staker)
@@ -219,7 +219,7 @@ mod tests {
 
     transfer(
       &nft_staking,
-      &guardian,
+      &owner,
       json!({
         "operation": { "type": "ContractToCollection" },
         "collection": {
@@ -234,7 +234,7 @@ mod tests {
 
     transfer(
       &nft_staking,
-      &guardian,
+      &owner,
       json!({
         "operation": { "type": "CollectionToDistribution" },
         "collection": {

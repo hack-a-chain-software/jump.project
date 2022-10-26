@@ -27,7 +27,7 @@ impl Contract {
   ) {
     match &operation {
       TransferOperation::CollectionToContract | TransferOperation::ContractToCollection => {
-        self.only_guardians(operator);
+        self.only_owner(operator);
         self.only_contract_tokens(token_id);
         staking_program.only_non_program_tokens(token_id);
       }
@@ -120,24 +120,24 @@ mod tests {
   use super::*;
 
   #[rstest]
-  #[case::guardian_ct_contract_to_collection(
+  #[case::owner_ct_contract_to_collection(
     TransferOperation::ContractToCollection,
-    guardian(),
+    owner(),
     contract_token()
   )]
-  #[case::guardian_ct_collection_to_contract(
+  #[case::owner_ct_collection_to_contract(
     TransferOperation::CollectionToContract,
-    guardian(),
+    owner(),
     contract_token()
   )]
-  #[case::guardian_ct_collection_to_distribution(
+  #[case::owner_ct_collection_to_distribution(
     TransferOperation::CollectionToDistribution,
-    guardian(),
+    owner(),
     contract_token()
   )]
-  #[case::guardian_ct_beneficiary_to_collection(
+  #[case::owner_ct_beneficiary_to_collection(
     TransferOperation::BeneficiaryToCollection,
-    guardian(),
+    owner(),
     contract_token()
   )]
   #[case::collection_owner_pt_collection_to_distribution(
@@ -166,24 +166,24 @@ mod tests {
   }
 
   #[rstest]
-  #[case::guardian_pt_contract_to_collection(
+  #[case::owner_pt_contract_to_collection(
     TransferOperation::ContractToCollection,
-    guardian(),
+    owner(),
     program_token()
   )]
-  #[case::guardian_pt_collection_to_contract(
+  #[case::owner_pt_collection_to_contract(
     TransferOperation::CollectionToContract,
-    guardian(),
+    owner(),
     program_token()
   )]
-  #[case::guardian_pt_collection_to_distribution(
+  #[case::owner_pt_collection_to_distribution(
     TransferOperation::CollectionToDistribution,
-    guardian(),
+    owner(),
     program_token()
   )]
-  #[case::guardian_pt_beneficiary_to_collection(
+  #[case::owner_pt_beneficiary_to_collection(
     TransferOperation::BeneficiaryToCollection,
-    guardian(),
+    owner(),
     program_token()
   )]
   #[case::collection_owner_ct_contract_to_collection(
