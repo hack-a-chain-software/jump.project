@@ -1,7 +1,6 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap};
 use near_sdk::json_types::{Base58CryptoHash, U128};
-use near_sdk::serde::private::de::IdentifierDeserializer;
 use near_sdk::{near_bindgen, BorshStorageKey, env, sys, AccountId, CryptoHash, PanicOnDefault};
 
 use binaries::Binary;
