@@ -34,7 +34,9 @@ The main reason for the behavior is that, in practice, many investor already put
 
 ## 15. Inadequate validation on AccountId (mintable token)
 
+The auditors pointed out that token_contract.rs, vesting_contract.rs and modified_contract_standards.rs do not ensure that account ids are valid when processing them. This might lead to assets becoming irrecoverable by typing and frontend errors.
 
+All contracts have been modified to validate the account ids being inputed by the user.
 
 ## 18. Optimization in withdraw (locked_token)
 
