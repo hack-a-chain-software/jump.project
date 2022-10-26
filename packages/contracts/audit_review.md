@@ -23,8 +23,18 @@ The auditors point out that there is an insufficient gas amount being passed to 
 
 
 ## 12. Inadequate function parameters (vesting_contract)
+### Acknowledged
+
+The auditors point out the the optional parameter `date_in` in the `create_investment` public method might allow users to actually bypass the intended cliff period in a vesting.
+
+However, this is the intended behavior, as the method can only be called by the owner, they must have the autonomy to actually select the date in which the investor entered the investment agreemnte.
+
+The main reason for the behavior is that, in practice, many investor already put funds into Jump DeFi, even before the contracts were deployed as they were early investors. Therefore, their vesting schemas have already been started and must be faithfully reproduced, which might require the owner to set a previous start_date.
+
 
 ## 15. Inadequate validation on AccountId (mintable token)
+
+
 
 ## 18. Optimization in withdraw (locked_token)
 
