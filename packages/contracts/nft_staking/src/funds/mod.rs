@@ -24,8 +24,8 @@ mod tests_fixtures {
   }
 
   #[fixture]
-  pub fn guardian() -> AccountId {
-    AccountId::from_str("guardian.near").unwrap()
+  pub fn owner() -> AccountId {
+    AccountId::from_str("owner.near").unwrap()
   }
 
   #[fixture]
@@ -105,15 +105,9 @@ mod tests_fixtures {
   }
 
   #[fixture]
-  pub fn owner() -> AccountId {
-    AccountId::from_str("owner.near").unwrap()
-  }
-
-  #[fixture]
   pub fn contract(
     owner: AccountId,
     contract_token: FungibleTokenID,
-    guardian: AccountId,
     staking_program: StakingProgram,
   ) -> Contract {
     let mut context = get_context();
@@ -122,8 +116,6 @@ mod tests_fixtures {
     testing_env!(context.build());
 
     let mut contract = Contract::new(owner, vec![contract_token.clone()]);
-
-    contract.add_guardian(guardian);
 
     contract
       .contract_treasury
