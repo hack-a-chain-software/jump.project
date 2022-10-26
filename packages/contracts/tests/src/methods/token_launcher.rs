@@ -32,20 +32,22 @@ pub async fn register_contract(
         "init_cost": init_cost.to_string(),
         "init_fn_name": init_fn_name,
         "init_fn_params": init_fn_params
-      })),
+      })).deposit(1_000_000_000_000_000_000_000_000),
   )
   .await
 }
 
 pub async fn unregister_contract(
+  owner: &Account,
+  contract: &Contract,
   contract_name: String,
 ) -> ExecutionResult<String> {
   transact_call(
     owner
-      .call(&contract.id(), "register_contract")
+      .call(&contract.id(), "unregister_contract")
       .args_json(json!({
         "contract_name": contract_name
-      })),
+      })).gas(300_000_000_000_000),
   )
   .await
 }
