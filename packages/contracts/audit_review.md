@@ -11,7 +11,10 @@ The issue is acknowledged, however the staking contract will be discontinued as 
 
 The staking contract has been excluded from the repository.
 
-## 4. Insufficient Access Controls on NFT Minting (locked_token)
+## 4. Insufficient Access Controls on NFT Minting (nft_contract)
+### Acknowledged
+
+Issue refers to testnet only contract, no need to implement
 
 ## 5. Users will not be able to withdraw their locked tokens even after they are unlocked (locked_token)
 
