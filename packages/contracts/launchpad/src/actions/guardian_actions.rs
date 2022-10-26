@@ -34,6 +34,14 @@ pub struct ListingData {
 impl Contract {
   #[payable]
   pub fn create_new_listing(&mut self, listing_data: ListingData) -> u64 {
+    assert!(
+      listing_data.liquidity_pool_project_tokens == U128(0)
+        && listing_data.liquidity_pool_price_tokens == U128(0),
+      "Jump Dex integration not yet available, {}, {}",
+      listing_data.liquidity_pool_project_tokens.0,
+      listing_data.liquidity_pool_price_tokens.0
+    );
+
     self.assert_owner_or_guardian();
     let initial_storage = env::storage_usage();
     let project_owner_account_id = listing_data.project_owner.clone();
@@ -41,8 +49,12 @@ impl Contract {
       .internal_get_investor(&project_owner_account_id)
       .expect(ERR_010);
 
-    assert!(project_owner_account.authorized_listing_creation, "{}", ERR_115);
-    
+    assert!(
+      project_owner_account.authorized_listing_creation,
+      "{}",
+      ERR_115
+    );
+
     let listing_id = self.internal_create_new_listing(listing_data);
     project_owner_account.track_storage_usage(initial_storage);
     project_owner_account.is_listing_owner = true;
@@ -109,6 +121,9 @@ mod tests {
           .insert(&GUARDIAN_ACCOUNT.parse().unwrap());
 
         let mut listing_data = standard_listing_data();
+        // temporarily set to 0, see audit(1)
+        listing_data.liquidity_pool_project_tokens = U128(0);
+        listing_data.liquidity_pool_price_tokens = U128(0);
 
         if a {
           listing_data.open_sale_2_timestamp_seconds =
@@ -120,13 +135,19 @@ mod tests {
         } else if d {
           listing_data.token_allocation_price = U128(1);
           listing_data.token_allocation_size = U128(1);
-          listing_data.liquidity_pool_project_tokens = U128(2);
-          listing_data.liquidity_pool_price_tokens = U128(1);
+          listing_data.liquidity_pool_project_tokens = U128(0);
+          listing_data.liquidity_pool_price_tokens = U128(0);
+          // temporarily comented out see audit(1)
+          // listing_data.liquidity_pool_project_tokens = U128(2);
+          // listing_data.liquidity_pool_price_tokens = U128(1);
         } else if e {
-          listing_data.liquidity_pool_project_tokens =
-            U128(listing_data.liquidity_pool_project_tokens.0 * 1_000_000_000);
-          listing_data.liquidity_pool_price_tokens =
-            U128(listing_data.liquidity_pool_price_tokens.0 * 1_000_000_000);
+          listing_data.liquidity_pool_project_tokens = U128(0);
+          listing_data.liquidity_pool_price_tokens = U128(0);
+          // temporarily comented out see audit(1)
+          // listing_data.liquidity_pool_project_tokens =
+          //   U128(listing_data.liquidity_pool_project_tokens.0 * 1_000_000_000);
+          // listing_data.liquidity_pool_price_tokens =
+          //   U128(listing_data.liquidity_pool_price_tokens.0 * 1_000_000_000);
         }
 
         if project_owner_registered {
@@ -136,7 +157,9 @@ mod tests {
             0
           };
           contract.internal_deposit_storage_investor(&listing_data.project_owner, storage_deposit);
-          let mut investor = contract.internal_get_investor(&listing_data.project_owner).unwrap();
+          let mut investor = contract
+            .internal_get_investor(&listing_data.project_owner)
+            .unwrap();
           investor.authorized_listing_creation = true;
           contract.internal_update_investor(&listing_data.project_owner, investor)
         }
@@ -256,49 +279,58 @@ mod tests {
         Some(ERR_110.to_string()),
       ),
       //    (c) allocation size preciselly divides total_amount_sale_project_tokens
-      (
-        OWNER_ACCOUNT.parse().unwrap(),
-        1,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        Some(ERR_109.to_string()),
-      ),
+       
+      // temporarily comented out see audit(1)
+      // (
+      //   OWNER_ACCOUNT.parse().unwrap(),
+      //   1,
+      //   true,
+      //   true,
+      //   false,
+      //   false,
+      //   true,
+      //   false,
+      //   false,
+      //   Some(ERR_109.to_string()),
+      // ),
+
       //    (d) (liquidity_pool_project_tokens / liquidity_pool_price_tokens) <=
       //        (token_allocation_price / token_allocation_size)
       //        to ensure that price on presale isn't larger than on DEX
-      (
-        OWNER_ACCOUNT.parse().unwrap(),
-        1,
-        true,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        Some(ERR_111.to_string()),
-      ),
+      
+      // temporarily comented out see audit(1)
+      // (
+      //   OWNER_ACCOUNT.parse().unwrap(),
+      //   1,
+      //   true,
+      //   true,
+      //   false,
+      //   false,
+      //   false,
+      //   true,
+      //   false,
+      //   Some(ERR_111.to_string()),
+      // ),
+
       //    (e) liquidity_pool_price_tokens) <=
       //        (token_allocation_price * token_allocation_size)
       //        to ensure there will be enough price tokens to build
       //        dex liquidity
-      (
-        OWNER_ACCOUNT.parse().unwrap(),
-        1,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        Some(ERR_112.to_string()),
-      ),
+      
+      // temporarily comented out see audit(1)
+      // (
+      //   OWNER_ACCOUNT.parse().unwrap(),
+      //   1,
+      //   true,
+      //   true,
+      //   false,
+      //   false,
+      //   false,
+      //   false,
+      //   true,
+      //   Some(ERR_112.to_string()),
+      // ),
+
       // 4. assert enough storage in listing owner account;
       (
         OWNER_ACCOUNT.parse().unwrap(),

@@ -11,6 +11,7 @@ const LOCK_PERIOD: u64 = 60_000_000_000;
 impl Contract {
   #[payable]
   pub fn launch_on_dex(&mut self, listing_id: U64) -> Promise {
+    panic!("Jump Dex integration not yet available");
     let timestamp = env::block_timestamp();
     let mut listing = self.internal_get_listing(listing_id.0);
     assert!(listing.dex_lock_time <= timestamp, "{}", ERR_403);
