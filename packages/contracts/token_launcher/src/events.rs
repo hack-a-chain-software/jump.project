@@ -17,9 +17,24 @@ fn log_basic_event_format(standard: &str, version: &str, event_type: &str, data_
     .to_string()
   )
 }
-/// New wasm was added to factory contract storage
+/// New wasm was registered with a name to the binaries struct
 pub fn event_new_contract_registered(type_of_contract: &str, contract_hash: Base58CryptoHash) {
   let event_type = "new_contract_registered";
+  let event_data = &json!({
+      "type_of_contract": type_of_contract,
+      "contract_hash": contract_hash,
+  });
+  log_basic_event_format(
+    STANDARD_NAME,
+    STANDARD_VERSION,
+    event_type,
+    vec![event_data],
+  );
+}
+
+/// Contract was removed from the deploying options (a.k.a removed from the binaries struct)
+pub fn event_contract_removed(type_of_contract: &str, contract_hash: Base58CryptoHash) {
+  let event_type = "contract_removed";
   let event_data = &json!({
       "type_of_contract": type_of_contract,
       "contract_hash": contract_hash,

@@ -7,6 +7,18 @@ pub(crate) const ERR_001: &str = "This function is private to owner";
 pub(crate) const ERR_003: &str =
   "Contract: register_contract: A contract with this name is already saved to the memory";
 
+pub(crate) const ERR_004: &str =
+  "Contract: register_contract: To register a contract you must attach 0,25 N as storage";
+
+pub(crate) const ERR_005: &str =
+  "Contract: register_contract: There is no contract associated with the hash that was passed";
+
+pub(crate) const ERR_006: &str =
+  "Contract: unregister_contract: There is no contract with this name - it is not possible to unregister it";
+
+pub(crate) const ERR_007: &str =
+  "Contract: unregister_contract: There is no hash associated with this name - it is not possible to unregister it";
+
 pub(crate) const ERR_101: &str =
   "Deploy: deploy_new_contract: This contract address already exists";
 

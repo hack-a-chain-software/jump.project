@@ -1,16 +1,20 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap};
 use near_sdk::json_types::{Base58CryptoHash, U128};
+use near_sdk::serde::private::de::IdentifierDeserializer;
 use near_sdk::{near_bindgen, BorshStorageKey, env, sys, AccountId, CryptoHash, PanicOnDefault};
 
 use binaries::Binary;
-use crate::errors::{ERR_001, ERR_003};
-use crate::events::event_new_contract_registered; //, ERR_002};
+use crate::errors::{ERR_001, ERR_003, ERR_004, ERR_005, ERR_006, ERR_007};
+use crate::events::{event_new_contract_registered, event_contract_removed}; //, ERR_002};
 
 pub mod actions;
 pub mod binaries;
 pub mod errors;
 pub mod events;
+
+/// The 0.25 NEAR tokens required for the registration of a new contract
+const MIN_ATTACHED_STORAGE: u128 = 250_000_000_000_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -22,6 +26,8 @@ pub struct Contract {
   pub storage_cost: LookupMap<Base58CryptoHash, U128>,
   ///AccountID where contract was deployed and the name of the contract
   pub deployed_contracts: LookupMap<AccountId, String>,
+  // Balance received from the deployment fees
+  pub treasury: U128, // VIEW, WITHDRAW, SET TO TREASURY
 }
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]
@@ -46,6 +52,7 @@ impl Contract {
       binaries: LookupMap::new(StorageKey::Binaries),
       storage_cost: LookupMap::new(StorageKey::CostPerHash),
       deployed_contracts: LookupMap::new(StorageKey::DeployedContracts),
+      treasury: U128(0),
     }
   }
 }
@@ -60,7 +67,9 @@ impl Contract {
 #[near_bindgen]
 impl Contract {
   /// Register the memorry hash of as wasm that was saved on chain
-  /// to the factory 'binaries' struct -this allows to access the contract more easily
+  /// to the factory 'binaries' struct - this allows to access the contract more easily
+  /// this function is restricted to the owner
+  #[payable]
   pub fn register_contract(
     &mut self,
     contract_name: String,
@@ -70,10 +79,29 @@ impl Contract {
     init_fn_name: String,
     init_fn_params: String,
   ) {
+    self.only_owner();
+
+    //verify that there is not a contract registered with this name
     assert!(
       !self.binaries.contains_key(&contract_name.clone()),
       "{}",
       ERR_003
+    );
+
+    //verify that there is enough storage to register the contract
+    assert!(
+      env::attached_deposit() >= MIN_ATTACHED_STORAGE,
+      "{}",
+      ERR_004
+    );
+
+    //verify if there is a contract saved with this hash
+    //when a contract is saved, it's hash is automatically saved on 'storage_cost' LUP MAP
+    //therefore, it's there, we can proceed
+    assert!(
+      !self.storage_cost.contains_key(&contract_hash.clone()),
+      "{}",
+      ERR_005
     );
 
     let new_binary = Binary::new(
@@ -88,6 +116,35 @@ impl Contract {
     self.binaries.insert(&contract_name, &new_binary);
     event_new_contract_registered(contract_name.as_str(), contract_hash);
   }
+
+  /// Function to unregister a contract - also restricted to the owner
+  /// It removes the contract from the binary map and also removes it's
+  /// wasm file from contract 'memory'
+  pub fn unregister_contract(&mut self, contract_name: String) {
+    self.only_owner();
+
+    //verify that there IS a contract registered with this name
+    assert!(
+      self.binaries.contains_key(&contract_name.clone()),
+      "{}",
+      ERR_006
+    );
+
+    let contract_hash = self
+      .binaries
+      .get(&contract_name.clone())
+      .expect(ERR_007)
+      .contract_hash;
+
+    //remove contract from the binaries struct
+    self.binaries.remove(&contract_name);
+    //remove the contract from the struct that contains its cost
+    self.storage_cost.remove(&contract_hash.into());
+    //remove the binary from memory
+    env::storage_remove(&contract_hash);
+
+    event_contract_removed(contract_name.as_str(), contract_hash.into());
+  }
 }
 
 #[cfg(test)]
@@ -101,7 +158,6 @@ mod tests {
 
   pub const CONTRACT_ACCOUNT: &str = "contract.testnet";
   pub const OWNER_ACCOUNT: &str = "owner.testnet";
-
 
   pub fn get_context(
     input: Vec<u8>,
@@ -137,6 +193,7 @@ mod tests {
       binaries: LookupMap::new(b"a".to_vec()),
       storage_cost: LookupMap::new(b"m".to_vec()),
       deployed_contracts: LookupMap::new(b"c".to_vec()),
+      treasury: U128(0),
     }
   }
 
@@ -187,8 +244,8 @@ mod tests {
 
     let context = get_context(
       vec![],
-      10,
-      100,
+      MIN_ATTACHED_STORAGE,
+      MIN_ATTACHED_STORAGE * 4,
       OWNER_ACCOUNT.parse().unwrap(),
       0,
       Gas(10u64.pow(18)),
@@ -220,6 +277,39 @@ mod tests {
   }
 
   /// Test registration of a contract (to be deployed)
+  /// that was already registred
+  /// Should panic and not allow for user to register it
+  #[test]
+  #[should_panic(
+    expected = "Contract: register_contract: To register a contract you must attach 0,25 N as storage"
+  )]
+  fn test_register_contract_of_contract_without_paying_for_storage() {
+    let contract_hash_58: Base58CryptoHash =
+      Base58CryptoHash::from_str("GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH").unwrap();
+
+    let context = get_context(
+      vec![],
+      10,
+      100,
+      OWNER_ACCOUNT.parse().unwrap(),
+      0,
+      Gas(10u64.pow(18)),
+    );
+    testing_env!(context);
+
+    let mut contract: Contract = init_contract();
+
+    contract.register_contract(
+      "token".to_string(),
+      contract_hash_58,
+      U128(10),
+      U128(10),
+      "new".to_string(),
+      "params".to_string(),
+    );
+  }
+
+  /// Test registration of a contract (to be deployed)
   /// The contract hash should be saved to the 'binaries' array
   /// assert that a certain hash "GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH"
   /// was registred to the binaries map
@@ -230,8 +320,8 @@ mod tests {
 
     let context = get_context(
       vec![],
-      10,
-      100,
+      MIN_ATTACHED_STORAGE * 2,
+      MIN_ATTACHED_STORAGE * 4,
       OWNER_ACCOUNT.parse().unwrap(),
       0,
       Gas(10u64.pow(18)),
@@ -256,6 +346,56 @@ mod tests {
       .expect("failed ");
     assert_eq!(binary.contract_name, "token".to_string());
     assert_eq!(binary.contract_hash, CryptoHash::from(contract_hash_58));
+
+    //GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH
+  }
+
+  /// Test registration of a contract (to be deployed) and unregistration
+  /// The contract hash should be saved to the 'binaries' array
+  /// assert that a certain hash "GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH"
+  /// was registred to the binaries map
+  /// Then assert that it was unregistered from binaries and from storage_cost
+  #[test]
+  fn test_register_and_unregister_contract() {
+    let contract_hash_58: Base58CryptoHash =
+      Base58CryptoHash::from_str("GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH").unwrap();
+
+    let context = get_context(
+      vec![],
+      MIN_ATTACHED_STORAGE * 2,
+      MIN_ATTACHED_STORAGE * 4,
+      OWNER_ACCOUNT.parse().unwrap(),
+      0,
+      Gas(10u64.pow(18)),
+    );
+    testing_env!(context);
+
+    let mut contract: Contract = init_contract();
+
+    contract.register_contract(
+      "token".to_string(),
+      contract_hash_58,
+      U128(10),
+      U128(10),
+      "new".to_string(),
+      "params".to_string(),
+    );
+
+    //assert contract registration
+    assert!(contract.binaries.contains_key(&"token".to_string()));
+    let binary: Binary = contract
+      .binaries
+      .get(&"token".to_string())
+      .expect("failed ");
+    assert_eq!(binary.contract_name, "token".to_string());
+    assert_eq!(binary.contract_hash, CryptoHash::from(contract_hash_58));
+
+    //unregister
+    contract.unregister_contract("token".to_string());
+
+    //assert that it was unregistered correctly
+    assert!(!contract.binaries.contains_key(&"token".to_string()));
+    assert!(!contract.storage_cost.contains_key(&contract_hash_58));
 
     //GuP7VRr9w1tJoRRBUJaD8jWF7Xe4Em5oZULRoXowBLQH
   }
