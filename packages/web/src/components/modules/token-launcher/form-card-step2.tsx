@@ -178,6 +178,7 @@ export function FormCardStep2({
                   label="Initial Supply"
                   inputName="total_supply"
                   type="number"
+                  showDetails={false}
                 />
                 <div className="flex flex-row">
                   <div className="flex flex-column h-[40px] items-center  mr-[7px]">
@@ -221,6 +222,7 @@ export function FormCardStep2({
                   label="Maximum Supply"
                   inputName="total_supply"
                   type="number"
+                  showDetails={false}
                 />
                 <div className="flex flex-row">
                   <div className="flex flex-column h-[40px] items-center mr-[7px]">
