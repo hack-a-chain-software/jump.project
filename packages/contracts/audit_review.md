@@ -5,6 +5,11 @@ This document comments on the audit report from BlockApex, discussing every issu
 This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacfc054e
 
 ## 3. Inadequate implementation leads to loss of rewards (xJUMP)
+### Acknowledged
+
+The issue is acknowledged, however the staking contract will be discontinued as the team opted to go along only with the xJUMP model for token staking.
+
+The staking contract has been excluded from the repository.
 
 ## 4. Insufficient Access Controls on NFT Minting (locked_token)
 
