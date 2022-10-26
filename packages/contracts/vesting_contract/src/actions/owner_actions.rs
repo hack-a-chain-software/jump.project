@@ -108,6 +108,10 @@ impl Contract {
     //validate that the sender is the contract owner
     assert_one_yocto();
     self.only_owner();
+    assert!(
+      env::is_valid_account_id(account.as_bytes()),
+      "Invalid investor account"
+    );
     self.new_investment(category, account, total_value, date_in);
   }
 

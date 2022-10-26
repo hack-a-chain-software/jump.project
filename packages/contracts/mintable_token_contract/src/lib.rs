@@ -32,6 +32,10 @@ impl Contract {
   pub fn new(owner_id: AccountId, init_supply: U128, metadata: FungibleTokenMetadata) -> Self {
     assert!(!env::state_exists(), "Already initialized");
     metadata.assert_valid();
+    assert!(
+      env::is_valid_account_id(owner_id.as_bytes()),
+      "Invalid owner account"
+    );
     let mut this = Self {
       owner_id: owner_id.clone(),
       token: FungibleToken::new(b"a".to_vec()),
