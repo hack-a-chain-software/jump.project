@@ -7,6 +7,25 @@ This document refers to audit on commit hash ddb92dda6eb779ac854471eeda817abeacf
 # Issues
 
 ## 1. Improper access controls leads to liquidity theft
+### Not Acknowledged -> alternative measures taken
+
+The auditors claim that liquidity can be stolen in case the attacker does not complete the add liquidity lifecycle and that the transactions should be atomic in order to preserve security. However, these claims are based on the model folowed by Uniswap V2 code on EVM based blockchains.
+
+The Near Protocol has some properties that disallow such atomicity from being achieved, given that cross contract calls are performed across different shards through promises processed in different blocks, hence cross contract calls CANNOT preserve atomicity.
+
+Moreover, the reference dex implementation, on which we are basing the code comes from ref.finance. In this model, it is necessary to perform 4 transactions in order to create a pool:
+1. create pool
+2. Add token 1 to launchpad's internal account in ref.finance
+3. Add token 2 to launchpad's internal account in ref.finance
+4. Take tokens from launchpad's internal balance and add them to liquidity in the pool created in (1)
+
+In this model, there is no way to steal the liquidity deposited in steps 2 and 3 since it is locked in an internal account insede ref's contract that can only be accessed by its owner (the launchpad contract). If any other account tries to call `add_liquidity` their transacton will fail since they do not have the necessary internal balance deposited.
+
+
+However, given that the JUMP DEX is currently not operational and that until it is the automatic generation of liquidity pools should not be used inside listings, we have changed the `launch_on_dex` method to always panic and made it impossible to set automatic IDOs for new sales created.
+
+The code will be updated to revert the changes as soon as the JUMP DEX is launched and a full integration can be built.
+
 
 ## 8. Improper evaluation of `dex_lock_time`
 ### Not Acknowledged

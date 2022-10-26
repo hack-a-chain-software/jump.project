@@ -146,10 +146,16 @@ mod tests {
 
     // token amounts
     let total_amount_sale_project_tokens = 1_000_000_000;
-    let liquidity_pool_project_tokens = 500_000_000;
+
+    // temporarily comented out see audit(1)
+    // let liquidity_pool_project_tokens = 500_000_000;
+    let liquidity_pool_project_tokens = 0;
+
     let token_allocation_size = 1_000;
     let token_allocation_price: u128 = 500;
-    let liquidity_pool_price_tokens = 400_000_000;
+    // temporarily comented out see audit(1)
+    // let liquidity_pool_price_tokens = 400_000_000;
+    let liquidity_pool_price_tokens = 0;
 
     // vesting shares
     let fraction_instant_release = 4_000;
@@ -615,163 +621,164 @@ mod tests {
     time_travel(&worker, 60 * 30).await?;
 
     // 14. Launch on dex
+    // temporarily comented out see audit(1)
 
-    let op_listing_data = view_listing(&launchpad, listing_id).await?;
-    let listing_data = op_listing_data.unwrap();
-    let mut project_tokens_liquidity = listing_data["listing_treasury"]
-      ["liquidity_pool_project_token_balance"]
-      .as_str()
-      .unwrap()
-      .parse::<u128>()
-      .unwrap();
-    let mut price_tokens_liquidity = listing_data["listing_treasury"]
-      ["liquidity_pool_price_token_balance"]
-      .as_str()
-      .unwrap()
-      .parse::<u128>()
-      .unwrap();
-    let project_liquidity_fee = (project_tokens_liquidity * fee_liquidity_tokens) / FRACTION_BASE;
-    let price_liquidity_fee = (price_tokens_liquidity * fee_liquidity_tokens) / FRACTION_BASE;
+    // let op_listing_data = view_listing(&launchpad, listing_id).await?;
+    // let listing_data = op_listing_data.unwrap();
+    // let mut project_tokens_liquidity = listing_data["listing_treasury"]
+    //   ["liquidity_pool_project_token_balance"]
+    //   .as_str()
+    //   .unwrap()
+    //   .parse::<u128>()
+    //   .unwrap();
+    // let mut price_tokens_liquidity = listing_data["listing_treasury"]
+    //   ["liquidity_pool_price_token_balance"]
+    //   .as_str()
+    //   .unwrap()
+    //   .parse::<u128>()
+    //   .unwrap();
+    // let project_liquidity_fee = (project_tokens_liquidity * fee_liquidity_tokens) / FRACTION_BASE;
+    // let price_liquidity_fee = (price_tokens_liquidity * fee_liquidity_tokens) / FRACTION_BASE;
 
-    project_tokens_liquidity -= project_liquidity_fee;
-    price_tokens_liquidity -= price_liquidity_fee;
+    // project_tokens_liquidity -= project_liquidity_fee;
+    // price_tokens_liquidity -= price_liquidity_fee;
 
-    // assert creation of new pool
-    let initial_pool_quantity = get_number_of_pools(&ref_finance).await?;
-    launch_on_dex(&launchpad, &root, listing_id).await?;
-    let final_pool_quantity = get_number_of_pools(&ref_finance).await?;
-    let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
-    assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
-    assert_eq!(
-      pool_info["token_account_ids"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_str().unwrap().to_string())
-        .collect::<Vec<String>>(),
-      vec![ft_project.id().to_string(), ft_price.id().to_string()]
-    );
-    assert_eq!(
-      pool_info["amounts"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_str().unwrap().to_string())
-        .collect::<Vec<String>>(),
-      vec![0.to_string(), 0.to_string()]
-    );
+    // // assert creation of new pool
+    // let initial_pool_quantity = get_number_of_pools(&ref_finance).await?;
+    // launch_on_dex(&launchpad, &root, listing_id).await?;
+    // let final_pool_quantity = get_number_of_pools(&ref_finance).await?;
+    // let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
+    // assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
+    // assert_eq!(
+    //   pool_info["token_account_ids"]
+    //     .as_array()
+    //     .unwrap()
+    //     .iter()
+    //     .map(|v| v.as_str().unwrap().to_string())
+    //     .collect::<Vec<String>>(),
+    //   vec![ft_project.id().to_string(), ft_price.id().to_string()]
+    // );
+    // assert_eq!(
+    //   pool_info["amounts"]
+    //     .as_array()
+    //     .unwrap()
+    //     .iter()
+    //     .map(|v| v.as_str().unwrap().to_string())
+    //     .collect::<Vec<String>>(),
+    //   vec![0.to_string(), 0.to_string()]
+    // );
 
-    // assert deposit of project token
-    let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
-    launch_on_dex(&launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
-    assert_eq!(
-      initial_balances
-        .get(&ft_project.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?
-        + project_tokens_liquidity,
-      final_balances
-        .get(&ft_project.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?
-    );
+    // // assert deposit of project token
+    // let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    // launch_on_dex(&launchpad, &root, listing_id).await?;
+    // let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    // assert_eq!(
+    //   initial_balances
+    //     .get(&ft_project.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?
+    //     + project_tokens_liquidity,
+    //   final_balances
+    //     .get(&ft_project.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?
+    // );
 
-    // assert fee was charged
-    let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
-    for pair in contract_treasury_balance.iter() {
-      match pair.0.get("FT") {
-        Some(value) => {
-          if value["account_id"].as_str().unwrap().to_string() == ft_price.id().to_string() {
-            assert_eq!(
-              pair.1.parse::<u128>().unwrap(),
-              expected_fee_price_tokens_withdraw
-            );
-          } else if value["account_id"].as_str().unwrap().to_string() == ft_project.id().to_string()
-          {
-            assert_eq!(pair.1.parse::<u128>().unwrap(), project_liquidity_fee);
-          }
-        }
-        None => (),
-      }
-    }
+    // // assert fee was charged
+    // let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
+    // for pair in contract_treasury_balance.iter() {
+    //   match pair.0.get("FT") {
+    //     Some(value) => {
+    //       if value["account_id"].as_str().unwrap().to_string() == ft_price.id().to_string() {
+    //         assert_eq!(
+    //           pair.1.parse::<u128>().unwrap(),
+    //           expected_fee_price_tokens_withdraw
+    //         );
+    //       } else if value["account_id"].as_str().unwrap().to_string() == ft_project.id().to_string()
+    //       {
+    //         assert_eq!(pair.1.parse::<u128>().unwrap(), project_liquidity_fee);
+    //       }
+    //     }
+    //     None => (),
+    //   }
+    // }
 
-    // assert deposit of price token
-    let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
-    launch_on_dex(&launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
-    assert_eq!(
-      initial_balances
-        .get(&ft_price.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?
-        + price_tokens_liquidity,
-      final_balances
-        .get(&ft_price.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?
-    );
+    // // assert deposit of price token
+    // let initial_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    // launch_on_dex(&launchpad, &root, listing_id).await?;
+    // let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    // assert_eq!(
+    //   initial_balances
+    //     .get(&ft_price.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?
+    //     + price_tokens_liquidity,
+    //   final_balances
+    //     .get(&ft_price.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?
+    // );
 
-    // assert fee was charged
-    let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
-    for pair in contract_treasury_balance.iter() {
-      match pair.0.get("FT") {
-        Some(value) => {
-          if value["account_id"].as_str().unwrap().to_string() == ft_price.id().to_string() {
-            assert_eq!(
-              pair.1.parse::<u128>().unwrap(),
-              expected_fee_price_tokens_withdraw + price_liquidity_fee
-            );
-          } else if value["account_id"].as_str().unwrap().to_string() == ft_project.id().to_string()
-          {
-            assert_eq!(pair.1.parse::<u128>().unwrap(), project_liquidity_fee);
-          }
-        }
-        None => (),
-      }
-    }
+    // // assert fee was charged
+    // let contract_treasury_balance = view_contract_treasury_balance(&launchpad).await?;
+    // for pair in contract_treasury_balance.iter() {
+    //   match pair.0.get("FT") {
+    //     Some(value) => {
+    //       if value["account_id"].as_str().unwrap().to_string() == ft_price.id().to_string() {
+    //         assert_eq!(
+    //           pair.1.parse::<u128>().unwrap(),
+    //           expected_fee_price_tokens_withdraw + price_liquidity_fee
+    //         );
+    //       } else if value["account_id"].as_str().unwrap().to_string() == ft_project.id().to_string()
+    //       {
+    //         assert_eq!(pair.1.parse::<u128>().unwrap(), project_liquidity_fee);
+    //       }
+    //     }
+    //     None => (),
+    //   }
+    // }
 
-    // assert provisioning of liquidity
-    launch_on_dex(&launchpad, &root, listing_id).await?;
-    let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
-    assert_eq!(
-      final_balances
-        .get(&ft_price.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?,
-      0
-    );
-    assert_eq!(
-      final_balances
-        .get(&ft_price.id().to_string())
-        .unwrap_or(&"0".to_string())
-        .parse::<u128>()?,
-      0
-    );
+    // // assert provisioning of liquidity
+    // launch_on_dex(&launchpad, &root, listing_id).await?;
+    // let final_balances = get_deposits(&ref_finance, launchpad.as_account()).await?;
+    // assert_eq!(
+    //   final_balances
+    //     .get(&ft_price.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?,
+    //   0
+    // );
+    // assert_eq!(
+    //   final_balances
+    //     .get(&ft_price.id().to_string())
+    //     .unwrap_or(&"0".to_string())
+    //     .parse::<u128>()?,
+    //   0
+    // );
 
-    let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
-    assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
-    assert_eq!(
-      pool_info["token_account_ids"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_str().unwrap().to_string())
-        .collect::<Vec<String>>(),
-      vec![ft_project.id().to_string(), ft_price.id().to_string()]
-    );
-    assert_eq!(
-      pool_info["amounts"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_str().unwrap().to_string())
-        .collect::<Vec<String>>(),
-      vec![
-        project_tokens_liquidity.to_string(),
-        price_tokens_liquidity.to_string()
-      ]
-    );
+    // let pool_info = get_pool(&ref_finance, final_pool_quantity - 1).await?;
+    // assert_eq!(initial_pool_quantity + 1, final_pool_quantity);
+    // assert_eq!(
+    //   pool_info["token_account_ids"]
+    //     .as_array()
+    //     .unwrap()
+    //     .iter()
+    //     .map(|v| v.as_str().unwrap().to_string())
+    //     .collect::<Vec<String>>(),
+    //   vec![ft_project.id().to_string(), ft_price.id().to_string()]
+    // );
+    // assert_eq!(
+    //   pool_info["amounts"]
+    //     .as_array()
+    //     .unwrap()
+    //     .iter()
+    //     .map(|v| v.as_str().unwrap().to_string())
+    //     .collect::<Vec<String>>(),
+    //   vec![
+    //     project_tokens_liquidity.to_string(),
+    //     price_tokens_liquidity.to_string()
+    //   ]
+    // );
 
     // 15. Time travel to cliff period
     time_travel(&worker, 60 * 30).await?;
