@@ -98,12 +98,12 @@ mod tests {
   use super::*;
 
   #[rstest]
-  #[case::contract_guardian_ct(DepositOperation::ContractTreasury, guardian(), contract_token())]
-  #[case::collection_guardian_ct(
+  #[case::contract_owner_ct(DepositOperation::ContractTreasury, owner(), contract_token())]
+  #[case::collection_owner_ct(
     DepositOperation::CollectionTreasury {
       collection: collection(),
     },
-    guardian(),
+    owner(),
     contract_token()
   )]
   #[case::collection_collection_owner_pt(
@@ -123,17 +123,17 @@ mod tests {
   }
 
   #[rstest]
-  #[case::contract_guardian_pt(DepositOperation::ContractTreasury, guardian(), program_token())]
+  #[case::contract_owner_pt(DepositOperation::ContractTreasury, owner(), program_token())]
   #[case::contract_collection_owner_pt(
     DepositOperation::ContractTreasury,
     collection_owner(),
     program_token()
   )]
-  #[case::collection_guardian_pt(
+  #[case::collection_owner_pt(
     DepositOperation::CollectionTreasury {
       collection: collection(),
     },
-    guardian(),
+    owner(),
     program_token()
   )]
   #[case::collection_collection_owner_ct(
