@@ -17,6 +17,10 @@ The staking contract has been excluded from the repository.
 Issue refers to testnet only contract, no need to implement
 
 ## 5. Users will not be able to withdraw their locked tokens even after they are unlocked (locked_token)
+### Implemented
+
+The auditors point out that there is an insufficient gas amount being passed to cross contract calls. The contract has been updated to pass 120 Tgas to `ft_tranfer` and 50 Tgas to the attached callback.
+
 
 ## 12. Inadequate function parameters (vesting_contract)
 

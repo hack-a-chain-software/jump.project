@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
 
-  use crate::*;
+  use core::panic;
+
+use crate::*;
 
   /// integration test happy case
   /// aims to test full aplication flow for locked_jump
@@ -206,9 +208,15 @@ mod tests {
     let initial_user2: u128 = ft_balance_of(&ft_token, &user2).await?.parse().unwrap();
     let initial_user3: u128 = ft_balance_of(&ft_token, &user3).await?.parse().unwrap();
 
-    withdraw_locked_tokens(&user, &locked_token, "0".to_string()).await;
-    withdraw_locked_tokens(&user2, &locked_token, "0".to_string()).await;
-    withdraw_locked_tokens(&user3, &locked_token, "0".to_string()).await;
+    for result in withdraw_locked_tokens(&user, &locked_token, "0".to_string()).await.outcomes() {
+      if result.is_failure() { panic!("Withdraw transaction failed") };
+    };
+    for result in withdraw_locked_tokens(&user2, &locked_token, "0".to_string()).await.outcomes() {
+      if result.is_failure() { panic!("Withdraw transaction failed") };
+    };
+    for result in withdraw_locked_tokens(&user3, &locked_token, "0".to_string()).await.outcomes() {
+      if result.is_failure() { panic!("Withdraw transaction failed") };
+    };
 
     let final_user: u128 = ft_balance_of(&ft_token, &user).await?.parse().unwrap();
     let final_user2: u128 = ft_balance_of(&ft_token, &user2).await?.parse().unwrap();

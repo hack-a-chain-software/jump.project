@@ -1,8 +1,8 @@
 use crate::*;
 use crate::ext_interface::{ext_token_contract, ext_self};
 
-const FT_TRANSFER_GAS: Gas = Gas(0);
-const FT_TRANSFER_CALLBACK_GAS: Gas = Gas(0);
+const FT_TRANSFER_GAS: Gas = Gas(120_000_000_000_000);
+const FT_TRANSFER_CALLBACK_GAS: Gas = Gas(50_000_000_000_000);
 
 #[near_bindgen]
 impl Contract {
