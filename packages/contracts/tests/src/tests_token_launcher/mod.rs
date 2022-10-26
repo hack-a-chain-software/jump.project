@@ -105,14 +105,11 @@ mod tests {
     //Assert that owner received the tokens at initialization
     assert_eq!(balance, INITIAL_TOKEN_SUPPLY.to_string());
 
-    println!("{}", 3);
-
     // try to deploy contract with wrong parameters
     // verify if the tokens where returned to the owner
 
     let owner_balance_before_callback = owner.view_account().await?.balance;
 
-    println!("{}", 4);
 
     println!(
       "{}{}",
@@ -141,6 +138,16 @@ mod tests {
       owner_balance_after_callback
         >= (owner_balance_before_callback - 1_000_000_000_000_000_000_000_000)
     );
+
+    //test contract removal 
+
+    unregister_contract(CONTRACT_NAME.to_string()).await;
+    transact_call(user.call(&factory.id(), "get_code").args_json(json!({
+      "code_hash": hash
+    })))
+    .await
+    .json()?;
+
 
     anyhow::Ok(())
   }

@@ -37,6 +37,19 @@ pub async fn register_contract(
   .await
 }
 
+pub async fn unregister_contract(
+  contract_name: String,
+) -> ExecutionResult<String> {
+  transact_call(
+    owner
+      .call(&contract.id(), "register_contract")
+      .args_json(json!({
+        "contract_name": contract_name
+      })),
+  )
+  .await
+}
+
 pub async fn deploy_new_contract(
   owner: &Account,
   contract: &Contract,

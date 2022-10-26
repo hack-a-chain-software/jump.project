@@ -42,7 +42,8 @@ impl Contract {
       .0;
 
     let binary = self.binaries.get(&contract_name).expect(ERR_301);
-    let final_cost = storage_cost * env::storage_byte_cost() + binary.deployment_cost.0 + binary.init_cost.0;
+    let final_cost =
+      storage_cost * env::storage_byte_cost() + binary.deployment_cost.0 + binary.init_cost.0;
 
     U128(final_cost)
   }
@@ -55,5 +56,10 @@ impl Contract {
   pub fn view_deployed_contract(&self, account: AccountId) -> String {
     let contract_type = self.deployed_contracts.get(&account).expect(ERR_302);
     contract_type
+  }
+
+  pub fn view_treasury(&self) -> U128 {
+    self.only_owner();
+    self.treasury
   }
 }
