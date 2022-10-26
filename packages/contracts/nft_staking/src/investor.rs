@@ -112,7 +112,12 @@ impl Contract {
       Some(amount) => amount,
       None => available, // TODO: test case to assert this
     };
-    assert!(withdraw <= available, "");
+    assert!(
+      withdraw <= available,
+      "available storage balance for withdraw is only {} but the requested amount was {}",
+      available,
+      withdraw,
+    );
 
     investor.withdraw_storage_funds(withdraw);
     self.investors.insert(&account_id, &investor);
