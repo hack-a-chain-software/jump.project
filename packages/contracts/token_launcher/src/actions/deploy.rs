@@ -15,6 +15,7 @@ const CALLBACK: &str = "callback";
 impl Contract {
   ///Verifies if the selected contract meets the conditions to be deployed
   ///Calls the deploy function that has unsafe methods
+  /// TO-DO
   #[payable]
   pub fn deploy_new_contract(
     &mut self,
@@ -84,6 +85,7 @@ impl Contract {
     if is_promise_success() {
       //Log the sucessfull deployment
       event_contract_deploy(deploy_address, type_of_contract, "Success".to_string());
+      // TODO - INCREMENT TREASURY
       PromiseOrValue::Value(true)
     } else {
       //Remove the contract address from deployed_contracts
@@ -106,8 +108,7 @@ pub fn deploy_contract(
   binary: Binary,
   contract_to_be_deployed: String,
 ) {
-  // change this to be only stoarage cost and send fee to treasury
-  let attached_deposit = env::attached_deposit();
+  let attached_deposit = env::attached_deposit(); // REMOVE THE FEE HERE
   let encoded_args = near_sdk::serde_json::to_vec(&args).expect(ERR_105);
   let factory_account_id = env::current_account_id().as_bytes().to_vec();
   let code_hash = binary.contract_hash;
