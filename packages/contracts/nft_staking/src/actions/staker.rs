@@ -56,15 +56,18 @@ impl Contract {
   ) {
     if is_promise_success() {
       events::unstake_nft(&token_id, balance);
-    } else {
-      let collection = token_id.0.clone();
-
-      let staked_nft = StakedNFT::new(token_id, owner_id, staked_timestamp.0);
-      let mut staking_program = self.staking_programs.get(&collection).unwrap();
-      staking_program.insert_staked_nft(&staked_nft);
-
-      self.staking_programs.insert(&collection, &staking_program);
+      return;
     }
+
+    let initial_storage = env::storage_usage();
+    let collection = token_id.0.clone();
+
+    let staked_nft = StakedNFT::new(token_id, owner_id.clone(), staked_timestamp.0);
+    let mut staking_program = self.staking_programs.get(&collection).unwrap();
+    staking_program.insert_staked_nft(&staked_nft);
+
+    self.staking_programs.insert(&collection, &staking_program);
+    self.track_storage_usage(&owner_id, initial_storage);
   }
 
   #[payable]
@@ -112,13 +115,16 @@ impl Contract {
   ) {
     if is_promise_success() {
       events::withdraw_reward(collection, owner_id, token_id, amount);
-    } else {
-      let mut staking_program = self.staking_programs.get(&collection).unwrap();
-
-      staking_program.outer_deposit(&owner_id, &token_id, amount.0);
-
-      self.staking_programs.insert(&collection, &staking_program);
+      return;
     }
+
+    let initial_storage = env::storage_usage();
+    let mut staking_program = self.staking_programs.get(&collection).unwrap();
+
+    staking_program.outer_deposit(&owner_id, &token_id, amount.0);
+
+    self.staking_programs.insert(&collection, &staking_program);
+    self.track_storage_usage(&owner_id, initial_storage);
   }
 
   #[payable]

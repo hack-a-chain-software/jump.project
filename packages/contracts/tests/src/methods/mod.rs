@@ -4,6 +4,7 @@ use crate::*;
 
 mod launchpad;
 mod locked_token;
+pub mod nep145;
 pub mod nft;
 pub mod nft_staking;
 mod ref_finance;

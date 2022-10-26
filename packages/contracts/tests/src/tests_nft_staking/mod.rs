@@ -9,15 +9,16 @@ mod tests {
   use crate::{
     methods::{
       token::initialize_ft_contract,
+      nep145::storage_withdraw,
       nft_staking::{
         initialize_nft_staking, add_guardian, transfer, deposit, create_staking_program, stake,
         unstake, withdraw_reward, DENOM,
       },
       nft::{initialize_nft_contract, nft_mint, view_nft_token},
     },
+    lib::events::{parse_event_logs, find_event_type},
     create_user_account, get_wasm, deploy_contract, deploy_contract_from_wasm_path, time_travel,
     register_user,
-    lib::events::{parse_event_logs, find_event_type},
   };
 
   #[derive(Debug, Clone)]
@@ -151,6 +152,7 @@ mod tests {
    * 11. Assert the NFT went back to the owner
    * 12. Outer withdraw staker balance (staker)
    * 13. Assert the claimed reward is correct, considering early-withdraw penalty
+   * 14. Withdraw available storage deposit (staker)
    */
   #[rstest]
   #[tokio::test]
@@ -308,6 +310,8 @@ mod tests {
     )
     .unwrap();
     assert_withdraw_reward(contract_withdraw_event, contract_reward)?;
+
+    storage_withdraw(&nft_staking, &staker, None).await;
 
     anyhow::Ok(())
   }
