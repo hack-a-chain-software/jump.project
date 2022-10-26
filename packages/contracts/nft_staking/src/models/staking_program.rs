@@ -156,7 +156,7 @@ impl StakingProgram {
       let withdrawable_amount = denom_multiplication(amount, withdraw_rate);
       let remainder = amount - withdrawable_amount;
 
-      balance.insert(k.clone(), withdrawable_amount);
+      *balance.entry(k.clone()).or_insert(0) += withdrawable_amount;
       *self.collection_treasury.entry(k).or_insert(0) += remainder;
     }
 
@@ -362,6 +362,63 @@ mod tests {
     assert_eq!(
       staking_program.collection_treasury.get(&token_id).unwrap(),
       &remainder
+    );
+  }
+
+  #[test]
+  fn test_inner_withdraw_consecutive_early_withdraw() {
+    // Arrange
+    let mut context = get_context();
+    context.block_timestamp(10 * 10u64.pow(9));
+    testing_env!(context.build());
+
+    let [staker_id, _] = get_accounts();
+    let mut staking_program = get_staking_program();
+    let token_id = get_token_ids()[0].clone();
+
+    let first_nft_id = get_nft_id()[0].clone();
+    let first_withdrawn_amount = 8;
+    let first_remainder = 2;
+    let mut first_nft = StakedNFT::new(first_nft_id.clone(), staker_id.clone(), 9 * 10u64.pow(3));
+    first_nft
+      .balance
+      .insert(token_id.clone(), first_withdrawn_amount + first_remainder);
+    staking_program.insert_staked_nft(&first_nft);
+
+    // Act
+    let first_withdrawn_balance = staking_program.inner_withdraw(&first_nft_id);
+
+    // Assert
+    assert_eq!(
+      first_withdrawn_balance.get(&token_id).unwrap(),
+      &first_withdrawn_amount
+    );
+    assert_eq!(
+      staking_program.collection_treasury.get(&token_id).unwrap(),
+      &first_remainder
+    );
+
+    // Arrange
+    let second_nft_id = get_nft_id()[0].clone();
+    let second_withdrawn_amount = 8;
+    let second_remainder = 2;
+    let mut second_nft = StakedNFT::new(second_nft_id.clone(), staker_id, 9 * 10u64.pow(3));
+    second_nft
+      .balance
+      .insert(token_id.clone(), second_withdrawn_amount + second_remainder);
+    staking_program.insert_staked_nft(&second_nft);
+
+    // Act
+    let second_withdrawn_balance = staking_program.inner_withdraw(&second_nft_id);
+
+    // Assert
+    assert_eq!(
+      second_withdrawn_balance.get(&token_id).unwrap(),
+      &(first_withdrawn_amount + second_withdrawn_amount)
+    );
+    assert_eq!(
+      staking_program.collection_treasury.get(&token_id).unwrap(),
+      &(first_remainder + second_remainder)
     );
   }
 
