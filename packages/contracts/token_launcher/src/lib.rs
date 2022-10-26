@@ -26,7 +26,7 @@ pub struct Contract {
   ///AccountID where contract was deployed and the name of the contract
   pub deployed_contracts: LookupMap<AccountId, String>,
   // Balance received from the deployment fees
-  pub treasury: U128, // VIEW, WITHDRAW, SET TO TREASURY
+  pub treasury: U128,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, BorshStorageKey)]

@@ -48,6 +48,9 @@ pub(crate) const ERR_203: &str =
 pub(crate) const ERR_204: &str =
   "Owner: get_code_with_name: There is no contract of this type registred on the contract memory";
 
+pub(crate) const ERR_205: &str =
+  "Owner: withdraw_treasury: The amount you solicited to withdraw is greater then the treasury: ";
+
 pub(crate) const ERR_301: &str =
   "view: There is no contract of this type registred on the binaries map";
 
