@@ -36,10 +36,12 @@ export const useTokenLauncher = create<{
         .toFixed(2)
         .toString();
 
-      const validPrefix = prefix.toLowerCase();
+      const validPrefix = prefix
+        .replace(/[^a-zA-Z0-9w]/g, "")
+        .slice(0, 56)
+        .toLowerCase();
 
-      const contract_account =
-        validPrefix + "." + import.meta.env.VITE_TOKEN_LAUNCHER_CONTRACT;
+      const contract_account = validPrefix + ".testnet";
 
       transactions.push(
         getTransaction(
