@@ -7,7 +7,7 @@ const FT_TRANSFER_CALLBACK_GAS: Gas = Gas(50_000_000_000_000);
 #[near_bindgen]
 impl Contract {
   #[payable]
-  pub fn withdraw_locked_tokens(&mut self, vesting_id: U64) -> Promise {
+  pub fn withdraw_locked_tokens(&mut self, vesting_id: U64) -> PromiseOrValue<()> {
     assert_one_yocto();
     let account_id = env::predecessor_account_id();
     let vesting_id = vesting_id.0;
@@ -21,19 +21,25 @@ impl Contract {
       .ft_functionality
       .internal_withdraw(&account_id, value_to_withdraw);
 
-    ext_token_contract::ext(self.contract_config.get().unwrap().base_token)
-      .with_static_gas(FT_TRANSFER_GAS)
-      .with_attached_deposit(1)
-      .ft_transfer(
-        account_id.to_string(),
-        U128(value_to_withdraw),
-        "locked token withdraw".to_string(),
+    if value_to_withdraw > 0 {
+      PromiseOrValue::Promise(
+        ext_token_contract::ext(self.contract_config.get().unwrap().base_token)
+          .with_static_gas(FT_TRANSFER_GAS)
+          .with_attached_deposit(1)
+          .ft_transfer(
+            account_id.to_string(),
+            U128(value_to_withdraw),
+            "locked token withdraw".to_string(),
+          )
+          .then(
+            ext_self::ext(env::current_account_id())
+              .with_static_gas(FT_TRANSFER_CALLBACK_GAS)
+              .callback_base_token_transfer(account_id, U128(value_to_withdraw), U64(vesting_id)),
+          ),
       )
-      .then(
-        ext_self::ext(env::current_account_id())
-          .with_static_gas(FT_TRANSFER_CALLBACK_GAS)
-          .callback_base_token_transfer(account_id, U128(value_to_withdraw), U64(vesting_id)),
-      )
+    } else {
+      PromiseOrValue::Value(())
+    }
   }
 }
 
@@ -111,52 +117,57 @@ mod tests {
           U128(((100 - vesting_percent_elapsed_time as u128) * vesting_total_amount) / 100)
         );
 
-        let receipts = get_created_receipts();
-        assert_eq!(receipts.len(), 2);
+        if expected_withdraw > 0 {
+          let receipts = get_created_receipts();
+          assert_eq!(receipts.len(), 2);
 
-        assert_eq!(
-          receipts[0].receiver_id.to_string(),
-          TOKEN_ACCOUNT.to_string()
-        );
-        assert_eq!(receipts[0].actions.len(), 1);
-        match receipts[0].actions[0].clone() {
-          VmAction::FunctionCall {
-            function_name,
-            args,
-            gas: _,
-            deposit,
-          } => {
-            assert_eq!(function_name, "ft_transfer");
-            assert_eq!(deposit, 1);
-            let json_args: serde_json::Value =
-              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
-            assert_eq!(json_args["receiver_id"], user.to_string());
-            assert_eq!(json_args["amount"], expected_withdraw.to_string());
+          assert_eq!(
+            receipts[0].receiver_id.to_string(),
+            TOKEN_ACCOUNT.to_string()
+          );
+          assert_eq!(receipts[0].actions.len(), 1);
+          match receipts[0].actions[0].clone() {
+            VmAction::FunctionCall {
+              function_name,
+              args,
+              gas: _,
+              deposit,
+            } => {
+              assert_eq!(function_name, "ft_transfer");
+              assert_eq!(deposit, 1);
+              let json_args: serde_json::Value =
+                serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+              assert_eq!(json_args["receiver_id"], user.to_string());
+              assert_eq!(json_args["amount"], expected_withdraw.to_string());
+            }
+            _ => panic!(),
           }
-          _ => panic!(),
-        }
 
-        assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
-        assert_eq!(receipts[1].actions.len(), 1);
-        match receipts[1].actions[0].clone() {
-          VmAction::FunctionCall {
-            function_name,
-            args,
-            gas: _,
-            deposit,
-          } => {
-            assert_eq!(function_name, "callback_base_token_transfer");
-            assert_eq!(deposit, 0);
-            let json_args: serde_json::Value =
-              serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
-            assert_eq!(json_args["recipient"], user.to_string());
-            assert_eq!(
-              json_args["quantity_withdrawn"],
-              expected_withdraw.to_string()
-            );
-            assert_eq!(json_args["vesting_id"], "0".to_string());
+          assert_eq!(receipts[1].receiver_id, CONTRACT_ACCOUNT.parse().unwrap());
+          assert_eq!(receipts[1].actions.len(), 1);
+          match receipts[1].actions[0].clone() {
+            VmAction::FunctionCall {
+              function_name,
+              args,
+              gas: _,
+              deposit,
+            } => {
+              assert_eq!(function_name, "callback_base_token_transfer");
+              assert_eq!(deposit, 0);
+              let json_args: serde_json::Value =
+                serde_json::from_str(from_utf8(&args).unwrap()).unwrap();
+              assert_eq!(json_args["recipient"], user.to_string());
+              assert_eq!(
+                json_args["quantity_withdrawn"],
+                expected_withdraw.to_string()
+              );
+              assert_eq!(json_args["vesting_id"], "0".to_string());
+            }
+            _ => panic!(),
           }
-          _ => panic!(),
+        } else {
+          let receipts = get_created_receipts();
+          assert_eq!(receipts.len(), 0);
         }
       }
     }
@@ -188,6 +199,7 @@ mod tests {
     IntoIterator::into_iter(test_cases).for_each(|v| {
       run_test_case(closure_generator(v.0, v.1, v.2, v.3, v.4, counter), v.5);
       counter += 1;
+      println!("{}", counter);
     });
   }
 }

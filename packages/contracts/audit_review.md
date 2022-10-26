@@ -40,3 +40,6 @@ All contracts have been modified to validate the account ids being inputed by th
 
 ## 18. Optimization in withdraw (locked_token)
 
+The auditors highlight that in case the user has no tokens to be released and calls `withdraw_locked_tokens`, there is no need to send a `ft_transfer` promise with the value of 0. Instead the method could simply return an empty PromiseOrValue enum and save the user's gas fees.
+
+This optimization has been implemented.
