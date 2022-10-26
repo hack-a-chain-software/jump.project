@@ -1,4 +1,4 @@
-use crate::errors::ERR_202;
+use crate::errors::{ERR_202, ERR_203};
 use crate::investor::MIN_STORAGE_BALANCE;
 use crate::{Contract, ContractExt};
 
@@ -67,13 +67,13 @@ impl StorageManagement for Contract {
   #[payable]
   fn storage_unregister(&mut self, force: Option<bool>) -> bool {
     assert_one_yocto();
+    assert_ne!(force, Some(true), "force option is not implemented");
+
     let account_id = env::predecessor_account_id();
-    if let Some(account_deposit) = self.internal_get_investor(&account_id) {
-      // TODO: figure out force option logic.
-      // assert!(account_deposit.allocation_count.is_empty(), "{}", ERR_203);
-      assert!(false);
+    if let Some(investor) = self.internal_get_investor(&account_id) {
+      assert_eq!(investor.storage_used, 0, "{}", ERR_203);
       self.investors.remove(&account_id);
-      Promise::new(account_id.clone()).transfer(account_deposit.storage_deposit);
+      Promise::new(account_id.clone()).transfer(investor.storage_deposit);
       true
     } else {
       false
