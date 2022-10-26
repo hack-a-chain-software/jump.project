@@ -27,7 +27,7 @@ function App() {
 
         <Flex w="100vw" ml="auto" minH="100vh" position="relative">
           <Nav />
-          <div className="w-[calc(100vw-140px)] max-w-[1512px] mx-auto">
+          <div className="md:w-[calc(100vw-140px)] max-w-[1512px] mx-auto">
             <Pages />
           </div>
         </Flex>
