@@ -49,30 +49,44 @@ impl Contract {
   }
 
   #[payable]
-  pub fn add_contract_token(&mut self, new_contract_token: FungibleTokenID) {
+  pub fn add_contract_token(&mut self, token_id: FungibleTokenID) {
     assert_one_yocto();
     self.only_owner(&env::predecessor_account_id());
 
+    /*
+     *   This is an intentional technical debt. Currently there's no way to delete a staking program, so
+     * if we were to block the addition of a new contract token while it was being used as a program token,
+     * it would result in the impossibility of ever using any token which was at any point in time a program token,
+     * as a contract token.
+     *
+     *    It's likely this whole edge-case will remain irrelevant forever, as there's little reason to make a token
+     * a contract token, even more so a program token, as it likely isn't even owned by the contract owner.
+     *
+     *   Note that in the current contract behavior, what happens is that the collection owner authorization always
+     * has precedence over the guardians/owner. Meaning, if for some reason, in a given staking program, a program token
+     * is also a contract token, its role as a program token superseeds its role as a contract token, and only the
+     * collection owner may operate on it. We found this to be a reasonable trade-off with little downsides to an unlikely
+     * problem with a costly solution.
+     */
     // TODO: create an index of program tokens and assert it's a non-program token
 
-    self.contract_treasury.insert(new_contract_token, 0);
+    self.contract_treasury.insert(token_id, 0);
   }
 
   #[payable]
-  pub fn remove_contract_token(&mut self, remove_contract_token: FungibleTokenID) {
+  pub fn remove_contract_token(&mut self, token_id: FungibleTokenID) {
     assert_one_yocto();
-    self.only_owner(&env::predecessor_account_id());
+    let caller_id = env::predecessor_account_id();
+    self.only_owner(&caller_id);
 
-    // TODO: withdraw the remaining balance
-    /* edge-case:
-     *  1. The contract has balance in a current contract token
-     *  2. The token is removed by this function
-     *  3. Some staking program is created with this token as a program token
-     *  4. It becomes impossible to withdraw the remaining balance
-     *
-     *  This is very unlikely to happen, however it would be good to avoid this possibility.
-     */
+    let remaining_balance = self.contract_treasury.get(&token_id).unwrap();
+    assert_eq!(
+      remaining_balance,
+      &0,
+      "Cannot remove token from contract treasury, there still remains a balance of {}. Be sure to also withdraw the balance from all collection treasuries.",
+      remaining_balance
+    );
 
-    self.contract_treasury.remove(&remove_contract_token);
+    self.contract_treasury.remove(&token_id);
   }
 }
