@@ -6,18 +6,23 @@ In a financial application it's very important to be careful with assets. Even m
 
 ## Balances
 ### Distribution Funds
+
 The core functionality of the contract revolves around the *Distribution Funds*. There's one for each staking program, and it's the pool of tokens that will be distributed as rewards to stakers.
 
 ### Contract Treasury
+
 Holds the bulk of contract tokens, which can then be routed to individual staking programs. Only the owner can withdraw from it, but anyone can deposit (partners, for example).
 
 ### Collection Treasury
+
 Holds both program and contract tokens to be distributed. 
 
 ### Staked NFT Balance
+
 Where most of the distributed tokens will initially go to.
 
 ### Staker Balance
+
 Receives funds from *Staked NFT Balances* associated with the staker's NFTs. It exists for technical reasons better described in the [inner and outer withdrawals section](#inner_withdraw-and-outer_withdraw). There's one for each pair of staker and staking program. Could be refactored later so there's only one per staker.
 
 ### Beneficiary Funds
@@ -79,8 +84,20 @@ The diagram show only abstract operations, which are incorporated inside functio
 ## Operators, Contract and Program Tokens
 The authorization logic behind internal balances transfers is based on the concept of contract and program tokens.
 
-Contract tokens are common to every staking program, and are in custody of the owner and guardians. Program tokens are specific to each staking program, and are in custody of the collection owner.
+Contract tokens are common to every staking program, and are in custody of the owner. Program tokens are specific to each staking program, and are in custody of the collection owner.
 
-Guardians and collection owners can only operate on their respective tokens. However, if for any reason there's a staking program whose program token is a contract token, guardians will not be able to operate on it.
+In the context of a balance operation that could be performed by either the owner or  collection owner (on their respective tokens), these actors are called _operators_. Most of the operation logic is the same when performed by either kind of operator, except which tokens they are authorized to operate on.
 
-In the context of a balance operation that could be performed by either guardians or the collection owner (on their respective tokens), these actors are called _operators_. Most of the operation logic is the same when performed by either kind of operator, except which tokens they are authorized to operate on.
+### Updating Contract Tokens
+
+When initializing the contract, it's required to provide a list of contract tokens. The contract does allows for the contract tokens to be updated by the owner. That being said, thsere are a lot of caveats when performing such updates, so this decision must be well thought-out.
+
+When a Guardian creates a Staking Program, it's asserted that the chosen program token is not a current contract token. However, if a new contract token is to be added to the treasury, a complex situation arises. It is possible for a new contract token to be the program token for some previously created program. In this context, the authorization rules make the token's role as a program token to superseed its role as a contract one. Thus, for this Staking Program and this specific token, only the collection owner will be authorized to operate on it. The authorization logic for a balance operation is the following:
+
+1. Is the token the program token? If so, only the collection owner is authorized
+2. Is the token a contract token? If so, only the owner is authorized
+3. Otherwise, no one is authorized
+
+When removing a contract token, another such complicated situation may occur. We do assert that the contract treasury balance for the token to be removed is empty. But for technical reasons, it's not viable to assert that this is also the case for all the collection treasuries. It's recommended to withdraw the contract from all possible balances (e.g. collection treasuries, beneficiary funds) before removing a contract token. Still, the distribution funds cannot be withdrawn, so it is possible that even after that, some tokens remain in the contract. There shouldn't be many, considering they will all be distributed to stakers (which are oblivious to token authorization rules) or end up in the beneficiary funds (which tends to be very small).
+
+If for some reason the owner wants to withdraw a previous contract token's remaining balance, it is possible, they just need to add it again. Note that even though it is possible that some staking program has it as its program token (and thus the owner has no authorization over it on the respective collection treasury), its balance does not belong to the owner anyways, as the program was created after its deletion from the contract tokens set (so the funds didn't come from the contract treasury). And regarding programs created before the removal, as they do not have this token as their program token, the owner will regain their ability to operate on it.
