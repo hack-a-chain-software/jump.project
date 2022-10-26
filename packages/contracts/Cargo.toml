@@ -1,7 +1,6 @@
 [workspace]
 # Add location of contracts here
 members = [
-  "./staking",
   # we can't have nft_staking as a workspace member until we
   # upgrade every contract to near_sdk@4.0.0
   # https://github.com/rust-lang/cargo/issues/7880
