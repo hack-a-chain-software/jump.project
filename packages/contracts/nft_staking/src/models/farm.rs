@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use near_sdk::{collections::UnorderedMap, env};
+use near_sdk::{collections::UnorderedMap, env, log};
 use serde::Serialize;
 
 use crate::{
+  calc::denom_convert,
   types::{FungibleTokenBalance, FungibleTokenID, NFTCollection, NonFungibleTokenID, TokenRPS},
   StorageKey,
 };
@@ -87,15 +88,14 @@ impl Farm {
   }
 
   pub fn add_nft(&mut self, nft_id: &NonFungibleTokenID) {
-    let mut balance = HashMap::new();
+    self.distribute();
 
+    let mut balance = HashMap::new();
     for (ft_id, dist) in self.distributions.iter() {
       balance.insert(ft_id.clone(), dist.rps);
     }
 
     self.nfts_rps.insert(nft_id, &balance);
-
-    self.distribute(); // TODO: confirm this is a bug, and should in fact happen before RPS assignment
   }
 
   pub fn distribute(&mut self) {
@@ -156,6 +156,15 @@ mod tests {
   use super::super::tests_fixtures::*;
   use super::*;
 
+  // hacky way to pass rounds during test without time-travel
+  fn pass_rounds(farm: &mut Farm, total_seeds: u64, skip_rounds: u64) {
+    let current_round = farm.round();
+
+    for (_, dist) in &mut farm.distributions {
+      *dist = dist.distribute(total_seeds, current_round + skip_rounds);
+    }
+  }
+
   fn get_farm(vec_distributions: Vec<(AccountId, RewardsDistribution)>) -> Farm {
     let mut distributions = HashMap::new();
     for (k, v) in vec_distributions {
@@ -207,11 +216,6 @@ mod tests {
     farm.distribute();
 
     for (k, dist) in &dists {
-      println!(
-        "round_interval = {}; balance = {}; reward = {}",
-        farm.round_interval, dist.undistributed, dist.reward
-      );
-
       let current_dist = farm.distributions.get(&k).unwrap();
       assert_eq!(
         current_dist.undistributed,
@@ -227,7 +231,7 @@ mod tests {
   #[test]
   fn test_farm_distribute_single_token() {
     let mut context = get_context();
-    context.block_timestamp(44 * 10u64.pow(9));
+    context.block_timestamp(14 * 10u64.pow(9));
     testing_env!(context.build());
 
     let dists = get_distributions()[0..2].to_vec();
@@ -237,6 +241,10 @@ mod tests {
     let [nft_id, _, _] = get_nft_ids();
     farm.add_nft(&nft_id);
 
+    // hacky way to pass rounds without time-travel
+    pass_rounds(&mut farm, 1, 2);
+
+    let nft_rps = farm.nfts_rps.get(&nft_id).unwrap();
     for (k, dist) in &dists {
       let current_dist = farm.distributions.get(&k).unwrap();
 
@@ -246,19 +254,45 @@ mod tests {
       );
       assert_eq!(denom_convert(current_dist.rps), 2 * dist.reward);
       assert_eq!(current_dist.rr, 2);
+      assert_eq!(nft_rps.get(k), Some(&U256::zero()));
     }
   }
 
   #[test]
   fn test_farm_claim() {
+    // Arrange
     let mut context = get_context();
     context.block_timestamp(30 * 10u64.pow(9));
 
     let mut farm = get_farm(vec![]);
 
     let [nft_id, _, _] = get_nft_ids();
+
+    // Act
     farm.add_nft(&nft_id);
 
-    farm.claim(&nft_id);
+    // Assert
+    let initial_nft_rps = farm.nfts_rps.get(&nft_id).unwrap();
+    for (k, dist) in &farm.distributions {
+      assert_eq!(initial_nft_rps.get(k), Some(&dist.rps));
+    }
+
+    // Arrange
+    // hacky way to pass rounds without time-travel
+    pass_rounds(&mut farm, 1, 1);
+
+    // Act
+    let claimed_balance = farm.claim(&nft_id);
+
+    // Assert
+    let final_nft_rps = farm.nfts_rps.get(&nft_id).unwrap();
+    for (k, dist) in &farm.distributions {
+      let initial_rps = initial_nft_rps.get(k).unwrap();
+      let final_rps = final_nft_rps.get(k).unwrap();
+      let claimed = claimed_balance.get(k).unwrap();
+
+      assert_eq!(final_rps, &dist.rps);
+      assert_eq!(claimed, &denom_convert(final_rps - initial_rps));
+    }
   }
 }
