@@ -1,4 +1,6 @@
-import { FormLabel, Input } from "@chakra-ui/react";
+import { FormLabel, Input, Text } from "@chakra-ui/react";
+import { ExclamationCircleIcon } from "@heroicons/react/outline";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 interface FormInputAndLabelProps {
@@ -6,6 +8,8 @@ interface FormInputAndLabelProps {
   label: JSX.Element | string;
   inputName: string;
   type?: string;
+  showDetails?: boolean;
+  sublabel?: string;
 }
 
 export function FormInputAndLabel({
@@ -13,8 +17,11 @@ export function FormInputAndLabel({
   label,
   inputName,
   type,
+  showDetails = true,
+  sublabel,
 }: FormInputAndLabelProps) {
   const { register } = useFormContext();
+  const [hasFocus, setFocus] = useState(false);
 
   return (
     <>
@@ -23,7 +30,7 @@ export function FormInputAndLabel({
         fontWeight="600"
         lineHeight="16px"
         mb="13px"
-        mt="31px"
+        mt="35px"
       >
         {label}
       </FormLabel>
@@ -41,7 +48,22 @@ export function FormInputAndLabel({
         placeholder={placeholder}
         {...register(inputName)}
         type={type}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        mb="8px"
+        onWheel={(event) => {
+          event.currentTarget.blur();
+        }}
       />
+      {hasFocus && showDetails && (
+        <div className="flex flex-row">
+          <ExclamationCircleIcon className="absolute w-[15px] h-[15px] white md:leading-3 mt-[5px] sm:mt-[2px]" />
+
+          <Text className="pl-5 sm:pl-0 sm:absolute mt-1 text-[12px] text-white sm:leading-3 left-9">
+            {sublabel}
+          </Text>
+        </div>
+      )}
     </>
   );
 }
