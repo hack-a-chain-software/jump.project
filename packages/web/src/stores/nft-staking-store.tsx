@@ -6,6 +6,7 @@ import {
 } from "@/tools";
 import { Token, Transaction } from "@near/ts";
 import type { WalletSelector } from "@near-wallet-selector/core";
+import { utils } from "near-api-js";
 
 export const useNftStaking = create<{
   loading: boolean;
@@ -30,6 +31,10 @@ export const useNftStaking = create<{
   getTokenStorage: (
     connection: WalletSelector,
     account: string,
+    token: string
+  ) => Promise<any>;
+  getMinStorageCost: (
+    connection: WalletSelector,
     token: string
   ) => Promise<any>;
   claimRewards: (
@@ -198,6 +203,8 @@ export const useNftStaking = create<{
 
     for (const key of balances) {
       const storage = await get().getTokenStorage(connection, account, key);
+      const storageMin = await get().getMinStorageCost(connection, key);
+      const nearStorageCost = utils.format.formatNearAmount(storageMin?.min);
 
       if (!storage) {
         transactions.push(
@@ -209,7 +216,7 @@ export const useNftStaking = create<{
               account_id: account,
               registration_only: false,
             },
-            "0.10"
+            nearStorageCost
           )
         );
       }
@@ -275,6 +282,8 @@ export const useNftStaking = create<{
 
     for (const key of balances) {
       const storage = await get().getTokenStorage(connection, account, key);
+      const storageMin = await get().getMinStorageCost(connection, key);
+      const nearStorageCost = utils.format.formatNearAmount(storageMin?.min);
 
       if (!storage) {
         transactions.push(
@@ -286,7 +295,7 @@ export const useNftStaking = create<{
               account_id: account,
               registration_only: false,
             },
-            "0.50"
+            nearStorageCost
           )
         );
       }
@@ -315,6 +324,14 @@ export const useNftStaking = create<{
       return await viewFunction(connection, token, "storage_balance_of", {
         account_id: account,
       });
+    } catch (e) {
+      return;
+    }
+  },
+
+  getMinStorageCost: async (connection, token) => {
+    try {
+      return await viewFunction(connection, token, "storage_balance_bounds");
     } catch (e) {
       return;
     }
