@@ -27,7 +27,7 @@ impl Contract {
 
     //verify if contract size does not exceed max allowed on near
     assert!(
-      deploy_address.len() < 64,
+      deploy_address.len() <= 64,
       "{}{}",
       ERR_102,
       env::current_account_id()
