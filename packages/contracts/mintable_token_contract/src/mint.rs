@@ -7,7 +7,10 @@ impl Contract {
   pub fn ft_mint(&mut self, quantity_to_mint: U128, recipient: AccountId) {
     assert_one_yocto();
     self.only_owner();
-
+    assert!(
+      env::is_valid_account_id(recipient.as_bytes()),
+      "Invalid recipient account"
+    );
     self.token.internal_deposit(&recipient, quantity_to_mint.0);
     self.on_tokens_minted(recipient, quantity_to_mint.0);
   }
