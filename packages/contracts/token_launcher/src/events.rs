@@ -81,3 +81,18 @@ pub fn event_contract_deploy(
     vec![event_data],
   );
 }
+
+/// Withdrawal of the contract treasury by the owner
+pub fn event_treasury_withdrawal(amount: U128, treasury: U128) {
+  let event_type = "treasury_withdrawal";
+  let event_data = &json!({
+      "amount: ": amount,
+      "balance_after_withdraw": treasury
+  });
+  log_basic_event_format(
+    STANDARD_NAME,
+    STANDARD_VERSION,
+    event_type,
+    vec![event_data],
+  );
+}

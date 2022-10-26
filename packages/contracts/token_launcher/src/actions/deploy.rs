@@ -80,18 +80,24 @@ impl Contract {
     deploy_address: AccountId,
     type_of_contract: String,
     initial_deposit: U128,
+    deploy_fee: U128,
     user_deploying: AccountId,
   ) -> PromiseOrValue<bool> {
     if is_promise_success() {
       //Log the sucessfull deployment
       event_contract_deploy(deploy_address, type_of_contract, "Success".to_string());
-      // TODO - INCREMENT TREASURY
+
+      //increase the treasury when promise is sucessfull
+      self.treasury = U128(self.treasury.0 + deploy_fee.0);
+
       PromiseOrValue::Value(true)
     } else {
       //Remove the contract address from deployed_contracts
       self.deployed_contracts.remove(&deploy_address);
+
       //Log the failed deployement
       event_contract_deploy(deploy_address, type_of_contract, "Fail".to_string());
+
       //return the attached deposit to the account that signed the deploy
       Promise::new(user_deploying).transfer(initial_deposit.0);
       PromiseOrValue::Value(false)
@@ -108,15 +114,20 @@ pub fn deploy_contract(
   binary: Binary,
   contract_to_be_deployed: String,
 ) {
-  let attached_deposit = env::attached_deposit(); // REMOVE THE FEE HERE
+  // The deployment fee should not be transfered to the new contract - it should be subtracted
+  let contract_deposit = env::attached_deposit() - binary.deployment_cost.0;
+
   let encoded_args = near_sdk::serde_json::to_vec(&args).expect(ERR_105);
   let factory_account_id = env::current_account_id().as_bytes().to_vec();
   let code_hash = binary.contract_hash;
   let init_fn = binary.init_fn_name;
+
   // arguments for callback function - initial deposit is used to return funds on callback
+  // deployment fee is used to increase the trasury balance
   let callback_args = near_sdk::serde_json::to_vec(&json!({ "deploy_address": deploy_address,
    "type_of_contract":contract_to_be_deployed,
-    "initial_deposit":env::attached_deposit().to_string(),
+    "initial_deposit":contract_deposit.to_string(),
+    "deploy_fee": binary.deployment_cost,
     "user_deploying": env::predecessor_account_id()
   }))
   .expect("Failed to serialize callback args");
@@ -137,7 +148,7 @@ pub fn deploy_contract(
     // create account first.
     sys::promise_batch_action_create_account(promise_id);
     // transfer attached deposit.
-    sys::promise_batch_action_transfer(promise_id, &attached_deposit as *const u128 as _);
+    sys::promise_batch_action_transfer(promise_id, &contract_deposit as *const u128 as _);
     // deploy contract (code is taken from register 0).
     sys::promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
     // call `new` with given arguments
@@ -235,9 +246,3 @@ mod tests {
     contract.deploy_new_contract("token".to_string(), contract_deployed, json!(null));
   }
 }
-
-// pub fn deploy_new_contract(
-//   &mut self,
-//   contract_to_be_deployed: String,
-//   deploy_prefix: String,
-//   args: Value,
