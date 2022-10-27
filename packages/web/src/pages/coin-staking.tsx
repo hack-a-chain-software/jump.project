@@ -1,5 +1,12 @@
-import { Box, Flex, Text, Skeleton, useDisclosure } from "@chakra-ui/react";
-import { useCallback, useMemo } from "react";
+import {
+  Box,
+  Flex,
+  Text,
+  Skeleton,
+  useDisclosure,
+  Image,
+} from "@chakra-ui/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNearQuery } from "react-near";
 import { WalletIcon } from "../assets/svg";
 import {
@@ -18,7 +25,9 @@ import { WithdrawModal } from "../modals/staking/withdraw";
 import { useWalletSelector } from "@/context/wallet-selector";
 import Big from "big.js";
 import { Tutorial } from "@/components";
-
+import { JumpIcon } from "../assets/svg/jump-logo";
+import { XJumpIcon } from "../assets/svg/xjump-logo";
+import { viewFunction } from "@/tools";
 interface TokenRatio {
   x_token: string;
   base_token: string;
@@ -32,6 +41,7 @@ interface TokenRatio {
 export const Staking = () => {
   const { accountId, selector } = useWalletSelector();
   const { stakeXToken, burnXToken } = useStaking();
+  const [baseTokenMetadata, setBaseTokenMetadata] = useState<any>();
 
   const {
     data: { base_token = "1", x_token = "1" } = {},
@@ -75,12 +85,26 @@ export const Staking = () => {
   const { data: jumpMetadata } = useNearQuery<{
     decimals: number;
     symbol: string;
+    icon: string;
   }>("ft_metadata", {
     contract: JUMP_TOKEN,
     poolInterval: 1000 * 60,
     skip: !accountId,
     debug: true,
   });
+
+  useEffect(() => {
+    (async () => {
+      const metadata = await viewFunction(
+        selector,
+        X_JUMP_TOKEN,
+        "ft_metadata"
+      );
+
+      setBaseTokenMetadata(metadata);
+      console.log(metadata);
+    })();
+  }, []);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
@@ -251,7 +275,26 @@ export const Staking = () => {
               >
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
-                  value={jumpValue + jumpMetadata?.symbol}
+                  value={
+                    <Flex className="items-top space-x-[8px]">
+                      <Box
+                        borderRadius={99}
+                        border="solid 3px"
+                        outline={glassyWhiteOpaque}
+                        borderColor={glassyWhiteOpaque}
+                        boxSizing="content-box"
+                        className="h-[28px] w-[28px]"
+                      >
+                        <Image
+                          width="100%"
+                          height="100%"
+                          borderRadius="20px"
+                          src={jumpMetadata?.icon}
+                        />
+                      </Box>
+                      <Text children={jumpValue} />
+                    </Flex>
+                  }
                   title="xJUMP Value"
                   bottomText={`1 JUMP = ${xJumpValue} xJump`}
                   className="h-full w-full"
@@ -267,7 +310,27 @@ export const Staking = () => {
                   className="h-full w-full"
                   bottomText={"worth " + xTokenInToken + " JUMP"}
                   borderColor={glassyWhiteOpaque}
-                  value={xTokenBalance.toFixed(2) + " xJump"}
+                  value={
+                    <Flex className="items-top space-x-[8px]">
+                      <Box
+                        clipPath="polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
+                        border="solid 3px"
+                        borderLeft="solid 1px"
+                        borderRight="solid 1px"
+                        background={glassyWhiteOpaque}
+                        borderColor="rgba(255,255,255,0.05)"
+                        boxSizing="content-box"
+                        className="h-[30px] w-[30px]"
+                      >
+                        <Image
+                          width="100%"
+                          height="100%"
+                          src={baseTokenMetadata?.icon}
+                        />
+                      </Box>
+                      <Text children={xTokenBalance.toFixed(2)} />
+                    </Flex>
+                  }
                 />
               </Skeleton>
 
@@ -361,11 +424,12 @@ export const Staking = () => {
       <Box
         bg={jumpGradient}
         p="30px"
-        display="flex"
         alignItems="center"
         justifyContent="space-between"
         borderRadius={20}
         // position="absolute"
+        className="max-w-fit sm:max-w-none flex flex-col sm:flex-row 
+        gap-[16px]  sm:gap-0"
         bottom="30px"
         left="150px"
         right="30px"

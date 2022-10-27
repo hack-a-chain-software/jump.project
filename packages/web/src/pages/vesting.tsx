@@ -1,4 +1,12 @@
-import { Stack, Flex, Skeleton, useColorModeValue } from "@chakra-ui/react";
+import {
+  Stack,
+  Flex,
+  Skeleton,
+  useColorModeValue,
+  Box,
+  Image,
+  Text,
+} from "@chakra-ui/react";
 import {
   If,
   TopCard,
@@ -190,9 +198,27 @@ export const Vesting = () => {
                   className="amount-locked"
                   title="Total Locked"
                   value={
-                    accountId
-                      ? `${totalLocked} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
+                    accountId ? (
+                      <Flex className="items-top space-x-[8px]">
+                        <Box
+                          borderRadius={99}
+                          border="solid 3px"
+                          outline={glassyWhiteOpaque}
+                          borderColor={glassyWhiteOpaque}
+                          boxSizing="content-box"
+                          className="h-[28px] w-[28px]"
+                        >
+                          <Image
+                            width="100%"
+                            height="100%"
+                            src={investorInfo?.token?.icon}
+                          />
+                        </Box>
+                        <Text children={totalLocked} />
+                      </Flex>
+                    ) : (
+                      "Connect Wallet"
+                    )
                   }
                   bottomText="All amount locked"
                 />
@@ -210,9 +236,27 @@ export const Vesting = () => {
                   title="Total Unlocked"
                   className="amount-unlocked"
                   value={
-                    accountId
-                      ? `${totalUnlocked} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
+                    accountId ? (
+                      <Flex className="items-top space-x-[8px]">
+                        <Box
+                          borderRadius={99}
+                          border="solid 3px"
+                          outline={glassyWhiteOpaque}
+                          borderColor={glassyWhiteOpaque}
+                          boxSizing="content-box"
+                          className="h-[28px] w-[28px]"
+                        >
+                          <Image
+                            width="100%"
+                            height="100%"
+                            src={investorInfo?.token?.icon}
+                          />
+                        </Box>
+                        <Text children={totalUnlocked} />
+                      </Flex>
+                    ) : (
+                      "Connect Wallet"
+                    )
                   }
                   bottomText="Unlocked amount"
                 />
@@ -230,9 +274,27 @@ export const Vesting = () => {
                   title={accountId ? "Total Withdrawn" : ""}
                   className="amount-withdrawn"
                   value={
-                    accountId
-                      ? `${totalWithdrawn} ${investorInfo?.token?.symbol}`
-                      : "Connect Wallet"
+                    accountId ? (
+                      <Flex className="items-top space-x-[8px]">
+                        <Box
+                          borderRadius={99}
+                          border="solid 3px"
+                          outline={glassyWhiteOpaque}
+                          borderColor={glassyWhiteOpaque}
+                          boxSizing="content-box"
+                          className="h-[28px] w-[28px]"
+                        >
+                          <Image
+                            width="100%"
+                            height="100%"
+                            src={investorInfo?.token?.icon}
+                          />
+                        </Box>
+                        <Text children={totalWithdrawn} />
+                      </Flex>
+                    ) : (
+                      "Connect Wallet"
+                    )
                   }
                   bottomText="Total quantity "
                 />
