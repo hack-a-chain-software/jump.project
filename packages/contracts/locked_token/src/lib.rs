@@ -39,7 +39,7 @@ pub struct Contract {
   pub locked_token_metadata: LazyOption<FungibleTokenMetadata>,
   // contract parameters
   pub contract_config: LazyOption<ContractConfig>,
-  // keep track of how many Jump tokens wre deposited to the contract
+  // keep track of how many Jump tokens were deposited to the contract
   pub minters: UnorderedSet<AccountId>,
   // keep track of all pending vesting schedules
   pub vesting_schedules: LookupMap<AccountId, Vector<Vesting>>,
