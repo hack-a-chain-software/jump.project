@@ -98,7 +98,7 @@ impl Contract {
     //when a contract is saved, it's hash is automatically saved on 'storage_cost' LUP MAP
     //therefore, it's there, we can proceed
     assert!(
-      !self.storage_cost.contains_key(&contract_hash.clone()),
+      self.storage_cost.contains_key(&contract_hash.clone()),
       "{}",
       ERR_005
     );
