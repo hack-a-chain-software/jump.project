@@ -56,9 +56,15 @@ Besides the NEP-141 and NEP-145 interface implemented by the contract, it is imp
     This method must be called after deploying the contract to enable it to operate.
     *Method name*: `new`
     *Method params*:
+
         x_token_name: String -> Official name of the xToken, ideally should be x{name of base token}
+
         x_token_symbol: String -> Official symbol/ticker for the token, ideally should be x{ticker of base token}
+
+        x_token_icon: String -> Official icon of the xToken that shows up in wallets and other applications
+
         x_token_decimals: u8 -> Quantity of decimal houses supported by the xToken, ideally should be equal to base token
+
         base_token_address: String -> account id of the NEP-141 contract for the base token
     ```shell
     near call <xTokenAddress> "new" '{"x_token_name": "<x_token_name>", "x_token_symbol": "<x_token_symbol>", "x_token_decimals": <x_token_decimals>, "base_token_address": "<base_token_address>" }' --accountId <ownerAccountId> 
