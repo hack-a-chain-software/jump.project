@@ -281,20 +281,11 @@ export const useNftStaking = create<{
     }, []);
 
     for (const key of balances) {
-<<<<<<< HEAD
       const storage = await get().getTokenStorage(connection, account, key);
       const storageMin = await get().getMinStorageCost(connection, key);
       const nearStorageCost = utils.format.formatNearAmount(storageMin?.min);
-=======
-      // const storage = await get().getTokenStorage(connection, account, key);
-      const storageMin = await get().getMinStorageCost(connection, key);
-      const nearStorageCost = utils.format.formatNearAmount(storageMin?.min);
-      const nearStorageCostFormatterd = Number(nearStorageCost)
-        .toFixed(3)
-        .toString();
->>>>>>> b8334e56 (fix(web): changed reward deposit to minimum necessary)
 
-      if (!storageMin) {
+      if (!storage) {
         transactions.push(
           getTransaction(
             account,
@@ -304,11 +295,7 @@ export const useNftStaking = create<{
               account_id: account,
               registration_only: false,
             },
-<<<<<<< HEAD
             nearStorageCost
-=======
-            nearStorageCostFormatterd
->>>>>>> b8334e56 (fix(web): changed reward deposit to minimum necessary)
           )
         );
       }
