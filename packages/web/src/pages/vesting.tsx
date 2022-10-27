@@ -199,7 +199,7 @@ export const Vesting = () => {
                   title="Total Locked"
                   value={
                     accountId ? (
-                      <Flex className="items-top space-x-[8px]">
+                      <Flex className="items-center space-x-[8px]">
                         <Box
                           borderRadius={99}
                           border="solid 3px"
@@ -237,7 +237,7 @@ export const Vesting = () => {
                   className="amount-unlocked"
                   value={
                     accountId ? (
-                      <Flex className="items-top space-x-[8px]">
+                      <Flex className="items-center space-x-[8px]">
                         <Box
                           borderRadius={99}
                           border="solid 3px"
@@ -275,7 +275,7 @@ export const Vesting = () => {
                   className="amount-withdrawn"
                   value={
                     accountId ? (
-                      <Flex className="items-top space-x-[8px]">
+                      <Flex className="items-center space-x-[8px]">
                         <Box
                           borderRadius={99}
                           border="solid 3px"

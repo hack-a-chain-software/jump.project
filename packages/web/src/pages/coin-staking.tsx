@@ -276,7 +276,7 @@ export const Staking = () => {
                 <ValueBox
                   borderColor={glassyWhiteOpaque}
                   value={
-                    <Flex className="items-top space-x-[8px]">
+                    <Flex className="items-center space-x-[8px]">
                       <Box
                         borderRadius={99}
                         border="solid 3px"
@@ -311,7 +311,7 @@ export const Staking = () => {
                   bottomText={"worth " + xTokenInToken + " JUMP"}
                   borderColor={glassyWhiteOpaque}
                   value={
-                    <Flex className="items-top space-x-[8px]">
+                    <Flex className="items-center space-x-[8px]">
                       <Box
                         clipPath="polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
                         border="solid 3px"
