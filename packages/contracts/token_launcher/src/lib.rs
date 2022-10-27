@@ -329,6 +329,11 @@ mod tests {
 
     let mut contract: Contract = init_contract();
 
+    // first, we need to register the storage cost of the contract
+    // this is done in the 'store' function, but this action cannot be performed on
+    // unit tets
+    contract.storage_cost.insert(&contract_hash_58, &U128(10));
+
     contract.register_contract(
       "token".to_string(),
       contract_hash_58,
@@ -370,6 +375,11 @@ mod tests {
     testing_env!(context);
 
     let mut contract: Contract = init_contract();
+
+    // first, we need to register the storage cost of the contract
+    // this is done in the 'store' function, but this action cannot be performed on
+    // unit tets
+    contract.storage_cost.insert(&contract_hash_58, &U128(10));
 
     contract.register_contract(
       "token".to_string(),
