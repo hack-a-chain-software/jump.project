@@ -45,18 +45,16 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
   );
 
   // get highest block in DB
-  // const lastProcessedTransaction = (await ProcessedEvent.findOne({
-  //   attributes: [
-  //     [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
-  //   ],
-  //   raw: true,
-  // }))!;
+  const lastProcessedTransaction = (await ProcessedEvent.findOne({
+    attributes: [
+      [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
+    ],
+    raw: true,
+  }))!;
 
-  // const lastProcessedBlock = lastProcessedTransaction.block_height
-  //   ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
-  //   : START_BLOCK;
-
-  const lastProcessedBlock = START_BLOCK;
+  const lastProcessedBlock = lastProcessedTransaction.block_height
+    ? parseInt(lastProcessedTransaction.block_height) - BLOCK_REDUNDANCY
+    : START_BLOCK;
 
   const lakeConfig: types.LakeConfig = {
     s3BucketName: S3_BUCKET,
