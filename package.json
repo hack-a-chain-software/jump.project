@@ -29,7 +29,8 @@
     "deploy:testnet": "yarn workspace @near/contracts deploy:testnet",
     "local:env": "NEAR_NETWORK=testnet node .github/utilities/set_local_environments.js",
     "local:run": "yarn local:env && cd services/localtest && docker-compose rm -v db && docker compose up --force-recreate --build",
-    "local:full": "yarn deploy:testnet && yarn local:run"
+    "local:full": "yarn deploy:testnet && yarn local:run",
+    "local:seeder": "node .github/utilities/database_basic_populate.js"
   },
   "husky": {
     "hooks": {
