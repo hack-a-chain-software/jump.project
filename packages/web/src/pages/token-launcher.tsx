@@ -22,7 +22,7 @@ export type TokenDataProps = {
   reference_hash?: string | null;
   type: string;
   supply_type: string;
-  total_supply?: number;
+  total_supply?: string;
 };
 
 export const TokenLauncher = () => {
@@ -36,7 +36,7 @@ export const TokenLauncher = () => {
     reference_hash: null,
     type: "",
     supply_type: "",
-    total_supply: 0,
+    total_supply: "0",
   });
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -79,7 +79,7 @@ export const TokenLauncher = () => {
       obj?.supply_type == "fixed" ? "total_supply" : "init_supply";
 
     const decimals = new Big(10).pow(Number(obj.decimals));
-    const supply = new Big(obj?.total_supply || 0).times(decimals).toString();
+    const supply = new Big(obj?.total_supply || "0").times(decimals).toFixed(0);
 
     const params = {
       owner_id: accountId,
