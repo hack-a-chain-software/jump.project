@@ -30,23 +30,27 @@ export const useTokenLauncher = create<{
     try {
       const transactions: Transaction[] = [];
 
+      const launcherContract = import.meta.env.VITE_TOKEN_LAUNCHER_CONTRACT;
+
       const nearDeployCost = utils.format.formatNearAmount(deployCost);
 
       const nearDeployCostFormatterd = Number(nearDeployCost)
         .toFixed(2)
         .toString();
 
+      const charsAvailable = 64 - launcherContract.length;
+
       const validPrefix = prefix
         .replace(/[^a-zA-Z0-9w]/g, "")
-        .slice(0, 56)
+        .slice(0, charsAvailable + 1)
         .toLowerCase();
 
-      const contract_account = validPrefix + ".testnet";
+      const contract_account = validPrefix + "." + launcherContract;
 
       transactions.push(
         getTransaction(
           accountId!,
-          import.meta.env.VITE_TOKEN_LAUNCHER_CONTRACT,
+          launcherContract,
           "deploy_new_contract",
           {
             contract_to_be_deployed: contract,
