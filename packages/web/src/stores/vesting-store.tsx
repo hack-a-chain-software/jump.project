@@ -56,8 +56,8 @@ export const useVestingStore = create<{
   getVestings: (connection: WalletSelector, accountId: string) => Promise<void>;
   fastPass: (
     vesting: string,
-    amount: number,
-    passCost: number,
+    amount: string,
+    passCost: string,
     accountId: string,
     connection: WalletSelector
   ) => Promise<void>;
@@ -246,7 +246,7 @@ export const useVestingStore = create<{
         import.meta.env.VITE_BASE_TOKEN,
         "ft_transfer_call",
         {
-          amount: String((amount * passCost) / 10000),
+          amount: new Big(amount).times(passCost).div("10000").toFixed(0),
           receiver_id: import.meta.env.VITE_LOCKED_CONTRACT,
           memo: null,
           msg: JSON.stringify({
