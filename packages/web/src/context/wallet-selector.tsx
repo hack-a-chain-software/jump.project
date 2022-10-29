@@ -10,7 +10,7 @@ import { map, distinctUntilChanged } from "rxjs";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-import { setupSender } from "@near-wallet-selector/sender";
+import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 
 interface WalletSelectorContextValue {
   selector: WalletSelector;
@@ -52,11 +52,7 @@ export const WalletSelectorContextProvider: React.FC<
     const _selector = await setupWalletSelector({
       network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
       debug: true,
-      modules: [
-        setupNearWallet({
-          iconUrl: "/assets/near-wallet-icon.png",
-        }),
-      ],
+      modules: [setupNearWallet(), setupMeteorWallet()],
     });
 
     const state = _selector.store.getState();
@@ -79,11 +75,14 @@ export const WalletSelectorContextProvider: React.FC<
 
     const subscription = selector.store.observable
       .pipe(
-        map((state) => state.accounts),
+        map(({ accounts }) => accounts),
         distinctUntilChanged()
       )
       .subscribe((nextAccounts) => {
+        console.log("Accounts Update", nextAccounts);
+
         setAccounts(nextAccounts);
+        setShowModal(false);
       });
 
     return () => subscription.unsubscribe();
