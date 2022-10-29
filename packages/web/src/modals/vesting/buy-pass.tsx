@@ -51,7 +51,7 @@ export function BuyFastPass({
               vestingId,
               totalAmount,
               passCost,
-              accountId as string,
+              (accountId as string) + "",
               selector
             )
           }
