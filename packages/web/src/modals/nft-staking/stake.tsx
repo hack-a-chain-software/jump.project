@@ -93,7 +93,7 @@ export function NFTStakeModal({
     >
       <Flex w="100%" direction="column">
         <Text color="white" marginTop="-12px" marginBottom="12px">
-          please select your nft from the wallet
+          please select your NFTs
         </Text>
 
         {loading ? (

@@ -25,7 +25,7 @@ const types = {
   whitelist: (
     <div className="w-max bg-white rounded-[50px] px-[8px] px-[8px] h-[20px]">
       <span className="text-[#431E5A] text-[12px] font-[500] relative top-[-3px] tracking-[-0.04em]">
-        Whitelist Only
+        Private sale
       </span>
     </div>
   ),

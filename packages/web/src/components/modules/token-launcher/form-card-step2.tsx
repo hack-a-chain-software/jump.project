@@ -126,9 +126,9 @@ export function FormCardStep2({
                     borderRadius="12px"
                     transition="0.1s background-color"
                     _hover={{ backgroundColor: "#D6B8D8" }}
-                    onClick={() => handleSelectValue("Simple Token")}
+                    onClick={() => handleSelectValue("Fixed Supply Token")}
                   >
-                    Simple Token
+                    Fixed Supply Token
                   </Text>
                   <Text
                     width="100%"
@@ -190,7 +190,7 @@ export function FormCardStep2({
                 </div>
               </>
             )}
-            {selectedValue == "Simple Token" && (
+            {selectedValue == "Fixed Supply Token" && (
               <>
                 <FormLabel
                   fontSize="16px"

@@ -137,7 +137,7 @@ export function FormIntroModal({
                     lineHeight="100%"
                     fontSize="0.875rem"
                   >
-                    Create NEP-141 token’s easily
+                    Create NEP-141 tokens easily
                   </Text>
                 </Flex>
               </Box>
@@ -207,7 +207,7 @@ export function FormIntroModal({
                     fontSize="0.875rem"
                     pr="50px"
                   >
-                    Get your tokens easily, being sent directly to your wallet
+                    Get your tokens easily, sent directly to your wallet
                   </Text>
                 </Flex>
               </Box>
