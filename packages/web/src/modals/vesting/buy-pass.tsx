@@ -49,9 +49,9 @@ export function BuyFastPass({
           onClick={() =>
             fastPass(
               vestingId,
-              totalAmount,
+              Number(totalAmount),
               passCost,
-              (accountId as string) + "",
+              accountId!,
               selector
             )
           }
