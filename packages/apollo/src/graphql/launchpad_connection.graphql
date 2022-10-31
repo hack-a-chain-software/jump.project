@@ -60,6 +60,8 @@ query LaunchpadConenction(
         total_quantity
         total_allocation
       }
+      project_allocations_sold
+      project_total_amount_sale_project_tokens
     }
   }
 }

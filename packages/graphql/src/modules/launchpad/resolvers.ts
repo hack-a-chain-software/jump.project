@@ -8,7 +8,7 @@ import {
   PaginatedLaunchpadFilters,
   ProjectIdQuery,
 } from "@/types";
-import { findTokenMetadata } from "@/modules/tools";
+import { findTokenMetadata, findProjectInfo } from "@/modules/tools";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { VisibilityEnum } from "@near/apollo";
@@ -37,6 +37,27 @@ export default {
         symbol,
         decimals,
       };
+    },
+    async project_allocations_sold({ listing_id }: LaunchpadListing) {
+      const { allocations_sold } = await findProjectInfo(listing_id);
+
+      console.log("projectallocationssold", allocations_sold);
+
+      return allocations_sold;
+    },
+    async project_total_amount_sale_project_tokens({
+      listing_id,
+    }: LaunchpadListing) {
+      const { total_amount_sale_project_tokens } = await findProjectInfo(
+        listing_id
+      );
+
+      console.log(
+        "project_total_amount_sale_project_tokens",
+        total_amount_sale_project_tokens
+      );
+
+      return total_amount_sale_project_tokens;
     },
     async allocation(
       { listing_id }: LaunchpadListing,

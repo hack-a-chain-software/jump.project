@@ -1,9 +1,9 @@
 import Big from "big.js";
 import { useMemo } from "react";
-import { launchpadProject } from "@/interfaces";
 import { useWalletSelector } from "@/context/wallet-selector";
 import isBefore from "date-fns/isBefore";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
+import { LaunchpadListing } from "@near/apollo";
 
 const CONNECT_WALLET_MESSAGE = "Connect Wallet";
 
@@ -11,6 +11,11 @@ const formatConfig = {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 };
+
+export interface investorAllocation {
+  allocationsBought: string | undefined;
+  totalTokensBought: string | undefined;
+}
 
 export const ProjectInvestments = ({
   investorAllocation,
@@ -28,7 +33,7 @@ export const ProjectInvestments = ({
   vestedAllocations: any;
   investorAllowance: any;
   investorAllocation: any;
-  launchpadProject: Partial<launchpadProject>;
+  launchpadProject: Partial<LaunchpadListing>;
 }) => {
   const { accountId, selector } = useWalletSelector();
   const { withdrawAllocations } = useLaunchpadStore();

@@ -64,6 +64,8 @@ export default gql`
     # Sub Queries
     project_token_info: ProjectTokenInfo
     price_token_info: ProjectTokenInfo
+    project_allocations_sold: String
+    project_total_amount_sale_project_tokens: String
     allocation(account_id: ID!): InvestorAllocation
   }
 
