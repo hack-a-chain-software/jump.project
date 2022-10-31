@@ -114,6 +114,14 @@ export const ProjectCard = ({
     return allocationsSold.mul(allocationPrice);
   }, [allocationsSold, allocationPrice]);
 
+  const tokensForSale = useMemo(() => {
+    return `${formatNumber(
+      project_total_amount_sale_project_tokens,
+      project_token_info?.decimals,
+      { notation: "compact", compactDisplay: "long" }
+    )} ${project_token_info?.symbol}`;
+  }, [project_total_amount_sale_project_tokens, project_token_info]);
+
   return (
     <div
       className="
@@ -212,14 +220,13 @@ export const ProjectCard = ({
               </span>
             </div>
 
-            <div>
+            <div
+              className="truncate max-w-[145px] overflow-hidden"
+              title={tokensForSale}
+            >
               <span
                 className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
-                children={`${formatNumber(
-                  project_total_amount_sale_project_tokens,
-                  project_token_info?.decimals,
-                  { notation: "compact", compactDisplay: "long" }
-                )} ${project_token_info?.symbol}`}
+                children={tokensForSale}
               />
             </div>
           </div>
