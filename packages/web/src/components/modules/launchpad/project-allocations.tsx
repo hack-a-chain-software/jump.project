@@ -8,7 +8,11 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { Steps } from "intro.js-react";
 import { LaunchpadListing } from "@near/apollo";
-import { investorAllocation } from "@/interfaces";
+
+export interface investorAllocation {
+  allocationsBought: string | undefined;
+  totalTokensBought: string | undefined;
+}
 
 import {
   If,
