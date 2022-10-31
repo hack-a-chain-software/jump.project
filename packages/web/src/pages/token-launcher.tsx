@@ -118,8 +118,6 @@ export const TokenLauncher = () => {
       }
     );
 
-    console.log(deployCost1);
-
     const deployCost = "35000000000000000000000010";
 
     const contract =

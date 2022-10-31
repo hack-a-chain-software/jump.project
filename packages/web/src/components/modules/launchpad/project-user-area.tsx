@@ -3,7 +3,6 @@ import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
-import { launchpadProject } from "@/interfaces";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { getUTCDate } from "@near/ts";
@@ -11,6 +10,7 @@ import format from "date-fns/format";
 import { StatusEnum } from "@near/apollo";
 
 import { NumberInput } from "@/components";
+import { LaunchpadListing } from "@near/apollo";
 
 const formatConfig = {
   minimumFractionDigits: 0,
@@ -41,7 +41,7 @@ export function ProjectUserArea({
 }: {
   investorAllowance: string;
   priceTokenBalance: string;
-  launchpadProject: launchpadProject;
+  launchpadProject: LaunchpadListing;
 }) {
   const { accountId, selector } = useWalletSelector();
   const { buyTickets } = useLaunchpadStore();

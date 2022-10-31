@@ -72,10 +72,12 @@ export type LaunchpadListing = {
   open_sale_2_timestamp?: Maybe<Scalars["String"]>;
   price_token?: Maybe<Scalars["String"]>;
   price_token_info?: Maybe<ProjectTokenInfo>;
+  project_allocations_sold?: Maybe<Scalars["String"]>;
   project_name?: Maybe<Scalars["String"]>;
   project_owner: Scalars["ID"];
   project_token: Scalars["ID"];
   project_token_info?: Maybe<ProjectTokenInfo>;
+  project_total_amount_sale_project_tokens?: Maybe<Scalars["String"]>;
   public: Scalars["Boolean"];
   status?: Maybe<Scalars["String"]>;
   telegram?: Maybe<Scalars["String"]>;
@@ -288,6 +290,8 @@ export type LaunchpadConenctionQuery = {
       fraction_instant_release?: string | null;
       liquidity_pool_price_tokens?: string | null;
       dex_id?: string | null;
+      project_allocations_sold?: string | null;
+      project_total_amount_sale_project_tokens?: string | null;
       project_token_info?: {
         __typename?: "ProjectTokenInfo";
         name?: string | null;
@@ -351,6 +355,8 @@ export type LaunchPadProjectQuery = {
     website?: string | null;
     whitepaper?: string | null;
     dex_id?: string | null;
+    project_allocations_sold?: string | null;
+    project_total_amount_sale_project_tokens?: string | null;
     project_token_info?: {
       __typename?: "ProjectTokenInfo";
       name?: string | null;
@@ -574,6 +580,8 @@ export const LaunchpadConenctionDocument = gql`
           total_quantity
           total_allocation
         }
+        project_allocations_sold
+        project_total_amount_sale_project_tokens
       }
     }
   }
@@ -688,6 +696,8 @@ export const LaunchPadProjectDocument = gql`
         total_quantity
         total_allocation
       }
+      project_allocations_sold
+      project_total_amount_sale_project_tokens
     }
   }
 `;

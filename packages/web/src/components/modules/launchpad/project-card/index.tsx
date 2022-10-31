@@ -1,5 +1,4 @@
 import Big from "big.js";
-import { launchpadProject } from "@/interfaces";
 import { StatusEnum } from "@near/apollo";
 import { useMemo } from "react";
 import Badge from "./badge";
@@ -10,6 +9,7 @@ import { RocketIcon } from "@/assets/svg/rocket";
 import { useNavigate } from "react-router";
 import { JumpGradient } from "@/assets/svg";
 import { useTokenMetadata } from "@/hooks/modules/token";
+import { LaunchpadListing } from "@near/apollo";
 
 const closedArray = [
   "sale_finalized",
@@ -29,14 +29,18 @@ export const ProjectCard = ({
   listing_id,
   price_token,
   project_token_info,
-  allocations_sold,
   public: publicProject,
   open_sale_1_timestamp,
   final_sale_2_timestamp,
-  total_amount_sale_project_tokens = "0",
+  project_allocations_sold,
   token_allocation_price = "0",
   token_allocation_size = "1",
-}: Partial<launchpadProject> & { public: boolean }) => {
+  project_total_amount_sale_project_tokens = "0",
+}: Partial<LaunchpadListing> & {
+  public: boolean;
+  project_allocations_sold: string;
+  project_total_amount_sale_project_tokens: string;
+}) => {
   const navigate = useNavigate();
 
   const { data: metadataPriceToken, loading: laodingPriceTokenMetadata } =
@@ -77,10 +81,10 @@ export const ProjectCard = ({
   }, [status, openSale, finalSale]);
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens || 1).div(
+    return new Big(project_total_amount_sale_project_tokens || 0).div(
       token_allocation_size || 1
     );
-  }, [total_amount_sale_project_tokens]);
+  }, [project_total_amount_sale_project_tokens, token_allocation_size]);
 
   const formatNumber = (value, decimals, config: any = formatConfig) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
@@ -91,12 +95,16 @@ export const ProjectCard = ({
   };
 
   const allocationsSold = useMemo(() => {
-    return new Big(allocations_sold ?? 0);
-  }, [allocations_sold]);
+    return new Big(project_allocations_sold ?? 0);
+  }, [project_allocations_sold]);
 
   const progress = useMemo(() => {
     return allocationsSold.mul(100).div(totalAmount).toFixed(2);
-  }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
+  }, [
+    project_allocations_sold,
+    project_total_amount_sale_project_tokens,
+    project_token_info,
+  ]);
 
   const allocationPrice = useMemo(() => {
     return new Big(token_allocation_price || 0);
@@ -208,7 +216,7 @@ export const ProjectCard = ({
               <span
                 className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
                 children={`${formatNumber(
-                  total_amount_sale_project_tokens,
+                  project_total_amount_sale_project_tokens,
                   project_token_info?.decimals,
                   { notation: "compact", compactDisplay: "long" }
                 )} ${project_token_info?.symbol}`}
