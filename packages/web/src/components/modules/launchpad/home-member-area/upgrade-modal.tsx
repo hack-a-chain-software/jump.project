@@ -287,8 +287,7 @@ export default function ({
                     {selected ? (
                       <span
                         className={twMerge(
-                          "font-[800] text-[16px] leading-[19px] tracking-[-0.03em]",
-                          tiersBadge[selected].class
+                          "font-[800] text-[16px] leading-[19px] tracking-[-0.03em] no-tier"
                         )}
                         children={tiersBadge[selected].name}
                       />
