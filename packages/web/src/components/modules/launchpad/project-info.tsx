@@ -1,6 +1,4 @@
-import Big from "big.js";
 import { useMemo } from "react";
-import { tokenMetadata, launchpadProject } from "@/interfaces";
 import { Badge } from "./project-card/badge";
 import { StatusEnum } from "@near/apollo";
 import isBefore from "date-fns/isBefore";
@@ -8,6 +6,7 @@ import { getUTCDate } from "@near/ts";
 import { ExternalLinkIcon } from "@heroicons/react/outline";
 import { Tutorial, TutorialItemInterface } from "@/components";
 import isEmpty from "lodash/isEmpty";
+import { LaunchpadListing } from "@near/apollo";
 
 const closedArray = [
   "sale_finalized",
@@ -26,7 +25,7 @@ export function ProjectInfo({
   open_sale_1_timestamp,
   final_sale_2_timestamp,
   stepItems,
-}: launchpadProject & { stepItems?: TutorialItemInterface[] }) {
+}: LaunchpadListing & { stepItems?: TutorialItemInterface[] }) {
   const openSale = useMemo(() => {
     return getUTCDate(Number(open_sale_1_timestamp));
   }, [open_sale_1_timestamp]);
