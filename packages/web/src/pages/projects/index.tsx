@@ -12,7 +12,7 @@ import {
   VisibilityEnum,
 } from "@near/apollo";
 import { useMemo } from "react";
-import { Button, TopCard, LoadingIndicator } from "@/components";
+import { Button, TopCard, LoadingIndicator, BackButton } from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useNearQuery } from "react-near";
 import { MemberArea } from "@/components/modules/launchpad/home-member-area";
@@ -21,10 +21,13 @@ import { twMerge } from "tailwind-merge";
 import { FolderOpenIcon, SearchIcon } from "@heroicons/react/outline";
 import { viewFunction } from "@/tools";
 import { QuestionMarkOutlinedIcon } from "@/assets/svg/question-mark-icon";
+import { useNavigate } from "react-router";
 
 const PAGINATE_LIMIT = 30;
 
 export const Projects = () => {
+  const navigate = useNavigate();
+
   const [filter, setFilter] = useState({});
   const [filterSearch, setSearch] = useState<string | null>(null);
   const [launchpadSettings, setlaunchpad] = useState<any>();
@@ -276,7 +279,9 @@ export const Projects = () => {
 
   return (
     <div className="p-[30px] w-full overflow-hidden pt-[150px] relative">
-      <div className="flex flex-col space-y-[24px] xl:space-y-[0px] xl:flex-row xl:space-x-[24px] mb-[86px]">
+      <BackButton text="Jump Pad" onClick={() => navigate("/")} />
+
+      <div className="flex flex-col space-y-[24px] xl:space-y-[0px] xl:flex-row xl:space-x-[24px] mb-[86px] mt-[30px]">
         <TopCard
           gradientText=""
           maxW="max-w-[548px] xl:max-w-[none]"

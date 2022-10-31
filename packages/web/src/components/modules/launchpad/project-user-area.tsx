@@ -166,7 +166,7 @@ export function ProjectUserArea({
   }, [projectStatus, openSale, finalSale]);
 
   return (
-    <div className="investment relative bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
+    <div className="investment relative bg-[rgba(255,255,255,0.1)] rounded-[20px] py-[24px] pb-[64px] px-[64px] flex-1 flex flex-col items-center h-max mb-[8px] max-w-[548px]">
       <div
         className={twMerge(
           "px-[24px] py-[8px] rounded-[50px] bg-[#559C71] w-max flex space-x-[10px] mb-[40px]",
