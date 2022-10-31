@@ -102,7 +102,6 @@ export const Staking = () => {
       );
 
       setBaseTokenMetadata(metadata);
-      console.log(metadata);
     })();
   }, []);
 

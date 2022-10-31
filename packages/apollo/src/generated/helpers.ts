@@ -63,10 +63,12 @@ export type LaunchpadListingKeySpecifier = (
   | "open_sale_2_timestamp"
   | "price_token"
   | "price_token_info"
+  | "project_allocations_sold"
   | "project_name"
   | "project_owner"
   | "project_token"
   | "project_token_info"
+  | "project_total_amount_sale_project_tokens"
   | "public"
   | "status"
   | "telegram"
@@ -100,10 +102,14 @@ export type LaunchpadListingFieldPolicy = {
   open_sale_2_timestamp?: FieldPolicy<any> | FieldReadFunction<any>;
   price_token?: FieldPolicy<any> | FieldReadFunction<any>;
   price_token_info?: FieldPolicy<any> | FieldReadFunction<any>;
+  project_allocations_sold?: FieldPolicy<any> | FieldReadFunction<any>;
   project_name?: FieldPolicy<any> | FieldReadFunction<any>;
   project_owner?: FieldPolicy<any> | FieldReadFunction<any>;
   project_token?: FieldPolicy<any> | FieldReadFunction<any>;
   project_token_info?: FieldPolicy<any> | FieldReadFunction<any>;
+  project_total_amount_sale_project_tokens?:
+    | FieldPolicy<any>
+    | FieldReadFunction<any>;
   public?: FieldPolicy<any> | FieldReadFunction<any>;
   status?: FieldPolicy<any> | FieldReadFunction<any>;
   telegram?: FieldPolicy<any> | FieldReadFunction<any>;

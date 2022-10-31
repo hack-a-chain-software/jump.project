@@ -2,12 +2,18 @@ import Big from "big.js";
 import { isBefore, format } from "date-fns";
 import { getUTCDate } from "@near/ts";
 import { WalletIcon } from "@/assets/svg";
-import { Fragment, useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Flex, Text, Skeleton } from "@chakra-ui/react";
 import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { launchpadProject, investorAllocation } from "@/interfaces";
 import { Steps } from "intro.js-react";
+import { LaunchpadListing } from "@near/apollo";
+
+export interface investorAllocation {
+  allocationsBought: string | undefined;
+  totalTokensBought: string | undefined;
+}
+
 import {
   If,
   GradientText,
@@ -26,7 +32,7 @@ export function ProjectAllocations({
   investorAllowance: string;
   priceTokenBalance: string;
   totalAllowanceData: string;
-  launchpadProject: launchpadProject;
+  launchpadProject: LaunchpadListing;
   investorAllocation: investorAllocation;
 }) {
   const { accountId, selector } = useWalletSelector();

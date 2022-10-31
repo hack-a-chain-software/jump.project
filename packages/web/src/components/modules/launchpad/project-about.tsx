@@ -1,13 +1,13 @@
 import { Card } from "@/components";
-import { launchpadProject } from "@/interfaces";
 import { Text, Flex, Skeleton } from "@chakra-ui/react";
+import { LaunchpadListing } from "@near/apollo";
 
 export function ProjectAbout({
   launchpadProject,
   isLoading,
 }: {
   isLoading: boolean;
-  launchpadProject: launchpadProject;
+  launchpadProject: LaunchpadListing;
 }) {
   return (
     <Card className="w-full col-span-12 lg:col-span-6 xl:col-span-6">
