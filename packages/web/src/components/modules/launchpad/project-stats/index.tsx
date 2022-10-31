@@ -2,13 +2,12 @@ import Big from "big.js";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { getUTCDate } from "@near/ts";
-import { launchpadProject } from "@/interfaces";
-import { useWalletSelector } from "@/context/wallet-selector";
+import { LaunchpadListing } from "@near/apollo";
 
 export function ProjectStats({
   cliff_timestamp,
   price_token_info,
-  allocations_sold,
+  project_allocations_sold,
   project_token_info,
   end_cliff_timestamp,
   open_sale_1_timestamp,
@@ -19,8 +18,8 @@ export function ProjectStats({
   fraction_instant_release,
   token_allocation_size,
   token_allocation_price,
-  total_amount_sale_project_tokens,
-}: launchpadProject) {
+  project_total_amount_sale_project_tokens,
+}: LaunchpadListing) {
   const formatDate = (start_timestamp?: string) => {
     const date = getUTCDate(Number(start_timestamp ?? "0"));
     return format(date, "MM/dd/yyyy");
@@ -38,14 +37,14 @@ export function ProjectStats({
   };
 
   const totalAmount = useMemo(() => {
-    return new Big(total_amount_sale_project_tokens || 0).div(
+    return new Big(project_total_amount_sale_project_tokens || 0).div(
       token_allocation_size || 1
     );
-  }, [total_amount_sale_project_tokens, token_allocation_size]);
+  }, [project_total_amount_sale_project_tokens, token_allocation_size]);
 
   const allocationsSold = useMemo(() => {
-    return new Big(allocations_sold || 0);
-  }, [allocations_sold]);
+    return new Big(project_allocations_sold || 0);
+  }, [project_allocations_sold]);
 
   const allocationPrice = useMemo(() => {
     return new Big(token_allocation_price || 0);
@@ -57,10 +56,11 @@ export function ProjectStats({
 
   const progress = useMemo(() => {
     return allocationsSold.mul(100).div(totalAmount).toFixed(2);
-  }, [allocations_sold, total_amount_sale_project_tokens, project_token_info]);
-
-  console.log("penis");
-  console.log(formatNumber(totalRaise, price_token_info?.decimals));
+  }, [
+    project_allocations_sold,
+    project_total_amount_sale_project_tokens,
+    project_token_info,
+  ]);
 
   const steps = useMemo(() => {
     return [
@@ -198,7 +198,7 @@ export function ProjectStats({
 
             <div>
               <span
-                children={allocations_sold || 0}
+                children={project_allocations_sold || 0}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -213,7 +213,7 @@ export function ProjectStats({
             <div>
               <span
                 children={formatNumber(
-                  total_amount_sale_project_tokens,
+                  project_total_amount_sale_project_tokens,
                   project_token_info?.decimals
                 )}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
@@ -288,7 +288,7 @@ export function ProjectStats({
             <div>
               <span
                 children={formatNumber(
-                  total_amount_sale_project_tokens,
+                  project_total_amount_sale_project_tokens,
                   project_token_info?.decimals
                 )}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
@@ -393,7 +393,7 @@ export function ProjectStats({
   }, [
     cliff_timestamp,
     price_token_info,
-    allocations_sold,
+    project_allocations_sold,
     project_token_info,
     end_cliff_timestamp,
     token_allocation_size,
@@ -404,7 +404,7 @@ export function ProjectStats({
     final_sale_2_timestamp,
     liquidity_pool_timestamp,
     fraction_instant_release,
-    total_amount_sale_project_tokens,
+    project_total_amount_sale_project_tokens,
   ]);
 
   function classNames(...classes) {
