@@ -280,7 +280,7 @@ async function nftStakingSetup(execution_data) {
   await connAccountMap.ownerAccount.functionCall({
     contractId: connAccountMap.nftStaking.accountId,
     methodName: "add_contract_token",
-    args: { new_contract_token: connAccountMap.partnertoken.accountId },
+    args: { token_id: connAccountMap.partnertoken.accountId },
     attachedDeposit: new BN(1),
   });
 

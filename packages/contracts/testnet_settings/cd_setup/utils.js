@@ -29,6 +29,7 @@ async function createAccount(account_id, execution_data) {
   } catch (err) {
     if (
       err.toString().includes("TooManyRequestsError:") ||
+      err.toString().includes("Error: Server Error") ||
       err
         .toString()
         .includes(
