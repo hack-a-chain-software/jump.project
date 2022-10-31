@@ -7,8 +7,3 @@ export interface tokenMetadata {
   reference_hash: any;
   decimals: number;
 }
-
-export interface investorAllocation {
-  allocationsBought: string | undefined;
-  totalTokensBought: string | undefined;
-}
