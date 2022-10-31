@@ -39,6 +39,7 @@ async function tokenLauncherSetup(execution_data) {
         metadata: "FungibleTokenMetadata",
       }),
     },
+    attachedDeposit: new BN(nearAPI.utils.format.parseNearAmount("0.25")),
     gas: new BN("300000000000000"),
   });
 
@@ -70,6 +71,7 @@ async function tokenLauncherSetup(execution_data) {
         metadata: "FungibleTokenMetadata",
       }),
     },
+    attachedDeposit: new BN(nearAPI.utils.format.parseNearAmount("0.25")),
     gas: new BN("300000000000000"),
   });
 }
