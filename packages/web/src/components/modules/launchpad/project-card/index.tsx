@@ -226,7 +226,11 @@ export const ProjectCard = ({
             >
               <span
                 className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
-                children={tokensForSale}
+                children={`${formatNumber(
+                  project_total_amount_sale_project_tokens,
+                  project_token_info?.decimals,
+                  { notation: "compact", compactDisplay: "long" }
+                )} ${project_token_info?.symbol}`}
               />
             </div>
           </div>
