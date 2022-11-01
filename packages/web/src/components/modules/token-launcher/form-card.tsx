@@ -1,4 +1,5 @@
 import {
+  Box,
   Flex,
   FormControl,
   FormLabel,
@@ -14,6 +15,7 @@ import { useFormContext } from "react-hook-form";
 import { FormHeader } from "./form-header";
 import { useMemo, useState } from "react";
 import { XCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/solid";
+import { QuestionMarkOutlinedIcon } from "@/assets/svg/question-mark-icon";
 
 interface FormCardProps {
   onSubmitStepForm: (data: any) => void;
@@ -102,7 +104,9 @@ export function FormCardStep1({ onSubmitStepForm }: FormCardProps) {
                 color="black"
                 placement="top-start"
               >
-                <QuestionMarkCircleIcon className="w-[17px] h-[17px] white leading-3 ml-1" />
+                <Box className="w-[15px] h-[15x] white leading-3 ml-1">
+                  <QuestionMarkOutlinedIcon />
+                </Box>
               </Tooltip>
             </FormLabel>
             <div className="relative">

@@ -1,9 +1,9 @@
-import { QuestionMarkCircleIcon } from "@heroicons/react/solid";
+import { QuestionMarkOutlinedIcon } from "@/assets/svg/question-mark-icon";
 
 export function IconButton({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick}>
-      <QuestionMarkCircleIcon className="w-[32px] h-[32px] hover:opacity-[.7]" />
+    <button onClick={onClick} className="w-[18px] h-[18px] hover:opacity-[.7]">
+      <QuestionMarkOutlinedIcon />
     </button>
   );
 }

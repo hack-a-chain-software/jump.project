@@ -3,12 +3,18 @@ import { IconButton } from "@/components";
 import { ReactNode, useState } from "react";
 
 export interface TutorialItemInterface {
-  title: string;
+  title?: string;
   element: string;
   intro: ReactNode;
 }
 
-export const Tutorial = ({ items }: { items: TutorialItemInterface[] }) => {
+export const Tutorial = ({
+  items,
+  options,
+}: {
+  items: TutorialItemInterface[];
+  options?: any;
+}) => {
   const [show, setShow] = useState(false);
 
   return (
@@ -26,6 +32,7 @@ export const Tutorial = ({ items }: { items: TutorialItemInterface[] }) => {
           showProgress: false,
           showBullets: false,
           scrollToElement: false,
+          ...options,
         }}
       />
     </>
