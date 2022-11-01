@@ -11,12 +11,20 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { tokenMetadata } from "@/interfaces";
+import { viewFunction } from "@/tools";
 
+interface TokenInterface {
+  balance?: string | number;
+  metadata?: tokenMetadata;
+}
 interface WalletSelectorContextValue {
   selector: WalletSelector;
   accounts: AccountState[];
   accountId: string | null;
   showModal: boolean;
+  token: TokenInterface | undefined;
+  xToken: TokenInterface | undefined;
   signOut: () => Promise<void>;
   toggleModal: () => void;
 }
@@ -35,6 +43,9 @@ export const WalletSelectorContextProvider: React.FC<
   const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState<AccountState[]>([]);
   const [selector, setSelector] = useState<WalletSelector | null>(null);
+  const [token, setToken] = useState<TokenInterface>();
+  const [xToken, setXToken] = useState<TokenInterface>();
+  const [loaded, setLoaded] = useState(false);
 
   const toggleModal = () => setShowModal(!showModal);
 
@@ -59,6 +70,30 @@ export const WalletSelectorContextProvider: React.FC<
 
     setAccounts(state.accounts);
     setSelector(_selector);
+
+    const tokenMetadata = await viewFunction(
+      _selector,
+      import.meta.env.VITE_BASE_TOKEN,
+      "ft_metadata"
+    );
+
+    setToken({
+      metadata: tokenMetadata,
+      ...(token || undefined),
+    });
+
+    const xTokenMetadata = await viewFunction(
+      _selector,
+      import.meta.env.VITE_STAKING_CONTRACT,
+      "ft_metadata"
+    );
+
+    setXToken({
+      metadata: xTokenMetadata,
+      ...(token || undefined),
+    });
+
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -93,6 +128,44 @@ export const WalletSelectorContextProvider: React.FC<
     setAccountId(newAccount);
   }, [accounts]);
 
+  useEffect(() => {
+    if (!accountId || !loaded) {
+      return;
+    }
+
+    console.log(selector);
+
+    (async () => {
+      const tokenBalance = await viewFunction(
+        selector,
+        import.meta.env.VITE_BASE_TOKEN,
+        "ft_balance_of",
+        {
+          account_id: accountId,
+        }
+      );
+
+      setToken({
+        balance: tokenBalance,
+        ...(token || null),
+      });
+
+      const xTokenBalance = await viewFunction(
+        selector,
+        import.meta.env.VITE_STAKING_CONTRACT,
+        "ft_balance_of",
+        {
+          account_id: accountId,
+        }
+      );
+
+      setXToken({
+        balance: xTokenBalance,
+        ...(xToken || null),
+      });
+    })();
+  }, [accountId, loaded]);
+
   if (!selector) {
     return null;
   }
@@ -106,6 +179,8 @@ export const WalletSelectorContextProvider: React.FC<
         showModal,
         signOut,
         toggleModal,
+        token,
+        xToken,
       }}
     >
       {children}

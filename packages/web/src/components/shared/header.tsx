@@ -1,19 +1,16 @@
 import { Flex, Text, useColorMode } from "@chakra-ui/react";
-import { MoonIcon, WalletIcon } from "../../assets/svg";
+import { MoonIcon, MenuIcon } from "../../assets/svg";
 import { JumpTextIcon } from "../../assets/svg/jump-text";
 import { Button } from "./button";
-import { If } from "./if";
-import { MenuIcon, LogoutIcon } from "@/assets/svg";
-import { useWalletSelector } from "@/context/wallet-selector";
 import { MobileNav } from "./mobile-nav";
 import { useState } from "react";
 import { AirdropModal } from "@/modals";
+import { Wallet } from "./wallet";
 
 export function Header() {
   const { toggleColorMode } = useColorMode();
   const [isOpen, setIsOpen] = useState(false);
   const [showTokenModal, setShowTokenModal] = useState(false);
-  const { accountId, toggleModal, signOut } = useWalletSelector();
 
   return (
     <div className="z-10 pt-[30px] absolute top-0 right-0 z-2 left-0 flex items-center justify-center md:ml-[120px]">
@@ -37,23 +34,11 @@ export function Header() {
             </Text>
           </Flex>
 
-          <Button isDisabled={true} onClick={toggleColorMode}>
+          {/* <Button isDisabled={true} onClick={toggleColorMode}>
             <MoonIcon />
-          </Button>
-          <If
-            condition={!!accountId}
-            fallback={
-              <Button onClick={() => toggleModal()}>
-                <Flex className="hidden md:block">Connect Wallet</Flex>
-                <WalletIcon />
-              </Button>
-            }
-          >
-            <Button onClick={() => signOut()}>
-              <Flex className="hidden md:block">{accountId}</Flex>
-              <LogoutIcon />
-            </Button>
-          </If>
+          </Button> */}
+
+          <Wallet />
 
           <Flex
             alignItems="center"

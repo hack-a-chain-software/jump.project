@@ -1,27 +1,9 @@
-import {
-  Flex,
-  Modal,
-  ModalBody,
-  ModalOverlay,
-  ModalContent,
-  Box,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import { useTheme } from "../../hooks/theme";
-
-import React, { useEffect, useState } from "react";
+import { useWalletSelector } from "@/context/wallet-selector";
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment, useEffect, useState } from "react";
 import type { ModuleState } from "@near-wallet-selector/core";
 
-import { GradientText } from "@/components";
-
-import { useWalletSelector } from "@/context/wallet-selector";
-import { WalletModuleItem } from "./submodules/wallet-module-item";
-
-const modalRadius = 20;
-
 export function WalletSelectorModal(props: {}) {
-  const { jumpGradient, glassyWhiteOpaque } = useTheme();
-
   const { selector, showModal, toggleModal } = useWalletSelector();
 
   const [modules, setModules] = useState<ModuleState[]>([]);
@@ -66,57 +48,70 @@ export function WalletSelectorModal(props: {}) {
   };
 
   return (
-    <Modal
-      closeOnEsc
-      closeOnOverlayClick
-      blockScrollOnMount={true}
-      isCentered
-      isOpen={showModal}
-      onClose={() => toggleModal()}
-    >
-      <ModalOverlay backdropFilter={"blur(20px)"} border="none" />
-
-      <ModalContent
-        id="content"
-        flexDirection="row"
-        bg="transparent"
-        borderRadius={modalRadius}
-        overflow="hidden"
-      >
-        <ModalBody
-          overflow="hidden"
-          borderRadius={modalRadius}
-          width="max-content"
-          minWidth="max-content"
-          bg={jumpGradient}
-          padding="0"
+    <Transition appear show={showModal} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={() => toggleModal()}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
         >
-          <Box
-            padding="34px"
-            bg={useColorModeValue(glassyWhiteOpaque, "transparent")}
-          >
-            <Flex marginBottom="24px">
-              <GradientText
-                mb="-5px"
-                fontWeight="800"
-                fontSize={24}
-                color="white"
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel
+                className="
+                  w-full max-w-[456px] px-[20px] pt-[20px] pb-[41px] transform overflow-hidden rounded-[16px] bg-white transition-all
+                  bg-[url('./modalbg.png')]
+                "
               >
-                Connect Wallet
-              </GradientText>
-            </Flex>
-            <Flex flexDirection="column" className="space-y-[12px]">
-              {modules.map((module) => (
-                <WalletModuleItem
-                  {...module.metadata}
-                  key={"wallet-selector-modal-module" + module.id}
-                  onClick={() => handleWalletClick(module)}
-                />
-              ))}
-            </Flex>
-          </Box>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                <div className="flex flex-col mb-[32px]">
+                  <Dialog.Title className="text-[#121315] text-[16px] font-[700] tracking-[-0.04em]">
+                    Connect Wallet
+                  </Dialog.Title>
+                </div>
+
+                <div className="space-y-[24px] flex flex-col">
+                  {modules.map((module) => (
+                    <button
+                      key={"wallet-selector-modal-module" + module.id}
+                      onClick={() => handleWalletClick(module)}
+                      className="
+                        rounded-[16.5818px] h-[78px] px-[32px] py-[17px] bg-white flex items-center hover:bg-[#894DA0] shadow-[0px_3.31636px_16.5818px_rgba(152,73,156,0.25)] 
+                        bg-[linear-gradient(90deg,_#894DA0_7px,_transparent_4px)] hover:text-white text-[#121315]
+                      "
+                    >
+                      <img
+                        src={module.metadata.iconUrl}
+                        className="w-[32px] mr-[52px]"
+                      />
+
+                      <span
+                        children={module.metadata.name}
+                        className="font-[700] text-[20px]"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
   );
 }
