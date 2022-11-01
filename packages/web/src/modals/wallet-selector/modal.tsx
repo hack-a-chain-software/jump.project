@@ -91,8 +91,8 @@ export function WalletSelectorModal(props: {}) {
                       key={"wallet-selector-modal-module" + module.id}
                       onClick={() => handleWalletClick(module)}
                       className="
-                        rounded-[16.5818px] h-[78px] px-[32px] py-[17px] bg-white flex items-center shadow-[0px_3.31636px_16.5818px_rgba(152,73,156,0.25)] hover:shadow-[0px_3.31636px_16.5818px_rgba(152,73,156,0.5)]
-                        bg-[linear-gradient(90deg,_#894DA0_7px,_transparent_4px)]  text-[#121315]
+                        rounded-[16.5818px] h-[78px] px-[32px] py-[17px] bg-white flex items-center hover:bg-[#894DA0] shadow-[0px_3.31636px_16.5818px_rgba(152,73,156,0.25)] 
+                        bg-[linear-gradient(90deg,_#894DA0_7px,_transparent_4px)] hover:text-white text-[#121315]
                       "
                     >
                       <img
