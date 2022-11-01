@@ -7,6 +7,8 @@ import { format, addMilliseconds, isBefore } from "date-fns";
 import { InvestorInfo } from "@/hooks/modules/launchpad";
 import { tokenMetadata } from "@/interfaces";
 import { twMerge } from "tailwind-merge";
+import { Tutorial, TutorialItemInterface } from "@/components";
+import isEmpty from "lodash/isEmpty";
 
 const tiers = [
   {
@@ -44,6 +46,7 @@ export function MemberArea({
   totalAllowance,
   launchpadSettings,
   baseToken: { metadata, balance },
+  stepItems,
 }: {
   isLoaded: boolean;
   investor: InvestorInfo;
@@ -60,6 +63,7 @@ export function MemberArea({
     metadata: tokenMetadata;
     balance: string;
   };
+  stepItems?: TutorialItemInterface[];
 }) {
   const { accountId, selector } = useWalletSelector();
   const { decreaseMembership } = useLaunchpadStore();
@@ -133,7 +137,17 @@ export function MemberArea({
           </span>
         </div>
       )}
-
+      {!isEmpty(stepItems) && (
+        <Tutorial
+          items={stepItems || []}
+          options={{
+            hidePrev: true,
+            hideNext: true,
+            showStepNumbers: true,
+            stepNumbersOfLabel: "/",
+          }}
+        />
+      )}
       <div className="flex flex-col h-full">
         <div className="mb-[15px]">
           <span className="text-[14px] font-[800] leading-[17px] tracking-[-0.03em]">
@@ -141,8 +155,8 @@ export function MemberArea({
           </span>
         </div>
 
-        <div className="mb-[22px] flex justify-between space-x-[17px]">
-          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+        <div className="mb-[22px] flex justify-between space-x-[17px] ">
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px] tier-box">
             <div className="mb-[5px]">
               <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
                 Current Tier
@@ -160,7 +174,7 @@ export function MemberArea({
             </div>
           </div>
 
-          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]  allocation-tier-box">
             <div className="mb-[5px]">
               <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
                 Allocation tier
@@ -175,7 +189,7 @@ export function MemberArea({
             </div>
           </div>
 
-          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px]">
+          <div className="flex-1 bg-[rgba(252,252,252,0.2)] pt-[10px] pb-[22px] px-[18px] rounded-[10px] jump-staked-box">
             <div className="mb-[5px]">
               <span className="font-[600] text-[14px] leading-[17px] tracking-[-0.03em]">
                 xJUMP staked

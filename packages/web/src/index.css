@@ -46,17 +46,49 @@ body {
 
 .introjs-tooltip {
   border-radius: 25px !important;
-  background-color: #682676 !important;
+  background-color: #894DA0 !important;
   font-family: 'Inter', sans-serif !important;
+  padding: 15px !important;
+}
+
+.introjs-tooltip-header {
+  padding-top: 6px !important;
 }
 
 .introjs-tooltiptext {
   color: white !important;
   font-family: 'Inter', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.member-area-tooltip {
+  padding: 0 !important;
+}
+
+.member-area-tooltip .introjs-helperNumberLayer {
+  color: white;
+  position: absolute !important;
+  width: 100% !important;
+  bottom: 0 !important;
+  margin-bottom: 50px !important;
+}
+
+.member-area-tooltip .introjs-tooltiptext {
+  padding: 0 40px 0 33px !important;
+}
+
+.introjs-tooltiptext li {
+  line-height: 20px !important;
 }
 
 .introjs-tooltip-title {
   color: white !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  line-height: 18px !important;
 }
 
 .introjs-arrow.top,
@@ -70,13 +102,20 @@ body {
   border-top: unset !important;
 }
 
+.member-area-tooltip .introjs-tooltipbuttons {
+  padding: 0 40px 0 33px !important;
+  margin-bottom: 20px !important;
+}
+
 .introjs-button {
   /* padding: 30px 20px !important; */
-  font-size: 16px !important;
-  border-radius: 15px !important;
+  font-size: 14px !important;
+  border-radius: 9.59px !important;
   font-family: 'Inter', sans-serif !important;
+  line-height: 18px !important;
   font-weight: 600 !important;
   text-shadow: none !important;
+  
 }
 
 .introjs-button.introjs-prevbutton {
@@ -84,6 +123,16 @@ body {
   border: 1px solid white !important;
   background-color: transparent !important;
   text-decoration: none !important;
+  content: "Previous" !important;
+}
+
+.introjs-button.introjs-nextbutton {
+  color: white !important;
+  border: 1px solid white !important;
+  background-color: #FFF !important;
+  text-decoration: none !important;
+  color: #431E5A !important;
+  
 }
 
 .introjs-skipbutton {
@@ -100,6 +149,40 @@ body {
 
 .introjs-helperLayer {
   border-radius: 25px !important;
+}
+
+.member-area-tooltip {
+  margin-right: 0px !important;
+  min-height: 330px !important;
+}
+
+
+.member-area-tooltip .introjs-tooltipbuttons {
+  position: absolute !important;
+  width: 100% !important;
+  bottom: 0 !important;
+}
+
+.member-area-tooltip .introjs-arrow {
+  display: none !important;
+}
+
+@media (min-width: 640px) { 
+  .introjs-tooltip.member-area-tooltip {
+    width: 433px;
+    max-width: 433px !important;
+    max-height: 290px !important;
+    min-height: none !important;
+  }
+
+  .member-area-tooltip .introjs-tooltipbuttons {
+    padding: 0 40px 0 33px !important;
+    margin-bottom: 38px !important;
+  }
+
+  .member-area-tooltip .introjs-helperNumberLayer {
+    margin-bottom: 39px !important;
+  }
 }
 
 .no-tier {
