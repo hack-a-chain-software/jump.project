@@ -392,7 +392,7 @@ async function nftStakingSetup(execution_data) {
       collection_rps,
       min_staking_period: "10000000000000",
       early_withdraw_penalty: "500000000000",
-      round_interval: "10",
+      round_interval: "10000",
       start_in: "0",
     };
 
