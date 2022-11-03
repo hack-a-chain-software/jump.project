@@ -1,6 +1,8 @@
 import { utils, providers } from "near-api-js";
 import type { CodeResult } from "near-api-js/lib/providers/provider";
 import { Transaction } from "@near/ts";
+import { getTransactionsAction } from "@/tools";
+import toast from "react-hot-toast";
 
 export const AttachedGas = "300000000000000";
 
@@ -8,7 +10,21 @@ export const executeMultipleTransactions = async (
   transactions: Transaction[],
   wallet: any
 ) => {
-  return wallet.signAndSendTransactions({ transactions });
+  try {
+    const result = await wallet.signAndSendTransactions({ transactions });
+
+    const action = getTransactionsAction(result);
+
+    if (!action) {
+      return;
+    }
+
+    toast[action.status](action.message);
+  } catch (e) {
+    console.warn(e);
+
+    // toast.error('Oops, we had a problem with your request, please try again');
+  }
 };
 
 export const getTransaction = (
@@ -16,8 +32,7 @@ export const getTransaction = (
   receiverId: string,
   method: string,
   args: any,
-  amount?: string,
-  callbackUrl?: string
+  amount?: string
 ): Transaction => {
   return {
     signerId,
