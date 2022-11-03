@@ -18,8 +18,8 @@ export function BuyFastPass({
   isOpen: boolean;
   acceleration: number;
   vestingId: string;
-  totalAmount: number;
-  passCost: number;
+  totalAmount: string;
+  passCost: string;
   onClose: () => void;
 }) {
   const { accountId, selector } = useWalletSelector();
