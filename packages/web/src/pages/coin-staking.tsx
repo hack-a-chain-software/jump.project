@@ -25,8 +25,6 @@ import { WithdrawModal } from "../modals/staking/withdraw";
 import { useWalletSelector } from "@/context/wallet-selector";
 import Big from "big.js";
 import { Tutorial } from "@/components";
-import { JumpIcon } from "../assets/svg/jump-logo";
-import { XJumpIcon } from "../assets/svg/xjump-logo";
 import { viewFunction } from "@/tools";
 interface TokenRatio {
   x_token: string;
