@@ -30,15 +30,17 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
     }
   );
 
-  const { data: jumpMetadata, loading } = useNearQuery<{ decimals: number }>(
-    "ft_metadata",
+  const { data: jumpMetadata } = useNearQuery<
     {
-      contract: X_JUMP_TOKEN,
-      poolInterval: 1000 * 60,
-      debug: true,
-    }
-  );
-
+      decimals: number;
+    },
+    { account_id: string }
+  >("ft_metadata", {
+    contract: X_JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    skip: !accountId,
+    debug: true,
+  });
   const { values, setFieldValue, handleSubmit, isSubmitting } = useFormik({
     onSubmit: async (values) => {
       try {
@@ -60,6 +62,9 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
   const formattedBalance = useMemo(() => {
     return new Big(balance ?? 0).div(decimals).toFixed(2);
   }, [balance, decimals]);
+
+  console.log({ decimals: decimals.toFixed(0) });
+  console.log({ balance });
 
   return (
     <ModalImageDialog
