@@ -233,8 +233,8 @@ export function VestingCard(
         isOpen={showFastPass}
         token={props.token}
         vestingId={props.id || ""}
-        passCost={Number(props.contractData.fast_pass_cost)}
-        totalAmount={Number(props.locked_value)}
+        passCost={props.contractData.fast_pass_cost}
+        totalAmount={props.locked_value}
         acceleration={Number(props.contractData?.fast_pass_acceleration)}
       />
     </Box>

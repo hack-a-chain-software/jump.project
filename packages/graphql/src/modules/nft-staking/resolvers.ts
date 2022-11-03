@@ -40,7 +40,7 @@ export default {
     async rewards({ collection_id }: NFTStaking) {
       const { farm } = (await findStakingProgram(collection_id)) || {};
 
-      const secondsPerMonth = 2592000;
+      const millisecondsPerMonth = 2592000000;
 
       const interval = farm.round_interval;
       const distributions = farm.distributions;
@@ -54,12 +54,18 @@ export default {
 
         const rewardBN = new BN(reward);
         const intervalBN = new BN(interval);
-        const secondsPerMonthBN = new BN(secondsPerMonth);
+        const millisecondsPerMonthBN = new BN(millisecondsPerMonth);
+
+        console.log(interval);
+        console.log(reward);
 
         stakingRewards.push({
           ...metadata,
           account_id: key,
-          perMonth: secondsPerMonthBN.mul(rewardBN).div(intervalBN).toString(),
+          perMonth: millisecondsPerMonthBN
+            .mul(rewardBN)
+            .div(intervalBN)
+            .toString(),
         });
       }
 
