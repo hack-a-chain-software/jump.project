@@ -7,6 +7,7 @@ import { SwapIcon } from "./assets/svg/swap";
 import { AnalyticsIcon } from "./assets/svg/analytics";
 import { StakingIcon } from "./assets/svg/nft-staking-icon";
 import { XJumpIcon } from "./assets/svg/xjump-icon";
+import { TokenLabIcon } from "./assets/svg/token-lab-icon";
 
 export const navRoutes = [
   {
@@ -18,14 +19,14 @@ export const navRoutes = [
   },
   {
     enabled: true,
-    title: "xJump",
+    title: "xJUMP",
     icon: <XJumpIcon />,
     route: "/coin-staking",
     subroutePrefix: "coin-staking",
   },
   {
     enabled: true,
-    title: "Jump NFT Staking",
+    title: "NFT Staking",
     icon: <StakingIcon />,
     route: "/nft-staking",
     subroutePrefix: "nft-staking",
@@ -39,8 +40,8 @@ export const navRoutes = [
   },
   {
     enabled: true,
-    title: "Jump Token Laboratory",
-    icon: <FarmIcon />,
+    title: "Token Laboratory",
+    icon: <TokenLabIcon />,
     route: "/token-launcher",
     subroutePrefix: "token-launcher",
   },
