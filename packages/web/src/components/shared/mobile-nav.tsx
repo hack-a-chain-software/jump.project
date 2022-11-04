@@ -56,7 +56,7 @@ export const MobileNav = ({
           <Stack display="flex" flex={1} gap="10px">
             {navRoutes.map((e) => (
               <Flex
-                w="130px"
+                maxWidth="170px"
                 minH="42px"
                 cursor={e.enabled ? "pointer" : "not-allowed"}
                 transition="0.3s"
@@ -70,6 +70,7 @@ export const MobileNav = ({
                 direction="column"
               >
                 <Text
+                  overflowWrap="break-word"
                   userSelect="none"
                   textAlign="center"
                   display="flex"
