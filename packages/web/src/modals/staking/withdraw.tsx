@@ -15,7 +15,7 @@ interface IWithdrawModalProps
 }
 
 export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
-  const { accountId } = useWalletSelector();
+  const { selector, accountId } = useWalletSelector();
 
   const { data: balance = "0" } = useNearQuery<string, { account_id: string }>(
     "ft_balance_of",
@@ -45,6 +45,15 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
     onSubmit: async (values) => {
       try {
         await _onSubmit(values);
+
+        const { selectedWalletId } = selector.store.getState();
+
+        if (selectedWalletId === "near-wallet") {
+          return;
+        }
+
+        rest.onClose();
+        location.reload();
       } catch (error) {
         console.warn(error);
       } finally {
