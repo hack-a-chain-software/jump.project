@@ -1,11 +1,13 @@
+import actions from "./actions";
 import { providers } from "near-api-js";
 
 export interface TransactionPayload {
-  status: any;
+  status: Status;
   transaction: Transaction;
+  receipts_outcome: ReceiptOutcome[];
 }
 
-export interface Transaction {
+interface Transaction {
   actions: Action[];
   hash: string;
   nonce: number;
@@ -15,171 +17,37 @@ export interface Transaction {
   signer_id: string;
 }
 
-export interface Action {
+interface Action {
   FunctionCall: FunctionCall;
 }
 
-export interface FunctionCall {
+interface FunctionCall {
   args: string;
   deposit: string;
   gas: number;
   method_name: string;
 }
 
-export interface Actionable {
-  error: string;
-  success: string;
-  check: ({ transaction: { actions } }: TransactionPayload) => boolean;
+interface ReceiptOutcome {
+  id: string;
+  block_hash: string;
+  outcome: Outcome;
 }
 
-const actions: Actionable[] = [
-  {
-    error: "We had a problem with your request.",
-    success: "Successfully redeemed tokens.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
+interface Outcome {
+  executor_id: string;
+  gas_burnt: number;
+  logs: string[];
+  receipt_ids: string[];
+  status: Status;
+  tokens_burnt: string;
+}
 
-      return action.FunctionCall.method_name === "ft_faucet";
-    },
-  },
-  {
-    error: "We had a problem with your request.",
-    success: "Successfully redeemed tokens.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "nft_faucet";
-    },
-  },
-  {
-    error: "We had a problem withdrawing your allocations.",
-    success: "Successfully withdrawn locations.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "withdraw_allocations";
-    },
-  },
-  {
-    error: "Something happened when buying your tickets.",
-    success: "Tickets purchased successfully.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      const args = window.atob(action.FunctionCall.args);
-
-      return (
-        action.FunctionCall.method_name === "ft_transfer_call" &&
-        args.includes("BuyAllocation")
-      );
-    },
-  },
-  {
-    error: "We were unable to update your membership.",
-    success: "Membership updated successfully.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      const args = window.atob(action.FunctionCall.args);
-
-      return (
-        action.FunctionCall.method_name === "ft_transfer_call" &&
-        args.includes("VerifyAccount")
-      );
-    },
-  },
-  {
-    error: "We were unable to update your membership.",
-    success: "Membership updated successfully.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "decrease_membership_tier";
-    },
-  },
-  {
-    error: "We were unable to stake your tokens.",
-    success: "Successfully staked NFTs.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "nft_transfer_call";
-    },
-  },
-  {
-    error: "We We were unable to remove your NFTs.",
-    success: "NFTs successfully withdrawn.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "unstake";
-    },
-  },
-  {
-    error: "We were unable to redeem your rewards.",
-    success: "Successfully redeemed rewards.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "withdraw_reward";
-    },
-  },
-  {
-    error: "We were unable to stake your Jumps.",
-    success: "Jump staked successfully.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      const args = window.atob(action.FunctionCall.args);
-
-      return (
-        action.FunctionCall.method_name === "ft_transfer_call" &&
-        args.includes("mint")
-      );
-    },
-  },
-  {
-    error: "We had a problem redeeming your tokens.",
-    success: "Jump tokens redeemed successfully.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "burn_x_token";
-    },
-  },
-  {
-    error: "We had a problem deploying your Token.",
-    success: "Token successfully deployed.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "deploy_new_contract";
-    },
-  },
-  {
-    error: "We had a problem redeeming your jump tokens.",
-    success: "Successfully redeemed Jump tokens.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      return action.FunctionCall.method_name === "withdraw_locked_tokens";
-    },
-  },
-  {
-    error: "We had a problem purchasing your fastpass.",
-    success: "FastPass successfully purchased.",
-    check: ({ transaction: { actions } }: TransactionPayload) => {
-      const [action] = actions;
-
-      const args = window.atob(action.FunctionCall.args);
-
-      return (
-        action.FunctionCall.method_name === "ft_transfer_call" &&
-        args.includes("BuyFastPass")
-      );
-    },
-  },
-];
+interface Status {
+  SuccessValue?: string;
+  SuccessReceiptId?: string;
+  Failure?: string;
+}
 
 const rpcProviders = {
   testnet: "https://archival-rpc.testnet.near.org",
@@ -192,6 +60,18 @@ export const provider = new providers.JsonRpcProvider(
 
 export const getTransactionState = async (txHash: string, accountId: string) =>
   await provider.txStatus(txHash, accountId);
+
+export const getTransactionsStatus = ({
+  receipts_outcome,
+}: {
+  receipts_outcome: ReceiptOutcome[];
+}) => {
+  return receipts_outcome.every(
+    ({ outcome }) => !Object.keys(outcome.status).includes("Failure")
+  )
+    ? "success"
+    : "error";
+};
 
 export const getTransactionsAction = (
   transactions: Partial<TransactionPayload>[]
@@ -206,8 +86,7 @@ export const getTransactionsAction = (
         return;
       }
 
-      const status =
-        Object.keys(payload.status)[0] === "Failure" ? "error" : "success";
+      const status = getTransactionsStatus(payload);
 
       return {
         status,
