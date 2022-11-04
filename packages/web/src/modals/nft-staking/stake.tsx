@@ -34,7 +34,16 @@ export function NFTStakeModal({
       return;
     }
 
-    stake(selector, accountId!, collection, items ?? selected);
+    await stake(selector, accountId!, collection, items ?? selected);
+
+    const { selectedWalletId } = selector.store.getState();
+
+    if (selectedWalletId === "near-wallet") {
+      return;
+    }
+
+    onClose();
+    location.reload();
   };
 
   const select = (id: string) => {

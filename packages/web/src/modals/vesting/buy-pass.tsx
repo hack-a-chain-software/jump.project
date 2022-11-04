@@ -46,15 +46,24 @@ export function BuyFastPass({
       }}
       footer={
         <Button
-          onClick={() =>
-            fastPass(
+          onClick={async () => {
+            await fastPass(
               vestingId,
               totalAmount?.toString() || "",
               passCost?.toString() || "",
               accountId!,
               selector
-            )
-          }
+            );
+
+            const { selectedWalletId } = selector.store.getState();
+
+            if (selectedWalletId === "near-wallet") {
+              return;
+            }
+
+            onClose();
+            location.reload();
+          }}
           bg="white"
           color="black"
           w="100%"
