@@ -61,17 +61,12 @@ export const provider = new providers.JsonRpcProvider(
 export const getTransactionState = async (txHash: string, accountId: string) =>
   await provider.txStatus(txHash, accountId);
 
-export const getTransactionsStatus = ({
-  receipts_outcome,
-}: {
-  receipts_outcome: ReceiptOutcome[];
-}) => {
-  return receipts_outcome.every(
+export const getTransactionsStatus = (receiptsOutcome: ReceiptOutcome[]) =>
+  receiptsOutcome.every(
     ({ outcome }) => !Object.keys(outcome.status).includes("Failure")
   )
     ? "success"
     : "error";
-};
 
 export const getTransactionsAction = (
   transactions: Partial<TransactionPayload>[]
@@ -86,7 +81,7 @@ export const getTransactionsAction = (
         return;
       }
 
-      const status = getTransactionsStatus(payload);
+      const status = getTransactionsStatus(payload?.receipts_outcome!);
 
       return {
         status,
