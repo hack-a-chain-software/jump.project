@@ -118,8 +118,18 @@ export default function ({
     return bigBalance.sub(amountToSelectedLevel).div(decimals).toFixed(2);
   }, [bigBalance, amountToSelectedLevel]);
 
-  const upgradeLevel = () =>
-    increaseMembership(selected!, accountId!, selector);
+  const upgradeLevel = async () => {
+    await increaseMembership(selected!, accountId!, selector);
+
+    const { selectedWalletId } = selector.store.getState();
+
+    if (selectedWalletId === "near-wallet") {
+      return;
+    }
+
+    onClose();
+    location.reload();
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
