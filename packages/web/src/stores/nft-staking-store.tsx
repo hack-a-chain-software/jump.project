@@ -162,7 +162,7 @@ export const useNftStaking = create<{
       );
     });
 
-    executeMultipleTransactions(transactions, wallet);
+    await executeMultipleTransactions(transactions, wallet);
   },
 
   unstake: async (connection, account, tokens, collection) => {
@@ -237,7 +237,7 @@ export const useNftStaking = create<{
       );
     }
 
-    executeMultipleTransactions(transactions, wallet);
+    await executeMultipleTransactions(transactions, wallet);
   },
 
   claimRewards: async (connection, account, tokens, collection) => {

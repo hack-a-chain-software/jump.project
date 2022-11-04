@@ -213,7 +213,7 @@ export const useVestingStore = create<{
 
     const wallet = await connection.wallet();
 
-    executeMultipleTransactions(transactions, wallet);
+    await executeMultipleTransactions(transactions, wallet);
   },
 
   fastPass: async (vesting, amount, passCost, accountId, connection) => {
@@ -260,7 +260,7 @@ export const useVestingStore = create<{
 
     const wallet = await connection.wallet();
 
-    executeMultipleTransactions(transactions, wallet);
+    await executeMultipleTransactions(transactions, wallet);
   },
 
   getTokenStorage: async (connection, account, token) => {
