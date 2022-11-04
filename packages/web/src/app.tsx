@@ -12,6 +12,7 @@ import {
 import routes from "virtual:generated-pages-react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { Toast } from "./components";
 
 const Pages = () => {
   return useRoutes(routes);
@@ -48,7 +49,7 @@ function App() {
         return;
       }
 
-      toast[action.status](action.message);
+      toast.custom(({ visible }) => <Toast visible={visible} {...action} />);
     })();
   }, [accountId]);
 
