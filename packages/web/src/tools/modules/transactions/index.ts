@@ -26,15 +26,16 @@ export interface FunctionCall {
   method_name: string;
 }
 
-const rpcProviders = {
-  testnet: "https://archival-rpc.testnet.near.org",
-  mainnet: "https://archival-rpc.mainnet.near.org",
-};
+export interface Actionable {
+  error: string;
+  success: string;
+  check: ({ transaction: { actions } }: TransactionPayload) => boolean;
+}
 
-const actions = [
+const actions: Actionable[] = [
   {
-    error: "We had a problem with your request, for more details visit:",
-    success: "Successfully redeemed tokens",
+    error: "We had a problem with your request.",
+    success: "Successfully redeemed tokens.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -42,8 +43,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem with your request, for more details visit:",
-    success: "Successfully redeemed tokens",
+    error: "We had a problem with your request.",
+    success: "Successfully redeemed tokens.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -51,8 +52,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem withdrawing your allocations, learn more at:",
-    success: "Successfully withdrawn locations",
+    error: "We had a problem withdrawing your allocations.",
+    success: "Successfully withdrawn locations.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -60,8 +61,8 @@ const actions = [
     },
   },
   {
-    error: "Something happened when buying your tickets, learn more:",
-    success: "Tickets purchased successfully",
+    error: "Something happened when buying your tickets.",
+    success: "Tickets purchased successfully.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -74,8 +75,8 @@ const actions = [
     },
   },
   {
-    error: "We were unable to update your membership, see more at:",
-    success: "Membership updated successfully",
+    error: "We were unable to update your membership.",
+    success: "Membership updated successfully.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -88,8 +89,8 @@ const actions = [
     },
   },
   {
-    error: "We were unable to update your membership, see more at:",
-    success: "Membership updated successfully",
+    error: "We were unable to update your membership.",
+    success: "Membership updated successfully.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -97,8 +98,8 @@ const actions = [
     },
   },
   {
-    error: "We were unable to stake your tokens, see more at:",
-    success: "Successfully staked NFTs",
+    error: "We were unable to stake your tokens.",
+    success: "Successfully staked NFTs.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -106,8 +107,8 @@ const actions = [
     },
   },
   {
-    error: "We We were unable to remove your NFTs, see more at:",
-    success: "NFTs successfully withdrawn",
+    error: "We We were unable to remove your NFTs.",
+    success: "NFTs successfully withdrawn.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -115,8 +116,8 @@ const actions = [
     },
   },
   {
-    error: "We were unable to redeem your rewards, see more at:",
-    success: "Successfully redeemed rewards",
+    error: "We were unable to redeem your rewards.",
+    success: "Successfully redeemed rewards.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -124,8 +125,8 @@ const actions = [
     },
   },
   {
-    error: "We were unable to stake your Jumps, see more at:",
-    success: "Jump staked successfully",
+    error: "We were unable to stake your Jumps.",
+    success: "Jump staked successfully.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -138,8 +139,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem redeeming your tokens, see more at:",
-    success: "Jump tokens redeemed successfully",
+    error: "We had a problem redeeming your tokens.",
+    success: "Jump tokens redeemed successfully.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -147,8 +148,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem deploying your Token, see more at:",
-    success: "Token successfully deployed",
+    error: "We had a problem deploying your Token.",
+    success: "Token successfully deployed.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -156,8 +157,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem redeeming your jump tokens, see more at:",
-    success: "Successfully redeemed Jump tokens",
+    error: "We had a problem redeeming your jump tokens.",
+    success: "Successfully redeemed Jump tokens.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -165,8 +166,8 @@ const actions = [
     },
   },
   {
-    error: "We had a problem purchasing your fastpass, see more at:",
-    success: "FastPass successfully purchased",
+    error: "We had a problem purchasing your fastpass.",
+    success: "FastPass successfully purchased.",
     check: ({ transaction: { actions } }: TransactionPayload) => {
       const [action] = actions;
 
@@ -179,6 +180,11 @@ const actions = [
     },
   },
 ];
+
+const rpcProviders = {
+  testnet: "https://archival-rpc.testnet.near.org",
+  mainnet: "https://archival-rpc.mainnet.near.org",
+};
 
 export const provider = new providers.JsonRpcProvider(
   rpcProviders[import.meta.env.VITE_NEAR_NETWORK]
@@ -205,9 +211,8 @@ export const getTransactionsAction = (
 
       return {
         status,
-        payload,
         message: action[status],
-        ...action,
+        transactionHash: payload.transaction?.hash,
       };
     })
     .filter((item) => item)[0];
