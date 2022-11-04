@@ -38,11 +38,11 @@ export const useTokenLauncher = create<{
         .toFixed(2)
         .toString();
 
-      const charsAvailable = 64 - launcherContract.length;
+      const charsAvailable = 63 - launcherContract.length;
 
       const validPrefix = prefix
         .replace(/[^a-zA-Z0-9w]/g, "")
-        .slice(0, charsAvailable + 1)
+        .slice(0, charsAvailable)
         .toLowerCase();
 
       const contract_account = validPrefix + "." + launcherContract;
