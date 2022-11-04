@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import isEmpty from "lodash/isEmpty";
 import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
@@ -12,6 +12,7 @@ import {
   Button as CButton,
 } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { viewFunction } from "@/tools";
 
 export function NFTStakeModal({
   isOpen = false,

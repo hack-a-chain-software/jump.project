@@ -26,6 +26,11 @@ export interface FunctionCall {
   method_name: string;
 }
 
+const rpcProviders = {
+  testnet: "https://archival-rpc.testnet.near.org",
+  mainnet: "https://archival-rpc.mainnet.near.org",
+};
+
 const actions = [
   {
     error: "We had a problem with your request, for more details visit:",
@@ -176,7 +181,7 @@ const actions = [
 ];
 
 export const provider = new providers.JsonRpcProvider(
-  "https://archival-rpc.testnet.near.org"
+  rpcProviders[import.meta.env.VITE_NEAR_NETWORK]
 );
 
 export const getTransactionState = async (txHash: string, accountId: string) =>
