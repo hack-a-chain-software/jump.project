@@ -3,6 +3,7 @@ import type { CodeResult } from "near-api-js/lib/providers/provider";
 import { Transaction } from "@near/ts";
 import { getTransactionsAction } from "@/tools";
 import toast from "react-hot-toast";
+import { Toast } from "@/components";
 
 export const AttachedGas = "300000000000000";
 
@@ -19,11 +20,9 @@ export const executeMultipleTransactions = async (
       return;
     }
 
-    toast[action.status](action.message);
+    toast.custom(({ visible }) => <Toast visible={visible} {...action} />);
   } catch (e) {
     console.warn(e);
-
-    // toast.error('Oops, we had a problem with your request, please try again');
   }
 };
 
