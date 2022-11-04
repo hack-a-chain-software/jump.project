@@ -46,15 +46,6 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
     onSubmit: async (values) => {
       try {
         await _onSubmit(values);
-
-        const { selectedWalletId } = selector.store.getState();
-
-        if (selectedWalletId === "near-wallet") {
-          return;
-        }
-
-        rest.onClose();
-        location.reload();
       } catch (error) {
         console.warn(error);
       } finally {

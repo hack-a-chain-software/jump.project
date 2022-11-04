@@ -211,19 +211,7 @@ export function VestingCard(
               <Button
                 disabled={props.available_to_withdraw === "0" || !accountId}
                 onClick={async () => {
-                  await withdraw(
-                    [String(props.id)],
-                    accountId as string,
-                    selector
-                  );
-
-                  const { selectedWalletId } = selector.store.getState();
-
-                  if (selectedWalletId === "near-wallet") {
-                    return;
-                  }
-
-                  location.reload();
+                  withdraw([String(props.id)], accountId as string, selector);
                 }}
               >
                 <Flex

@@ -47,16 +47,7 @@ export function AirdropModal({
       );
     }
 
-    await executeMultipleTransactions(transactions, wallet);
-
-    const { selectedWalletId } = selector.store.getState();
-
-    if (selectedWalletId === "near-wallet") {
-      return;
-    }
-
-    onClose();
-    location.reload();
+    executeMultipleTransactions(transactions, wallet);
   };
 
   const getNfts = async () => {
@@ -84,16 +75,7 @@ export function AirdropModal({
       );
     }
 
-    await executeMultipleTransactions(transactions, wallet);
-
-    const { selectedWalletId } = selector.store.getState();
-
-    if (selectedWalletId === "near-wallet") {
-      return;
-    }
-
-    onClose();
-    location.reload();
+    executeMultipleTransactions(transactions, wallet);
   };
 
   return (
