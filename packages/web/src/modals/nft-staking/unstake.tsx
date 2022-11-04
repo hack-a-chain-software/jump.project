@@ -31,16 +31,7 @@ export function NFTUnstakeModal({
       footer={
         <Button
           onClick={async () => {
-            await unstake(selector, accountId as string, selected, collection);
-
-            const { selectedWalletId } = selector.store.getState();
-
-            if (selectedWalletId === "near-wallet") {
-              return;
-            }
-
-            onClose();
-            location.reload();
+            unstake(selector, accountId as string, selected, collection);
           }}
           bg="white"
           color="black"

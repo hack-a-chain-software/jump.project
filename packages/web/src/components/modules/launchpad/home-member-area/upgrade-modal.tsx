@@ -119,16 +119,7 @@ export default function ({
   }, [bigBalance, amountToSelectedLevel]);
 
   const upgradeLevel = async () => {
-    await increaseMembership(selected!, accountId!, selector);
-
-    const { selectedWalletId } = selector.store.getState();
-
-    if (selectedWalletId === "near-wallet") {
-      return;
-    }
-
-    onClose();
-    location.reload();
+    increaseMembership(selected!, accountId!, selector);
   };
 
   return (

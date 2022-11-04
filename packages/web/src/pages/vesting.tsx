@@ -332,7 +332,7 @@ export const Vesting = () => {
               <GradientButton
                 width="150px"
                 onClick={async () => {
-                  await withdraw(
+                  withdraw(
                     vestings
                       .filter(({ available_to_withdraw }) => {
                         return (
@@ -344,14 +344,6 @@ export const Vesting = () => {
                     accountId as string,
                     selector
                   );
-
-                  const { selectedWalletId } = selector.store.getState();
-
-                  if (selectedWalletId === "near-wallet") {
-                    return;
-                  }
-
-                  location.reload();
                 }}
                 justifyContent="center"
                 bg={useColorModeValue("white", darkPurple)}

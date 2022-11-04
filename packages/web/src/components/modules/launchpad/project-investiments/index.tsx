@@ -86,20 +86,7 @@ export const ProjectInvestments = ({
 
   const retrieveTokens = async () => {
     if (listing_id && price_token) {
-      await withdrawAllocations(
-        listing_id!,
-        project_token!,
-        accountId!,
-        selector
-      );
-
-      const { selectedWalletId } = selector.store.getState();
-
-      if (selectedWalletId === "near-wallet") {
-        return;
-      }
-
-      location.reload();
+      withdrawAllocations(listing_id!, project_token!, accountId!, selector);
     }
   };
 

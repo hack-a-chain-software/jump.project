@@ -46,15 +46,7 @@ export function NFTStakingUserActions(props: any) {
   };
 
   const claim = async () => {
-    await claimRewards(selector, accountId!, tokens, collection);
-
-    const { selectedWalletId } = selector.store.getState();
-
-    if (selectedWalletId === "near-wallet") {
-      return;
-    }
-
-    location.reload();
+    claimRewards(selector, accountId!, tokens, collection);
   };
 
   return (
