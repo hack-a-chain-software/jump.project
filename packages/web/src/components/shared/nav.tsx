@@ -36,7 +36,7 @@ export const Nav = () => {
             <Flex
               alignItems="center"
               w="80px"
-              minH="80px"
+              minH="75px"
               cursor={e.enabled ? "pointer" : "not-allowed"}
               transition="0.3s"
               onClick={() => (e.enabled ? navigate(e.route) : null)}

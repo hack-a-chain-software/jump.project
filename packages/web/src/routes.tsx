@@ -3,6 +3,10 @@ import { FarmIcon } from "./assets/svg/farm";
 import { PoolsIcon } from "./assets/svg/pools";
 import { RocketIcon } from "./assets/svg/rocket";
 import { LockIcon } from "./assets/svg/lock";
+import { SwapIcon } from "./assets/svg/swap";
+import { AnalyticsIcon } from "./assets/svg/analytics";
+import { StakingIcon } from "./assets/svg/nft-staking-icon";
+import { XJumpIcon } from "./assets/svg/xjump-icon";
 
 export const navRoutes = [
   {
@@ -15,14 +19,14 @@ export const navRoutes = [
   {
     enabled: true,
     title: "xJump",
-    icon: <WalletIcon />,
+    icon: <XJumpIcon />,
     route: "/coin-staking",
     subroutePrefix: "coin-staking",
   },
   {
     enabled: true,
     title: "Jump NFT Staking",
-    icon: <WalletIcon />,
+    icon: <StakingIcon />,
     route: "/nft-staking",
     subroutePrefix: "nft-staking",
   },
@@ -45,5 +49,23 @@ export const navRoutes = [
     icon: <PoolsIcon />,
     route: "/pools",
     subroutePrefix: "pools",
+  },
+  {
+    title: "Swap",
+    icon: <SwapIcon />,
+    route: "/swap",
+    subroutePrefix: "swap",
+  },
+  {
+    title: "Farm",
+    icon: <FarmIcon />,
+    route: "/farm",
+    subroutePrefix: "farm",
+  },
+  {
+    title: "Analytics",
+    icon: <AnalyticsIcon />,
+    route: "/analytics",
+    subroutePrefix: "analytics",
   },
 ];
