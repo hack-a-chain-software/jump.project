@@ -133,8 +133,6 @@ export const WalletSelectorContextProvider: React.FC<
       return;
     }
 
-    console.log(selector);
-
     (async () => {
       const tokenBalance = await viewFunction(
         selector,
