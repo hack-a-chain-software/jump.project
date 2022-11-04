@@ -45,15 +45,6 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
     onSubmit: async (values) => {
       try {
         await _onSubmit(values);
-
-        const { selectedWalletId } = selector.store.getState();
-
-        if (selectedWalletId === "near-wallet") {
-          return;
-        }
-
-        rest.onClose();
-        location.reload();
       } catch (error) {
         console.warn(error);
       } finally {
@@ -71,9 +62,6 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
   const formattedBalance = useMemo(() => {
     return new Big(balance ?? 0).div(decimals).toFixed(2);
   }, [balance, decimals]);
-
-  console.log({ decimals: decimals.toFixed(0) });
-  console.log({ balance });
 
   return (
     <ModalImageDialog

@@ -46,7 +46,7 @@ export function ProjectAllocations({
         typeof launchpadProject?.listing_id &&
         launchpadProject?.price_token
       ) {
-        await buyTickets(
+        buyTickets(
           new Big(amount)
             .mul(new Big(launchpadProject.token_allocation_price || 0))
             .toString(),
@@ -55,14 +55,6 @@ export function ProjectAllocations({
           accountId!,
           selector
         );
-
-        const { selectedWalletId } = selector.store.getState();
-
-        if (selectedWalletId === "near-wallet") {
-          return;
-        }
-
-        location.reload();
       }
     },
     [

@@ -72,7 +72,6 @@ export const NFTStaking = () => {
   //   },
   //   skip: !accountId,
   // });
-  // console.log(nftProjects?.nft_staking_projects.data);
 
   useEffect(() => {
     (async () => {
