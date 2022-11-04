@@ -9,9 +9,9 @@ import {
 } from "../../components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
-import { NftStakingProjectsConnectionDocument, StakedEnum } from "@near/apollo";
+import { NftStakingProjectsConnectionDocument } from "@near/apollo";
 import { NftStakingProjectsConnectionQueryVariables } from "@near/apollo";
 import { useWalletSelector } from "@/context/wallet-selector";
 
@@ -27,16 +27,16 @@ const collectionImages = [
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
+  // const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
   // const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
-  const [filterSearch, setSearch] = useState<string | null>(null);
+  // const [filterSearch, setSearch] = useState<string | null>(null);
   // const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
   //   null
   // );
-  const [loadingItems, setLoadingItems] = useState(false);
+  // const [loadingItems, setLoadingItems] = useState(false);
   const { accountId } = useWalletSelector();
 
-  const { jumpGradient, glassyWhiteOpaque, blackAndWhite } = useTheme();
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
 
   const cardOpacity = useColorModeValue(0.9, 0.7);
   const cardBg = useColorModeValue(jumpGradient, glassyWhiteOpaque);
