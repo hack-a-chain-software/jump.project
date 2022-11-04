@@ -29,6 +29,7 @@ DB_HOST=db
 DB_PORT=5432
 DB_NAME=postgres
 NFT_STAKING_CONTRACT=${contracts_data.nftStaking}
+JUMP_LAUNCHPAD_CONTRACT=${contracts_data.launchpad}
 ENV=TESTNET
 `;
 
