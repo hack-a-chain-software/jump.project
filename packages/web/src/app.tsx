@@ -4,7 +4,11 @@ import { Header, Nav, ReportButton } from "./components";
 import { useTheme } from "./hooks/theme";
 import { BrowserRouter as Router, useRoutes } from "react-router-dom";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { getTransactionState, getTransactionsAction } from "./tools";
+import {
+  getTransactionState,
+  getTransactionsAction,
+  viewFunction,
+} from "./tools";
 import routes from "virtual:generated-pages-react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
