@@ -23,8 +23,6 @@ const transactionHashes = new URLSearchParams(window.location.search).get(
 );
 
 function App() {
-  console.log(transactionHashes, "loadddded");
-
   const { gradientBackground } = useTheme();
 
   const { accountId } = useWalletSelector();
