@@ -88,8 +88,16 @@ export function MemberArea({
     return metLevels?.length;
   }, [minimumTokens, stakedTokens]);
 
-  const downgradeLevel = () => {
-    decreaseMembership(0, accountId!, selector);
+  const downgradeLevel = async () => {
+    await decreaseMembership(0, accountId!, selector);
+
+    const { selectedWalletId } = selector.store.getState();
+
+    if (selectedWalletId === "near-wallet") {
+      return;
+    }
+
+    location.reload();
   };
 
   const lastCheck = useMemo(() => {

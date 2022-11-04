@@ -75,12 +75,8 @@ export const useLaunchpadStore = create<{
       const wallet = await connection.wallet();
 
       await executeMultipleTransactions(transactions, wallet);
-
-      toast.success(
-        "You have withdrawn all the available allocations for this project with success!"
-      );
     } catch (error) {
-      return console.error(toast.error(`Withdraw Allocations Error: ${error}`));
+      console.warn(error);
     }
   },
 
@@ -125,9 +121,7 @@ export const useLaunchpadStore = create<{
 
       await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
-      return console.error(
-        toast.error(`Buy Tickets to Launchpad Error: ${error}`)
-      );
+      console.warn(error);
     }
   },
   async increaseMembership(desiredLevel, accountId, connection) {
@@ -189,9 +183,7 @@ export const useLaunchpadStore = create<{
 
       await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
-      return console.error(
-        toast.error(`Error While Increasing Membership: ${error}`)
-      );
+      console.warn(error);
     }
   },
   async decreaseMembership(desiredLevel, accountId, connection) {
@@ -253,9 +245,7 @@ export const useLaunchpadStore = create<{
 
       await executeMultipleTransactions(transactions, wallet);
     } catch (error) {
-      return console.error(
-        toast.error(`Error While Decreasing Membership: ${error}`)
-      );
+      console.warn(error);
     }
   },
 }));

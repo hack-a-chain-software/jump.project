@@ -15,7 +15,7 @@ interface IStakeModalProps
 }
 
 export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
-  const { accountId } = useWalletSelector();
+  const { selector, accountId } = useWalletSelector();
 
   const { data: balanceJump = 0 } = useNearQuery<
     string,
@@ -46,6 +46,15 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
     onSubmit: async (values) => {
       try {
         await _onSubmit(values);
+
+        const { selectedWalletId } = selector.store.getState();
+
+        if (selectedWalletId === "near-wallet") {
+          return;
+        }
+
+        rest.onClose();
+        location.reload();
       } catch (error) {
         console.warn(error);
       } finally {
