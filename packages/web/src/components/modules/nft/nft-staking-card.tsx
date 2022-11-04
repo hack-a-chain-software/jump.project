@@ -27,7 +27,6 @@ export function NFTStakingCard(
   const cardOpacity = useColorModeValue(glassyWhiteOpaque, "transparent");
 
   const getFormatedBalance = (balance, decimals) => {
-    console.log({ decimals });
     const decimalsBig = new Big(10).pow(decimals ?? 0);
     const balanceBig = new Big(balance ?? 0);
 

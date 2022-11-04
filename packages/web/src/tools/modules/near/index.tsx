@@ -1,11 +1,18 @@
 import { utils, providers } from "near-api-js";
 import type { CodeResult } from "near-api-js/lib/providers/provider";
 import { Transaction } from "@near/ts";
-import { getTransactionsAction } from "@/tools";
-import toast from "react-hot-toast";
-import { Toast } from "@/components";
 
 export const AttachedGas = "300000000000000";
+
+const refreshPage = (transactions) => {
+  const newUrl =
+    window.location.origin +
+    window.location.pathname +
+    "?transactionHashes=" +
+    transactions;
+
+  window.location.href = newUrl;
+};
 
 export const executeMultipleTransactions = async (
   transactions: Transaction[],
@@ -14,13 +21,7 @@ export const executeMultipleTransactions = async (
   try {
     const result = await wallet.signAndSendTransactions({ transactions });
 
-    const action = getTransactionsAction(result);
-
-    if (!action) {
-      return;
-    }
-
-    toast.custom(({ visible }) => <Toast visible={visible} {...action} />);
+    refreshPage(result.map(({ transaction }) => transaction.hash).join(","));
   } catch (e) {
     console.warn(e);
   }

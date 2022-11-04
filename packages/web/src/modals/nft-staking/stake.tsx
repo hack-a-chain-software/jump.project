@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from "react";
+import { useState, Fragment } from "react";
 import isEmpty from "lodash/isEmpty";
 import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
@@ -12,7 +12,6 @@ import {
   Button as CButton,
 } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { viewFunction } from "@/tools";
 
 export function NFTStakeModal({
   isOpen = false,
@@ -34,16 +33,7 @@ export function NFTStakeModal({
       return;
     }
 
-    await stake(selector, accountId!, collection, items ?? selected);
-
-    const { selectedWalletId } = selector.store.getState();
-
-    if (selectedWalletId === "near-wallet") {
-      return;
-    }
-
-    onClose();
-    location.reload();
+    stake(selector, accountId!, collection, items ?? selected);
   };
 
   const select = (id: string) => {
