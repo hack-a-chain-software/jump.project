@@ -27,6 +27,7 @@ DB_HOST=${process.env.DB_HOST}
 DB_PORT=5432
 DB_NAME=${process.env.DB_NAME}
 NFT_STAKING_CONTRACT=${contracts_data.nftStaking}
+JUMP_LAUNCHPAD_CONTRACT=${contracts_data.launchpad}
 ENV=TESTNET
 `;
 
