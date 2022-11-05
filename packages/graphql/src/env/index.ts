@@ -14,3 +14,5 @@ export const EnvVariables = {
   launchpad_contract: process.env.JUMP_LAUNCHPAD_CONTRACT,
   rpc_url: process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org",
 };
+
+console.log({ EnvVariables });
