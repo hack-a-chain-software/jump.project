@@ -14,6 +14,7 @@ env:
   ECS_CLUSTER: staging-indexer-cluster
   ECS_TASK_DEFINITION: services/indexer/task-definition.json
   CONTAINER_NAME: staging-indexer
+  DB_PORT: 5432
 
 on:
   push:
