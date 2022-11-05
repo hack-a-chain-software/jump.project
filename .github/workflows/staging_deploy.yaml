@@ -8,6 +8,7 @@ env:
   DB_NAME: ${{ secrets.STAGING_DB_NAME }}
   DB_USER: ${{ secrets.STAGING_DB_USER }}
   DB_PASS: ${{ secrets.STAGING_DB_PASS }}
+  DB_PORT: 5432
   AWS_REGION: us-east-1
   ECS_SERVICE: staging-indexer-service
   ECS_CLUSTER: staging-indexer-cluster
