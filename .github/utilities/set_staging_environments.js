@@ -13,6 +13,7 @@ VITE_LOCKED_CONTRACT=${contracts_data.lockedTokenAccount}
 VITE_STAKING_CONTRACT=${contracts_data.xTokenAccount}
 VITE_NFT_STAKING_CONTRACT=${contracts_data.nftStaking}
 VITE_JUMP_LAUNCHPAD_CONTRACT=${contracts_data.launchpad}
+VITE_TOKEN_LAUNCHER_CONTRACT=${contracts_data.tokenLauncher}
 VITE_FAUCET_CONTRACT=${contracts_data.faucet}
 VITE_NEAR_NETWORK=${process.env.NEAR_NETWORK}
 `;
