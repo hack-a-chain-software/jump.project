@@ -20,6 +20,10 @@ export const theme = extendTheme({
     },
     darkerGrey: "#1E1E1E",
   },
+  fonts: {
+    heading: "Inter, sans-serif",
+    body: "Inter, sans-serif",
+  },
   styles: {
     global: {
       body: {
