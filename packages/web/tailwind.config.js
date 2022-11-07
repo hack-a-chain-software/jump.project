@@ -1,21 +1,37 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
-
 module.exports = {
   important: true,
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+        sans: ["Inter", "sans-serif"],
       },
       colors: {
-        diamond: "linear-gradient(90deg, #9795F0 0%, #FBC8D4 100%)",
+        violet: "#6E3A85", // Wine Violet
+        purple: "#431E5A", // Purple Jump
+        black: "#000000", // Black
+        green: "#559C71", // Soft Green
+        blue: "#5E6DEC", // Soft Blue
+        red: "#CE2828", // Soft Red
+        jump: {
+          100: "linear-gradient(90deg, #510B72 0%, #740B0B 100%);", // Jump Gradient
+          200: "linear-gradient(90deg, #AE00FF 0%, #FF1100 100%);", // Jump Gradient 2
+        },
+        white: {
+          DEFAULT: "#FFFFFF", // White
+          200: "#E2E8F0", // Gray
+          300: "#FFFFFFBF", // Transparent White 2
+          400: "#FFFFFF80", // Transparent White
+          500: "#FCFCFC33", // Glass 1
+          600: "#FFFFFF1A", // Glass 2
+        },
       },
-      screens: {
-        mobile: "868px",
-        tablet: "1180px",
-        web: "1500px",
+      borderRadius: {
+        none: 0,
+        sm: ".625rem",
+        lg: "1.25rem",
       },
+      lineHeight: "1",
       animation: {
         enter: "enter 200ms ease-out",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
@@ -37,6 +53,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
-  plugins: [require("@tailwindcss/line-clamp")],
+  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/line-clamp")],
 };
