@@ -9,7 +9,10 @@ module.exports = {
       colors: {
         violet: "#6E3A85", // Wine Violet
         purple: "#431E5A", // Purple Jump
-        black: "#000000", // Black
+        black: {
+          DEFAULT: "#000000", // Black
+          200: "#000000B3", // Black Glass
+        },
         green: "#559C71", // Soft Green
         blue: "#5E6DEC", // Soft Blue
         red: "#CE2828", // Soft Red
@@ -32,6 +35,7 @@ module.exports = {
         lg: "1.25rem",
       },
       lineHeight: "1",
+      letterSpacing: "-.03rem",
       animation: {
         enter: "enter 200ms ease-out",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
