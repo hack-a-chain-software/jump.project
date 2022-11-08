@@ -85,23 +85,41 @@ Guardians are responsible for 2 actions within the contract: creating and cancel
         listing_data: ListingData -> Configuration object: 
         struct ListingData {
             project_owner: AccountId -> Account of the projects owner, a person from the project itself that is going to receive all raised funds after the sale,
+
             project_token: AccountId -> Contract address for the project's token that is going to be sold,
+
             price_token: AccountId -> Contract address for the token that is going to be used to raise - normally a stablecoin such as usdc,
+
             listing_type: ListingType -> "Public" for a public sale or "Private" for a private sale (only wallets whitelisted by the project_owner can join),
+
             open_sale_1_timestamp_seconds: U64 -> Timestamp for the start of the sale (phase 1). Must be input using unix universal timestamp, can be converted here: https://www.epochconverter.com/,
+
             open_sale_2_timestamp_seconds: U64> Timestamp for the start of the sale (phase 2 - first come first serve phase). Must be input using unix universal timestamp, can be converted here: https://www.epochconverter.com/,
+
             final_sale_2_timestamp_seconds: U64 -> Timestamp to end the sale if not sold out. Must be input using unix universal timestamp, can be converted here: https://www.epochconverter.com/ (if sale sells out, it ends at the moment the last tokens are sold),
+
             liquidity_pool_timestamp_seconds: U64 -> Timestamp to create liquidity pool in JUMP dex using funds from raise. Must be input using unix universal timestamp, can be converted here: https://www.epochconverter.com/. (Not working until jump dex goes live),
+
             total_amount_sale_project_tokens: U128 -> Total quantity of project tokens that is going to be sold in the listing (must be inputed with decimal places),
+
             token_allocation_size: U128 -> Size of each batch of project tokens being sold (must be inputed with decimal places),
+
             token_allocation_price: U128 -> Cost of each batch of tokens being sold (must be inputed with decimal places),
+
             liquidity_pool_project_tokens: U128 -> Quantity of project tokens to be commited to the creation of the liquidity pool after the sale. (Not working until jump dex goes live, input 0),
+
             liquidity_pool_price_tokens: U128 -> Quantity of price tokens to be commited to the creation of the liquidity pool after the sale. (Not working until jump dex goes live, input 0),
+
             fraction_instant_release: U128 -> % of purchased tokens that the investor is going to be able to withdraw after the sale ends (base is 10000, so to select 20% user has to input 2000),
+
             fraction_cliff_release: U128 -> % of purchased tokens that the investor is going to be able to withdraw after the cliff period (base is 10000, so to select 20% user has to input 2000),
+
             cliff_timestamp_seconds: U64 -> Quantity of seconds after the sale ends, during which the investor gains no access to new vested tokens. 
+
             end_cliff_timestamp_seconds: U64 -> Quantity of seconds after the sale ends when investor gains access to all vested tokens - must be greater than or equal to cliff_timestamp_seconds,
+
             fee_price_tokens: U128 -> % of raised funds taken as a fee for the launchpad (base is 10000, so to select 20% user has to input 2000),
+            
             fee_liquidity_tokens: U128 ->  % of pledged liquidity pool tokens taken as a fee for the launchpad - applies both to price and project tokens commited to the liquidity pool (base is 10000, so to select 20% user has to input 2000),
         }
 
