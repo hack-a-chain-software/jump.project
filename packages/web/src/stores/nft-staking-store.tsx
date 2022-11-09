@@ -170,6 +170,27 @@ export const useNftStaking = create<{
 
     const transactions: any = [];
 
+    const stakingStorage = await get().getTokenStorage(
+      connection,
+      account,
+      import.meta.env.VITE_NFT_STAKING_CONTRACT
+    );
+
+    if (!stakingStorage || stakingStorage?.available < "0.10") {
+      transactions.push(
+        getTransaction(
+          account,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "storage_deposit",
+          {
+            account_id: account,
+            registration_only: false,
+          },
+          "0.25"
+        )
+      );
+    }
+
     tokens.forEach(({ token_id }) => {
       transactions.push(
         getTransaction(
@@ -244,6 +265,27 @@ export const useNftStaking = create<{
     const wallet = await connection.wallet();
 
     const transactions: any = [];
+
+    const stakingStorage = await get().getTokenStorage(
+      connection,
+      account,
+      import.meta.env.VITE_NFT_STAKING_CONTRACT
+    );
+
+    if (!stakingStorage || stakingStorage?.available < "0.10") {
+      transactions.push(
+        getTransaction(
+          account,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "storage_deposit",
+          {
+            account_id: account,
+            registration_only: false,
+          },
+          "0.25"
+        )
+      );
+    }
 
     tokens.forEach(({ token_id }) => {
       transactions.push(
