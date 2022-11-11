@@ -373,47 +373,28 @@ export const Staking = () => {
             <Flex direction="column" gap={4} width="100%">
               <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
                 <Button
-                  color="black"
-                  border="1px solid white"
-                  bg="white"
-                  justifyContent="space-between"
-                  maxWidth="100%"
-                  width="100%"
+                  className="w-full flex justify-between"
                   onClick={stakingDisclosure.onOpen}
                   disabled={!baseTokenBalance || baseTokenBalance === "0"}
                 >
-                  Stake JUMP <WalletIcon />
+                  Stake JUMP <WalletIcon className="h-6" />
                 </Button>
               </Skeleton>
 
               <Skeleton isLoaded={!isLoading} className="rounded-[15px] w-full">
                 <Button
-                  color="white"
-                  border="1px solid white"
-                  bg="transparent"
-                  maxWidth="100%"
-                  width="100%"
-                  justifyContent="space-between"
+                  outline
+                  className="w-full flex justify-between"
                   onClick={withdrawDisclosure.onOpen}
                   disabled={!balance || balance === "0"}
                 >
-                  <Flex
-                    w="100%"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    className="flex md:hidden"
-                  >
-                    Unstake <WalletIcon />
-                  </Flex>
+                  <div className="w-full items-center justify-between flex lg:hidden">
+                    Unstake <WalletIcon className="h-6" />
+                  </div>
 
-                  <Flex
-                    w="100%"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    className="hidden md:flex"
-                  >
-                    Unstake and Claim Rewards <WalletIcon />
-                  </Flex>
+                  <div className="w-full items-center justify-between hidden lg:flex">
+                    Unstake and Claim Rewards <WalletIcon className="h-6" />
+                  </div>
                 </Button>
               </Skeleton>
             </Flex>
