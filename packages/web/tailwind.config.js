@@ -42,14 +42,17 @@ module.exports = {
         tighter: "-.06rem",
         tight: "-.04rem",
         DEFAULT: "-.027rem",
+        normal: "0",
       },
       fontSize: {
+        3: ".75rem",
         3.5: ".875rem",
         5: "1.25rem",
         6: "1.5rem",
       },
       spacing: {
         4.5: "1.125rem",
+        17: "4.25rem",
       },
       animation: {
         enter: "enter 200ms ease-out",

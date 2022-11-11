@@ -1,72 +1,61 @@
-import { Flex, Stack, Text, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "@chakra-ui/react";
 import { useNavigate } from "react-router";
-import { navRoutes } from "../../routes";
-import { JumpIcon } from "../../assets/svg/jump-logo";
+import { navRoutes } from "@/routes";
+import { twMerge } from "tailwind-merge";
 
 export const Nav = () => {
   const navigate = useNavigate();
 
-  return (
-    <Flex
-      // minH="100vh"
-      w="140px"
-      left="0px"
-      top="120px"
-      pt="25px"
-      gap="25px"
-      bg="transparent"
-      position="sticky"
-      zIndex="19"
-      shrink={0}
-      className="hidden md:flex sticky top-1 h-max"
-    >
-      <Stack flex={1} gap="10px" display="flex" alignItems="center">
-        <Flex>
-          <JumpIcon />
-        </Flex>
+  const onClick = (event, route) => {
+    event.preventDefault();
+    route.enabled && navigate(route.route);
+  };
 
-        {navRoutes.map((e) => (
-          <Tooltip
-            isDisabled={e.enabled}
-            key={e.route}
-            hasArrow
-            label="Coming soon"
-            placement="right"
+  const renderLink = (route) => {
+    const { route: path, enabled, icon, title } = route;
+    const {
+      location: { pathname },
+    } = window;
+
+    const current =
+      pathname === path || (path === "/" && pathname.includes("/projects"));
+
+    return (
+      <Tooltip
+        isDisabled={enabled}
+        key={path}
+        hasArrow
+        label="Coming soon"
+        placement="right"
+      >
+        <a
+          href={enabled ? path : null}
+          onClick={(event) => onClick(event, route)}
+        >
+          <div
+            className={twMerge(
+              "relative before:transition before:content-[' ']",
+              "before:rounded-full before:absolute before:aspect-square",
+              "before:scale-0 before:w-17 hover:before:scale-100",
+              "before:bg-white-600 before:opacity-30 hover:before:opacity-100 font-semibold text-center w-full flex",
+              "flex-col items-center justify-center p-4 leading-3 tracking-normal gap-y-[.47rem]",
+              current ? "text-white" : "text-white-400"
+            )}
           >
-            <Flex
-              alignItems="center"
-              w="80px"
-              minH="75px"
-              cursor={e.enabled ? "pointer" : "not-allowed"}
-              transition="0.3s"
-              onClick={() => (e.enabled ? navigate(e.route) : null)}
-              userSelect="none"
-              justifyContent="center"
-              direction="column"
-            >
-              <Text
-                userSelect="none"
-                textAlign="center"
-                display="flex"
-                alignItems="center"
-                flexDirection="column"
-                fontSize="12px"
-                pt={2}
-                opacity={
-                  window.location.pathname === e.route ||
-                  (e.route === "/" &&
-                    window.location.pathname.includes("/projects"))
-                    ? 1
-                    : 0.3
-                }
-              >
-                {e.icon}
-                {e.title}
-              </Text>
-            </Flex>
-          </Tooltip>
-        ))}
-      </Stack>
-    </Flex>
+            {icon}
+            <p className="w-min text-3">{title}</p>
+          </div>
+        </a>
+      </Tooltip>
+    );
+  };
+
+  return (
+    <div className="relative hidden lg:block h-screen inline-block flex-grow-0 flex-shrink-0 basis-[107px]">
+      {/* pb-[98px] = HEADER_HEIGHT + 24px */}
+      <nav className="fixed hidden lg:block h-screen w-[107px] overflow-y-scroll py-4 pb-[98px]">
+        {navRoutes.map(renderLink)}
+      </nav>
+    </div>
   );
 };
