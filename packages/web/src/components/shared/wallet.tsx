@@ -49,10 +49,14 @@ export const Wallet = () => {
     return new Big(xToken?.balance || 0).div(xtokenDecimals).toFixed(2);
   }, [xToken?.balance, xtokenDecimals]);
 
-  if (!!!accountId) {
+  if (!accountId) {
     return (
-      <Button white onClick={() => toggleModal()} className="hidden md:flex">
-        <WalletIcon className="h-3.5" />
+      <Button
+        white
+        onClick={() => toggleModal()}
+        className="hidden md:flex text-3.5 font-semibold leading-4 tracking-tight text-purple gap-x-1"
+      >
+        <WalletIcon className="h-5" />
         Connect Wallet
       </Button>
     );
@@ -61,7 +65,10 @@ export const Wallet = () => {
   return (
     <Menu as="div" className="relative text-left hidden md:inline-block">
       <Menu.Button as="div">
-        <Button>
+        <Button
+          white
+          className="hidden md:flex text-3.5 font-semibold leading-4 tracking-tight text-purple gap-x-1"
+        >
           <span children={shortenAddress(accountId)} />
 
           <ChevronDownIcon className="ml-2 -mr-1 w-[25px] h-[25px] text-[#1A1A1A]" />
