@@ -4,8 +4,8 @@ import { FormButton } from "./form-button";
 import { FormInputAndLabel } from "./form-input-label";
 import { FormHeader } from "./form-header";
 import { useEffect, useRef, useState, RefObject } from "react";
-import { ChevronDownIcon, ChevronLeftIcon } from "@heroicons/react/solid";
-import { ExclamationCircleIcon } from "@heroicons/react/outline";
+import { ChevronDownIcon, ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 interface FormCardProps {
   onReturnFunction: () => void;

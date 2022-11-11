@@ -13,9 +13,9 @@ import {
 } from "@chakra-ui/react";
 import {
   CurrencyDollarIcon,
-  CodeIcon,
+  CodeBracketIcon,
   ArrowRightIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/24/outline";
 import { WalletIcon, JumpKangaroo, JumpKangarooUpsidedown } from "@/assets/svg";
 
 export function FormIntroModal({
@@ -121,7 +121,7 @@ export function FormIntroModal({
                 width="100%"
                 zIndex="100"
               >
-                <CodeIcon className="w-[23px] h-[23px] text-[#894DA0] stroke-2" />
+                <CodeBracketIcon className="w-[23px] h-[23px] text-[#894DA0] stroke-2" />
                 <Flex direction="column" gap="9px" pt="5px">
                   <Text
                     color="#000"

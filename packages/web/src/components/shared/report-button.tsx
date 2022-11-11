@@ -1,5 +1,8 @@
 import { useTheme } from "../../hooks/theme";
-import { ExclamationIcon, ClipboardListIcon } from "@heroicons/react/solid";
+import {
+  ExclamationTriangleIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/solid";
 import { Flex, useColorModeValue } from "@chakra-ui/react";
 
 export function ReportButton() {
@@ -29,7 +32,7 @@ export function ReportButton() {
           text-white
         "
         >
-          <ClipboardListIcon className="w-8" />
+          <ClipboardDocumentListIcon className="w-8" />
 
           <span className="text-[18px]">Feedback</span>
         </Flex>
@@ -54,7 +57,7 @@ export function ReportButton() {
           text-white
         "
         >
-          <ExclamationIcon className="w-8" />
+          <ExclamationTriangleIcon className="w-8" />
 
           <span className="text-[18px]">Report Bug</span>
         </Flex>

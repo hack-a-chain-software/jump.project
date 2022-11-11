@@ -18,7 +18,10 @@ import { useNearQuery } from "react-near";
 import { MemberArea } from "@/components/modules/launchpad/home-member-area";
 import { ProjectCard } from "@/components";
 import { twMerge } from "tailwind-merge";
-import { FolderOpenIcon, SearchIcon } from "@heroicons/react/outline";
+import {
+  FolderOpenIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { viewFunction } from "@/tools";
 import { QuestionMarkOutlinedIcon } from "@/assets/svg/question-mark-icon";
 import { useNavigate } from "react-router";
@@ -361,7 +364,7 @@ export const Projects = () => {
                 }
               />
 
-              <SearchIcon
+              <MagnifyingGlassIcon
                 className="
                   w-[18px] h-[18px] text-white
                   pointer-none opacity-[0.5]

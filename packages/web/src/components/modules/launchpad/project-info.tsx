@@ -3,7 +3,7 @@ import { Badge } from "./project-card/badge";
 import { StatusEnum } from "@near/apollo";
 import isBefore from "date-fns/isBefore";
 import { getUTCDate } from "@near/ts";
-import { ExternalLinkIcon } from "@heroicons/react/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Tutorial, TutorialItemInterface } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { LaunchpadListing } from "@near/apollo";
@@ -111,7 +111,7 @@ export function ProjectInfo({
                 Website
               </span>
 
-              <ExternalLinkIcon className="w-[14px] h-[14px] text-white" />
+              <ArrowTopRightOnSquareIcon className="w-[14px] h-[14px] text-white" />
             </button>
           </div>
 
@@ -124,7 +124,7 @@ export function ProjectInfo({
                 Whitepaper
               </span>
 
-              <ExternalLinkIcon className="w-[14px] h-[14px] text-white" />
+              <ArrowTopRightOnSquareIcon className="w-[14px] h-[14px] text-white" />
             </button>
           </div>
         </div>

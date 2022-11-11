@@ -6,7 +6,7 @@ import { useLaunchpadStore } from "@/stores/launchpad-store";
 import { tokenMetadata } from "@/interfaces";
 import { Dialog, Transition } from "@headlessui/react";
 import { twMerge } from "tailwind-merge";
-import { XIcon } from "@heroicons/react/solid";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 import { Coins } from "@/assets/svg";
 
 const tiersBadge = [
@@ -153,7 +153,7 @@ export default function ({
                   onClick={() => onClose()}
                   className="absolute right-[6px] top-[6px] hover:opacity-[0.6]"
                 >
-                  <XIcon className="text-[#0F172A] w-[24px] h-[24px]" />
+                  <XMarkIcon className="text-[#0F172A] w-[24px] h-[24px]" />
                 </button>
                 <div className="flex flex-col items-start mb-[32px] px-[25px] py-[19px] w-full rounded-[20px] bg-[linear-gradient(90deg,#9795F0_0%,#FBC8D4_100%)] relative overflow-hidden">
                   <div className="mb-[16px]">
