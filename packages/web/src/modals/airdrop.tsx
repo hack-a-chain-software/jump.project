@@ -94,11 +94,15 @@ export function AirdropModal({
         </Text>
 
         <div className="flex flex-col space-y-[12px] items-stretch w-[200px]">
-          <Button onClick={() => getJumpTokens()} className="justify-start">
+          <Button
+            white
+            onClick={() => getJumpTokens()}
+            className="justify-start"
+          >
             Get JUMP Tokens
           </Button>
 
-          <Button onClick={() => getNfts()} className="justify-start">
+          <Button white onClick={() => getNfts()} className="justify-start">
             Get NFT's to Stake
           </Button>
         </div>

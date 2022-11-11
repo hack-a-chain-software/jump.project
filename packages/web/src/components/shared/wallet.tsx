@@ -51,10 +51,9 @@ export const Wallet = () => {
 
   if (!!!accountId) {
     return (
-      <Button onClick={() => toggleModal()} className="hidden md:flex">
-        <span>Connect Wallet</span>
-
-        <WalletIcon />
+      <Button white onClick={() => toggleModal()} className="hidden md:flex">
+        <WalletIcon className="h-3.5" />
+        Connect Wallet
       </Button>
     );
   }

@@ -1,39 +1,28 @@
-import React from "react";
-import {
-  Button as ChakraButton,
-  ButtonProps,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import React, { ButtonHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
-interface IButtonProps extends ButtonProps {}
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  white?: boolean;
+  inline?: boolean;
+  outline?: boolean;
+  full?: boolean;
+};
 
-/**
- * @description - Chakra custom button component
- */
-export function Button({
-  bg = "white",
-  color = "black",
-  ...props
-}: IButtonProps) {
+export function Button(props: ButtonProps) {
+  let style =
+    " disabled:grayscale-[.8] disabled:text-green py-2.5 px-6 rounded-sm flex gap-x-2 text-3.5 leading-4 items-center justify-center font-semibold active:opacity-40 hover:opacity-40";
+  if (props.white) style += " bg-white text-purple";
+  else if (props.inline) style += " text-white";
+  else if (props.outline)
+    style +=
+      " text-white border-white-300 border-[1px] disabled:border-white-600";
+  else style += " bg-purple text-white";
+
+  if (props.full) style += " w-full flex justify-center";
+
   return (
-    <ChakraButton
-      bg={bg}
-      color={color}
-      borderRadius="15px"
-      px="20px"
-      py="30px"
-      gap="12px"
-      fontSize="16px"
-      fontFamily="Inter"
-      alignItems="center"
-      fontWeight="semibold"
-      _active={{
-        opacity: 0.4,
-      }}
-      _hover={{
-        opacity: 0.4,
-      }}
-      {...props}
-    />
+    <button {...props} className={twMerge(style, props.className)}>
+      {props.children}
+    </button>
   );
 }
