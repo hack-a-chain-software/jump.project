@@ -47,6 +47,7 @@
     "react-error-boundary": "^3.1.4",
     "react-hook-form": "^7.36.1",
     "react-hot-toast": "^2.3.0",
+    "react-loading-skeleton": "^3.1.0",
     "react-lottie": "^1.2.3",
     "react-near": "^3.4.8",
     "react-router": "^6.3.0",
