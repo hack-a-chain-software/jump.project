@@ -19,7 +19,7 @@ export const Tutorial = ({
 
   return (
     <>
-      <div className="absolute right-[12px] top-[12px] z-[12]">
+      <div className="absolute right-4 top-4 z-20">
         <IconButton onClick={() => setShow(!show)} />
       </div>
 

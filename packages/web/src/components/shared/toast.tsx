@@ -1,4 +1,3 @@
-import { TransactionPayload } from "@/tools";
 import { twMerge } from "tailwind-merge";
 import { CheckIcon, XIcon } from "@heroicons/react/solid";
 

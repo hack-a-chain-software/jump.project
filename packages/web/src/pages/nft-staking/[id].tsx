@@ -1,10 +1,8 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @typescript-eslint/ban-types */
 import { Flex, Grid, Text, Button } from "@chakra-ui/react";
 import isEqual from "lodash/isEqual";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import { WalletIcon } from "../../assets/svg";
+import { WalletIcon } from "@/assets/svg";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   If,
@@ -17,7 +15,7 @@ import {
   NFTStakingUserActions,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
-import { useNftStaking } from "../../stores/nft-staking-store";
+import { useNftStaking } from "@/stores/nft-staking-store";
 import toast from "react-hot-toast";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
@@ -88,7 +86,7 @@ export function NFTStakingProject() {
           <div>
             <span>
               Here is the NFT Staking Project Page, the card displays all the
-              rewards you can get per month if you stake your nfts.
+              rewards you can get per month if you stake your NFT&apos;s.
             </span>
           </div>
         ),
@@ -112,7 +110,7 @@ export function NFTStakingProject() {
           <div className="flex flex-col">
             <span>
               This is the user area, here you will be able to stake/unstake your
-              NFT'S and redeem all available rewards.
+              NFT&apos;S and redeem all available rewards.
             </span>
           </div>
         ),
@@ -122,7 +120,7 @@ export function NFTStakingProject() {
         element: ".nft-staked",
         intro: (
           <div className="flex flex-col">
-            <span>Here you can find all your staked NFT's.</span>
+            <span>Here you can find all your staked NFT&apos;s.</span>
           </div>
         ),
       },
@@ -141,7 +139,7 @@ export function NFTStakingProject() {
       <BackButton onClick={() => navigate("/nft-staking")} />
 
       <div className="relative">
-        <Tutorial items={stepItems as any} />
+        <Tutorial items={stepItems as []} />
 
         <NFTStakingCard
           logo={staking?.collection_image}

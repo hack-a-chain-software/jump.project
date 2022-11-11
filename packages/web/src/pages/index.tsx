@@ -1,7 +1,6 @@
-import Big from "big.js";
 import { Flex } from "@chakra-ui/react";
 import { StatusEnum } from "@near/apollo";
-import { TopCard, PreviewProjects } from "@/components";
+import { TopCard, PreviewProjects, PageContainer } from "@/components";
 import { Tutorial } from "@/components";
 
 export function Index() {
@@ -31,14 +30,8 @@ export function Index() {
     },
   ];
 
-  const formatBig = (value, decimals) => {
-    const decimalsBig = new Big(10).pow(Number(decimals) ?? 0);
-
-    return new Big(value ?? 0).div(decimalsBig);
-  };
-
   return (
-    <div className="relative flex-col p-[30px] w-full overflow-hidden pt-[150px]">
+    <PageContainer>
       <Flex gap={5} className="flex-col lg:flex-row mb-[72px] relative">
         <Tutorial items={stepItems} />
 
@@ -55,7 +48,7 @@ export function Index() {
         <PreviewProjects title="Upcoming sales" status={StatusEnum.Waiting} />
         <PreviewProjects title="Closed sales" status={StatusEnum.Closed} />
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
