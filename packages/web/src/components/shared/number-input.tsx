@@ -1,5 +1,5 @@
 import { Flex, Button, Input, useNumberInput } from "@chakra-ui/react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/outline";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 export function NumberInput({
   value,

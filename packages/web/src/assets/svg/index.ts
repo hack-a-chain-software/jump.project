@@ -1,4 +1,3 @@
-export * from "./moon";
 export * from "./wallet";
 export * from "./close";
 export * from "./discord";
@@ -11,7 +10,6 @@ export * from "./info";
 export * from "./arrow-right";
 export * from "./jump-big-white";
 export * from "./lock";
-export * from "./menu";
 export * from "./logout";
 export * from "./jump-gradient";
 export * from "./jump-big-logo";

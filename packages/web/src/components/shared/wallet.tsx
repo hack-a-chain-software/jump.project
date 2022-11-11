@@ -2,9 +2,9 @@ import { Fragment, useMemo } from "react";
 import { Button } from "./button";
 import { WalletIcon } from "@/assets/svg";
 import { Menu, Transition } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/solid";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { DuplicateIcon } from "@heroicons/react/outline";
+import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { LogoutIcon } from "@/assets/svg";
 import Big from "big.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -102,7 +102,7 @@ export const Wallet = () => {
                   className="text-[#1A1A1A] text-[14px] font-[500]"
                 />
 
-                <DuplicateIcon className="w-[24px] text-[rgba(26,26,26,0.5)]" />
+                <Square2StackIcon className="w-[24px] text-[rgba(26,26,26,0.5)]" />
               </button>
             </CopyToClipboard>
           </div>

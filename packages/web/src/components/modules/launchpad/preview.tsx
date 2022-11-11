@@ -1,7 +1,7 @@
 import isEmpty from "lodash/isEmpty";
 import { useNavigate } from "react-router";
 import { ProjectCard } from "./project-card";
-import { FolderOpenIcon } from "@heroicons/react/outline";
+import { FolderOpenIcon } from "@heroicons/react/24/outline";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { StatusEnum, useLaunchpadConenctionQuery } from "@near/apollo";
 

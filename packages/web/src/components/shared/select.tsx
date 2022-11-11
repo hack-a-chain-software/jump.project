@@ -3,7 +3,7 @@ import { Fragment, useMemo } from "react";
 import { useTheme } from "@/hooks/theme";
 import { Flex, useColorModeValue } from "@chakra-ui/react";
 import { Listbox, Transition } from "@headlessui/react";
-import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 
 interface Item<V> {
   label: string;
@@ -54,7 +54,7 @@ export function Select<V>({
                     {selected?.label ?? placeholder}
                   </span>
 
-                  <SelectorIcon className="h-[18px]" />
+                  <ChevronUpDownIcon className="h-[18px]" />
                 </Flex>
               </Flex>
             </Listbox.Button>

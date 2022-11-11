@@ -1,5 +1,5 @@
 import { FormLabel, Input, Text } from "@chakra-ui/react";
-import { ExclamationCircleIcon } from "@heroicons/react/outline";
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 

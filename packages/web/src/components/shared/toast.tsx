@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { CheckIcon, XIcon } from "@heroicons/react/solid";
+import { CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
 const explorer = {
   mainnet: "https://explorer.near.org/transactions/",
@@ -32,7 +32,7 @@ export const Toast = ({
       {status === "success" ? (
         <CheckIcon className="w-[12px] h-[12px] text-white" />
       ) : (
-        <XIcon className="w-[12px] h-[12px] text-white" />
+        <XMarkIcon className="w-[12px] h-[12px] text-white" />
       )}
     </div>
 
