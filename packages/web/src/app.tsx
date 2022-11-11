@@ -13,6 +13,7 @@ import routes from "virtual:generated-pages-react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { Toast } from "./components";
+import ScrollToTop from "@/tools/ScrollToTop";
 
 const Pages = () => {
   return useRoutes(routes);
