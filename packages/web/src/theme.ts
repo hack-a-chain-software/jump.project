@@ -27,6 +27,7 @@ export const theme = extendTheme({
   styles: {
     global: {
       body: {
+        background: false,
         fontSize: "16px",
       },
     },

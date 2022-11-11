@@ -1,14 +1,8 @@
-import { Flex } from "@chakra-ui/react";
 import { Toaster } from "react-hot-toast";
 import { Header, Nav, ReportButton } from "./components";
-import { useTheme } from "./hooks/theme";
 import { BrowserRouter as Router, useRoutes } from "react-router-dom";
 import { useWalletSelector } from "@/context/wallet-selector";
-import {
-  getTransactionState,
-  getTransactionsAction,
-  viewFunction,
-} from "./tools";
+import { getTransactionState, getTransactionsAction } from "./tools";
 import routes from "virtual:generated-pages-react";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
@@ -24,8 +18,6 @@ const transactionHashes = new URLSearchParams(window.location.search).get(
 );
 
 function App() {
-  const { gradientBackground } = useTheme();
-
   const { accountId } = useWalletSelector();
 
   useEffect(() => {
@@ -55,22 +47,16 @@ function App() {
   }, [accountId]);
 
   return (
-    <Flex flex={1} bg={gradientBackground}>
+    <Router>
       <ReportButton />
-
-      <Router>
-        <Header />
-
-        <Flex w="100vw" ml="auto" minH="100vh" position="relative">
-          <Nav />
-          <div className="md:w-[calc(100vw-140px)] max-w-[1512px] mx-auto">
-            <Pages />
-          </div>
-        </Flex>
-      </Router>
-
+      <ScrollToTop />
+      <Header />
+      <div className="w-full flex">
+        <Nav />
+        <Pages />
+      </div>
       <Toaster position="top-center" />
-    </Flex>
+    </Router>
   );
 }
 

@@ -25,6 +25,7 @@ module.exports = {
           300: "#FFFFFFBF", // Transparent White 2
           400: "#FFFFFF80", // Transparent White
           500: "#FCFCFC33", // Glass 1
+          550: "#FFFFFF26", // White 15%
           600: "#FFFFFF1A", // Glass 2
         },
       },
@@ -33,8 +34,23 @@ module.exports = {
         sm: ".625rem",
         lg: "1.25rem",
       },
-      lineHeight: "1",
-      letterSpacing: "-.03rem",
+      lineHeight: {
+        3.5: ".875rem",
+        4.5: "1.125rem",
+      },
+      letterSpacing: {
+        tighter: "-.06rem",
+        tight: "-.04rem",
+        DEFAULT: "-.027rem",
+      },
+      fontSize: {
+        3.5: ".875rem",
+        5: "1.25rem",
+        6: "1.5rem",
+      },
+      spacing: {
+        4.5: "1.125rem",
+      },
       animation: {
         enter: "enter 200ms ease-out",
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
