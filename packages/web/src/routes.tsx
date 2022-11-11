@@ -1,4 +1,3 @@
-import { WalletIcon } from "./assets/svg";
 import { FarmIcon } from "./assets/svg/farm";
 import { PoolsIcon } from "./assets/svg/pools";
 import { RocketIcon } from "./assets/svg/rocket";
