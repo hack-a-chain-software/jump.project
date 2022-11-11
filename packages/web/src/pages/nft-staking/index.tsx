@@ -1,61 +1,42 @@
-import { Image, Stack, useColorModeValue, Flex, Input } from "@chakra-ui/react";
+import { Tab } from "@headlessui/react";
 import { useNavigate } from "react-router";
 import {
-  If,
   TopCard,
   NFTStakingCard,
   PageContainer,
   Empty,
-} from "../../components";
+  Button,
+} from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
-import { useEffect, useMemo } from "react";
-import { useTheme } from "@/hooks/theme";
-import { NftStakingProjectsConnectionDocument } from "@near/apollo";
-import { NftStakingProjectsConnectionQueryVariables } from "@near/apollo";
+import { useEffect, useMemo, useState } from "react";
+import {
+  NftStakingProjectsConnectionDocument,
+  NftStakingProjectsConnectionQueryVariables,
+  StakedEnum,
+} from "@near/apollo";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { twMerge } from "tailwind-merge";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 const PAGINATE_LIMIT = 30;
-
-const collectionImages = [
-  "https://paras-cdn.imgix.net/bafybeigc6z74rtwmigcoo5eqcsc4gxwkganqs4uq5nuz4dwlhjhrurofeq?w=300&auto=format,compress",
-  "https://paras-cdn.imgix.net/bafkreie4ohxbaz4ocr6eddrfmfivfb3d67uymefuy4ubuh2qijodtrpgee?w=300&auto=format,compress",
-  "https://paras-cdn.imgix.net/bafkreihbv5liue6o7ag36fcu2xlsxtocaoioigqnj7uuycnw3d2vb6hjme?w=300&auto=format,compress",
-  "https://d1fdloi71mui9q.cloudfront.net/7gfrOO2CQ7OSk7s9Bpiv_roo-king.png",
-];
 
 export const NFTStaking = () => {
   const navigate = useNavigate();
 
-  // const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
-  // const [filterStatus, setStatus] = useState<StatusEnum | null>(null);
-  // const [filterSearch, setSearch] = useState<string | null>(null);
-  // const [filterVisibility, setVisibility] = useState<VisibilityEnum | null>(
-  //   null
-  // );
-  // const [loadingItems, setLoadingItems] = useState(false);
+  const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
+  const [filterSearch, setSearch] = useState<string | null>(null);
   const { accountId } = useWalletSelector();
 
-  const { jumpGradient, glassyWhiteOpaque } = useTheme();
-
-  const cardOpacity = useColorModeValue(0.9, 0.7);
-  const cardBg = useColorModeValue(jumpGradient, glassyWhiteOpaque);
-
-  const queryVariables: NftStakingProjectsConnectionQueryVariables = useMemo(
-    () => {
+  const queryVariables: NftStakingProjectsConnectionQueryVariables =
+    useMemo(() => {
       return {
         limit: PAGINATE_LIMIT,
         accountId: accountId ?? "",
-        // showStaked: filterStaked,
-        // visibility: filterVisibility,
-        // status: filterStatus,
-        // search: filterSearch,
+        showStaked: filterStaked,
+        search: filterSearch,
       };
-    },
-    [
-      /*filterStatus, filterVisibility, filterSearch, filterStaked*/
-    ]
-  );
+    }, [filterSearch, filterStaked]);
 
   const {
     data: nftProjects,
@@ -109,10 +90,94 @@ export const NFTStaking = () => {
     },
   ];
 
+  const renderProjectCard = (staking, index) => {
+    return (
+      <NFTStakingCard
+        key={"nft-staking-collection" + index}
+        className="hover:opacity-80"
+        onClick={() =>
+          navigate(`/nft-staking/${window.btoa(staking?.collection_id)}`)
+        }
+        logo={staking?.collection_image}
+        name={staking?.collection_meta?.name}
+        rewards={staking?.rewards}
+      />
+    );
+  };
+
+  const renderStakingPools = () => {
+    return (
+      <div className="ProjectList space-y-[24px]">
+        {isEmpty(nftProjects) ? (
+          !loading ? (
+            <Empty text="No collections available" />
+          ) : (
+            <NFTStakingCard />
+          )
+        ) : (
+          nftProjects?.nft_staking_projects?.data?.map(renderProjectCard)
+        )}
+      </div>
+    );
+  };
+
+  const renderStakedPools = () => {
+    return (
+      <div className="ProjectList space-y-[24px]">
+        {isEmpty(nftProjects) ? (
+          !loading ? (
+            <Empty text="No collections available" />
+          ) : (
+            <NFTStakingCard />
+          )
+        ) : (
+          nftProjects?.nft_staking_projects?.data?.map(renderProjectCard)
+        )}
+      </div>
+    );
+  };
+
+  const renderTab = ({ selected }, title) => {
+    const style = selected
+      ? "bg-white-500 font-bold"
+      : "bg-transparent font-normal hover:bg-[#FFFFFF0D]";
+    return (
+      <Button
+        className={twMerge(
+          "font-bold leading-4 text-4 tracking-tight p-2.5 outline-none",
+          style
+        )}
+      >
+        {title}
+      </Button>
+    );
+  };
+
+  const renderSearchbar = () => {
+    return (
+      <div className="relative h-min">
+        <input
+          type="text"
+          placeholder="Search project"
+          className="placeholder:text-white-400 w-full lg:w-[354px] text-white bg-white-500 rounded-sm border-0 m-0 leading-[16px] text-3.5 py-3 pl-4 pr-12"
+          name="search"
+          onInput={(e) => setSearch(e.currentTarget.value)}
+          id="search"
+        />
+        <button
+          type={"submit"}
+          className="absolute inset-0 left-auto px-4 flex justify-center items-center hover:stroke-white-300"
+        >
+          <MagnifyingGlassIcon className="fill-white-300 w-5 h-5" />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <PageContainer>
       <TopCard
-        gradientText=""
+        gradientText="NFT Staking"
         bigText="Jump NFT Staking"
         bottomDescription={`
           Welcome to Jump NFT Staking; the portal between NFT technology and decentralized finance on NEAR Protocol!
@@ -120,115 +185,30 @@ export const NFTStaking = () => {
         py
         jumpLogo
         stepItems={stepItems}
-        renderAsset={
-          <>
-            {collectionImages.map((imagesrc, i) => (
-              <Image
-                ml="-30px"
-                src={imagesrc}
-                w="70px"
-                h="70px"
-                borderRadius={35}
-                key={i}
-              />
-            ))}
-          </>
-        }
       />
-      {/* <Flex justifyContent="space-between" flexWrap="wrap" gap={5}>
-        <Flex gap="4" flexGrow="1" flexWrap="wrap"> */}
-      {/* <Select
-            value={filterStatus}
-            placeholder="Status"
-            onChange={(value: StatusEnum | null) => setStatus(value)}
-            items={[
-              { label: "Public", value: StatusEnum.Open },
-              { label: "Private", value: StatusEnum.Closed },
-            ] as const}
-          />
-          <Select
-            placeholder="Visibility"
-            value={filterVisibility}
-            onChange={(value: VisibilityEnum | null) =>
-              setVisibility(value as VisibilityEnum)
-            }
-            items={[
-              { label: "Public", value: VisibilityEnum.Public },
-              { label: "Private", value: VisibilityEnum.Private },
-            ] as const}
 
-          /> */}
-
-      {/* <Select
-            value={filterStaked}
-            placeholder="Staked"
-            onChange={(value: StakedEnum | null) =>
-              setStaked(value as StakedEnum)
-            }
-            items={
-              [
-                { label: "Yes", value: StakedEnum.Yes },
-                { label: "No", value: StakedEnum.No },
-              ] as const
-            }
-          /> */}
-      {/* </Flex>
-      </Flex> */}
-
-      {/* <Flex className="md:max-w-[330px]" w="100%">
-          <Input
-            borderWidth="2px"
-            h="60px"
-            maxW="100%"
-            w="100%"
-            value={filterSearch ?? ""}
-            fontSize={16}
-            borderRadius={15}
-            placeholder="Search by project name"
-            _placeholder={{
-              color: blackAndWhite,
-            }}
-            outline="none"
-            px="20px"
-            onInput={(event) =>
-              setSearch((event.target as HTMLInputElement).value)
-            }
-          />
-        </Flex> */}
-      {/* </Flex> */}
-      <If
-        fallback={
-          !loading ? (
-            <Empty text="No collections available" />
-          ) : (
-            <NFTStakingCard />
-          )
+      <Tab.Group
+        onChange={(index) =>
+          setStaked(index == 0 ? StakedEnum.No : StakedEnum.Yes)
         }
-        condition={!isEmpty(nftProjects)}
       >
-        {nftProjects && (
-          <Stack spacing="32px" className="projects-list">
-            {nftProjects?.nft_staking_projects?.data?.map((staking, index) => (
-              <NFTStakingCard
-                className="projects-card"
-                key={"nft-staking-collection" + index}
-                onClick={() =>
-                  navigate(
-                    `/nft-staking/${window.btoa(staking?.collection_id)}`
-                  )
-                }
-                _hover={{
-                  opacity: cardOpacity,
-                  background: cardBg,
-                }}
-                logo={staking?.collection_image}
-                name={staking?.collection_meta?.name}
-                rewards={staking?.rewards}
-              />
-            ))}
-          </Stack>
-        )}
-      </If>
+        <div className="flex flex-wrap justify-between w-full gap-y-4">
+          <Tab.List className="flex gap-10 w-full lg:w-auto">
+            <Tab as="div" className="outline-none">
+              {(props) => renderTab(props, "Staking pools")}
+            </Tab>
+            <Tab as="div" className="outline-none">
+              {(props) => renderTab(props, "My staked pools")}
+            </Tab>
+          </Tab.List>
+          {renderSearchbar()}
+        </div>
+
+        <Tab.Panels>
+          <Tab.Panel>{renderStakingPools()}</Tab.Panel>
+          <Tab.Panel>{renderStakedPools()}</Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
     </PageContainer>
   );
 };

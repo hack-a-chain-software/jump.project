@@ -1,25 +1,21 @@
-import { Flex, FlexProps } from "@chakra-ui/react";
 import { PropsWithChildren } from "react";
 import { motion } from "framer-motion";
+import { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-export const PageContainer = (props: PropsWithChildren<FlexProps>) => {
+export const PageContainer = (props: PropsWithChildren<PropsWithChildren>) => {
   return (
-    <Flex
-      direction="column"
-      p="30px"
-      w="100%"
-      minH="100vh"
-      pt="150px"
-      {...props}
-    >
+    <div className="flex p-6 flex-col w-full overflow-y-hidden mx-auto max-w-[1512px]">
       <motion.div
         animate={{ opacity: 1 }}
         initial={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="space-y-[30px]"
+        className="space-y-[38px]"
       >
-        {props.children}
+        <SkeletonTheme baseColor="#FFFFFF00" highlightColor="#FFFFFF1A">
+          {props.children}
+        </SkeletonTheme>
       </motion.div>
-    </Flex>
+    </div>
   );
 };
