@@ -67,13 +67,7 @@ export function NFTStakeModal({
         !loading &&
         !isEmpty(data) && (
           <Fragment>
-            <Button
-              marginRight={12}
-              onClick={() => stakeNFT()}
-              bg="white"
-              color="black"
-              w="100%"
-            >
+            <Button white full onClick={() => stakeNFT()}>
               Stake Now!
               <ArrowRightIcon />
             </Button>
@@ -106,7 +100,7 @@ export function NFTStakeModal({
             fallback={
               <Flex pt="64px" marginTop="auto">
                 <Text fontSize="18px">
-                  You don't have tokens available to stake
+                  You don&apos;t have tokens available to stake
                 </Text>
               </Flex>
             }

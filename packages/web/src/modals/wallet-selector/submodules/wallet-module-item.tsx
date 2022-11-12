@@ -11,14 +11,7 @@ export function WalletModuleItem({
   onClick: () => void;
 }) {
   return (
-    <Button
-      color="white"
-      border="1px solid white"
-      bg="transparent"
-      onClick={onClick}
-      height="56px"
-      justifyContent="start"
-    >
+    <Button outline className="justify-start" onClick={onClick}>
       <Image src={iconUrl} width="32px" height="32px" />
 
       {name}

@@ -70,12 +70,10 @@ export const WithdrawModal = ({ _onSubmit, ...rest }: IWithdrawModalProps) => {
       image="https://images.unsplash.com/photo-1593672715438-d88a70629abe?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
       footer={
         <Button
-          justifyContent="space-between"
-          bg="white"
-          color="black"
-          isLoading={isSubmitting as any}
+          full
+          white
+          className="justify-between"
           disabled={isSubmitting}
-          w="100%"
           onClick={() => handleSubmit()}
         >
           Withdraw <WalletIcon />

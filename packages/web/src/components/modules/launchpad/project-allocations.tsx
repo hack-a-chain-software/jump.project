@@ -72,15 +72,13 @@ export function ProjectAllocations({
 
   const enabledSales = useMemo(() => {
     const now = new Date();
-    const startSale = new Date(
-      Number(launchpadProject?.open_sale_1_timestamp!)
-    );
+    const startSale = new Date(Number(launchpadProject.open_sale_1_timestamp!));
 
     return isBefore(startSale, now);
   }, [launchpadProject]);
 
   const ticketsAmount = useMemo(() => {
-    return new Big(launchpadProject?.token_allocation_price! ?? 0).mul(
+    return new Big(launchpadProject.token_allocation_price! ?? 0).mul(
       new Big(tickets.toString())
     );
   }, [tickets]);
@@ -188,7 +186,7 @@ export function ProjectAllocations({
             fontSize="24px"
             mb="-20px"
             as="h1"
-            children={formatDate(launchpadProject?.open_sale_1_timestamp!)}
+            children={formatDate(launchpadProject.open_sale_1_timestamp!)}
           />
         </Flex>
       </If>
@@ -247,11 +245,9 @@ export function ProjectAllocations({
           condition={!!accountId}
           fallback={
             <Button
-              disabled={true}
+              disabled
               onClick={() => onJoinProject(tickets)}
-              justifyContent="space-between"
-              w="100%"
-              maxWidth="380px"
+              className="justify-between w-full max-w-[380px]"
             >
               Connect Wallet
             </Button>
@@ -263,11 +259,10 @@ export function ProjectAllocations({
           >
             <Button
               onClick={() => onJoinProject(tickets)}
-              justifyContent="space-between"
-              w="100%"
-              maxWidth="380px"
-              bg={hasTicketsAmount ? "white" : "#EB5757"}
-              isDisabled={!hasTicketsAmount || tickets === 0}
+              className={`justify-between w-full max-w-[380px] ${
+                hasTicketsAmount ? "bg-white" : "bg-[#EB5757]"
+              }`}
+              disabled={!hasTicketsAmount || tickets === 0}
             >
               Join{" "}
               {tickets > 0 ? (

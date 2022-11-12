@@ -6,7 +6,8 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   inline?: boolean;
   outline?: boolean;
   full?: boolean;
-  onClick?: React.MouseEvent<HTMLButtonElement>;
+  onClick?: () => void;
+  disabled?: boolean;
 };
 
 export function Button(props: ButtonProps) {
@@ -22,7 +23,11 @@ export function Button(props: ButtonProps) {
   if (props.full) style += " w-full flex justify-center";
 
   return (
-    <button onClick={props.onClick} className={twMerge(style, props.className)}>
+    <button
+      onClick={props.onClick}
+      disabled={props.disabled}
+      className={twMerge(style, props.className)}
+    >
       {props.children}
     </button>
   );

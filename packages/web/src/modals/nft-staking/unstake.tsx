@@ -30,12 +30,11 @@ export function NFTUnstakeModal({
       onClose={() => onClose()}
       footer={
         <Button
-          onClick={async () => {
-            unstake(selector, accountId as string, selected, collection);
-          }}
-          bg="white"
-          color="black"
-          w="100%"
+          white
+          full
+          onClick={async () =>
+            unstake(selector, accountId as string, selected, collection)
+          }
         >
           Unstake
           <ArrowRightIcon />
@@ -45,7 +44,7 @@ export function NFTUnstakeModal({
     >
       <Flex w="100%" direction="column">
         <Text marginTop="-12px" marginBottom="12px">
-          Unstake all selected NFT's?
+          Unstake all selected NFT&apos;s?
         </Text>
 
         <Flex
