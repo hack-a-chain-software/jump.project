@@ -423,7 +423,7 @@ export const Staking = () => {
           </Text>
         </Flex>
 
-        <Button px="50px" onClick={onOpen} bg="white" color="black">
+        <Button white className="px-[50px]" onClick={onOpen}>
           Learn More Here
         </Button>
       </Box>
@@ -434,7 +434,7 @@ export const Staking = () => {
         title="Understanding xJUMP Staking"
         onClose={onClose}
         footer={
-          <Button bg="white" color="black" px="12px" className="px-[12px]">
+          <Button white className="px-[12px]">
             Read More on Docs
           </Button>
         }

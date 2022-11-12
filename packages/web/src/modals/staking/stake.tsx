@@ -71,13 +71,11 @@ export const StakeModal = ({ _onSubmit, ...rest }: IStakeModalProps) => {
       image="https://images.unsplash.com/photo-1593672715438-d88a70629abe?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
       footer={
         <Button
-          justifyContent="space-between"
-          bg="white"
-          isLoading={isSubmitting}
+          full
+          white
+          className="justify-between"
           disabled={isSubmitting}
-          color="black"
           onClick={() => handleSubmit()}
-          w="100%"
         >
           Stake
           <WalletIcon />

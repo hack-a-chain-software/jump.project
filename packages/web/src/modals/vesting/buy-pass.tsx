@@ -46,18 +46,17 @@ export function BuyFastPass({
       }}
       footer={
         <Button
-          onClick={async () => {
+          full
+          white
+          onClick={async () =>
             fastPass(
               vestingId,
               totalAmount?.toString() || "",
               passCost?.toString() || "",
               accountId!,
               selector
-            );
-          }}
-          bg="white"
-          color="black"
-          w="100%"
+            )
+          }
         >
           Buy Fast Pass!
         </Button>
