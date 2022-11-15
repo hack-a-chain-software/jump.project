@@ -6,7 +6,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   inline?: boolean;
   outline?: boolean;
   full?: boolean;
-  onClick?: () => void;
+  onClick?: (event) => void;
   disabled?: boolean;
 };
 

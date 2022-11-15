@@ -1,4 +1,4 @@
-import { Flex, Grid, Text, Button } from "@chakra-ui/react";
+import { Flex, Grid, Text } from "@chakra-ui/react";
 import isEqual from "lodash/isEqual";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -13,6 +13,7 @@ import {
   TokenAccordion,
   NFTStakingUserRewards,
   NFTStakingUserActions,
+  Button,
 } from "@/components";
 import { NFTUnstakeModal } from "@/modals";
 import { useNftStaking } from "@/stores/nft-staking-store";
@@ -164,6 +165,7 @@ export function NFTStakingProject() {
         <div className="relative nft-staked">
           <Flex
             paddingTop="66px"
+            paddingBottom="40px"
             alignItems="center"
             justifyContent="space-between"
             flexWrap="wrap"
@@ -177,18 +179,12 @@ export function NFTStakingProject() {
 
             <Flex>
               <Button
-                bg="white"
-                borderRadius="15px"
-                height="60px"
-                w="307px"
-                color="black"
-                display="flex"
-                alignItems="center"
+                white
+                className="w-[307px] p-4"
                 onClick={() => toggleUnstakeModal()}
               >
-                <Text marginRight="16px">Unstake Selected NFTs!</Text>
-
-                <WalletIcon />
+                Unstake Selected NFTs!
+                <WalletIcon className="h-6" />
               </Button>
             </Flex>
           </Flex>

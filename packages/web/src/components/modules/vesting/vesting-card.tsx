@@ -184,44 +184,38 @@ export function VestingCard(
               maxW="300px"
               height="133px"
               flexDirection="column"
-              justifyContent="space-between"
+              justifyContent="space-evenly"
             >
               <Button
                 disabled={
                   props.fast_pass || baseTokenBalance === "0" || !accountId
                 }
+                full
+                white
+                className="flex justify-between p-4"
                 onClick={() => setShowFastPass(true)}
               >
-                <Flex
-                  width="100%"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  {props.fast_pass ? (
-                    "Bought Fast Pass"
-                  ) : (
-                    <>
-                      Buy Fast Pass
-                      <WalletIcon />
-                    </>
-                  )}
-                </Flex>
+                {props.fast_pass ? (
+                  "Bought Fast Pass"
+                ) : (
+                  <>
+                    Buy Fast Pass
+                    <WalletIcon className="h-6" />
+                  </>
+                )}
               </Button>
 
               <Button
                 disabled={props.available_to_withdraw === "0" || !accountId}
+                full
+                white
+                className="flex justify-between p-4"
                 onClick={async () => {
                   withdraw([String(props.id)], accountId as string, selector);
                 }}
               >
-                <Flex
-                  width="100%"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  Withdraw Available Tokens
-                  <WalletIcon />
-                </Flex>
+                Withdraw Available Tokens
+                <WalletIcon className="h-6" />
               </Button>
             </Flex>
           </Flex>

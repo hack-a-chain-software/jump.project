@@ -67,19 +67,19 @@ export function NFTStakeModal({
         !loading &&
         !isEmpty(data) && (
           <Fragment>
-            <Button white full onClick={() => stakeNFT()}>
+            <Button white className="w-fit" onClick={() => stakeNFT()}>
               Stake Now!
               <ArrowRightIcon />
             </Button>
 
-            <CButton
-              variant="link"
+            <Button
+              inline
               onClick={() => {
                 stakeNFT(data?.map(({ token_id }) => token_id) || []);
               }}
             >
               Stake All
-            </CButton>
+            </Button>
           </Fragment>
         )
       }
