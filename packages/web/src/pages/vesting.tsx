@@ -328,9 +328,8 @@ export const Vesting = () => {
               onChange={(value: string | null) => setFilter(value)}
             />
 
-            <Flex maxW="330px">
+            <Flex maxW="330px" alignItems="center">
               <GradientButton
-                width="150px"
                 onClick={async () => {
                   withdraw(
                     vestings
@@ -345,8 +344,7 @@ export const Vesting = () => {
                     selector
                   );
                 }}
-                justifyContent="center"
-                bg={useColorModeValue("white", darkPurple)}
+                className="justify-center w-[150px]"
               >
                 Claim All
               </GradientButton>

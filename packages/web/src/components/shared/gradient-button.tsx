@@ -8,7 +8,9 @@ export function GradientButton(props: Props) {
   const { jumpGradient } = useTheme();
   return (
     <Box p="2px" h="max" bg={jumpGradient} borderRadius={18}>
-      <Button full white disabled={props.isDisabled} />
+      <Button full white disabled={props.isDisabled} onClick={props.onClick}>
+        {props.children}
+      </Button>
     </Box>
   );
 }
