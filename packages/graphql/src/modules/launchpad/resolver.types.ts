@@ -1,6 +1,6 @@
-import { PaginationFilters } from "@/modules/tools/createPaginatedConnection";
+import { PaginationFilters } from "@/utils/createPaginatedConnection";
 import { StatusEnum, VisibilityEnum } from "@near/apollo";
-import { ID } from "./graphql-types";
+import { ID } from "@/types/graphql-types";
 
 export type Allocation = {
   account_id: ID;

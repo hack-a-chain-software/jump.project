@@ -4,29 +4,21 @@ import {
   NFTStaking,
   NFTStakingFilters,
   PaginatedNFTStakingFilters,
-} from "@/types/nft-staking";
+} from "./resolver.types";
+import { StakingToken } from "@near/ts";
 import { QueryTypes } from "sequelize";
 import { StakedEnum } from "@near/apollo";
 import {
   findCollectionMetadata,
   findStakingProgram,
   findTokenMetadata,
-} from "../tools";
+} from "@/utils";
+
 import {
   createPageableQuery,
   PaginationFilters,
-} from "../tools/createPaginatedConnection";
+} from "@/utils/createPaginatedConnection";
 import BN from "bn.js";
-
-export interface StakingToken {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  perMonth: string;
-  decimals: number;
-  account_id: string;
-}
 
 export default {
   NFTStaking: {

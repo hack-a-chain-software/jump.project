@@ -1,6 +1,6 @@
-import { ID } from "./graphql-types";
+import { ID } from "@/types";
 import { StakedEnum } from "@near/apollo";
-import { PaginationFilters } from "@/modules/tools/createPaginatedConnection";
+import { PaginationFilters } from "@/utils/createPaginatedConnection";
 
 export type NFTStaking = {
   collection_id: ID;
