@@ -1,18 +1,16 @@
 import {
-  AccountIdQuery,
   Allocation,
-  GraphQLContext,
   LaunchpadFilters,
   LaunchpadListing,
   NFTInvestor,
   PaginatedLaunchpadFilters,
-  ProjectIdQuery,
-} from "@/types";
-import { findTokenMetadata, findProjectInfo } from "@/modules/tools";
+} from "./resolver.types";
+import { AccountIdQuery, GraphQLContext, ProjectIdQuery } from "@/types";
+import { findTokenMetadata, findProjectInfo } from "@/utils";
 import { QueryTypes } from "sequelize";
 import { ImportantStatusFilters, queriesPerStatus } from "@/constants/statuses";
 import { VisibilityEnum } from "@near/apollo";
-import { createPageableQuery } from "../tools/createPaginatedConnection";
+import { createPageableQuery } from "@/utils/createPaginatedConnection";
 
 export default {
   LaunchpadListing: {

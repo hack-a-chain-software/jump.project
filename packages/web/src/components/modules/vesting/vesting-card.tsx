@@ -16,13 +16,13 @@ import { BuyFastPass } from "@/modals";
 import { useNearQuery } from "react-near";
 import { JUMP_TOKEN } from "@/env/contract";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { useTokenBalance } from "@/hooks/modules/token";
 import Big from "big.js";
 
 export function VestingCard(
   props: Vesting & BoxProps & { token: Token; contractData: ContractData }
 ) {
-  const { jumpGradient, gradientBoxTopCard, glassyWhite, glassyWhiteOpaque } =
-    useTheme();
+  const { jumpGradient, gradientBoxTopCard, glassyWhiteOpaque } = useTheme();
 
   const createdAt = useMemo(() => {
     return getUTCDate(Number(props.start_timestamp) / 1000000);
@@ -46,32 +46,26 @@ export function VestingCard(
 
   const [showFastPass, setShowFastPass] = useState(false);
 
-  const { data: baseTokenBalance } = useNearQuery<
-    string,
-    { account_id: string }
-  >("ft_balance_of", {
-    contract: JUMP_TOKEN,
-    variables: {
-      account_id: accountId!,
-    },
-    poolInterval: 1000 * 60,
-    skip: !accountId,
-  });
+  const { data: baseTokenBalance } = useTokenBalance(JUMP_TOKEN, accountId);
 
   const decimals = useMemo(() => {
     return new Big(10).pow(props?.token?.decimals || 1);
   }, [props]);
 
+  function formatBigNumberWithDecimals(value: string | number, decimals: Big) {
+    return new Big(value).div(decimals).toFixed(2);
+  }
+
   const totalAmount = useMemo(() => {
-    return new Big(props.locked_value).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(props.locked_value, decimals);
   }, [props, decimals]);
 
   const avaialbleToClaim = useMemo(() => {
-    return new Big(props.available_to_withdraw).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(props.available_to_withdraw, decimals);
   }, [props, decimals]);
 
   const withdrawnAmount = useMemo(() => {
-    return new Big(props.withdrawn_tokens).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(props.withdrawn_tokens, decimals);
   }, [props, decimals]);
 
   return (

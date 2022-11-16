@@ -3,16 +3,9 @@
 import { EnvVariables } from "@/env";
 import { NearQuery } from "@/types";
 import { providers } from "near-api-js";
+import { CollectionMetaResponse } from "@near/ts";
 
 const provider = new providers.JsonRpcProvider(EnvVariables.rpc_url);
-
-export interface CollectionMetaResponse {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon: string;
-  base_uri: string;
-}
 
 export async function findCollectionMetadata(
   collection_address: string

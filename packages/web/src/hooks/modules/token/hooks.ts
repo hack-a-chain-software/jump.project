@@ -9,8 +9,8 @@ export function useTokenMetadata(token_id: string) {
   });
 }
 
-export function useTokenBalance(token_id: string, account_id: string) {
-  return useNearQuery<string, { account_id: string }>("ft_balance_of", {
+export function useTokenBalance(token_id: string, account_id: string | null) {
+  return useNearQuery<string, { account_id: string | null }>("ft_balance_of", {
     contract: token_id,
     variables: {
       account_id,
