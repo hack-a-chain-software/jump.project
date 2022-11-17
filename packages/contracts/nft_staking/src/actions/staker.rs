@@ -10,7 +10,7 @@ use crate::{
 use near_sdk::{
   assert_one_yocto, env, is_promise_success,
   json_types::{U128, U64},
-  near_bindgen, AccountId, Promise,
+  near_bindgen, AccountId, Promise, PromiseOrValue,
 };
 
 impl StakingProgram {
@@ -133,7 +133,7 @@ impl Contract {
     collection: NFTCollection,
     token_id: FungibleTokenID,
     amount: Option<U128>,
-  ) -> Promise {
+  ) -> PromiseOrValue<()> {
     assert_one_yocto();
 
     let initial_storage = env::storage_usage();
@@ -149,7 +149,8 @@ impl Contract {
       .unwrap();
     self.track_storage_usage(&caller_id, initial_storage);
 
-    ext_fungible_token::ext(token_id.clone())
+    if withdrawn_amount > 0 {
+      PromiseOrValue::Promise(ext_fungible_token::ext(token_id.clone())
       .with_static_gas(FT_TRANSFER_GAS)
       .with_attached_deposit(1)
       .ft_transfer(caller_id.clone(), U128(withdrawn_amount), None)
@@ -157,7 +158,11 @@ impl Contract {
         ext_self::ext(env::current_account_id())
           .with_static_gas(COMPENSATE_GAS)
           .compensate_withdraw_reward(collection, token_id, caller_id, U128(withdrawn_amount)),
-      )
+      ))
+    } else {
+      PromiseOrValue::Value(())
+    }
+    
   }
 
   #[payable]

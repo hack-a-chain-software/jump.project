@@ -146,3 +146,24 @@ pub async fn withdraw_reward(
   )
   .await
 }
+
+pub async fn alter_rewards(
+  signer: &Account,
+  nft_staking: &Contract,
+  collection: &Contract,
+  token_id: &str,
+  amount: u128
+) -> ExecutionResult<String> {
+  transact_call(
+    signer
+      .call(nft_staking.as_account().id(), "alter_rewards")
+      .args_json(json!({
+        "collection": serialize_nft_contract(collection),
+        "token_id": token_id,
+        "amount": amount.to_string()
+      }))
+      .deposit(1)
+      .gas(GAS_LIMIT),
+  )
+  .await
+}

@@ -124,6 +124,21 @@ The owner is responsible for 5 functions in the contract: (1) adding guardians, 
     near call <nftStakingAddress> "transfer" '{"operation": "<operation>", "collection": {"type": "NFTContract", "account_id": "<NFTContractId>"}, "token_id": "<token_id>", "amount": "<amount>"}' --accountId <ownerAccountId> --depositYocto 1
     ```
 
+8. alter_rewards
+
+    This method is used by the owner or by the collection owner to alter the rewards per round given in a staking program. Only the owner can change the rewards given in contract tokens and only the collection owner can change the rewards given as program tokens.
+
+    *Method name*: `alter_rewards`
+
+    *Method params*:
+
+        collection: NFTCollection -> {"type": "NFTContract", "account_id": "<NFTContractId>"}
+        token_id: FungibleTokenID -> AccountId of NEP-141 in whose rewards you want to alter
+        amount: Option<U128> -> new amount of rewards per round
+
+    ```shell
+    near call <nftStakingAddress> "alter_rewards" '{"collection": {"type": "NFTContract", "account_id": "<NFTContractId>"}, "token_id": "<token_id>", "amount": "<amount>"}' --accountId <ownerAccountId> --depositYocto 1
+    ```
 
 
 ## Guardian methods
@@ -193,7 +208,7 @@ Guardians are responsible for creating staking programs and altering their confi
     ```
 
 ## Collection owner methods
-There are 3 actions that must be performed by collection owners: (1) depositing reward tokens to contract treasury, (2) transferring reward tokens from contract tresury to distribution and (3) withdrawing from contract treasury.
+There are 3 actions that must be performed by collection owners: (1) depositing reward tokens to contract treasury, (2) transferring reward tokens from contract tresury to distribution and (3) changing rewards given.
 
 1. deposit_to_collection
 
@@ -227,4 +242,20 @@ There are 3 actions that must be performed by collection owners: (1) depositing 
 
     ```shell
     near call <nftStakingAddress> "transfer" '{"operation": "<operation>", "collection": {"type": "NFTContract", "account_id": "<NFTContractId>"}, "token_id": "<token_id>", "amount": "<amount>"}' --accountId <collectionOwnerAccountId> --depositYocto 1
+    ```
+
+3. alter_rewards
+
+    This method is used by the owner or by the collection owner to alter the rewards per round given in a staking program. Only the owner can change the rewards given in contract tokens and only the collection owner can change the rewards given as program tokens.
+
+    *Method name*: `alter_rewards`
+
+    *Method params*:
+
+        collection: NFTCollection -> {"type": "NFTContract", "account_id": "<NFTContractId>"}
+        token_id: FungibleTokenID -> AccountId of NEP-141 in whose rewards you want to alter
+        amount: Option<U128> -> new amount of rewards per round
+
+    ```shell
+    near call <nftStakingAddress> "alter_rewards" '{"collection": {"type": "NFTContract", "account_id": "<NFTContractId>"}, "token_id": "<token_id>", "amount": "<amount>"}' --accountId <collectionOwnerAccountId> --depositYocto 1
     ```
