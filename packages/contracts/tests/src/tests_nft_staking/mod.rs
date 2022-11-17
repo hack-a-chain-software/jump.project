@@ -12,7 +12,7 @@ mod tests {
       nep145::storage_withdraw,
       nft_staking::{
         initialize_nft_staking, add_guardian, transfer, deposit, create_staking_program, stake,
-        unstake, withdraw_reward, DENOM,
+        alter_rewards, unstake, withdraw_reward, DENOM,
       },
       nft::{initialize_nft_contract, nft_mint, view_nft_token},
     },
@@ -174,7 +174,7 @@ mod tests {
 
     add_guardian(&nft_staking, &owner, guardian.id()).await;
 
-    let contract_token_funds = 600000000000000;
+    let contract_token_funds = 60000000000000000;
 
     deposit(
       &nft_staking,
@@ -247,7 +247,7 @@ mod tests {
     )
     .await;
 
-    let program_token_funds = 600000000000000;
+    let program_token_funds = 6000000000000000;
 
     deposit(
       &nft_staking,
@@ -349,6 +349,77 @@ mod tests {
     )
     .unwrap();
     assert_withdraw_reward(contract_withdraw_event, contract_reward)?;
+
+    // Redo stake, unstake, confirm rewards after changing reward amounts
+    let new_contract_reward = contract_reward * 3;
+
+    println!("{:#?}", alter_rewards(
+      &owner,
+      &nft_staking,
+      &nft_collection,
+      &contract_token.id(),
+      new_contract_reward,
+    )
+    .await);
+
+    stake(&nft_staking, &nft_collection, &staker, nft_id).await;
+
+    let stake_timestamp_ms = worker.view_latest_block().await?.timestamp() / 10_u64.pow(6);
+    let stake_round = stake_timestamp_ms.checked_sub(start_at_ms).unwrap_or(0) / round_interval_ms;
+
+    unstake(&nft_staking, &nft_collection, &staker, nft_id).await;
+
+    let unstake_timestamp_ms = worker.view_latest_block().await?.timestamp() / 10_u64.pow(6);
+    let unstake_round =
+      unstake_timestamp_ms.checked_sub(start_at_ms).unwrap_or(0) / round_interval_ms;
+
+    let rounds: u128 = (unstake_round - stake_round).into();
+    println!("{}", rounds);
+
+    let nft = view_nft_token(&nft_collection, nft_id).await?.unwrap();
+    assert_eq!(nft.owner_id.as_str(), staker.id().as_str());
+
+    let assert_withdraw_reward = |event: serde_json::Value, reward: u128| -> anyhow::Result<()> {
+      let tokens_json = event
+        .get("data")
+        .and_then(|d| d.get(0))
+        .and_then(|d| d.get("amount"))
+        .and_then(|d| Some(d.clone()))
+        .unwrap();
+      let tokens = u128::from_str_radix(tokens_json.as_str().unwrap(), 10)?;
+
+      let real_reward_per_round = reward * (DENOM - early_withdraw_penalty);
+      let withdrawn_reward = tokens * DENOM;
+      println!("real_reward_per_round: {}", real_reward_per_round);
+      println!("withdrawn_reward: {}", withdrawn_reward);
+
+      assert!(
+        withdrawn_reward == real_reward_per_round * (rounds - 1)
+          || withdrawn_reward == real_reward_per_round * rounds
+      );
+
+      Ok(())
+    };
+
+    let program_withdraw_result =
+      withdraw_reward(&nft_staking, &nft_collection, &staker, &program_token).await;
+    let program_withdraw_event = find_event_type(
+      parse_event_logs(program_withdraw_result)?,
+      "withdraw_reward",
+    )
+    .unwrap();
+    assert_withdraw_reward(program_withdraw_event, program_reward)?;
+
+    println!("program done");
+
+    let contract_withdraw_result =
+      withdraw_reward(&nft_staking, &nft_collection, &staker, &contract_token).await;
+    let contract_withdraw_event = find_event_type(
+      parse_event_logs(contract_withdraw_result)?,
+      "withdraw_reward",
+    )
+    .unwrap();
+    assert_withdraw_reward(contract_withdraw_event, new_contract_reward)?;
 
     storage_withdraw(&nft_staking, &staker, None).await;
 
