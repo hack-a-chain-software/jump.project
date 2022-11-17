@@ -390,8 +390,8 @@ async function nftStakingSetup(execution_data) {
       collection_owner: connAccountMap.ownerAccount.accountId,
       token_address: tokenAddress,
       collection_rps,
-      min_staking_period: "10000000000000",
-      early_withdraw_penalty: "500000000000",
+      min_staking_period: "86400000",
+      early_withdraw_penalty: "500000000000000000000",
       round_interval: "10000",
       start_in: "0",
     };
