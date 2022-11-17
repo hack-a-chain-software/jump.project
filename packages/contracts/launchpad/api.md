@@ -21,7 +21,7 @@ The contract contains 2 different routines: (1) creating new listings, (2) withd
 
 
 ## Owner methods
-The owner can perform 3 different actions that are private to their account:
+The owner can perform 4 different actions that are private to their account:
 
 1. assign_guardian
 
@@ -70,6 +70,28 @@ The owner can perform 3 different actions that are private to their account:
     near view <contractAddress> "view_contract_treasury_length"
     ```
     The return value is going to be the maximum index value that has tokens in it. Call retrieve_treasury_funds multiple times, all the way until token_index is equal to the retunr value of the view call.
+
+4. update_settings
+
+    This method allows the owner to change the contract's configurations
+
+    *Method name*: `update_settings`
+
+    *Method params*:
+
+        new_settings: ContractSettings -> Configuration JSON containing:
+        pub struct ContractSettings {
+            membership_token: AccountId -> token that must be staked to climb lauchpad tiers - this cannot be changed
+            token_lock_period: U64 -> duration of timelock for staked tokens after investing (in nanoseconds),
+            tiers_minimum_tokens: Vec<U128> -> array of necessary tokens staked for each tier (must be same length as tiers_entitled_allocations)
+            tiers_entitled_allocations: Vec<U64> -> quantity of allocations to which each tier is entitled in sale phase 1 (must be same length as tiers_minimum_tokens)
+            allowance_phase_2: U64 -> number of allocations to which every user is entitled in phase 2 - if you want that to be infinite, simply input a very high number
+            partner_dex: AccountId -> Account of JUMP DEX,
+        }
+
+    ```shell
+    near call <contractAddress> "update_settings" '{"new_settings": {"membership_token": "<membership_token>", "token_lock_period": "<token_lock_period>", "tiers_minimum_tokens": ["<tier_1_tokens>", "<tier_2_tokens>", ...], "tiers_entitled_allocations": ["<tier_1_allocations>", "<tier_2_allocations>", ...], "allowance_phase_2": "<allowance_phase_2>", "partner_dex": "<partner_dex>"} }' --accountId <ownerAccountId> --depositYocto 1
+    ```
 
 ## Guardian methods
 Guardians are responsible for 2 actions within the contract: creating and cancelling listings

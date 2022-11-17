@@ -56,6 +56,13 @@ impl Contract {
         .callback_token_transfer_to_owner(key, U128(value)),
     )
   }
+
+  #[payable]
+  pub fn update_settings(&mut self, new_settings: ContractSettings) {
+    self.assert_owner();
+    assert_eq!(self.contract_settings.membership_token, new_settings.membership_token, "Cannot change membership token");
+    self.contract_settings = new_settings;
+  }
 }
 
 #[cfg(test)]
