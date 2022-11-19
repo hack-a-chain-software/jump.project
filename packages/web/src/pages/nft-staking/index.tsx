@@ -46,14 +46,6 @@ export const NFTStaking = () => {
     notifyOnNetworkStatusChange: true,
   });
 
-  // const { data } = useNearQuery("nft_tokens_for_owner", {
-  //   contract: "445ce3679b0536fd4920nearmeerkatking.testnet",
-  //   variables: {
-  //     account_id: accountId,
-  //   },
-  //   skip: !accountId,
-  // });
-
   useEffect(() => {
     (async () => {
       await refetch({

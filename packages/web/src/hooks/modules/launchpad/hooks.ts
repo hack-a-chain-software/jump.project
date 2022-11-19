@@ -1,3 +1,6 @@
+import { X_JUMP_TOKEN } from "@/env/contract";
+import { viewFunction } from "@/tools";
+import { WalletSelector } from "@near-wallet-selector/core";
 import { useNearQuery } from "react-near";
 
 const defaultLPOptions = {
@@ -65,9 +68,10 @@ export const useXTokenBalance = (wallet: string) => {
   return useNearQuery<string, { account_id: string }>("ft_balance_of", {
     contract: import.meta.env.VITE_STAKING_CONTRACT,
     variables: {
-      account_id: wallet,
+      account_id: wallet!,
     },
     poolInterval: 1000 * 60,
+    skip: !wallet,
   });
 };
 
@@ -124,3 +128,17 @@ export const useViewInvestorAllocation = (
     },
   };
 };
+
+export async function useSettings(selector: WalletSelector) {
+  const settings = await viewFunction(
+    selector,
+    import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+    "view_contract_settings"
+  );
+  return settings;
+}
+
+export async function useXJumpMetadata(selector: WalletSelector) {
+  const metadata = await viewFunction(selector, X_JUMP_TOKEN, "ft_metadata");
+  return metadata;
+}

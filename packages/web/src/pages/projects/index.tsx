@@ -1,45 +1,51 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useMemo } from "react";
 import isEmpty from "lodash/isEmpty";
 import { debounce } from "lodash-es";
-import {
-  useViewInvestor,
-  useViewTotalEstimatedInvestorAllowance,
-} from "@/hooks/modules/launchpad";
-import { X_JUMP_TOKEN } from "@/env/contract";
-import {
-  LaunchpadConenctionQueryVariables,
-  useLaunchpadConenctionQuery,
-  VisibilityEnum,
-} from "@near/apollo";
-import { useMemo } from "react";
-import { Button, TopCard, LoadingIndicator, BackButton } from "@/components";
-import { useWalletSelector } from "@/context/wallet-selector";
-import { useNearQuery } from "react-near";
-import { MemberArea } from "@/components/modules/launchpad/home-member-area";
-import { ProjectCard } from "@/components";
 import { twMerge } from "tailwind-merge";
 import {
   FolderOpenIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import { viewFunction } from "@/tools";
-import { QuestionMarkOutlinedIcon } from "@/assets/svg/question-mark-icon";
-import { useNavigate } from "react-router";
 
-const PAGINATE_LIMIT = 30;
+import {
+  useViewInvestor,
+  useViewTotalEstimatedInvestorAllowance,
+  useXTokenBalance,
+  useSettings,
+  useXJumpMetadata,
+} from "@/hooks/modules/launchpad";
+import {
+  LaunchpadConenctionQueryVariables,
+  useLaunchpadConenctionQuery,
+  VisibilityEnum,
+} from "@near/apollo";
+import {
+  Button,
+  TopCard,
+  LoadingIndicator,
+  BackButton,
+  ProjectCard,
+} from "@/components";
+import { useWalletSelector } from "@/context/wallet-selector";
+import { MemberArea } from "@/components/modules/launchpad/home-member-area";
+import { stepItemsProjects, stepItemsMemberArea } from "./projects.tutorial";
+import { PAGINATE_LIMIT } from "./projects.config";
 
 export const Projects = () => {
-  const navigate = useNavigate();
-
-  const [filter, setFilter] = useState({});
+  const [baseTokenMetadata, setBaseTokenMetadata] = useState<any>();
   const [filterSearch, setSearch] = useState<string | null>(null);
   const [launchpadSettings, setlaunchpad] = useState<any>();
-  const [baseTokenMetadata, setBaseTokenMetadata] = useState<any>();
-
   const [loadingItems, setLoadingItems] = useState(false);
+  const [filter, setFilter] = useState({});
 
   const { accountId, selector } = useWalletSelector();
 
+  const navigate = useNavigate();
+
+  // Blockchain Data:
+  const xTokenBalance = useXTokenBalance(accountId!);
   const investor = useViewInvestor(accountId!);
 
   const { data: totalAllowanceData = "0" } =
@@ -47,34 +53,15 @@ export const Projects = () => {
 
   useEffect(() => {
     (async () => {
-      const settings = await viewFunction(
-        selector,
-        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
-        "view_contract_settings"
-      );
+      const metadata = await useXJumpMetadata(selector);
+      const settings = await useSettings(selector);
 
-      const metadata = await viewFunction(
-        selector,
-        X_JUMP_TOKEN,
-        "ft_metadata"
-      );
-
-      setlaunchpad(settings);
       setBaseTokenMetadata(metadata);
+      setlaunchpad(settings);
     })();
   }, []);
 
-  const { data: baseTokenBalance } = useNearQuery<
-    string,
-    { account_id: string }
-  >("ft_balance_of", {
-    contract: X_JUMP_TOKEN,
-    variables: {
-      account_id: accountId!,
-    },
-    skip: !accountId,
-  });
-
+  // Graphql Data:
   const queryVariables: LaunchpadConenctionQueryVariables = useMemo(() => {
     return {
       limit: PAGINATE_LIMIT,
@@ -137,149 +124,6 @@ export const Projects = () => {
     [loadingItems, hasNextPage, loadingProjects, launchpadProjects]
   );
 
-  const stepItems = [
-    {
-      element: ".top-card",
-      title: "Launchpad Projects",
-      intro: (
-        <div>
-          <span>
-            This is the Launchpad projects page. Here you can stake your xJump,
-            watch your current tier and search Vesting Projects
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Member Area",
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <span className="mb-2">This is member area.</span>
-
-          <span>
-            In this section you can stake your xJump tokens, check your level,
-            consult the amount of staked tokens and the total of your
-            allocations.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Projects",
-      element: ".projects",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            All Investment projects are listed here, you can filter to show only
-            your projects or private sale projects.
-          </span>
-        </div>
-      ),
-    },
-  ];
-
-  const MemberAreaTutorialTitle = () => {
-    return (
-      <div
-        className="flex flex-row items-center justify-start gap-2
-    mb-[21px]"
-      >
-        <div className="w-[16px] h-[16px]">
-          <QuestionMarkOutlinedIcon />
-        </div>
-        <span className="text-[16px] font-bold">Jump Pad Allocation tier</span>
-      </div>
-    );
-  };
-
-  const stepItemsMemberArea = [
-    {
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <span>
-            The Jump Pad features a two-round system for public sales that
-            ensures every tier level is guaranteed a token allocation. Traders
-            of all sizes have the opportunity to invest in the best upcoming
-            projects within the NEAR Protocol ecosystem.
-          </span>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-    {
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <span>
-            In the first round users can purchase the amount of tokens allotted
-            to them based on their allocation tier. There are six allocation
-            tiers: Bronze, Silver, Gold, Tungsten, Platinum, Diamond. Allocation
-            tiers are determined by the quantity of xJUMP token staked for any
-            given sale.
-          </span>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-    {
-      element: ".member-area",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <span>
-            In round 2, any unsold tokens from the first round are made
-            available to the public on a FCFS basis. This round will remain open
-            until all remaining tokens are sold.
-          </span>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-    {
-      element: ".tier-box",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <ul>
-            <li>1. Bronze: 100 xJUMP</li>
-            <li>2. Tungsten: 250 xJUMP</li>
-            <li>3. Silver: 500 xJUMP</li>
-            <li>4. Gold: 1000 xJUMP</li>
-            <li>5. Platinum: x2500 JUMP</li>
-            <li>6. Diamond: x5000 JUMP</li>
-          </ul>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-    {
-      element: ".allocation-tier-box",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <span>
-            Your current allocation tier based on the amount of xJUMP staked.
-          </span>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-    {
-      element: ".jump-staked-box",
-      intro: (
-        <div className="flex flex-col">
-          <MemberAreaTutorialTitle />
-          <span>Your amount of xJUMP staked on the Jump Pad.</span>
-        </div>
-      ),
-      tooltipClass: "member-area-tooltip",
-    },
-  ];
-
   return (
     <div className="p-[30px] w-full overflow-hidden pt-[150px] relative">
       <BackButton text="Jump Pad" onClick={() => navigate("/")} />
@@ -291,7 +135,7 @@ export const Projects = () => {
           bigText="Boost your Jump Pad experience with xJUMP"
           bottomDescription="Get early access to the best NEAR projects before they hit the market,  and increase your allocation tier by using xJUMP "
           jumpLogo
-          stepItems={stepItems}
+          stepItems={stepItemsProjects}
         />
 
         <MemberArea
@@ -300,7 +144,7 @@ export const Projects = () => {
           totalAllowance={totalAllowanceData}
           launchpadSettings={launchpadSettings!}
           baseToken={{
-            balance: baseTokenBalance!,
+            balance: xTokenBalance?.data!,
             metadata: baseTokenMetadata!,
           }}
           stepItems={stepItemsMemberArea}

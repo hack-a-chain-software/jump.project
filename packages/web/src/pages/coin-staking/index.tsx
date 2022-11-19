@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Big from "big.js";
 import {
   Box,
   Flex,
@@ -6,9 +8,6 @@ import {
   useDisclosure,
   Image,
 } from "@chakra-ui/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNearQuery } from "react-near";
-import { WalletIcon } from "../assets/svg";
 import {
   Button,
   GradientText,
@@ -16,20 +15,30 @@ import {
   PageContainer,
   ValueBox,
   Card,
-} from "../components";
-import { X_JUMP_TOKEN, JUMP_TOKEN } from "../env/contract";
-import { useTheme } from "../hooks/theme";
-import { StakeModal } from "../modals";
-import { useStaking } from "../stores/staking-store";
-import { WithdrawModal } from "../modals/staking/withdraw";
+  Tutorial,
+} from "@/components";
 import { useWalletSelector } from "@/context/wallet-selector";
-import Big from "big.js";
-import { Tutorial } from "@/components";
-import { viewFunction } from "@/tools";
-interface TokenRatio {
-  x_token: string;
-  base_token: string;
-}
+import { X_JUMP_TOKEN, JUMP_TOKEN } from "@/env/contract";
+import { WithdrawModal } from "@/modals/staking/withdraw";
+import { StakeModal } from "@/modals";
+import { useXJumpMetadata } from "@/hooks/modules/launchpad";
+import {
+  useTokenBalance,
+  useTokenMetadata,
+  useTokenRatio,
+} from "@/hooks/modules/token";
+import { useTheme } from "@/hooks/theme";
+import {
+  jumpYearlyDistributionCompromise,
+  parseToBigAndDivByDecimals,
+  divideAndParseToTwoDecimals,
+  calcAPR,
+  calcAmountRaw,
+} from "./staking.config";
+import { stepItemsStaking } from "./staking.tutorial";
+import { useStaking } from "@/stores/staking-store";
+import { WalletIcon } from "@/assets/svg";
+import { getDecimals } from "@/tools";
 
 /**
  * @name Staking
@@ -37,78 +46,41 @@ interface TokenRatio {
  * @description - This is the staking JUMP page where user can stake and unstake Jump
  */
 export const Staking = () => {
-  const { accountId, selector } = useWalletSelector();
-  const { stakeXToken, burnXToken } = useStaking();
   const [baseTokenMetadata, setBaseTokenMetadata] = useState<any>();
 
-  const {
-    data: { base_token = "1", x_token = "1" } = {},
-    loading: loadingTokenRatio,
-  } = useNearQuery<TokenRatio>("view_token_ratio", {
-    contract: X_JUMP_TOKEN,
-    poolInterval: 1000 * 60,
-    debug: true,
-    onError(err) {
-      console.warn(err);
-    },
-  });
-
-  // amount of tokens that jump will deposit every month
-  // this is an alternative while there is no track record
-  // of yield to extrapolate from
-  const jumpYearlyDistributionCompromise = "10000000000000000000";
-
-  const { data: balance = "0", loading: loadingBalance } = useNearQuery<
-    string,
-    { account_id: string }
-  >("ft_balance_of", {
-    contract: X_JUMP_TOKEN,
-    variables: {
-      account_id: accountId as string,
-    },
-    poolInterval: 1000 * 60,
-    skip: !accountId,
-  });
-
-  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
-    useNearQuery<string, { account_id: string }>("ft_balance_of", {
-      contract: JUMP_TOKEN,
-      variables: {
-        account_id: accountId as string,
-      },
-      poolInterval: 1000 * 60,
-      skip: !accountId,
-    });
-
-  const { data: jumpMetadata } = useNearQuery<{
-    decimals: number;
-    symbol: string;
-    icon: string;
-  }>("ft_metadata", {
-    contract: JUMP_TOKEN,
-    poolInterval: 1000 * 60,
-    skip: !accountId,
-    debug: true,
-  });
-
-  useEffect(() => {
-    (async () => {
-      const metadata = await viewFunction(
-        selector,
-        X_JUMP_TOKEN,
-        "ft_metadata"
-      );
-
-      setBaseTokenMetadata(metadata);
-    })();
-  }, []);
+  const { jumpGradient, glassyWhiteOpaque } = useTheme();
+  const { accountId, selector } = useWalletSelector();
+  const { stakeXToken, burnXToken } = useStaking();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const stakingDisclosure = useDisclosure();
   const withdrawDisclosure = useDisclosure();
 
-  const { jumpGradient, glassyWhiteOpaque } = useTheme();
+  // Blockchain Data
+  const {
+    data: { base_token = "1", x_token = "1" } = {},
+    loading: loadingTokenRatio,
+  } = useTokenRatio(X_JUMP_TOKEN);
 
+  const { data: balance = "0", loading: loadingBalance } = useTokenBalance(
+    X_JUMP_TOKEN,
+    accountId
+  );
+
+  const { data: baseTokenBalance, loading: loadingBaseTokenBalance } =
+    useTokenBalance(JUMP_TOKEN, accountId);
+
+  const { data: jumpMetadata } = useTokenMetadata(JUMP_TOKEN);
+
+  useEffect(() => {
+    (async () => {
+      const metadata = await useXJumpMetadata(selector);
+
+      setBaseTokenMetadata(metadata);
+    })();
+  }, []);
+
+  // Calculating balances
   const balanceXToken = useMemo(() => balance || "0", [balance]);
 
   const baseToken = useMemo(() => {
@@ -119,15 +91,9 @@ export const Staking = () => {
     return x_token === "0" ? "1" : x_token;
   }, [x_token]);
 
-  const getAmountRaw = (amount) => {
-    const denom = new Big("10").pow(jumpMetadata?.decimals!);
-
-    return new Big(amount).mul(denom).toString();
-  };
-
   const submitStaking = useCallback(
     async (amount: string) => {
-      const deposit = getAmountRaw(amount);
+      const deposit = calcAmountRaw(amount, jumpMetadata?.decimals!);
 
       try {
         await stakeXToken(deposit, accountId!, selector);
@@ -140,7 +106,7 @@ export const Staking = () => {
 
   const submitWithdraw = useCallback(
     async (amount: string) => {
-      const withdraw = getAmountRaw(amount);
+      const withdraw = calcAmountRaw(amount, jumpMetadata?.decimals!);
 
       try {
         await burnXToken(withdraw, accountId!, selector);
@@ -155,69 +121,38 @@ export const Staking = () => {
     return loadingBalance && loadingTokenRatio && loadingBaseTokenBalance;
   }, [loadingBalance, loadingTokenRatio]);
 
+  // Calculating meaningful ratios
   const decimals = useMemo(() => {
-    return Big(10).pow(jumpMetadata?.decimals || 1);
+    return getDecimals(jumpMetadata?.decimals);
   }, [jumpMetadata]);
 
   const jumpRatio = useMemo(() => {
-    return new Big(baseToken).div(decimals);
+    return parseToBigAndDivByDecimals(baseToken, decimals);
   }, [baseToken, decimals]);
 
   const xJumpRatio = useMemo(() => {
-    return new Big(xToken).div(decimals);
+    return parseToBigAndDivByDecimals(xToken, decimals);
   }, [xToken, decimals]);
 
   const jumpValue = useMemo(() => {
-    return jumpRatio.div(xJumpRatio).toFixed(2);
+    return divideAndParseToTwoDecimals(jumpRatio, xJumpRatio);
   }, [jumpRatio, xJumpRatio]);
 
   const xJumpValue = useMemo(() => {
-    return xJumpRatio.div(jumpRatio).toFixed(2);
+    return divideAndParseToTwoDecimals(xJumpRatio, jumpRatio);
   }, [jumpRatio, xJumpRatio]);
 
   const xTokenBalance = useMemo(() => {
-    return new Big(balanceXToken).div(decimals);
+    return parseToBigAndDivByDecimals(balanceXToken, decimals);
   }, [balanceXToken, decimals]);
 
   const xTokenInToken = useMemo(() => {
-    return xTokenBalance.div(jumpValue).toFixed(2);
+    return divideAndParseToTwoDecimals(xTokenBalance, jumpValue);
   }, [xTokenBalance, jumpValue]);
 
   const apr = useMemo(() => {
-    const base = new Big(jumpYearlyDistributionCompromise).mul(100);
-
-    const baseBig = new Big(baseToken);
-
-    const denom = new Big(10).pow(9);
-
-    return base.div(baseBig).div(denom).toFixed(2);
+    return calcAPR(jumpYearlyDistributionCompromise, baseToken);
   }, [jumpYearlyDistributionCompromise, baseToken]);
-
-  const stepItems = [
-    {
-      element: ".jump-staking",
-      title: "Jump Staking",
-      intro: (
-        <div>
-          <span>
-            This is where you stake your Jumps in xJump. Required to enter
-            vesting projects.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "User Area",
-      element: ".user-area",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            In this section you can stake your Jump tokens. Stake now!
-          </span>
-        </div>
-      ),
-    },
-  ];
 
   return (
     <PageContainer>
@@ -229,7 +164,7 @@ export const Staking = () => {
           position="relative"
           className="jump-staking"
         >
-          <Tutorial items={stepItems} />
+          <Tutorial items={stepItemsStaking} />
 
           <Flex
             flex={1.6}

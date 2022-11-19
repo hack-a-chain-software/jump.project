@@ -10,7 +10,25 @@ import { Toast } from "./components";
 import ScrollToTop from "@/tools/ScrollToTop";
 
 const Pages = () => {
-  return useRoutes(routes);
+  const filteredRoutes = routes.map((item) => {
+    if (item.children) {
+      return {
+        ...item,
+        children: item.children?.filter((children) => {
+          if (
+            !children.path?.includes("tutorial") &&
+            !children.path?.includes("config")
+          ) {
+            return children;
+          }
+        }),
+      };
+    }
+
+    return item;
+  });
+
+  return useRoutes(filteredRoutes);
 };
 
 const transactionHashes = new URLSearchParams(window.location.search).get(
