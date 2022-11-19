@@ -59,7 +59,7 @@ export default function ({
   };
   baseToken: {
     metadata: tokenMetadata;
-    balance: string;
+    balance?: string;
   };
   investor: InvestorInfo;
 }) {

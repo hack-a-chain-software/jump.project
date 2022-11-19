@@ -33,12 +33,9 @@ export function NFTStakingProject() {
 
   const [focused, setFocused] = useState<Token | null>(null);
   const [showUnstake, setShowUnstake] = useState(false);
-
-  const { fetchUserTokens, tokens, loading } = useNftStaking();
-
-  const { accountId, selector } = useWalletSelector();
-
   const [selected, setSelected] = useState<Token[]>([]);
+  const { fetchUserTokens, tokens, loading } = useNftStaking();
+  const { accountId, selector } = useWalletSelector();
 
   const updateSelectedTokens = (token: Token) => {
     if (selected.findIndex((item) => isEqual(item, token)) !== -1) {

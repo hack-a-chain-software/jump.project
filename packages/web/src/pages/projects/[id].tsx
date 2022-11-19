@@ -17,6 +17,7 @@ import {
 } from "@/hooks/modules/launchpad";
 import { twMerge } from "tailwind-merge";
 import { useTokenBalance } from "@/hooks/modules/token";
+import { stepItemsProject } from "./projects.tutorial";
 
 export const Project = () => {
   const { id } = useParams();
@@ -65,46 +66,6 @@ export const Project = () => {
 
   const [tab, setTab] = useState("pool");
 
-  const stepItems = [
-    {
-      element: ".project-info",
-      title: "Jump Pad Project",
-      intro: (
-        <div>
-          <span>
-            Here is the Project Page, this is the page where you can view all
-            the information of a Vesting Project.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Project Details and Investments",
-      element: ".details",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            In the Pool Details/My Investments section you will find the most
-            diverse technical information about the Vesting Project and
-            everything about the Vesting Project.
-          </span>
-        </div>
-      ),
-    },
-    {
-      title: "Investment Session",
-      element: ".investment",
-      intro: (
-        <div className="flex flex-col">
-          <span>
-            It is in this section that you will find all the information to
-            enter the Vesting Project.
-          </span>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <PageContainer>
       <BackButton text="All Projects" onClick={() => navigate("/projects")} />
@@ -123,7 +84,10 @@ export const Project = () => {
           "
         >
           <div className="xl:max-w-[748px] w-full">
-            <ProjectInfo {...(launchpadProject as any)} stepItems={stepItems} />
+            <ProjectInfo
+              {...(launchpadProject as any)}
+              stepItems={stepItemsProject}
+            />
 
             <div className="bg-[rgba(255,255,255,0.1)] p-[24px] rounded-[20px] w-full relative details">
               <div className="flex-grow space-x-[24px] mb-[67px]">

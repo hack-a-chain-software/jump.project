@@ -1,12 +1,6 @@
-import {
-  Stack,
-  Flex,
-  Skeleton,
-  useColorModeValue,
-  Box,
-  Image,
-  Text,
-} from "@chakra-ui/react";
+import { useEffect, useState, useMemo } from "react";
+import isEmpty from "lodash/isEmpty";
+import { Stack, Flex, Skeleton, Box, Image, Text } from "@chakra-ui/react";
 import {
   If,
   TopCard,
@@ -16,22 +10,19 @@ import {
   Select,
   GradientButton,
   Empty,
-} from "../components";
-import isEmpty from "lodash/isEmpty";
-import { useTheme } from "@/hooks/theme";
-import { addMilliseconds, isBefore } from "date-fns";
-import { useEffect, useState, useMemo } from "react";
-import { getUTCDate } from "@near/ts";
+} from "@/components";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import Big from "big.js";
+import { useTheme } from "@/hooks/theme";
+import stepItemsVesting, { extraItem } from "./vesting.tutorial";
+import { formatBigNumberWithDecimals, getDecimals } from "@/tools";
+import { useFilter } from "./vesting.config";
 
 export const Vesting = () => {
-  const { glassyWhiteOpaque, darkPurple } = useTheme();
+  const [filter, setFilter] = useState<string | null>(null);
 
   const { accountId, selector } = useWalletSelector();
-
-  const [filter, setFilter] = useState<string | null>(null);
+  const { glassyWhiteOpaque } = useTheme();
 
   const {
     getInvestorInfo,
@@ -57,30 +48,7 @@ export const Vesting = () => {
   }, [accountId]);
 
   const filtered = useMemo(() => {
-    if (!filter) {
-      return vestings;
-    }
-
-    return vestings.filter(({ start_timestamp, vesting_duration }) => {
-      const created = getUTCDate(Number(start_timestamp) / 1000000);
-
-      const endAt = addMilliseconds(
-        created,
-        Number(vesting_duration) / 1000000
-      );
-
-      const today = getUTCDate();
-
-      if (filter === "complete") {
-        return isBefore(endAt, today);
-      }
-
-      if (filter === "runing") {
-        return isBefore(today, endAt);
-      }
-
-      return false;
-    });
+    return useFilter(filter, vestings);
   }, [filter, vestings]);
 
   const isLoading = useMemo(() => {
@@ -92,84 +60,35 @@ export const Vesting = () => {
   }, [investorInfo, accountId]);
 
   const decimals = useMemo(() => {
-    return new Big(10).pow(investorInfo?.token?.decimals || 1);
+    return getDecimals(investorInfo?.token?.decimals);
   }, [investorInfo]);
 
   const totalLocked = useMemo(() => {
-    return new Big(investorInfo?.totalLocked || 1).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(
+      investorInfo?.totalLocked || 1,
+      decimals
+    );
   }, [investorInfo, decimals]);
 
   const totalUnlocked = useMemo(() => {
-    return new Big(investorInfo?.totalUnlocked || 1).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(
+      investorInfo?.totalUnlocked || 1,
+      decimals
+    );
   }, [investorInfo, decimals]);
 
   const totalWithdrawn = useMemo(() => {
-    return new Big(investorInfo?.totalWithdrawn || 1).div(decimals).toFixed(2);
+    return formatBigNumberWithDecimals(
+      investorInfo?.totalWithdrawn || 1,
+      decimals
+    );
   }, [investorInfo, decimals]);
 
   const stepItems = useMemo(() => {
-    const items = [
-      {
-        title: "Jump Vesting",
-        element: ".top-card",
-        intro: (
-          <div>
-            <span>
-              This is the Jump Vesting page, here you can follow and redeem all
-              the rewards received by Jump.
-            </span>
-          </div>
-        ),
-      },
-      {
-        title: "Total Locked",
-        element: ".amount-locked",
-        intro: (
-          <div>
-            <span>This is your amount of locked tokens.</span>
-          </div>
-        ),
-      },
-      {
-        title: "Total Unlocked",
-        element: ".amount-unlocked",
-        intro: (
-          <div className="flex flex-col">
-            <span>Here you can find your amount of unlocked tokens.</span>
-          </div>
-        ),
-      },
-      {
-        title: "Total Withdrawn",
-        element: ".amount-withdrawn",
-        intro: (
-          <div className="flex flex-col">
-            <span>
-              This is the total amount of tokens you have withdrawn so far.
-            </span>
-          </div>
-        ),
-      },
-    ];
+    const items = stepItemsVesting;
 
     if (accountId! && !isEmpty(vestings)) {
-      items.push({
-        title: "Vesting Card",
-        element: ".vesting-card",
-        intro: (
-          <div className="flex flex-col">
-            <span className="mb-2">
-              This section shows all the currently active programs you invested
-              in.
-            </span>
-
-            <span>
-              You can claim the available amount of tokens, buy a fast pass or
-              wait until the end of the vesting period.
-            </span>
-          </div>
-        ),
-      });
+      items.push(extraItem);
     }
 
     return items;

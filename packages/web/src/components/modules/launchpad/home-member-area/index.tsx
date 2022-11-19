@@ -61,7 +61,7 @@ export function MemberArea({
   };
   baseToken: {
     metadata: tokenMetadata;
-    balance: string;
+    balance?: string;
   };
   stepItems?: TutorialItemInterface[];
 }) {

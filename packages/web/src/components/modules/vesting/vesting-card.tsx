@@ -18,6 +18,7 @@ import { JUMP_TOKEN } from "@/env/contract";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useTokenBalance } from "@/hooks/modules/token";
 import Big from "big.js";
+import { formatBigNumberWithDecimals } from "@/tools";
 
 export function VestingCard(
   props: Vesting & BoxProps & { token: Token; contractData: ContractData }
@@ -51,10 +52,6 @@ export function VestingCard(
   const decimals = useMemo(() => {
     return new Big(10).pow(props?.token?.decimals || 1);
   }, [props]);
-
-  function formatBigNumberWithDecimals(value: string | number, decimals: Big) {
-    return new Big(value).div(decimals).toFixed(2);
-  }
 
   const totalAmount = useMemo(() => {
     return formatBigNumberWithDecimals(props.locked_value, decimals);
