@@ -12,7 +12,7 @@ export function ReportButton() {
   const cardOpacity = useColorModeValue(glassyWhiteOpaque, glassyWhiteOpaque);
 
   return (
-    <Flex className="fixed bottom-[24px] right-[24px] z-[9999] cursor-pointer hover:opacity-[0.95] space-x-[12px]">
+    <Flex className="fixed bottom-[24px] right-[24px] z-40 cursor-pointer hover:opacity-[0.95] space-x-[12px]">
       <Flex
         bg={cardBg}
         onClick={() => {

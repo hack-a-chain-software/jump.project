@@ -1,4 +1,3 @@
-import "./index.css";
 import { Buffer } from "buffer";
 import React, { Suspense } from "react";
 import { ApolloProvider } from "@apollo/client";
@@ -10,6 +9,7 @@ import { WalletSelectorContextProvider } from "@/context/wallet-selector";
 import { theme } from "./theme";
 import { WalletSelectorModal } from "@/modals";
 import { buildClient } from "./resolvers";
+import "./index.css";
 import "intro.js/introjs.css";
 
 // TODO: Find a better way to handle this buffer error
