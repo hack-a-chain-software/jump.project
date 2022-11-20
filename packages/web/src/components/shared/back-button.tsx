@@ -1,22 +1,23 @@
-import { Flex, FlexProps, Text } from "@chakra-ui/react";
-import { ArrowRightIcon } from "../../assets/svg/arrow-right";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { AnchorHTMLAttributes } from "react";
+import { useNavigate } from "react-router";
 
-type Props = Partial<FlexProps>;
+export const BackButton = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => {
+  const navigate = useNavigate();
 
-export const BackButton = (props: Props & { text?: string }) => {
+  const onClick = (event) => {
+    event.preventDefault();
+    navigate(props.href as string);
+  };
+
   return (
-    <Flex
-      cursor="pointer"
-      direction="row"
-      gap="10px"
-      alignItems="center"
-      userSelect="none"
-      {...props}
+    <a
+      href={props.href}
+      onClick={props.onClick || (props.href ? onClick : undefined)}
+      className="flex gap-x-3 font-extrabold tracking-tight"
     >
-      <ArrowRightIcon width="30px" className="rotate-180" />
-      <Text fontWeight="bold" fontSize="20px">
-        {props.text || "Go Back"}
-      </Text>
-    </Flex>
+      <ChevronLeftIcon className="w-4" />
+      {props.children || "Go Back"}
+    </a>
   );
 };

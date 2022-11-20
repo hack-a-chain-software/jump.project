@@ -780,6 +780,8 @@ export const NftStakingProjectsConnectionDocument = gql`
         collection_modal_image
         collection_owner_id
         token_address
+        min_staking_period
+        early_withdraw_penalty
         rewards {
           spec
           name

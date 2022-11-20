@@ -44,7 +44,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["buffer", "process"],
+    include: ["buffer", "process", "intro.js"],
   },
   resolve: {
     alias: {

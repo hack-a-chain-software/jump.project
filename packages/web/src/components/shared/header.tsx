@@ -43,7 +43,7 @@ export function Header() {
           <JumpTextIcon />
         </div>
 
-        <div className="flex gap-x-6">
+        <div className="flex gap-x-6 items-center">
           {/* GetTestnet Tokens Button */}
           <Button
             inline

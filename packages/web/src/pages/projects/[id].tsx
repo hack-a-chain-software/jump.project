@@ -68,7 +68,7 @@ export const Project = () => {
 
   return (
     <PageContainer>
-      <BackButton text="All Projects" onClick={() => navigate("/projects")} />
+      <BackButton href="/projects">All Projects</BackButton>
 
       {isLoading && (
         <div className="flex items-center justify-center pt-[72px]">

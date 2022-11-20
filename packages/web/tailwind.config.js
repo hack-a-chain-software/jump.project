@@ -1,13 +1,16 @@
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: ["./index.html", "./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
       colors: {
-        violet: "#6E3A85", // Wine Violet
-        purple: "#431E5A", // Purple Jump
+        violet: "#6E3A85", // Shine Violet
+        purple: {
+          DEFAULT: "#431E5A", // Purple Jump
+          100: "#894DA0", // Wine Purple
+        },
         black: {
           DEFAULT: "#000000", // Black
           200: "#000000B3", // Black Glass
@@ -15,10 +18,6 @@ module.exports = {
         green: "#559C71", // Soft Green
         blue: "#5E6DEC", // Soft Blue
         red: "#CE2828", // Soft Red
-        jump: {
-          100: "linear-gradient(90deg, #510B72 0%, #740B0B 100%);", // Jump Gradient
-          200: "linear-gradient(90deg, #AE00FF 0%, #FF1100 100%);", // Jump Gradient 2
-        },
         white: {
           DEFAULT: "#FFFFFF", // White
           200: "#E2E8F0", // Gray
@@ -28,6 +27,10 @@ module.exports = {
           550: "#FFFFFF26", // White 15%
           600: "#FFFFFF1A", // Glass 2
         },
+      },
+      backgroundImage: {
+        jump: "linear-gradient(90deg, #510B72 0%, #740B0B 100%) fixed", // Jump Gradient
+        jump2: "linear-gradient(90deg, #AE00FF 0%, #FF1100 100%) fixed", // Jump Gradient 2
       },
       borderRadius: {
         none: 0,

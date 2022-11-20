@@ -4,16 +4,11 @@ import { useNearQuery } from "react-near";
 import { useNftStaking } from "@/stores/nft-staking-store";
 import { CheckIcon, ArrowRightIcon } from "@/assets/svg";
 import { ModalImageDialog, Button, If } from "@/components";
-import {
-  Flex,
-  Text,
-  Image,
-  Spinner,
-  Button as CButton,
-} from "@chakra-ui/react";
+import { Flex, Text, Spinner } from "@chakra-ui/react";
 import { useWalletSelector } from "@/context/wallet-selector";
 
 export function NFTStakeModal({
+  //TODO redo this component
   isOpen = false,
   onClose = () => {},
   collection,

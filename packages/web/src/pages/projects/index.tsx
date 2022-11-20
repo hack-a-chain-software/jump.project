@@ -126,7 +126,7 @@ export const Projects = () => {
 
   return (
     <div className="p-[30px] w-full overflow-hidden pt-[150px] relative">
-      <BackButton text="Jump Pad" onClick={() => navigate("/")} />
+      <BackButton href="/">Jump Pad</BackButton>
 
       <div className="flex flex-col space-y-[24px] xl:space-y-[0px] xl:flex-row xl:space-x-[24px] mb-[86px] mt-[30px]">
         <TopCard

@@ -1,26 +1,29 @@
-import { Flex, Text } from "@chakra-ui/react";
 import { JumpIcon } from "@/assets/svg/jump-logo";
+import { HTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
-export function Empty({ text }: { text: string }) {
+type EmptyProps = HTMLAttributes<HTMLDivElement> & {
+  text?: string;
+};
+
+export function Empty({ text, children, className }: EmptyProps) {
   return (
-    <Flex
-      height="400px"
-      marginX="auto"
-      alignItems="center"
-      justifyContent="center"
-      flexDirection="column"
+    <div
+      className={twMerge(
+        `flex items-center justify-center mx-auto h-[400px] flex-col`,
+        `${className}`
+      )}
     >
-      <JumpIcon />
-
-      <Text
-        marginTop="16px"
-        fontWeight="800"
-        fontSize={30}
-        letterSpacing="-0.03em"
-        mb={3}
-      >
-        {text}
-      </Text>
-    </Flex>
+      {text ? (
+        <>
+          <JumpIcon />
+          <p className="mt-4 font-extrabold text-[30px] tracking-tight mb-1">
+            {text}
+          </p>
+        </>
+      ) : (
+        <>{children}</>
+      )}
+    </div>
   );
 }
