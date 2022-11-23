@@ -77,7 +77,8 @@ function NFTStakingProject() {
         staked,
         Number(staking?.min_staking_period)
       );
-      return curfew < new Date();
+      return true;
+      //return curfew.getTime() < new Date().getUTCDate();
     });
   }, [staking?.min_staking_period, tokens]);
 
