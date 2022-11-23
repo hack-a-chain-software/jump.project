@@ -1,11 +1,5 @@
 import { useMemo, ReactNode } from "react";
-import {
-  NFTStakingCard,
-  PageContainer,
-  BackButton,
-  Button,
-  Empty,
-} from "@/components";
+import { NFTStakingCard, BackButton, Button, Empty } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { StakingToken, Token } from "@near/ts";
 import { Tutorial } from "@/components";
@@ -17,6 +11,7 @@ import { STEPS_ITEMS } from "./NFTStakingProject.config";
 import Big from "big.js";
 import ConfirmModal from "@/components/ConfirmModal";
 import Modal from "@/components/Modal";
+import PageContainer from "@/components/PageContainer";
 
 type NFTStakingProjectProps = {
   id: string;

@@ -1,5 +1,4 @@
 import {
-  PageContainer,
   FormCardStep1,
   TokenLauncherTopCard,
   FormCardStep2,
@@ -17,6 +16,7 @@ import {
   getContractType,
   handleOpenModal,
 } from "./token-launcher.config";
+import PageContainer from "@/components/PageContainer";
 
 export const TokenLauncher = () => {
   const [step, setStep] = useState<string>("step 1");

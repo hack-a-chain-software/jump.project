@@ -19,3 +19,5 @@ export const PageContainer = (props: PropsWithChildren<PropsWithChildren>) => {
     </div>
   );
 };
+
+export default PageContainer;
