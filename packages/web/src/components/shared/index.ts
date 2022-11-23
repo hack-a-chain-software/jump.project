@@ -3,7 +3,6 @@ export * from "./button";
 export * from "./if";
 export * from "./nav";
 export * from "./nearLogo";
-export * from "./page-container";
 export * from "./select";
 export * from "./value-box";
 export * from "./modals";

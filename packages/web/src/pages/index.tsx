@@ -1,7 +1,8 @@
 import { Flex } from "@chakra-ui/react";
 import { StatusEnum } from "@near/apollo";
-import { TopCard, PreviewProjects, PageContainer } from "@/components";
+import { TopCard, PreviewProjects } from "@/components";
 import { Tutorial } from "@/components";
+import PageContainer from "@/components/PageContainer";
 
 export function Index() {
   const stepItems = [

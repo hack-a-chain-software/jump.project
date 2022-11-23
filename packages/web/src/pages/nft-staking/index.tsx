@@ -1,12 +1,6 @@
 import { Tab } from "@headlessui/react";
 import { useNavigate } from "react-router";
-import {
-  TopCard,
-  NFTStakingCard,
-  PageContainer,
-  Empty,
-  Button,
-} from "@/components";
+import { TopCard, NFTStakingCard, Empty, Button } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { useQuery } from "@apollo/client";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +12,7 @@ import {
 import { useWalletSelector } from "@/context/wallet-selector";
 import { twMerge } from "tailwind-merge";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import PageContainer from "@/components/PageContainer";
 
 const PAGINATE_LIMIT = 30;
 
@@ -174,7 +169,6 @@ export const NFTStaking = () => {
         bottomDescription={`
           Welcome to Jump NFT Staking; the portal between NFT technology and decentralized finance on NEAR Protocol!
         `}
-        py
         jumpLogo
         stepItems={stepItems}
       />

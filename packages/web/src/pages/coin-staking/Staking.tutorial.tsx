@@ -1,4 +1,4 @@
-export const stepItemsStaking = [
+export const STEP_ITEMS = [
   {
     element: ".jump-staking",
     title: "Jump Staking",
@@ -22,4 +22,6 @@ export const stepItemsStaking = [
   },
 ];
 
-export default stepItemsStaking;
+export const STEP_ITEMS_DASHBOARD = [];
+
+export default STEP_ITEMS;

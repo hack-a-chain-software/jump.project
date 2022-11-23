@@ -5,12 +5,12 @@ import {
   If,
   TopCard,
   VestingCard,
-  PageContainer,
   ValueBox,
   Select,
   GradientButton,
   Empty,
 } from "@/components";
+import PageContainer from "@/components/PageContainer";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useTheme } from "@/hooks/theme";
@@ -100,7 +100,6 @@ export const Vesting = () => {
         gradientText="Jump Vesting"
         bigText="Unlock and Claim JUMP Rewards"
         bottomDescription=" Claim your JUMP and boost the rate of vested rewards"
-        py
         stepItems={stepItems}
         content={
           accountId ? (
@@ -133,7 +132,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalLocked} />
+                        <Text>{totalLocked}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"
@@ -171,7 +170,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalUnlocked} />
+                        <Text>{totalUnlocked}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"
@@ -209,7 +208,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalWithdrawn} />
+                        <Text>{totalWithdrawn}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"

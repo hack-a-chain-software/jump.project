@@ -12,10 +12,10 @@ type Props = {
   renderAsset?: JSX.Element;
   content?: JSX.Element;
   jumpLogo?: boolean;
-  py?: boolean;
   children?: ReactNode;
   onClick?: () => void;
   stepItems?: TutorialItemInterface[];
+  small?: boolean;
 };
 
 export const TopCard = ({
@@ -27,35 +27,38 @@ export const TopCard = ({
   maxW = "",
   children,
   stepItems,
+  small,
 }: Props) => {
   return (
     <div className={twMerge("launchpad top-card flex", maxW)}>
       <div
-        className="overflow-hidden
-                      flex
-                      flex-wrap
-                      align-middle
-                      justify-between
-                      w-full
-                      color-white
-                      font-extrabold
-                      py-7
-                      px-6
-                      pb-16
-                      h-full
-                      rounded-lg
-                      bg-white-600
-                      gap-1.5
-                      relative"
+        className={
+          (small ? "py-6 pb-6 gap-4" : "py-7 pb-16 gap-1.5") +
+          " overflow-hidden flex flex-wrap align-middle justify-between w-full color-white font-extrabold px-6 h-full rounded-lg bg-white-600 relative"
+        }
       >
         {!isEmpty(stepItems) && <Tutorial items={stepItems || []} />}
 
         <div className="flex flex-col relative flex-grow z-20 gap-y-4">
-          <p className="text-base tracking leading-4 mb-0.5">{gradientText}</p>
+          <p
+            className={
+              small
+                ? "text-3.5 font-extrabold leading-3.5 tracking-thigher"
+                : "text-base tracking leading-4 mb-0.5"
+            }
+          >
+            {gradientText}
+          </p>
           <h1 className="text-2xl tracking-tighter font-bolder leading-6">
             {bigText}
           </h1>
-          <p className="font-semibold text-3.5 max-w-3xl tracking leading-4.5">
+          <p
+            className={
+              (small
+                ? "font-medium lg:max-w-[84%]"
+                : "font-semibold max-w-3xl") + " text-3.5 tracking leading-4.5"
+            }
+          >
             {bottomDescription}
           </p>
           {children}
@@ -66,7 +69,7 @@ export const TopCard = ({
         )}
 
         <div className="absolute bottom-0 right-0 z-10 max-h-full overflow-hidden">
-          {jumpLogo && <JumpBigWhite />}
+          {jumpLogo && <JumpBigWhite small={small} />}
         </div>
       </div>
     </div>

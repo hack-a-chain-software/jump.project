@@ -1,7 +1,11 @@
-export const JumpBigWhite = () => {
+type JumpBigWhiteProps = {
+  small?: boolean;
+};
+
+export const JumpBigWhite = ({ small }: JumpBigWhiteProps) => {
   return (
     <svg
-      width="124"
+      width={small ? "93" : "124"}
       height="104"
       viewBox="0 0 124 104"
       fill="none"

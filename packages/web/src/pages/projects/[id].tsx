@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "@/components/shared/back-button";
@@ -6,7 +6,6 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import {
   ProjectInfo,
   ProjectStats,
-  PageContainer,
   ProjectInvestments,
   ProjectUserArea,
 } from "@/components";
@@ -18,6 +17,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import { useTokenBalance } from "@/hooks/modules/token";
 import { stepItemsProject } from "./projects.tutorial";
+import PageContainer from "@/components/PageContainer";
 
 export const Project = () => {
   const { id } = useParams();
