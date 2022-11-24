@@ -137,30 +137,29 @@ export const ProjectCard = ({
       <div className="absolute right-[19px] top-[20px] flex space-x-[8px]">
         <Badge type={projectStatus} />
 
-        {!!!publicProject && <Badge type="whitelist" />}
+        {!publicProject && <Badge type="whitelist" />}
       </div>
 
       <div className="flex space-x-[6.25px] mb-[24px]">
         <div>
           <img
             src={project_token_info?.image ?? ""}
+            alt={project_token_info?.name ?? "Token"}
             className="w-[45px] h-[45px] rounded-full"
           />
         </div>
 
         <div>
           <div className="mb-[-4px]">
-            <span
-              className="text-white text-[16px] font-[700] tracking-[-0.04em]"
-              children={project_token_info?.symbol}
-            />
+            <span className="text-white text-[16px] font-[700] tracking-[-0.04em]">
+              {project_token_info?.symbol}
+            </span>
           </div>
 
           <div>
-            <span
-              className="text-[13px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]"
-              children={project_token_info?.name}
-            />
+            <span className="text-[13px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]">
+              {project_token_info?.name}
+            </span>
           </div>
         </div>
       </div>
@@ -175,21 +174,18 @@ export const ProjectCard = ({
             </div>
 
             <div className="mb-[16px]">
-              <span
-                className="text-[20px] font-[700] tracking-[-0.04em]"
-                children={`$ ${formatNumber(
-                  totalRaise,
-                  metadataPriceToken?.decimals
-                )} ${metadataPriceToken?.symbol}`}
-              />
+              <span className="text-[20px] font-[700] tracking-[-0.04em]">
+                {`$ ${formatNumber(totalRaise, metadataPriceToken?.decimals)} ${
+                  metadataPriceToken?.symbol
+                }`}
+              </span>
             </div>
 
             <div>
               <div className="mb-[6px] text-end">
-                <span
-                  children={progress + "%"}
-                  className="text-white font-[700] text-[16px] tracking-[-0.04em]"
-                />
+                <span className="text-white font-[700] text-[16px] tracking-[-0.04em]">
+                  {progress + "%"}
+                </span>
               </div>
 
               <div
@@ -224,10 +220,9 @@ export const ProjectCard = ({
               className="truncate max-w-[145px] overflow-hidden"
               title={tokensForSale}
             >
-              <span
-                className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
-                children={tokensForSale}
-              />
+              <span className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]">
+                {tokensForSale}
+              </span>
             </div>
           </div>
 
@@ -239,13 +234,12 @@ export const ProjectCard = ({
             </div>
 
             <div>
-              <span
-                className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]"
-                children={`${formatNumber(
+              <span className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]">
+                {`${formatNumber(
                   token_allocation_price,
                   metadataPriceToken?.decimals
                 )} ${metadataPriceToken?.symbol}`}
-              />
+              </span>
             </div>
           </div>
         </>
@@ -296,10 +290,9 @@ export const ProjectCard = ({
             </div>
 
             <div>
-              <span
-                children={format(openSale, "MM/dd/yyyy HH:mm")}
-                className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
-              />
+              <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
+                {format(openSale, "MM/dd/yyyy HH:mm")}
+              </span>
             </div>
           </div>
         </>
@@ -322,10 +315,9 @@ export const ProjectCard = ({
               </div>
 
               <div>
-                <span
-                  children={format(openSale, "MM/dd/yyyy HH:mm")}
-                  className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
-                />
+                <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
+                  {format(openSale, "MM/dd/yyyy HH:mm")}
+                </span>
               </div>
             </div>
 
@@ -337,10 +329,9 @@ export const ProjectCard = ({
               </div>
 
               <div>
-                <span
-                  children={format(finalSale, "MM/dd/yyyy HH:mm")}
-                  className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]"
-                />
+                <span className="text-[#E2E8F0] font-[700] text-[14px] tracking-[-0.04em]">
+                  {format(finalSale, "MM/dd/yyyy HH:mm")}
+                </span>
               </div>
             </div>
           </>
