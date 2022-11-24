@@ -1,6 +1,6 @@
 import isEmpty from "lodash/isEmpty";
 import { useNavigate } from "react-router";
-import { ProjectCard } from "./project-card";
+import { ProjectCard } from "@/components";
 import { FolderOpenIcon } from "@heroicons/react/24/outline";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { StatusEnum, useLaunchpadConenctionQuery } from "@near/apollo";
@@ -34,10 +34,9 @@ export const PreviewProjects = ({
     <div className="mb-[48px] w-full">
       <div className="flex justify-between items-center mb-[56px]">
         <div>
-          <span
-            children={title}
-            className="font-inter text-white text-[20px] font-[700]"
-          />
+          <span className="font-inter text-white text-[20px] font-[700]">
+            {title}
+          </span>
         </div>
 
         <div>
@@ -65,7 +64,7 @@ export const PreviewProjects = ({
         </div>
       )}
 
-      <div className="flex space-x-[18px] justify-between w-[1500px] max-w-full overflow-auto">
+      <div className="flex space-x-[18px] justify-left w-[1500px] max-w-full overflow-auto">
         {!isEmpty(projects) &&
           !loading &&
           projects?.map((project, i) => (
