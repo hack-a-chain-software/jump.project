@@ -362,16 +362,20 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
     } as unknown as Token;
     const tokens = actionsLoading ? [token, token] : claimableTokens;
 
-    return tokens.map((token, index) => (
-      <NFTCard
-        {...token}
-        key={index}
-        minified={false}
-        curfew={collection.curfew}
-        penalty={collection.penalty}
-        rewards={collection.rewards}
-      />
-    ));
+    return (
+      <div className="mt-6 flex flex-col gap-y-8">
+        {tokens.map((token, index) => (
+          <NFTCard
+            {...token}
+            key={index}
+            minified={false}
+            curfew={collection.curfew}
+            penalty={collection.penalty}
+            rewards={collection.rewards}
+          />
+        ))}
+      </div>
+    );
   }
 
   function renderYourRewardsPanel() {
@@ -415,7 +419,8 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           {(actionsLoading && renderYourRewardsList()) ||
             (!accountId && renderYourRewardsConnectWallet()) ||
             (!tokens.length && renderYourRewardsNoStakedNFTs()) ||
-            (!claimableTokens.length && renderYourRewardsWaitStakedNFTs())}
+            (!claimableTokens.length && renderYourRewardsWaitStakedNFTs()) ||
+            (claimableTokens.length && renderYourRewardsList())}
         </div>
       </>
     );
@@ -450,18 +455,16 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   }
 
   function renderStakeButton() {
-    if (accountId)
-      return (
-        <Button onClick={() => showSelectToStakeModal(true)} big>
-          Stake NFTs
-        </Button>
-      );
-    else
-      return (
-        <Button white onClick={connectWallet} className="text-purple" big>
-          Connect Wallet
-        </Button>
-      );
+    return (
+      <Button
+        disabled={!accountId}
+        onClick={() => showSelectToStakeModal(true)}
+        big
+        className={accountId ? "" : "invisible"}
+      >
+        Stake NFTs
+      </Button>
+    );
   }
 
   return (
@@ -486,10 +489,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
         <Tab.Group>
           <Tab.List className="flex gap-10 mb-12">
             {renderTabButtons("Your rewards")}
-            {renderTabButtons(
-              "Staked NFTs",
-              tokens.length - claimableTokens.length
-            )}
+            {renderTabButtons("Staked NFTs", tokens.length)}
           </Tab.List>
           <Tab.Panels>
             <Tab.Panel className="space-y-8">

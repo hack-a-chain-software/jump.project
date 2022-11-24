@@ -4,6 +4,7 @@ import Reward from "@/components/Reward";
 import Skeleton from "react-loading-skeleton";
 import { addMilliseconds } from "date-fns";
 import Badge from "@/components/Badge";
+import Image from "@/components/Image";
 
 type NFTCardProps = Token & {
   rewards: StakingToken[];
@@ -18,7 +19,7 @@ function NFTCard(props: NFTCardProps) {
     balance,
     stakedAt,
     curfew,
-    metadata: { title: name, media: image, description: text },
+    metadata: { title: name, media: image },
     rewards,
     minified,
   } = props;
@@ -61,6 +62,7 @@ function NFTCard(props: NFTCardProps) {
         icon={reward?.icon}
         balance={balance ? balance[reward?.account_id] : "0"}
         decimals={reward?.decimals}
+        hideText={true}
       />
     ));
   }
@@ -71,7 +73,7 @@ function NFTCard(props: NFTCardProps) {
         ? `https://images.weserv.nl/?url=${image}&w=${width}&h=${width}`
         : `https://images.weserv.nl/?url=${image}&w=138&h=138`;
 
-    if (!id) return <Skeleton className={`rounded-full h-[138px] w-[138px]`} />;
+    if (!id) return <Skeleton className={`rounded-sm h-[138px] w-[138px]`} />;
 
     return (
       <div
@@ -81,10 +83,17 @@ function NFTCard(props: NFTCardProps) {
             : "rounded-sm"
         }`}
       >
-        <img
+        <Image
           src={source}
           alt={name}
-          className={minified && width > 230 ? "rounded-lg" : "rounded-sm"}
+          className={
+            minified && width > 230
+              ? "rounded-lg"
+              : minified
+              ? "rounded-sm"
+              : "rounded-sm w-[138px] h-[138px]"
+          }
+          landscapeLoader
         />
       </div>
     );
@@ -115,35 +124,34 @@ function NFTCard(props: NFTCardProps) {
   }
 
   function renderBadgeContent() {
-    const today = getUTCDate();
+    const today = new Date();
     const years = penaltyExpireDate.getFullYear() - today.getFullYear();
     const months = penaltyExpireDate.getMonth() - today.getMonth();
     const days = penaltyExpireDate.getDay() - today.getDay();
     const hours = penaltyExpireDate.getHours() - today.getHours();
     const minutes = penaltyExpireDate.getMinutes() - today.getMinutes();
 
-    if (years)
+    if (penaltyExpireDate < today) return renderBadge("Available to claim");
+    else if (years > 0)
       return renderBadge(
         `Available to claim in ${years} year${years > 1 ? "s" : ""}.`
       );
-    else if (months)
+    else if (months > 0)
       return renderBadge(
         `Available to claim in ${months} month${months > 1 ? "s" : ""}.`
       );
-    else if (days)
+    else if (days > 0)
       return renderBadge(
         `Available to claim in ${days} day${days > 1 ? "s" : ""}.`
       );
-    else if (hours)
+    else if (hours > 0)
       return renderBadge(
         `Available to claim in ${hours} hour${hours > 1 ? "s" : ""}.`
       );
-    else if (minutes)
+    else
       return renderBadge(
         `Available to claim in ${minutes} minute${minutes > 1 ? "s" : ""}.`
       );
-    else if (penaltyExpireDate.getMilliseconds() - today.getMilliseconds() <= 0)
-      return renderBadge("Available to claim");
   }
 
   function renderDetailedContainer() {

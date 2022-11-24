@@ -9,7 +9,7 @@ import { StakingProjectDocument } from "@near/apollo";
 import { addMilliseconds } from "date-fns";
 import { useNearQuery } from "react-near";
 import toast from "react-hot-toast";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 function NFTStakingProject() {
@@ -23,7 +23,7 @@ function NFTStakingProject() {
   } = useWalletSelector();
   const {
     fetchUserTokens,
-    tokens,
+    tokens: unorderedTokens,
     claimRewards,
     unstake,
     stake,
@@ -34,6 +34,10 @@ function NFTStakingProject() {
     {
       variables: { collection },
     }
+  );
+
+  const tokens = unorderedTokens.sort((a, b) =>
+    Number(a.stakedAt) < Number(b.stakedAt) ? 1 : -1
   );
 
   const { data: stakableTokens, loading: stakableLoading } = useNearQuery(
@@ -73,7 +77,7 @@ function NFTStakingProject() {
         staked,
         Number(staking?.min_staking_period)
       );
-      return curfew.getTime() < new Date().getUTCDate();
+      return curfew < new Date();
     });
   }, [staking?.min_staking_period, tokens]);
 
@@ -157,20 +161,14 @@ function NFTStakingProject() {
   }
 
   function claimAllRewards() {
-    claimRewards(selector, accountId!, claimableTokens, collection)
-      // TODO Does claim goes to wallet?
-      // .then(() => toast(<div className="flex items-center">
-      //   <CheckCircleIcon className="h-8 fill-green stroke-white" />
-      //   You have successfully claimed your NFTs.
-      // </div>))
-      .catch(() =>
-        toast(
-          <div className="flex items-center">
-            <XCircleIcon className="h-8 fill-red stroke-white" />
-            Something went wrong!
-          </div>
-        )
-      );
+    claimRewards(selector, accountId!, claimableTokens, collection).catch(() =>
+      toast(
+        <div className="flex items-center">
+          <XCircleIcon className="h-8 fill-red stroke-white" />
+          Something went wrong!
+        </div>
+      )
+    );
   }
 
   const nftStakingProjectProps = {
@@ -193,7 +191,10 @@ function NFTStakingProject() {
     stakableTokens: stakableTokens ? stakableTokens : [],
     selectToStakeModal,
     confirmUnstakeModal,
-    showSelectToStakeModal,
+    showSelectToStakeModal: (show: boolean) => {
+      setSelectedStakableTokens([]);
+      showSelectToStakeModal(show);
+    },
     showConfirmUnstakeModal,
     onSelectChange,
     onSelectStakableChange,
@@ -202,7 +203,10 @@ function NFTStakingProject() {
     onUnstakeSelectedTokens,
     unstakeSelectedTokens,
     stakeSelectedStakableTokens,
-    setSelectingMode,
+    setSelectingMode: (show: boolean) => {
+      setSelectedUnstakeTokens([]);
+      setSelectingMode(show);
+    },
     claimAllRewards,
     actionsLoading,
     stakingLoading,

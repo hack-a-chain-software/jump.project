@@ -4,6 +4,7 @@ import { HTMLAttributes } from "react";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
 import Reward from "@/components/Reward";
+import Image from "@/components/Image";
 
 type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
   name?: string | undefined;
@@ -30,7 +31,7 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
   const renderLogo = () => {
     if (props.logo)
       return (
-        <img
+        <Image
           src={props.logo}
           alt={props.name}
           className="h-[135px] w-[135px] rounded-full"
