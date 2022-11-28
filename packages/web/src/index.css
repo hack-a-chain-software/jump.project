@@ -44,23 +44,23 @@ body {
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5) !important;
 }
 
-.introjs-tooltip {
-  border-radius: 25px !important;
-  background-color: #894DA0 !important;
-  font-family: 'Inter', sans-serif !important;
-  padding: 15px !important;
+.introjs-tooltipReferenceLayer .introjs-tooltip {
+  border-radius: 25px;
+  background-color: #894DA0;
+  font-family: 'Inter', sans-serif;
+  padding: 15px;
 }
 
-.introjs-tooltip-header {
-  padding-top: 6px !important;
+.introjs-tooltipReferenceLayer .introjs-tooltip-header {
+  padding-top: 6px;
 }
 
-.introjs-tooltiptext {
-  color: white !important;
-  font-family: 'Inter', sans-serif !important;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  line-height: 18px !important;
+.introjs-tooltipReferenceLayer .introjs-tooltiptext {
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .member-area-tooltip {
@@ -79,27 +79,24 @@ body {
   padding: 0 40px 0 33px !important;
 }
 
-.introjs-tooltiptext li {
-  line-height: 20px !important;
+.introjs-tooltipReferenceLayer .introjs-tooltiptext li {
+  line-height: 20px;
 }
 
-.introjs-tooltip-title {
-  color: white !important;
-  font-family: 'Inter', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 16px !important;
-  line-height: 18px !important;
+.introjs-tooltipReferenceLayer .introjs-tooltip-title {
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 18px;
 }
 
-.introjs-arrow.top,
-.introjs-arrow.left,
-.introjs-arrow.right,
-.introjs-arrow.bottom {
+.introjs-tooltipReferenceLayer .introjs-arrow {
   display: none !important;
 }
 
-.introjs-tooltipbuttons {
-  border-top: unset !important;
+.introjs-tooltipReferenceLayer .introjs-tooltipbuttons {
+  border-top: unset;
 }
 
 .member-area-tooltip .introjs-tooltipbuttons {
@@ -107,48 +104,46 @@ body {
   margin-bottom: 20px !important;
 }
 
-.introjs-button {
+.introjs-tooltipReferenceLayer .introjs-button {
   /* padding: 30px 20px !important; */
-  font-size: 14px !important;
-  border-radius: 9.59px !important;
-  font-family: 'Inter', sans-serif !important;
-  line-height: 18px !important;
-  font-weight: 600 !important;
-  text-shadow: none !important;
+  font-size: 14px;
+  border-radius: 9.59px;
+  font-family: 'Inter', sans-serif;
+  line-height: 18px;
+  font-weight: 600;
+  text-shadow: none;
   
 }
 
-.introjs-button.introjs-prevbutton {
-  color: white !important;
-  border: 1px solid white !important;
-  background-color: transparent !important;
-  text-decoration: none !important;
-  content: "Previous" !important;
+.introjs-tooltipReferenceLayer .introjs-button.introjs-prevbutton {
+  color: white;
+  border: 1px solid white;
+  background-color: transparent;
+  text-decoration: none;
+  content: "Previous";
 }
 
-.introjs-button.introjs-nextbutton {
-  color: white !important;
-  border: 1px solid white !important;
-  background-color: #FFF !important;
-  text-decoration: none !important;
-  color: #431E5A !important;
-  
+.introjs-tooltipReferenceLayer .introjs-button.introjs-nextbutton {
+  border: 1px solid white;
+  background-color: #FFF;
+  text-decoration: none;
+  color: #431E5A;
 }
 
-.introjs-skipbutton {
-  color: white !important;
+.introjs-tooltipReferenceLayer .introjs-skipbutton {
+  color: white;
 }
 
-.introjs-skipbutton:hover {
-  opacity: .7 !important;
+.introjs-tooltipReferenceLayer .introjs-skipbutton:hover {
+  opacity: .7;
 }
 
-.introjs-disabled {
-  opacity: .4 !important;
+.introjs-tooltipReferenceLayer .introjs-disabled {
+  opacity: .4;
 }
 
-.introjs-helperLayer {
-  border-radius: 25px !important;
+.introjs-tooltipReferenceLayer .introjs-helperLayer {
+  border-radius: 25px;
 }
 
 .member-area-tooltip {
@@ -183,6 +178,72 @@ body {
   .member-area-tooltip .introjs-helperNumberLayer {
     margin-bottom: 39px !important;
   }
+}
+
+
+/* Step Guide Styling for xJump page */
+
+.introjs-tooltipReferenceLayer .xJump {
+  @apply rounded-lg bg-purple-100 pt-[30px] px-9 pb-[38px] w-[433px] max-w-[433px] min-h-[290px] box-border;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltip-header {
+  @apply p-0 flex items-center mt-[-4px] ml-[-8px];
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltip-title {
+  @apply text-white font-bold leading-4 tracking-normal min-h-0 ml-8;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-skipbutton {
+  @apply absolute text-white font-extralight leading-4.5 flex justify-center items-center top-[-1.5rem] right-[-1.5rem];
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-skipbutton:hover,
+.introjs-tooltipReferenceLayer .xJump .introjs-skipbutton:focus {
+  @apply text-white opacity-70;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext {
+  @apply p-0 pb-8;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext h5 {
+  @apply text-white font-bold leading-5 p-0 pt-3;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext p {
+  @apply text-white text-3.5 font-normal leading-4.5 p-0 pt-2;
+  font-family: 'Inter', sans-serif;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext a,
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext a:visited {
+  @apply p-0 border-b-[.0625rem] border-white-200;
+  font-family: 'Inter', sans-serif;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext a:hover,
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltiptext a:focus {
+  @apply opacity-70;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltipbuttons {
+  @apply p-0 absolute inset-9 top-auto h-10;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-tooltipbuttons a {
+  @apply px-5;
+}
+
+.introjs-tooltipReferenceLayer .xJump .introjs-helperNumberLayer {
+  @apply absolute left-0 right-0 font-bold bottom-9 pb-3 w-full flex justify-center items-center text-white text-3.5 tracking-tighter;
 }
 
 .no-tier {

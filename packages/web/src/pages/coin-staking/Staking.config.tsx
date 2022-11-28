@@ -11,4 +11,6 @@ const monthMS = 2629743000;
 export const TODAY_DATE_TIMESTAMP = String(new Date().getTime());
 export const WEEK_BEFORE_TIMESTAMP = String(new Date().getTime() - weekMS);
 export const MONTH_BEFORE_TIMESTAMP = String(new Date().getTime() - monthMS);
+export const XJUMP_FIRST_TIME_ITERATION_KEY = "@xjump-first-interaction";
+
 export default JUMP_YEARLY_DISTRIBUTION_COMPROMISE;

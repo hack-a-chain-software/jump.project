@@ -32,6 +32,9 @@ function Staking() {
   const [baseTokenRatioRaw, setBaseTokenRatioRaw] = useState("0");
   const [chartObj, setChartObj] = useState({});
 
+  const [tutorialModal, setTutorialModal] = useState<boolean>(false);
+  const [tutorialGuide, setTutorialGuide] = useState<boolean>(false);
+  const [dashboardTab, setDashboardTab] = useState<number>(0);
   const { stakeXToken: stakeXJumpToken, burnXToken: unstakeXJumpToken } =
     useStaking();
 
@@ -298,6 +301,10 @@ function Staking() {
     }
   }
 
+  function onGuideChange(nextIndex: number) {
+    if (nextIndex < 2) setDashboardTab(nextIndex);
+  }
+
   const stakingProps = {
     isLoading,
     apr,
@@ -315,6 +322,16 @@ function Staking() {
     balanceJumpToken,
     availableXJumpToClaim,
     chartObj,
+
+    tutorialModal,
+    setTutorialModal,
+
+    tutorialGuide,
+    setTutorialGuide,
+    onGuideChange,
+
+    dashboardTab,
+    setDashboardTab,
   };
 
   return <StakingComponent {...stakingProps} />;
