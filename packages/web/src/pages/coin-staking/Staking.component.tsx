@@ -1,5 +1,6 @@
 import { Button, TopCard, Tutorial } from "@/components";
 import Badge from "@/components/Badge";
+import Chart from "@/components/xjump-chart";
 import { Tab } from "@headlessui/react";
 import PageContainerDoubleSide from "@/components/PageContainerDoubleSide";
 import {
@@ -62,6 +63,59 @@ function StakingComponent(props: StakingComponentProps) {
     validationSchema: validationSchema,
   });
 
+  function renderChartDetailBox(name: string, value: string) {
+    return (
+      <div className="flex flex-col rounded-[20px] bg-white-600 p-4  sm:h-[80px] gap-y-4 md:w-[28.1%]">
+        <p className="text-3.5 leading-4 font-medium tracking-tight text-left">
+          {name}
+        </p>
+        <strong className="block text-[1.125rem] leading-4 font-extrabold tracking-tight text-left">
+          {value}
+        </strong>
+      </div>
+    );
+  }
+
+  function renderTimePeriodTab(selected: boolean, text: string) {
+    return (
+      <>
+        <Button
+          inline
+          className="font-bold rounded-none h-auto text-3.5 leading-3.5 tracking-tight pb-0.5 pt-[15px]"
+        >
+          {text}
+        </Button>
+        {selected && (
+          <hr className="h-1 mx-auto rounded-[20px] bg-violet border-none w-[27px]" />
+        )}
+      </>
+    );
+  }
+
+  function renderChartPeriodSelect() {
+    return (
+      <div className="flex gap-[20px] items-center justify-center rounded-[10px] bg-white-600 sm:h-[44px] md:min-w-[188px]">
+        <Tab.Group>
+          <Tab.List className="h-full">
+            <Tab className="outline-none ">
+              {({ selected }) => renderTimePeriodTab(selected, "1D")}
+            </Tab>
+
+            <Tab className="outline-none">
+              {({ selected }) => renderTimePeriodTab(selected, "1W")}
+            </Tab>
+            <Tab className="outline-none">
+              {({ selected }) => renderTimePeriodTab(selected, "1M")}
+            </Tab>
+            <Tab className="outline-none">
+              {({ selected }) => renderTimePeriodTab(selected, "1Y")}
+            </Tab>
+          </Tab.List>
+        </Tab.Group>
+      </div>
+    );
+  }
+
   function renderTopCard() {
     return (
       <TopCard
@@ -78,7 +132,19 @@ function StakingComponent(props: StakingComponentProps) {
   }
 
   function renderChart() {
-    return <div className="rounded-lg bg-white-600 p-6">Chart goes here</div>;
+    return (
+      <div className="rounded-lg bg-white-600 p-6 flex flex-col">
+        <div className="flex flex-row justify-between items-end">
+          <div className="flex flex-row gap-x-6 md:min-w-[70%]">
+            {renderChartDetailBox("xJump value", "2 JUMP")}
+            {renderChartDetailBox("Total staked JUMP", "1000 JUMP")}
+          </div>
+          {renderChartPeriodSelect()}
+        </div>
+
+        <Chart />
+      </div>
+    );
   }
 
   function renderTab(selected: boolean, text: string) {
@@ -111,8 +177,8 @@ function StakingComponent(props: StakingComponentProps) {
             max={balanceJumpToken}
             onChange={(e) =>
               stake
-                ? setFieldValueStake("value", e.target.value)
-                : setFieldValueWithDraw("value", e.target.value)
+                ? setFieldValueStake("value", e.target.value.toString())
+                : setFieldValueWithDraw("value", e.target.value.toString())
             }
             className="w-full border-none bg-transparent h-[121px] p-6 rounded-lg placeholder:text-white font-extrabold text-6 tracking-tight leading-6"
           />
