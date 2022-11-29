@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { X_JUMP_TOKEN, JUMP_TOKEN } from "@/env/contract";
 import {
@@ -19,6 +19,12 @@ import StakingComponent from "@/pages/coin-staking/Staking.component";
 import Big from "big.js";
 import toast from "react-hot-toast/headless";
 
+import { useNearQuery } from "react-near";
+interface TokenRatio {
+  x_token: string;
+  base_token: string;
+}
+
 function Staking() {
   const { accountId, selector } = useWalletSelector();
   const { stakeXToken: stakeXJumpToken, burnXToken: unstakeXJumpToken } =
@@ -31,7 +37,24 @@ function Staking() {
       x_token: rawRatioXJumpToken = XJUMP_BASE_XTOKEN_RATIO,
     } = {},
     loading: loadingXJumpRatio,
-  } = useTokenRatio(X_JUMP_TOKEN);
+  } = useNearQuery<TokenRatio>("view_token_ratio", {
+    contract: X_JUMP_TOKEN,
+    poolInterval: 1000 * 60,
+    debug: true,
+    onError(err) {
+      console.warn(err);
+    },
+  });
+  // console.log(useNearQuery<any>("view_token_ratio", {
+  //   contract: X_JUMP_TOKEN,
+  //   poolInterval: 1000 * 60,
+  //   debug: true,
+  //   onError(err) {
+  //     console.warn(err);
+  //   },
+  //   skip: !accountId,
+  //   onCompleted: (res) => console.log(res),
+  // }));
   const {
     data: { x_token: rawRatioTetherToken = XJUMP_BASE_USDT_TOKEN_RATIO } = {},
     loading: loadingTetherRatio,
@@ -41,6 +64,7 @@ function Staking() {
     data: rawBalanceXJumpToken = "0",
     loading: loadingBalanceXJumpToken,
   } = useTokenBalance(X_JUMP_TOKEN, accountId);
+
   const { data: jumpMetadata } = useTokenMetadata(JUMP_TOKEN);
 
   // Calculating balances
@@ -63,6 +87,7 @@ function Staking() {
 
   const submitStaking = useCallback(
     async (amount: string) => {
+      console.log(jumpMetadata?.decimals);
       const deposit = calcAmountRaw(amount, jumpMetadata?.decimals);
 
       try {

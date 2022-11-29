@@ -32,6 +32,8 @@
     "big.js": "^6.2.1",
     "buffer": "^6.0.3",
     "date-fns": "^2.29.1",
+    "echarts": "^5.4.0",
+    "echarts-for-react": "^3.0.2",
     "formik": "^2.2.9",
     "framer-motion": "^6",
     "intro.js": "^6.0.0",
