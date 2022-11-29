@@ -1,6 +1,6 @@
 export const stepItemsVesting = [
   {
-    title: "Jump Vesting",
+    title: "Jump VestingCardContainer",
     element: ".top-card",
     intro: (
       <div>
@@ -43,8 +43,8 @@ export const stepItemsVesting = [
 ];
 
 export const extraItem = {
-  title: "Vesting Card",
-  element: ".vesting-card",
+  title: "VestingCardContainer Card",
+  element: ".VestingCardContainer-card",
   intro: (
     <div className="flex flex-col">
       <span className="mb-2">

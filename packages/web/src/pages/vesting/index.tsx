@@ -4,19 +4,19 @@ import { Stack, Flex, Skeleton, Box, Image, Text } from "@chakra-ui/react";
 import {
   If,
   TopCard,
-  VestingCard,
   PageContainer,
   ValueBox,
   Select,
   GradientButton,
   Empty,
 } from "@/components";
+import VestingCard from "@/components/VestingCard";
 import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { useTheme } from "@/hooks/theme";
-import stepItemsVesting, { extraItem } from "./vesting.tutorial";
+import stepItemsVesting, { extraItem } from "./Vesting.tutorial";
 import { formatBigNumberWithDecimals, getDecimals } from "@/tools";
-import { useFilter } from "./vesting.config";
+import { useFilter } from "./Vesting.config";
 
 export const Vesting = () => {
   const [filter, setFilter] = useState<string | null>(null);
@@ -133,7 +133,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalLocked} />
+                        <Text>{totalLocked}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"
@@ -171,7 +171,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalUnlocked} />
+                        <Text>{totalUnlocked}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"
@@ -209,7 +209,7 @@ export const Vesting = () => {
                             src={investorInfo?.token?.icon}
                           />
                         </Box>
-                        <Text children={totalWithdrawn} />
+                        <Text>{totalWithdrawn}</Text>
                       </Flex>
                     ) : (
                       "Connect Wallet"
@@ -242,7 +242,7 @@ export const Vesting = () => {
               placeholder="Vesting Schedules"
               items={[
                 { label: "Completed", value: "completed" },
-                { label: "Vesting Live", value: "runing" },
+                { label: "VestingCardContainer Live", value: "runing" },
               ]}
               onChange={(value: string | null) => setFilter(value)}
             />
@@ -277,7 +277,7 @@ export const Vesting = () => {
                   {...vesting}
                   token={investorInfo.token as Token}
                   contractData={investorInfo.contractData as ContractData}
-                  key={"vesting-" + index}
+                  key={"VestingCardContainer-" + index}
                 />
               ))}
             </Stack>
