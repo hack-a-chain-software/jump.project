@@ -30,6 +30,7 @@ export function Button(props: ButtonProps) {
       onClick={props.onClick}
       disabled={props.disabled}
       className={twMerge(style, props.className)}
+      title={props.title}
     >
       {props.children}
     </button>
