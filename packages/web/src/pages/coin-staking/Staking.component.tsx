@@ -17,7 +17,7 @@ type StakingComponentProps = {
   isLoading;
   apr;
   valuePerDayJumpToken;
-  valuePerDayTetherToken;
+  valuePerDayTetherToken?;
   onSubmit: (values, call: (value: string) => void) => void;
   submitStaking: (value: string) => void;
   submitWithdraw: (value: string) => void;
@@ -136,7 +136,7 @@ function StakingComponent(props: StakingComponentProps) {
       <div className="rounded-lg bg-white-600 p-6 flex flex-col">
         <div className="flex flex-row justify-between items-end">
           <div className="flex flex-row gap-x-6 md:min-w-[70%]">
-            {renderChartDetailBox("xJump value", "2 JUMP")}
+            {renderChartDetailBox("xJump value", `${valueXJumpToken} JUMP`)}
             {renderChartDetailBox("Total staked JUMP", "1000 JUMP")}
           </div>
           {renderChartPeriodSelect()}
@@ -220,11 +220,11 @@ function StakingComponent(props: StakingComponentProps) {
       return (
         <div className="rounded-lg bg-white-600 p-6 pb-7 space-y-10">
           {renderDashboardLine("APR", `${apr}%`)}
-          {renderDashboardLine(
+          {/* {renderDashboardLine(
             "You will receive",
             `${valuePerDayJumpToken} JUMP/ day`,
             `= ${valuePerDayTetherToken} USDT`
-          )}
+          )} */}
           {renderDashboardLine("xJUMP Value", `${valueXJumpToken} JUMP`)}
         </div>
       );

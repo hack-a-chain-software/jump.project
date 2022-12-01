@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useWalletSelector } from "@/context/wallet-selector";
 import { X_JUMP_TOKEN, JUMP_TOKEN } from "@/env/contract";
 import {
@@ -20,52 +20,43 @@ import Big from "big.js";
 import toast from "react-hot-toast/headless";
 
 import { useNearQuery } from "react-near";
+import { viewFunction } from "../../tools/modules/near";
 interface TokenRatio {
   x_token: string;
   base_token: string;
 }
 
 function Staking() {
-  const { accountId, selector } = useWalletSelector();
+  const { accountId, selector, token } = useWalletSelector();
+  const [xJumpRatioRaw, setXJumpRatioRaw] = useState("0");
+  const [baseTokenRatioRaw, setBaseTokenRatioRaw] = useState("0");
   const { stakeXToken: stakeXJumpToken, burnXToken: unstakeXJumpToken } =
     useStaking();
 
+  useEffect(() => {
+    const fetchXJumpRatio = async () => {
+      const data = await viewFunction(
+        selector,
+        X_JUMP_TOKEN,
+        "view_token_ratio"
+      );
+      setXJumpRatioRaw(data?.x_token);
+      setBaseTokenRatioRaw(data?.base_token);
+    };
+
+    fetchXJumpRatio();
+  }, []);
+
   // Blockchain Data
-  const {
-    data: {
-      base_token: rawBaseXJumpToken = XJUMP_BASE_TOKEN_RATIO,
-      x_token: rawRatioXJumpToken = XJUMP_BASE_XTOKEN_RATIO,
-    } = {},
-    loading: loadingXJumpRatio,
-  } = useNearQuery<TokenRatio>("view_token_ratio", {
-    contract: X_JUMP_TOKEN,
-    poolInterval: 1000 * 60,
-    debug: true,
-    onError(err) {
-      console.warn(err);
-    },
-  });
-  // console.log(useNearQuery<any>("view_token_ratio", {
-  //   contract: X_JUMP_TOKEN,
-  //   poolInterval: 1000 * 60,
-  //   debug: true,
-  //   onError(err) {
-  //     console.warn(err);
-  //   },
-  //   skip: !accountId,
-  //   onCompleted: (res) => console.log(res),
-  // }));
-  const {
-    data: { x_token: rawRatioTetherToken = XJUMP_BASE_USDT_TOKEN_RATIO } = {},
-    loading: loadingTetherRatio,
-  } = useTokenRatio(XJUMP_TETHER_TOKEN);
+  // const {
+  //   data: { x_token: rawRatioTetherToken = XJUMP_BASE_USDT_TOKEN_RATIO } = {},
+  //   loading: loadingTetherRatio,
+  // } = useTokenRatio(XJUMP_TETHER_TOKEN);
 
   const {
     data: rawBalanceXJumpToken = "0",
     loading: loadingBalanceXJumpToken,
   } = useTokenBalance(X_JUMP_TOKEN, accountId);
-
-  const { data: jumpMetadata } = useTokenMetadata(JUMP_TOKEN);
 
   // Calculating balances
   const rawRawBalanceXJumpToken = useMemo(
@@ -73,22 +64,26 @@ function Staking() {
     [rawBalanceXJumpToken]
   );
 
+  const jumpTokenBalance = useMemo(
+    () => token?.balance || "0",
+    [token?.balance]
+  );
+
   const jumpToken = useMemo(() => {
-    return rawBaseXJumpToken === "0" ? "1" : rawBaseXJumpToken;
-  }, [rawBaseXJumpToken]);
+    return baseTokenRatioRaw === "0" ? "1" : baseTokenRatioRaw;
+  }, [baseTokenRatioRaw]);
 
   const xJumpToken = useMemo(() => {
-    return rawRatioXJumpToken === "0" ? "1" : rawRatioXJumpToken;
-  }, [rawRatioXJumpToken]);
+    return xJumpRatioRaw === "0" ? "1" : xJumpRatioRaw;
+  }, [xJumpRatioRaw]);
 
-  const tetherToken = useMemo(() => {
-    return rawRatioTetherToken === "0" ? "1" : rawRatioTetherToken;
-  }, [rawRatioTetherToken]);
+  // const tetherToken = useMemo(() => {
+  //   return rawRatioTetherToken === "0" ? "1" : rawRatioTetherToken;
+  // }, [rawRatioTetherToken]);
 
   const submitStaking = useCallback(
     async (amount: string) => {
-      console.log(jumpMetadata?.decimals);
-      const deposit = calcAmountRaw(amount, jumpMetadata?.decimals);
+      const deposit = calcAmountRaw(amount, token?.metadata?.decimals);
 
       try {
         await stakeXJumpToken(deposit, accountId!, selector);
@@ -96,12 +91,12 @@ function Staking() {
         console.warn(error);
       }
     },
-    [accountId, jumpMetadata]
+    [accountId, token?.metadata]
   );
 
   const submitWithdraw = useCallback(
     async (amount: string) => {
-      const withdraw = calcAmountRaw(amount, jumpMetadata?.decimals);
+      const withdraw = calcAmountRaw(amount, token?.metadata?.decimals);
 
       try {
         await unstakeXJumpToken(withdraw, accountId!, selector);
@@ -109,17 +104,17 @@ function Staking() {
         console.warn(error);
       }
     },
-    [accountId, jumpMetadata]
+    [accountId, token?.metadata]
   );
 
   const isLoading = useMemo(() => {
-    return loadingBalanceXJumpToken && loadingXJumpRatio && loadingTetherRatio;
-  }, [loadingBalanceXJumpToken, loadingXJumpRatio, loadingTetherRatio]);
+    return loadingBalanceXJumpToken;
+  }, [loadingBalanceXJumpToken]);
 
   // Calculating meaningful ratios
   const decimals = useMemo(() => {
-    return getDecimals(jumpMetadata?.decimals);
-  }, [jumpMetadata]);
+    return getDecimals(token?.metadata?.decimals);
+  }, [token?.metadata]);
 
   const ratioJumpToken = useMemo(() => {
     return parseToBigAndDivByDecimals(jumpToken, decimals);
@@ -129,9 +124,9 @@ function Staking() {
     return parseToBigAndDivByDecimals(xJumpToken, decimals);
   }, [xJumpToken, decimals]);
 
-  const ratioTetherToken = useMemo(() => {
-    return parseToBigAndDivByDecimals(tetherToken, decimals);
-  }, [tetherToken, decimals]);
+  // const ratioTetherToken = useMemo(() => {
+  //   return parseToBigAndDivByDecimals(tetherToken, decimals);
+  // }, [tetherToken, decimals]);
 
   const valueJumpToken = useMemo(() => {
     return divideAndParseToTwoDecimals(ratioJumpToken, ratioXJumpToken);
@@ -142,19 +137,25 @@ function Staking() {
   }, [ratioJumpToken, ratioXJumpToken]);
 
   const balanceXJumpToken = useMemo(() => {
-    return parseToBigAndDivByDecimals(rawRawBalanceXJumpToken, decimals);
+    return parseToBigAndDivByDecimals(
+      rawRawBalanceXJumpToken,
+      decimals
+    ).toFixed(2);
   }, [rawRawBalanceXJumpToken, decimals]);
 
   const balanceJumpToken = useMemo(() => {
-    return divideAndParseToTwoDecimals(balanceXJumpToken, valueJumpToken);
-  }, [balanceXJumpToken, valueJumpToken]);
+    return parseToBigAndDivByDecimals(jumpTokenBalance, decimals).toFixed(2);
+  }, [jumpTokenBalance, valueJumpToken]);
 
   const apr = useMemo(() => {
     const base = new Big(JUMP_YEARLY_DISTRIBUTION_COMPROMISE).mul(100);
+    console.log(base);
     const baseBig = new Big(jumpToken);
-    const denom = new Big(10).pow(9);
+    console.log(baseBig);
 
-    return base.div(baseBig).div(denom).toFixed(2);
+    // const denom = new Big(10).pow(9);
+
+    return base.div(baseBig);
   }, [jumpToken]);
 
   const valuePerDayJumpToken = useMemo(() => {
@@ -167,12 +168,12 @@ function Staking() {
     );
   }, [valueJumpToken, apr]);
 
-  const valuePerDayTetherToken = useMemo(() => {
-    if (new Big(valuePerDayJumpToken).eq("0")) return new Big("0").toFixed(2);
-    return divideAndParseToTwoDecimals(ratioTetherToken, valuePerDayJumpToken);
-  }, [valuePerDayJumpToken]);
+  // const valuePerDayTetherToken = useMemo(() => {
+  //   if (new Big(valuePerDayJumpToken).eq("0")) return new Big("0").toFixed(2);
+  //   return divideAndParseToTwoDecimals(ratioTetherToken, valuePerDayJumpToken);
+  // }, [valuePerDayJumpToken]);
 
-  function parseToBigAndDivByDecimals(value: string, decimals: Big) {
+  function parseToBigAndDivByDecimals(value: string | number, decimals: Big) {
     return new Big(value).div(decimals);
   }
 
@@ -199,7 +200,7 @@ function Staking() {
     isLoading,
     apr,
     valuePerDayJumpToken,
-    valuePerDayTetherToken,
+    // valuePerDayTetherToken,
 
     onSubmit,
     submitStaking,
