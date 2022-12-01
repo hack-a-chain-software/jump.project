@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import isEmpty from "lodash/isEmpty";
-import { Stack, Flex, Skeleton, Box, Image, Text } from "@chakra-ui/react";
+import { Flex, Skeleton, Box, Image, Text } from "@chakra-ui/react";
 import {
   If,
   TopCard,
@@ -270,17 +270,17 @@ export const Vesting = () => {
             </Flex>
           </Flex>
           {vestings && (
-            <Stack spacing="32px">
+            <div className="flex flex-wrap w-full gap-8 items-stretch">
               {filtered.map((vesting, index) => (
                 <VestingCard
                   className="vesting-card"
                   {...vesting}
                   token={investorInfo.token as Token}
                   contractData={investorInfo.contractData as ContractData}
-                  key={"VestingCardContainer-" + index}
+                  key={"VestingCard-" + index}
                 />
               ))}
-            </Stack>
+            </div>
           )}
         </>
       </If>

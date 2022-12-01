@@ -1,6 +1,5 @@
 import { differenceInMilliseconds, addMilliseconds } from "date-fns";
-import { BoxProps } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { HTMLAttributes, useMemo, useState } from "react";
 import { getUTCDate } from "@near/ts";
 import {
   useVestingStore,
@@ -16,10 +15,11 @@ import Big from "big.js";
 import { formatBigNumberWithDecimals } from "@/tools";
 import VestingCardComponent from "@/components/VestingCard/VestingCard.component";
 
-export type VestingCardProps = Vesting &
-  BoxProps & {
+export type VestingCardProps = HTMLAttributes<HTMLDivElement> &
+  Vesting & {
     token: Token;
     contractData: ContractData;
+    key?: string | number;
   };
 
 function VestingCard(props: VestingCardProps) {
@@ -55,7 +55,15 @@ function VestingCard(props: VestingCardProps) {
     return formatBigNumberWithDecimals(props.locked_value, decimals);
   }, [props, decimals]);
 
-  const avaialbleToClaim = useMemo(() => {
+  const earnPerDay = useMemo(() => {
+    const difference = differenceInMilliseconds(endAt, createdAt);
+
+    return new Big(totalAmount)
+      .div(Math.ceil(difference / (1000 * 3600 * 24)))
+      .toFixed(2);
+  }, [createdAt, endAt, totalAmount]);
+
+  const availableToClaim = useMemo(() => {
     return formatBigNumberWithDecimals(props.available_to_withdraw, decimals);
   }, [props, decimals]);
 
@@ -63,9 +71,14 @@ function VestingCard(props: VestingCardProps) {
     return formatBigNumberWithDecimals(props.withdrawn_tokens, decimals);
   }, [props, decimals]);
 
+  const fastPassPrice = useMemo(() => {
+    return new Big(totalAmount ?? 0).mul(0.05).div(decimals).toFixed(2);
+  }, [totalAmount, props.token]);
+
   const VestingCardComponentProps = {
     containerProps: props,
     accountId,
+    createdAt,
     endAt,
     progress,
     selector,
@@ -74,8 +87,10 @@ function VestingCard(props: VestingCardProps) {
     setShowFastPass,
     baseTokenBalance,
     totalAmount,
-    avaialbleToClaim,
+    availableToClaim,
     withdrawnAmount,
+    fastPassPrice,
+    earnPerDay,
   };
 
   return <VestingCardComponent {...VestingCardComponentProps} />;
