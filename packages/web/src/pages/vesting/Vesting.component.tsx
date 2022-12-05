@@ -180,6 +180,7 @@ function VestingComponent(props: VestingComponentProps) {
   return (
     <PageContainer>
       <TopCard
+        transparent
         gradientText="Jump Vesting"
         bigText="Unlock and claim JUMP rewards"
         bottomDescription="Claim your JUMP and boost the rate of vested rewards."
