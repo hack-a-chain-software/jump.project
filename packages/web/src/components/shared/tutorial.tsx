@@ -11,15 +11,17 @@ export interface TutorialItemInterface {
 export const Tutorial = ({
   items,
   options,
+  className,
 }: {
   items: TutorialItemInterface[];
   options?: any;
+  className?: string;
 }) => {
   const [show, setShow] = useState(false);
 
   return (
     <>
-      <div className="absolute right-4 top-4 z-20">
+      <div className={`absolute right-4 top-4 z-20 ${className}`}>
         <IconButton onClick={() => setShow(!show)} />
       </div>
 

@@ -174,7 +174,6 @@ export const NFTStaking = () => {
         bottomDescription={`
           Welcome to Jump NFT Staking; the portal between NFT technology and decentralized finance on NEAR Protocol!
         `}
-        py
         jumpLogo
         stepItems={stepItems}
       />
