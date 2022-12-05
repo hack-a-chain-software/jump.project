@@ -10,6 +10,6 @@ export default gql`
   }
 
   type Query {
-    get_historical_ratio(timestamp: String): XTokenRatio
+    get_historical_ratio(timestamp: String): [XTokenRatio]
   }
 `;

@@ -10,10 +10,14 @@ export default {
       { sequelize }: GraphQLContext
     ) {
       const result = await sequelize.query<XTokenRatio>(
-        `SELECT * FROM "x_token_ratios" 
+        `SELECT * FROM "x_token_ratios" t 
+        JOIN (select min(t2.time_event) as min_timestamp
+         from "x_token_ratios" t2
+         group by date(t2.time_event)
+        ) t2 on t.time_event = t2.min_timestamp
         WHERE time_event <= $1
         ORDER BY time_event DESC
-        LIMIT 1`,
+        LIMIT 360`,
         {
           bind: [
             new Date(parseInt(filters.timestamp))
@@ -25,7 +29,7 @@ export default {
         }
       );
 
-      return result[0] || null;
+      return result || null;
     },
   },
 };
