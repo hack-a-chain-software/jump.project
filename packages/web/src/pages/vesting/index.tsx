@@ -1,28 +1,20 @@
 import { useEffect, useState, useMemo } from "react";
 import isEmpty from "lodash/isEmpty";
-import { Stack, Flex, Skeleton, Box, Image, Text } from "@chakra-ui/react";
-import {
-  If,
-  TopCard,
-  VestingCard,
-  PageContainer,
-  ValueBox,
-  Select,
-  GradientButton,
-  Empty,
-} from "@/components";
-import { ContractData, Token, useVestingStore } from "@/stores/vesting-store";
+import { useVestingStore } from "@/stores/vesting-store";
 import { useWalletSelector } from "@/context/wallet-selector";
-import { useTheme } from "@/hooks/theme";
-import stepItemsVesting, { extraItem } from "./vesting.tutorial";
+import stepItemsVesting, { extraItem } from "./Vesting.tutorial";
 import { formatBigNumberWithDecimals, getDecimals } from "@/tools";
-import { useFilter } from "./vesting.config";
+import VestingComponent from "@/pages/vesting/Vesting.component";
+import { addMilliseconds, isBefore } from "date-fns";
+import { getUTCDate } from "@near/ts";
+import Big from "big.js";
 
-export const Vesting = () => {
-  const [filter, setFilter] = useState<string | null>(null);
+export type FilterOption = "all" | "complete" | "running" | "withdrawn";
+
+function Vesting() {
+  const [filter, setFilter] = useState<FilterOption>("all");
 
   const { accountId, selector } = useWalletSelector();
-  const { glassyWhiteOpaque } = useTheme();
 
   const {
     getInvestorInfo,
@@ -37,7 +29,7 @@ export const Vesting = () => {
   useEffect(() => {
     (async () => {
       if (!accountId) {
-        cleanupData();
+        await cleanupData();
 
         return;
       }
@@ -47,8 +39,41 @@ export const Vesting = () => {
     })();
   }, [accountId]);
 
+  const decimals = useMemo(() => {
+    return getDecimals(investorInfo?.token?.decimals);
+  }, [investorInfo]);
+
   const filtered = useMemo(() => {
-    return useFilter(filter, vestings);
+    if (filter === "all") return vestings;
+
+    return vestings.filter(
+      ({
+        start_timestamp,
+        vesting_duration,
+        locked_value,
+        withdrawn_tokens,
+      }) => {
+        const created = getUTCDate(Number(start_timestamp) / 1000000);
+        const endAt = addMilliseconds(
+          created,
+          Number(vesting_duration) / 1000000
+        );
+        const today = getUTCDate();
+
+        switch (filter) {
+          case "complete":
+            return isBefore(endAt, today);
+          case "running":
+            return isBefore(today, endAt);
+          case "withdrawn":
+            return new Big(
+              formatBigNumberWithDecimals(locked_value, decimals)
+            ).eq(formatBigNumberWithDecimals(withdrawn_tokens, decimals));
+          default:
+            return true;
+        }
+      }
+    );
   }, [filter, vestings]);
 
   const isLoading = useMemo(() => {
@@ -58,10 +83,6 @@ export const Vesting = () => {
 
     return isEmpty(investorInfo);
   }, [investorInfo, accountId]);
-
-  const decimals = useMemo(() => {
-    return getDecimals(investorInfo?.token?.decimals);
-  }, [investorInfo]);
 
   const totalLocked = useMemo(() => {
     return formatBigNumberWithDecimals(
@@ -94,198 +115,24 @@ export const Vesting = () => {
     return items;
   }, [accountId, vestings]);
 
-  return (
-    <PageContainer>
-      <TopCard
-        gradientText="Jump Vesting"
-        bigText="Unlock and Claim JUMP Rewards"
-        bottomDescription=" Claim your JUMP and boost the rate of vested rewards"
-        py
-        stepItems={stepItems}
-        content={
-          accountId ? (
-            <Flex gap="1.25rem" flex="1" className="flex-col lg:flex-row">
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  className="amount-locked"
-                  title="Total Locked"
-                  value={
-                    accountId ? (
-                      <Flex className="items-center space-x-[8px]">
-                        <Box
-                          borderRadius={99}
-                          border="solid 3px"
-                          outline={glassyWhiteOpaque}
-                          borderColor={glassyWhiteOpaque}
-                          boxSizing="content-box"
-                          className="h-[28px] w-[28px]"
-                        >
-                          <Image
-                            width="100%"
-                            height="100%"
-                            src={investorInfo?.token?.icon}
-                          />
-                        </Box>
-                        <Text children={totalLocked} />
-                      </Flex>
-                    ) : (
-                      "Connect Wallet"
-                    )
-                  }
-                  bottomText="All amount locked"
-                />
-              </Skeleton>
+  const vestingComponentProps = {
+    stepItems,
+    accountId,
+    selector,
+    isLoading,
+    loading,
+    investorInfo,
+    totalLocked,
+    totalUnlocked,
+    totalWithdrawn,
+    filter,
+    setFilter,
+    withdraw,
+    vestings,
+    filtered,
+  };
 
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title="Total Unlocked"
-                  className="amount-unlocked"
-                  value={
-                    accountId ? (
-                      <Flex className="items-center space-x-[8px]">
-                        <Box
-                          borderRadius={99}
-                          border="solid 3px"
-                          outline={glassyWhiteOpaque}
-                          borderColor={glassyWhiteOpaque}
-                          boxSizing="content-box"
-                          className="h-[28px] w-[28px]"
-                        >
-                          <Image
-                            width="100%"
-                            height="100%"
-                            src={investorInfo?.token?.icon}
-                          />
-                        </Box>
-                        <Text children={totalUnlocked} />
-                      </Flex>
-                    ) : (
-                      "Connect Wallet"
-                    )
-                  }
-                  bottomText="Unlocked amount"
-                />
-              </Skeleton>
-
-              <Skeleton
-                height="114px"
-                borderRadius={20}
-                className="md:min-w-[240px]"
-                endColor="rgba(255,255,255,0.3)"
-                isLoaded={!isLoading}
-              >
-                <ValueBox
-                  borderColor={glassyWhiteOpaque}
-                  title={accountId ? "Total Withdrawn" : ""}
-                  className="amount-withdrawn"
-                  value={
-                    accountId ? (
-                      <Flex className="items-center space-x-[8px]">
-                        <Box
-                          borderRadius={99}
-                          border="solid 3px"
-                          outline={glassyWhiteOpaque}
-                          borderColor={glassyWhiteOpaque}
-                          boxSizing="content-box"
-                          className="h-[28px] w-[28px]"
-                        >
-                          <Image
-                            width="100%"
-                            height="100%"
-                            src={investorInfo?.token?.icon}
-                          />
-                        </Box>
-                        <Text children={totalWithdrawn} />
-                      </Flex>
-                    ) : (
-                      "Connect Wallet"
-                    )
-                  }
-                  bottomText="Total quantity "
-                />
-              </Skeleton>
-            </Flex>
-          ) : (
-            <></>
-          )
-        }
-      />
-
-      <If
-        fallback={
-          accountId
-            ? !loading && <Empty text="No vestings available" />
-            : loading && (
-                <Empty text="Connect your wallet to view Jump Vesting" />
-              )
-        }
-        condition={!isEmpty(investorInfo) && !isEmpty(vestings)}
-      >
-        <>
-          <Flex justifyContent="space-between">
-            <Select
-              value={filter}
-              placeholder="Vesting Schedules"
-              items={[
-                { label: "Completed", value: "completed" },
-                { label: "Vesting Live", value: "runing" },
-              ]}
-              onChange={(value: string | null) => setFilter(value)}
-            />
-
-            <Flex maxW="330px" alignItems="center">
-              <GradientButton
-                onClick={async () => {
-                  withdraw(
-                    vestings
-                      .filter(({ available_to_withdraw }) => {
-                        return (
-                          Number(available_to_withdraw) >
-                          Math.pow(10, investorInfo.token?.decimals || 0)
-                        );
-                      })
-                      .map(({ id }) => String(id)),
-                    accountId as string,
-                    selector
-                  );
-                }}
-                className="justify-center w-[150px]"
-              >
-                Claim All
-              </GradientButton>
-            </Flex>
-          </Flex>
-          {vestings && (
-            <Stack spacing="32px">
-              {filtered.map((vesting, index) => (
-                <VestingCard
-                  className="vesting-card"
-                  {...vesting}
-                  token={investorInfo.token as Token}
-                  contractData={investorInfo.contractData as ContractData}
-                  key={"vesting-" + index}
-                />
-              ))}
-            </Stack>
-          )}
-        </>
-      </If>
-    </PageContainer>
-  );
-};
+  return <VestingComponent {...vestingComponentProps} />;
+}
 
 export default Vesting;
