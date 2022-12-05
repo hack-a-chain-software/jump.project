@@ -1,24 +1,41 @@
-import { TopCard, PageContainer, Button, VestingCard } from "@/components";
-import { Tab, Listbox } from "@headlessui/react";
-import { ContractData, Token } from "@/stores/vesting-store";
+import {
+  TopCard,
+  PageContainer,
+  Button,
+  VestingCard,
+  Empty,
+  TutorialItemInterface,
+} from "@/components";
+import { Tab, Listbox, Transition } from "@headlessui/react";
+import {
+  ContractData,
+  InvestorInfo,
+  Token,
+  Vesting,
+} from "@/stores/vesting-store";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import WarningBar from "@/components/WarningBar";
+import { WalletSelector } from "@near-wallet-selector/core";
+import { FilterOption } from "@/pages/vesting/index";
 
 type VestingComponentProps = {
-  stepItems;
-  accountId;
-  selector;
-  isLoading;
-  loading;
-  investorInfo;
-  totalLocked;
-  totalUnlocked;
-  totalWithdrawn;
-  filter;
-  setFilter;
-  withdraw;
-  vestings;
-  filtered;
+  stepItems: TutorialItemInterface[];
+  accountId: string | null;
+  selector: WalletSelector | null;
+  loading: boolean;
+  investorInfo: Partial<InvestorInfo>;
+  totalLocked: string; // Big
+  totalUnlocked: string; // Big
+  totalWithdrawn: string; // Big
+  filter: FilterOption;
+  setFilter: (filter: FilterOption) => void;
+  withdraw: (
+    vestings: string[],
+    accountId: string,
+    connection: WalletSelector
+  ) => Promise<void>;
+  filtered: Vesting[];
+  connectWallet: () => void;
 };
 
 function VestingComponent(props: VestingComponentProps) {
@@ -26,17 +43,13 @@ function VestingComponent(props: VestingComponentProps) {
     stepItems,
     accountId,
     selector,
-    isLoading,
     loading,
     investorInfo,
-    totalLocked,
-    totalUnlocked,
-    totalWithdrawn,
     filter,
     setFilter,
     withdraw,
-    vestings,
     filtered,
+    connectWallet,
   } = props;
 
   function renderTab(selected: boolean, text: string) {
@@ -46,11 +59,11 @@ function VestingComponent(props: VestingComponentProps) {
           inline
           className={`${
             selected ? "font-bold" : "font-medium"
-          } rounded-none h-auto text-4 leading-4 tracking-tight pb-2`}
+          } rounded-none h-auto text-4 leading-4 tracking-tight pb-2 px-0`}
         >
           {text}
         </Button>
-        {selected && <hr className="h-1 mx-auto bg-violet border-none" />}
+        {selected && <hr className="h-1 mx-auto bg-violet border-none z-10" />}
       </>
     );
   }
@@ -73,44 +86,43 @@ function VestingComponent(props: VestingComponentProps) {
 
     return (
       <Listbox value={filter} onChange={setFilter}>
-        <div className="relative w-[136px]">
-          <Listbox.Button className="w-full flex justify-between">
-            {options.reduce(
-              (name: string, option) =>
-                option.value === filter ? option.name : name,
-              "All"
-            )}
-            <ChevronDownIcon
-              className="h-5 w-5 text-gray-400"
-              aria-hidden="true"
-            />
-          </Listbox.Button>
-          <Listbox.Options>
-            {options.map((option) => (
-              <Listbox.Option
-                key={option.value}
-                className={({ active }) =>
-                  `relative cursor-default select-none p-2 ${
-                    active ? "bg-amber-100 text-amber-900" : "text-gray-900"
-                  }`
-                }
-                value={option.value}
-              >
-                {({ selected }) => (
-                  <>
-                    <span
-                      className={`block truncate ${
-                        selected ? "font-medium" : "font-normal"
-                      }`}
-                    >
-                      {option.name}
-                    </span>
-                  </>
-                )}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
-        </div>
+        {({ open }) => (
+          <div className="relative w-[136px] h-10">
+            <Listbox.Button className="w-full flex justify-between pt-2 pb-3 pl-4 pr-3 bg-white-600 rounded-sm font-normal text-3.5 leading-5 tracking-normal">
+              {options.reduce(
+                (name: string, option) =>
+                  option.value === filter ? option.name : name,
+                "All"
+              )}
+              <ChevronDownIcon
+                className={`h-5 w-5 text-gray-400 transition-all ${
+                  open ? "rotate-180 mt-[1px]" : "rotate-0"
+                }`}
+                aria-hidden="true"
+              />
+            </Listbox.Button>
+            <Transition
+              enter="transition duration-100 ease-out"
+              enterFrom="transform scale-90 translate-y-[-10%] opacity-0"
+              enterTo="transform scale-100 opacity-100"
+              leave="transition duration-75 ease-out"
+              leaveFrom="transform scale-100 opacity-100"
+              leaveTo="transform scale-90 translate-y-[-10%] opacity-0"
+            >
+              <Listbox.Options className="bg-white rounded-sm mt-2 p-2 flex flex-col gap-1">
+                {options.map((option) => (
+                  <Listbox.Option
+                    key={option.value}
+                    className="relative hover:bg-[#D6B8D8] cursor-default select-none py-2.5 px-4 rounded-sm font-medium text-3.5 leading-4.5 tracking-normal text-black"
+                    value={option.value}
+                  >
+                    {option.name}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        )}
       </Listbox>
     );
   }
@@ -121,6 +133,8 @@ function VestingComponent(props: VestingComponentProps) {
         {renderListBox()}
 
         <Button
+          className="w-[134px]"
+          disabled={!accountId || !filtered.length}
           onClick={() =>
             withdraw(
               filtered
@@ -130,8 +144,8 @@ function VestingComponent(props: VestingComponentProps) {
                     Math.pow(10, investorInfo.token?.decimals || 0)
                 )
                 .map(({ id }) => String(id)),
-              accountId,
-              selector
+              accountId ? accountId : "",
+              selector ? selector : ({} as WalletSelector)
             )
           }
         >
@@ -145,33 +159,104 @@ function VestingComponent(props: VestingComponentProps) {
     //TODO Implement onClick
     return (
       <>
-        <WarningBar>
-          To decrease the waiting time, you can get Fast Pass NFT. To read more,{" "}
-          <a href="#">click here</a>.
+        <WarningBar className="mt-[-.375rem]">
+          {!accountId ? "Connect your wallet to see rewards." : ""}
+          {(filter === "all" || filter === "running") && !filtered.length ? (
+            "You need to claim NFT Staking Pools rewards to earn LOCKED JUMP"
+          ) : (
+            <></>
+          )}
+          {filter === "complete" && !filtered.length ? (
+            "You need to claim NFT Staking Pools rewards to earn LOCKED JUMP"
+          ) : (
+            <></>
+          )}
+          {filter === "withdrawn" ? (
+            "All your rewards available to withdraw, after the end of the vesting period will be here."
+          ) : (
+            <></>
+          )}
+          {filter !== "withdrawn" && filtered.length ? (
+            <>
+              To decrease the waiting time, you can get Fast Pass NFT. To read
+              more,&nbsp;
+              <a
+                href="#"
+                className="border-white border-b-[1px] hover:border-none"
+              >
+                click here.
+              </a>
+            </>
+          ) : (
+            <></>
+          )}
         </WarningBar>
       </>
     );
   }
 
-  function renderDashboardPanel(withdrawn: boolean) {
-    //TODO Fix VestingCard
+  function renderEmpty() {
+    return (
+      <>
+        {!accountId ? (
+          <Empty className="pt-8 pb-32 px-6 h-min gap-y-6">
+            <h2 className="text-6 font-extrabold tracking-tight leading-6">
+              Connect your Wallet
+            </h2>
+            <Button white onClick={connectWallet} big>
+              Connect Wallet
+            </Button>
+          </Empty>
+        ) : (
+          <></>
+        )}
+        {(filter === "all" || filter === "running") && !filtered.length ? (
+          <Empty className="pt-8 pb-32 h-min w-full items-start">
+            <p>It seems you don’t have rewards in vesting period.</p>
+          </Empty>
+        ) : (
+          <></>
+        )}
+        {filter === "complete" && !filtered.length ? (
+          <Empty className="pt-8 pb-32 h-min w-full items-start">
+            <p>It seems you don’t have completed rewards to withdraw</p>
+          </Empty>
+        ) : (
+          <></>
+        )}
+        {filter === "withdrawn" && !filtered.length ? (
+          <Empty className="pt-8 pb-32 h-min w-full items-start">
+            <p>It seems you still don’t have rewards withdrawn</p>
+          </Empty>
+        ) : (
+          <></>
+        )}
+      </>
+    );
+  }
+
+  function renderDashboardPanel() {
     return (
       <>
         {renderWarningBar()}
-        {!withdrawn && renderOptions()}
+        {filter !== "withdrawn" ? renderOptions() : <></>}
 
-        {vestings && (
+        {renderEmpty()}
+
+        {!loading && filtered.length ? (
           <div className="flex flex-wrap w-full gap-8 items-stretch">
-            {/*{filtered.map((vesting, index) => (*/}
-            {/*  <VestingCard*/}
-            {/*    className="vesting-card"*/}
-            {/*    {...vesting}*/}
-            {/*    token={investorInfo.token as Token}*/}
-            {/*    contractData={investorInfo.contractData as ContractData}*/}
-            {/*    key={"VestingCard-" + index}*/}
-            {/*  />*/}
-            {/*))}*/}
+            {filtered.map((vesting, index) => (
+              <VestingCard
+                className="vesting-card"
+                {...vesting}
+                token={investorInfo.token as Token}
+                contractData={investorInfo.contractData as ContractData}
+                key={"VestingCard-" + index}
+              />
+            ))}
           </div>
+        ) : (
+          <></>
         )}
       </>
     );
@@ -192,20 +277,21 @@ function VestingComponent(props: VestingComponentProps) {
           index === 0 ? setFilter("all") : setFilter("withdrawn")
         }
       >
-        <Tab.List className="space-x-2">
+        <Tab.List className="flex gap-x-10 relative">
           <Tab className="outline-none">
             {({ selected }) => renderTab(selected, "Vesting period")}
           </Tab>
           <Tab className="outline-none">
             {({ selected }) => renderTab(selected, "Withdrawn")}
           </Tab>
+          <hr className="absolute inset-[-1.5rem] bottom-0 top-auto bg-white-600 w-[calc(100%_+_3rem)] z-0" />
         </Tab.List>
         <Tab.Panels>
-          <Tab.Panel className="outline-none">
-            {renderDashboardPanel(false)}
+          <Tab.Panel className="outline-none flex flex-col gap-8">
+            {renderDashboardPanel()}
           </Tab.Panel>
-          <Tab.Panel className="outline-none">
-            {renderDashboardPanel(true)}
+          <Tab.Panel className="outline-none flex flex-col gap-8">
+            {renderDashboardPanel()}
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

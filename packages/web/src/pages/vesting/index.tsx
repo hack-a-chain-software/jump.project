@@ -14,7 +14,11 @@ export type FilterOption = "all" | "complete" | "running" | "withdrawn";
 function Vesting() {
   const [filter, setFilter] = useState<FilterOption>("all");
 
-  const { accountId, selector } = useWalletSelector();
+  const {
+    accountId,
+    selector,
+    toggleModal: connectWallet,
+  } = useWalletSelector();
 
   const {
     getInvestorInfo,
@@ -23,7 +27,7 @@ function Vesting() {
     cleanupData,
     investorInfo,
     vestings,
-    loading,
+    loading: isLoading,
   } = useVestingStore();
 
   useEffect(() => {
@@ -76,8 +80,8 @@ function Vesting() {
     );
   }, [filter, vestings]);
 
-  const isLoading = useMemo(() => {
-    if (!accountId) {
+  const loading = useMemo(() => {
+    if (!accountId && !isLoading) {
       return false;
     }
 
@@ -119,7 +123,6 @@ function Vesting() {
     stepItems,
     accountId,
     selector,
-    isLoading,
     loading,
     investorInfo,
     totalLocked,
@@ -128,8 +131,8 @@ function Vesting() {
     filter,
     setFilter,
     withdraw,
-    vestings,
     filtered,
+    connectWallet,
   };
 
   return <VestingComponent {...vestingComponentProps} />;
