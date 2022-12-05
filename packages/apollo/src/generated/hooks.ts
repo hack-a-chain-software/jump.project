@@ -155,7 +155,7 @@ export type ProjectTokenInfo = {
 
 export type Query = {
   __typename?: "Query";
-  get_historical_ratio?: Maybe<XTokenRatio>;
+  get_historical_ratio?: Maybe<Array<Maybe<XTokenRatio>>>;
   health?: Maybe<MessageOutput>;
   investor_info?: Maybe<LaunchpadInvestor>;
   launchpad_project?: Maybe<LaunchpadListing>;
@@ -454,6 +454,21 @@ export type StakingProjectQuery = {
       account_id?: string | null;
     } | null> | null;
   } | null;
+};
+
+export type XJumpProjectQueryVariables = Exact<{
+  timestamp?: InputMaybe<Scalars["String"]>;
+}>;
+
+export type XJumpProjectQuery = {
+  __typename?: "Query";
+  get_historical_ratio?: Array<{
+    __typename?: "XTokenRatio";
+    key_column?: string | null;
+    time_event?: string | null;
+    base_token_amount?: string | null;
+    x_token_amount?: string | null;
+  } | null> | null;
 };
 
 export const InvestorInfoDocument = gql`
@@ -923,4 +938,65 @@ export type StakingProjectLazyQueryHookResult = ReturnType<
 export type StakingProjectQueryResult = Apollo.QueryResult<
   StakingProjectQuery,
   StakingProjectQueryVariables
+>;
+export const XJumpProjectDocument = gql`
+  query XJumpProject($timestamp: String) {
+    get_historical_ratio(timestamp: $timestamp) {
+      key_column
+      time_event
+      base_token_amount
+      x_token_amount
+    }
+  }
+`;
+
+/**
+ * __useXJumpProjectQuery__
+ *
+ * To run a query within a React component, call `useXJumpProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useXJumpProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useXJumpProjectQuery({
+ *   variables: {
+ *      timestamp: // value for 'timestamp'
+ *   },
+ * });
+ */
+export function useXJumpProjectQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    XJumpProjectQuery,
+    XJumpProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<XJumpProjectQuery, XJumpProjectQueryVariables>(
+    XJumpProjectDocument,
+    options
+  );
+}
+export function useXJumpProjectLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    XJumpProjectQuery,
+    XJumpProjectQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<XJumpProjectQuery, XJumpProjectQueryVariables>(
+    XJumpProjectDocument,
+    options
+  );
+}
+export type XJumpProjectQueryHookResult = ReturnType<
+  typeof useXJumpProjectQuery
+>;
+export type XJumpProjectLazyQueryHookResult = ReturnType<
+  typeof useXJumpProjectLazyQuery
+>;
+export type XJumpProjectQueryResult = Apollo.QueryResult<
+  XJumpProjectQuery,
+  XJumpProjectQueryVariables
 >;

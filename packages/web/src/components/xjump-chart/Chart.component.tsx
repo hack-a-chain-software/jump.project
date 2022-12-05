@@ -1,11 +1,17 @@
 import { graphic } from "echarts";
 import ReactEChart from "echarts-for-react";
 
-function Chart() {
+function Chart({
+  label = [""],
+  value = [0],
+}: {
+  label?: Array<string>;
+  value?: Array<number>;
+}) {
   const option = {
     xAxis: {
       type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: label,
       axisLine: {
         show: false,
       },
@@ -44,7 +50,7 @@ function Chart() {
             },
           ]),
         },
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
+        data: value,
         showSymbol: false,
       },
     ],

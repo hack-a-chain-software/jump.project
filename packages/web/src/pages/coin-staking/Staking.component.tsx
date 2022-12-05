@@ -12,6 +12,7 @@ import {
   initialValues,
   validationSchema,
 } from "@/modals/staking/form/formStaking";
+import { useEffect, useState } from "react";
 
 type StakingComponentProps = {
   isLoading;
@@ -23,8 +24,11 @@ type StakingComponentProps = {
   submitWithdraw: (value: string) => void;
   valueJumpToken;
   valueXJumpToken;
+  ratioJumpToken;
   balanceXJumpToken;
   balanceJumpToken;
+  availableXJumpToClaim;
+  chartObj;
 };
 
 function StakingComponent(props: StakingComponentProps) {
@@ -37,9 +41,15 @@ function StakingComponent(props: StakingComponentProps) {
     submitWithdraw,
     valueJumpToken,
     valueXJumpToken,
+    ratioJumpToken,
     balanceXJumpToken,
     balanceJumpToken,
+    availableXJumpToClaim,
+    chartObj,
   } = props;
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedData, setSelectedData] = useState(chartObj || []);
 
   const {
     values: valuesWithDraw,
@@ -63,9 +73,27 @@ function StakingComponent(props: StakingComponentProps) {
     validationSchema: validationSchema,
   });
 
+  useEffect(() => {
+    switch (selectedIndex) {
+      case 1:
+        setSelectedData(chartObj.week);
+        break;
+      case 2:
+        setSelectedData(chartObj.month);
+        break;
+      case 3:
+        console.log(chartObj.year);
+        setSelectedData(chartObj.year);
+        break;
+      default:
+        setSelectedData(chartObj.day);
+        break;
+    }
+  }, [selectedIndex]);
+
   function renderChartDetailBox(name: string, value: string) {
     return (
-      <div className="flex flex-col rounded-[20px] bg-white-600 p-4  sm:h-[80px] gap-y-4 md:w-[28.1%]">
+      <div className="flex flex-col rounded-[20px] bg-white-600 p-4  sm:h-[80px] gap-y-4 w-auto md:w-[38.1%] lg:w-[28.1%]">
         <p className="text-3.5 leading-4 font-medium tracking-tight text-left">
           {name}
         </p>
@@ -95,12 +123,11 @@ function StakingComponent(props: StakingComponentProps) {
   function renderChartPeriodSelect() {
     return (
       <div className="flex gap-[20px] items-center justify-center rounded-[10px] bg-white-600 sm:h-[44px] md:min-w-[188px]">
-        <Tab.Group>
+        <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
           <Tab.List className="h-full">
             <Tab className="outline-none ">
               {({ selected }) => renderTimePeriodTab(selected, "1D")}
             </Tab>
-
             <Tab className="outline-none">
               {({ selected }) => renderTimePeriodTab(selected, "1W")}
             </Tab>
@@ -131,18 +158,24 @@ function StakingComponent(props: StakingComponentProps) {
     );
   }
 
-  function renderChart() {
+  function renderChart(selectedData) {
     return (
       <div className="rounded-lg bg-white-600 p-6 flex flex-col">
-        <div className="flex flex-row justify-between items-end">
-          <div className="flex flex-row gap-x-6 md:min-w-[70%]">
+        <div
+          className="flex sm:flex-row flex-col justify-between items-start 
+        sm:items-end gap-y-4"
+        >
+          <div className="flex flex-row gap-x-6 md:min-w-[70%] flex-1">
             {renderChartDetailBox("xJump value", `${valueXJumpToken} JUMP`)}
-            {renderChartDetailBox("Total staked JUMP", "1000 JUMP")}
+            {renderChartDetailBox(
+              "Total staked JUMP",
+              `${ratioJumpToken.toFixed(2)} JUMP`
+            )}
           </div>
           {renderChartPeriodSelect()}
         </div>
 
-        <Chart />
+        <Chart label={selectedData?.date} value={selectedData?.value} />
       </div>
     );
   }
@@ -220,18 +253,18 @@ function StakingComponent(props: StakingComponentProps) {
       return (
         <div className="rounded-lg bg-white-600 p-6 pb-7 space-y-10">
           {renderDashboardLine("APR", `${apr}%`)}
-          {/* {renderDashboardLine(
+          {renderDashboardLine(
             "You will receive",
-            `${valuePerDayJumpToken} JUMP/ day`,
-            `= ${valuePerDayTetherToken} USDT`
-          )} */}
+            `${valuePerDayJumpToken} JUMP/ day`
+            // `= ${valuePerDayTetherToken} USDT`
+          )}
           {renderDashboardLine("xJUMP Value", `${valueXJumpToken} JUMP`)}
         </div>
       );
     else
       return (
         <div className="rounded-lg bg-white-600 p-6 pb-12 space-y-10">
-          {renderDashboardLine("Your staking", `${balanceJumpToken} JUMP`)}
+          {/* {renderDashboardLine("Your staking", `${balanceJumpToken} JUMP`)} */}
           {renderDashboardLine("You own", `${balanceXJumpToken} xJUMP`)}
           {renderDashboardLine("JUMP earned", `${balanceJumpToken} JUMP`)}
         </div>
@@ -268,7 +301,10 @@ function StakingComponent(props: StakingComponentProps) {
   function renderBalance(stake: boolean) {
     return (
       <p className="mt-4 mb-4 text-right font-semibold text-3.5 tracking-tight leading-3.5">
-        {stake ? "Balance" : "You can claim"}: {balanceJumpToken} JUMP
+        {stake
+          ? `Balance: ${balanceJumpToken}`
+          : `You can claim: ${availableXJumpToClaim}`}{" "}
+        JUMP
       </p>
     );
   }
@@ -313,7 +349,7 @@ function StakingComponent(props: StakingComponentProps) {
     <PageContainerDoubleSide>
       <PageContainerDoubleSide.Left>
         {renderTopCard()}
-        {renderChart()}
+        {renderChart(selectedData)}
       </PageContainerDoubleSide.Left>
       <PageContainerDoubleSide.Right>
         {renderDashboard()}
