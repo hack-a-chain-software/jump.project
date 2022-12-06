@@ -266,7 +266,7 @@ function StakingComponent(props: StakingComponentProps) {
         <div className="rounded-lg bg-white-600 p-6 pb-12 space-y-10">
           {/* {renderDashboardLine("Your staking", `${balanceJumpToken} JUMP`)} */}
           {renderDashboardLine("You own", `${balanceXJumpToken} xJUMP`)}
-          {renderDashboardLine("JUMP earned", `${balanceJumpToken} JUMP`)}
+          {renderDashboardLine("Valued at", `${balanceJumpToken} JUMP`)}
         </div>
       );
   }
