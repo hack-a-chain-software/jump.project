@@ -14,6 +14,11 @@ fs.writeFileSync("./packages/web/.env", environment_file_web);
 
 const environment_file_graphql = `
 SERVER_PORT=80
+DB_USERNAME=${process.env.DB_USER}
+DB_PASSWORD=${process.env.DB_PASS}
+DB_HOST=${process.env.DB_HOST}
+DB_PORT=5432
+DB_NAME=${process.env.DB_NAME}
 NFT_STAKING_CONTRACT=nftstaking.jumpfinance.near
 JUMP_LAUNCHPAD_CONTRACT=launchpad.jumpfinance.near
 ENV=MAINNET
