@@ -220,7 +220,7 @@ function StakingComponent(props: StakingComponentProps) {
             onClick={(e) =>
               stake
                 ? setFieldValueStake("value", balanceJumpToken)
-                : setFieldValueWithDraw("value", balanceJumpToken)
+                : setFieldValueWithDraw("value", availableXJumpToClaim)
             }
           >
             MAX
@@ -266,7 +266,10 @@ function StakingComponent(props: StakingComponentProps) {
         <div className="rounded-lg bg-white-600 p-6 pb-12 space-y-10">
           {/* {renderDashboardLine("Your staking", `${balanceJumpToken} JUMP`)} */}
           {renderDashboardLine("You own", `${balanceXJumpToken} xJUMP`)}
-          {renderDashboardLine("Valued at", `${balanceJumpToken} JUMP`)}
+          {renderDashboardLine(
+            "Valued at",
+            `${(balanceXJumpToken * valueXJumpToken).toFixed(2)} JUMP`
+          )}
         </div>
       );
   }
@@ -302,9 +305,8 @@ function StakingComponent(props: StakingComponentProps) {
     return (
       <p className="mt-4 mb-4 text-right font-semibold text-3.5 tracking-tight leading-3.5">
         {stake
-          ? `Balance: ${balanceJumpToken}`
-          : `You can claim: ${availableXJumpToClaim}`}{" "}
-        JUMP
+          ? `Balance: ${balanceJumpToken} JUMP`
+          : `You can claim: ${availableXJumpToClaim} xJUMP`}
       </p>
     );
   }

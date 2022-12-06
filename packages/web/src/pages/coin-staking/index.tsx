@@ -245,7 +245,7 @@ function Staking() {
   }, [rawRawBalanceXJumpToken, decimals]);
 
   const availableXJumpToClaim = useMemo(() => {
-    return new Big(balanceXJumpToken).mul(valueXJumpToken).toFixed(2);
+    return new Big(balanceXJumpToken).toFixed(2);
   }, [balanceXJumpToken, valueXJumpToken]);
 
   const balanceJumpToken = useMemo(() => {
