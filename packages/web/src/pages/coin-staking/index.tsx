@@ -144,6 +144,7 @@ function Staking() {
         X_JUMP_TOKEN,
         "view_token_ratio"
       );
+      console.log({ data });
       setXJumpRatioRaw(data?.x_token);
       setBaseTokenRatioRaw(data?.base_token);
     };
@@ -233,11 +234,11 @@ function Staking() {
   // }, [tetherToken, decimals]);
 
   const valueJumpToken = useMemo(() => {
-    return divideAndParseToTwoDecimals(ratioJumpToken, ratioXJumpToken);
+    return divideAndParseToTwoDecimals(ratioXJumpToken, ratioJumpToken);
   }, [ratioJumpToken, ratioXJumpToken]);
 
   const valueXJumpToken = useMemo(() => {
-    return divideAndParseToTwoDecimals(ratioXJumpToken, ratioJumpToken);
+    return divideAndParseToTwoDecimals(ratioJumpToken, ratioXJumpToken);
   }, [ratioJumpToken, ratioXJumpToken]);
 
   const balanceXJumpToken = useMemo(() => {
