@@ -31,6 +31,19 @@ export function Header() {
     "transition-all fixed inset-0 bottom-auto z-50 flex items-center justify-between px-8 h-[74px]";
   const floatingClasses = " shadow-lg backdrop-blur bg-white-600";
 
+  const testnetTokensButton =
+    import.meta.env.VITE_NEAR_NETWORK === "testnet" ? (
+      <Button
+        inline
+        className="p-0 text-3.5 font-semibold leading-4 tracking-normal"
+        onClick={() => setShowTokenModal(!showTokenModal)}
+      >
+        Get Testnet Tokens
+      </Button>
+    ) : (
+      <></>
+    );
+
   return (
     <div className="relative w-full h-[74px]">
       <header className={classes + (isHeaderFloating ? floatingClasses : "")}>
@@ -45,13 +58,7 @@ export function Header() {
 
         <div className="flex gap-x-6 items-center">
           {/* GetTestnet Tokens Button */}
-          <Button
-            inline
-            className="p-0 text-3.5 font-semibold leading-4 tracking-normal"
-            onClick={() => setShowTokenModal(!showTokenModal)}
-          >
-            Get Testnet Tokens
-          </Button>
+          {testnetTokensButton}
 
           {/* Wallet Button/Menu */}
           <Wallet />
