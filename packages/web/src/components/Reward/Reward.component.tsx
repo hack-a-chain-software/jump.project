@@ -72,11 +72,15 @@ function Reward({
     );
   }
 
-  return (
-    <div className="rounded-lg bg-white-600 p-4 min-w-[192px] h-[82px] space-y-3">
-      {badge ? renderBadge() : renderContent()}
-    </div>
-  );
+  if (name === "string") {
+    return <></>;
+  } else {
+    return (
+      <div className="rounded-lg bg-white-600 p-4 min-w-[192px] h-[82px] space-y-3">
+        {badge ? renderBadge() : renderContent()}
+      </div>
+    );
+  }
 }
 
 export default Reward;
