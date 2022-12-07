@@ -88,6 +88,7 @@ export const NFTStaking = () => {
         logo={staking?.collection_image}
         name={staking?.collection_meta?.name}
         rewards={staking?.rewards}
+        collection={nftProjects?.nft_staking_projects?.data?.collection_id}
       />
     );
   };

@@ -1,12 +1,14 @@
 import Big from "big.js";
 import Skeleton from "react-loading-skeleton";
 import Badge from "@/components/Badge";
+import { useCollectionStakedNfts } from "@/hooks/modules/launchpad";
 
 type RewardProps = {
   name: string;
   icon: string;
   balance: string;
   decimals: number;
+  stakedQuantity: number;
   badge?: string;
   hideText?: boolean;
 };
@@ -16,14 +18,18 @@ function Reward({
   icon,
   balance,
   decimals,
+  stakedQuantity,
   badge,
   hideText,
 }: RewardProps) {
+  const nftQuantity = useCollectionStakedNfts();
+
   function formattedBalance(balance: string, decimals: number) {
     const decimalsBig = new Big(10).pow(decimals ?? 0);
     const balanceBig = new Big(balance ?? 0);
+    const stakedBig = new Big(stakedQuantity === 0 ? 1 : stakedQuantity);
 
-    return balanceBig.div(decimalsBig).toFixed(2);
+    return balanceBig.div(decimalsBig).div(stakedBig).toFixed(2);
   }
 
   function renderImage() {
