@@ -17,15 +17,28 @@ export interface TokenMetadataResponse {
 export async function findTokenMetadata(
   token_address: string
 ): Promise<TokenMetadataResponse> {
-  const rawResult = await provider.query<NearQuery>({
-    request_type: "call_function",
-    account_id: token_address,
-    method_name: "ft_metadata",
-    finality: "optimistic",
-    args_base64: "e30=",
-  });
+  try {
+    const rawResult = await provider.query<NearQuery>({
+      request_type: "call_function",
+      account_id: token_address,
+      method_name: "ft_metadata",
+      finality: "optimistic",
+      args_base64: "e30=",
+    });
 
-  // format result
-  const res = JSON.parse(Buffer.from(rawResult.result).toString());
-  return res;
+    // format result
+    const res = JSON.parse(Buffer.from(rawResult.result).toString());
+    return res;
+  } catch (e) {
+    if (!JSON.stringify(e).includes("UntypedError"))
+      throw "Blockchain query error";
+
+    return {
+      spec: "not_found",
+      name: "string",
+      symbol: "string",
+      icon: "string",
+      decimals: 0,
+    };
+  }
 }

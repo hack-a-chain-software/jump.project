@@ -22,6 +22,7 @@ DB_NAME=${process.env.DB_NAME}
 NFT_STAKING_CONTRACT=nftstaking.jumpfinance.near
 JUMP_LAUNCHPAD_CONTRACT=launchpad.jumpfinance.near
 ENV=MAINNET
+NEAR_RPC_URL=https://rpc.mainnet.near.org
 `;
 
 fs.writeFileSync("./packages/graphql/.env", environment_file_graphql);
