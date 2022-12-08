@@ -41,7 +41,6 @@ const app = new ApolloServer({
 });
 
 async function main(): Promise<void> {
-  console.log(sequelize);
   try {
     console.log(
       "Running the GraphQL Server with the following ENV for NEAR = " +

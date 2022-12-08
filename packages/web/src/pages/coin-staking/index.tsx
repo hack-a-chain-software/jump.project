@@ -44,10 +44,8 @@ function Staking() {
   const { data: XTokenRatio } = useQuery(XJumpProjectDocument, {
     variables: queryVariables,
   });
-  console.log();
 
   useEffect(() => {
-    console.log(XTokenRatio);
     function createChartObj() {
       const monthValues: any = [];
       const monthDates: any = [];
@@ -127,8 +125,6 @@ function Staking() {
           },
         });
       }
-
-      console.log(chartObj, "yay");
     }
 
     createChartObj();
