@@ -19,6 +19,7 @@ import {
   PaginationFilters,
 } from "@/utils/createPaginatedConnection";
 import BN from "bn.js";
+import Big from "big.js";
 
 export default {
   NFTStaking: {
@@ -40,12 +41,11 @@ export default {
       const stakingRewards: StakingToken[] = [];
 
       for (const key in distributions) {
-        console.log(key);
         const metadata = await findTokenMetadata(key);
 
         const { reward } = distributions[key];
 
-        const rewardBN = new BN(reward.toString());
+        const rewardBN = new BN(new Big(reward).toFixed(0));
         const intervalBN = new BN(interval);
         const millisecondsPerMonthBN = new BN(millisecondsPerMonth);
 
