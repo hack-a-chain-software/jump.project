@@ -44,7 +44,7 @@ export default {
         const metadata = await findTokenMetadata(key);
 
         const { reward } = distributions[key];
-
+        throw { reward, type_reward: typeof reward };
         const rewardBN = new BN(reward.toString());
         const intervalBN = new BN(interval);
         const millisecondsPerMonthBN = new BN(millisecondsPerMonth);
