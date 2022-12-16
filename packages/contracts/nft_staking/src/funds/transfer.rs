@@ -15,6 +15,7 @@ pub enum TransferOperation {
   CollectionToContract,
   CollectionToDistribution,
   BeneficiaryToCollection,
+  DistributionToCollection,
 }
 
 impl Contract {
@@ -26,7 +27,7 @@ impl Contract {
     token_id: &FungibleTokenID,
   ) {
     match &operation {
-      TransferOperation::CollectionToContract | TransferOperation::ContractToCollection => {
+      TransferOperation::CollectionToContract | TransferOperation::ContractToCollection | TransferOperation::DistributionToCollection => {
         self.only_owner(operator);
         self.only_contract_tokens(token_id);
         staking_program.only_non_program_tokens(token_id);
@@ -89,6 +90,16 @@ impl Contract {
         );
         // TODO: ideally this would call StakingProgram::withdraw_beneficiary_funds
         let amount = staking_program.farm.withdraw_beneficiary_funds(&token_id);
+
+        *collection_treasury += amount;
+      }
+      TransferOperation::DistributionToCollection => {
+        assert!(
+          amount.is_none(),
+          "This operation does not support the parameter 'amount'"
+        );
+        // TODO: ideally this would call StakingProgram::withdraw_beneficiary_funds
+        let amount = staking_program.farm.withdraw_distribution_funds(&token_id);
 
         *collection_treasury += amount;
       }

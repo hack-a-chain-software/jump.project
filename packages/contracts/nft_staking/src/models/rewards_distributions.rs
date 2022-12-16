@@ -81,6 +81,15 @@ impl RewardsDistribution {
 
     (dist, beneficiary)
   }
+
+  pub fn withdraw_distribution(&self) -> (Self, u128) {
+    let mut dist = self.clone();
+    let undistributed = self.undistributed;
+
+    dist.undistributed = 0;
+
+    (dist, undistributed)
+  }
 }
 
 #[cfg(test)]

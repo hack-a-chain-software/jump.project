@@ -78,6 +78,18 @@ impl Farm {
     amount
   }
 
+  pub fn withdraw_distribution_funds(&mut self, token_id: &FungibleTokenID) -> u128 {
+    let (dist, amount) = self
+      .distributions
+      .get(&token_id)
+      .unwrap()
+      .withdraw_distribution();
+
+    self.distributions.insert(token_id.clone(), dist);
+
+    amount
+  }
+
   fn round(&self) -> u64 {
     let delta_t = env::block_timestamp_ms()
       .checked_sub(self.start_at)
