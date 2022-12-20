@@ -107,6 +107,14 @@ export const useNftStaking = create<{
         tokens.push({ ...token, balance, stakedAt: staked_timestamp });
       }
 
+      console.log({
+        staked,
+        connection,
+        account,
+        collection,
+        tokens,
+      });
+
       set({
         tokens,
       });
