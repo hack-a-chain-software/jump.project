@@ -11,9 +11,11 @@ export interface TutorialItemInterface {
 export const Tutorial = ({
   items,
   options,
+  onChange,
 }: {
   items: TutorialItemInterface[];
   options?: any;
+  onChange?: (index: number, element: Element) => void;
 }) => {
   const [show, setShow] = useState(false);
 
@@ -28,6 +30,7 @@ export const Tutorial = ({
         steps={items}
         initialStep={0}
         onExit={() => setShow(false)}
+        onChange={onChange}
         options={{
           showProgress: false,
           showBullets: false,

@@ -49,16 +49,19 @@ impl Contract {
     // all rewards were distributed according to old schema 
     staking_program.farm.distribute();
 
-    let reward_distribution = staking_program.farm.distributions.get(&token_id).expect("token not included in collection");
-
-    staking_program.farm.distributions.insert(token_id, RewardsDistribution {
-      undistributed: reward_distribution.undistributed,
-      unclaimed: reward_distribution.unclaimed,
-      beneficiary: reward_distribution.beneficiary,
-      rps: reward_distribution.rps,
-      rr: reward_distribution.rr,
-      reward: amount.0,
-    });
+    if let Some(reward_distribution) = staking_program.farm.distributions.get(&token_id) {
+      staking_program.farm.distributions.insert(token_id, RewardsDistribution {
+        undistributed: reward_distribution.undistributed,
+        unclaimed: reward_distribution.unclaimed,
+        beneficiary: reward_distribution.beneficiary,
+        rps: reward_distribution.rps,
+        rr: reward_distribution.rr,
+        reward: amount.0,
+      });
+    } else {
+      staking_program.farm.distributions.insert(token_id, RewardsDistribution::new(0, amount.0));
+    }
+    
 
     self.staking_programs.insert(&collection, &staking_program);
     

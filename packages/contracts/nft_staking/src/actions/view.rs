@@ -1,9 +1,11 @@
-use near_sdk::{near_bindgen, AccountId};
+use std::collections::HashMap;
+
+use near_sdk::{near_bindgen, AccountId, json_types::U128};
 
 use crate::{
   types::{
     NFTCollection, NonFungibleTokenID, SerializableFungibleTokenBalance, SerializableStakedNFT,
-    SerializableStakingProgram,
+    SerializableStakingProgram, FungibleTokenBalance,
   },
   Contract, ContractExt,
 };
@@ -93,5 +95,15 @@ impl Contract {
     let balance = staking_program.stakers_balances.get(&account_id).unwrap();
 
     balance.into()
+  }
+
+  pub fn view_contract_treasury_balance(
+    &self
+  ) -> HashMap<AccountId, U128> {
+    let mut result = HashMap::new();
+    for (key, value) in self.contract_treasury.iter() {
+      result.insert(key.clone(), U128(*value));
+    }
+    result
   }
 }

@@ -31,6 +31,8 @@ module.exports = {
       backgroundImage: {
         jump: "linear-gradient(90deg, #510B72 0%, #740B0B 100%) fixed", // Jump Gradient
         jump2: "linear-gradient(90deg, #AE00FF 0%, #FF1100 100%) fixed", // Jump Gradient 2
+        guide:
+          "linear-gradient(90deg, #CCA3FE 0%, rgba(174,89,240,1) 22%, rgba(138,101,243,1) 100%)",
       },
       borderRadius: {
         none: 0,
@@ -50,6 +52,8 @@ module.exports = {
       fontSize: {
         3: ".75rem",
         3.5: ".875rem",
+        4: "1rem",
+        4.5: "1.125rem",
         5: "1.25rem",
         6: "1.5rem",
       },

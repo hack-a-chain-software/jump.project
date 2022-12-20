@@ -32,6 +32,9 @@ function Staking() {
   const [baseTokenRatioRaw, setBaseTokenRatioRaw] = useState("0");
   const [chartObj, setChartObj] = useState({});
 
+  const [tutorialModal, setTutorialModal] = useState<boolean>(false);
+  const [tutorialGuide, setTutorialGuide] = useState<boolean>(false);
+  const [dashboardTab, setDashboardTab] = useState<number>(0);
   const { stakeXToken: stakeXJumpToken, burnXToken: unstakeXJumpToken } =
     useStaking();
 
@@ -137,6 +140,7 @@ function Staking() {
         X_JUMP_TOKEN,
         "view_token_ratio"
       );
+      console.log({ data });
       setXJumpRatioRaw(data?.x_token);
       setBaseTokenRatioRaw(data?.base_token);
     };
@@ -226,11 +230,11 @@ function Staking() {
   // }, [tetherToken, decimals]);
 
   const valueJumpToken = useMemo(() => {
-    return divideAndParseToTwoDecimals(ratioJumpToken, ratioXJumpToken);
+    return divideAndParseToTwoDecimals(ratioXJumpToken, ratioJumpToken);
   }, [ratioJumpToken, ratioXJumpToken]);
 
   const valueXJumpToken = useMemo(() => {
-    return divideAndParseToTwoDecimals(ratioXJumpToken, ratioJumpToken);
+    return divideAndParseToTwoDecimals(ratioJumpToken, ratioXJumpToken);
   }, [ratioJumpToken, ratioXJumpToken]);
 
   const balanceXJumpToken = useMemo(() => {
@@ -281,6 +285,7 @@ function Staking() {
 
   function calcAmountRaw(amount: string, decimals: number | undefined) {
     return new Big(amount).mul(new Big("10").pow(decimals!)).toFixed();
+    return new Big(amount).mul(new Big("10").pow(decimals!)).toFixed(0);
   }
 
   async function onSubmit(values, call) {
@@ -292,6 +297,10 @@ function Staking() {
     } finally {
       toast("Done!");
     }
+  }
+
+  function onGuideChange(nextIndex: number) {
+    if (nextIndex < 2) setDashboardTab(nextIndex);
   }
 
   const stakingProps = {
@@ -311,6 +320,16 @@ function Staking() {
     balanceJumpToken,
     availableXJumpToClaim,
     chartObj,
+
+    tutorialModal,
+    setTutorialModal,
+
+    tutorialGuide,
+    setTutorialGuide,
+    onGuideChange,
+
+    dashboardTab,
+    setDashboardTab,
   };
 
   return <StakingComponent {...stakingProps} />;
