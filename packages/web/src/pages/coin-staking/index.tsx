@@ -280,7 +280,7 @@ function Staking() {
   }
 
   function calcAmountRaw(amount: string, decimals: number | undefined) {
-    return new Big(amount).mul(new Big("10").pow(decimals!)).toString();
+    return new Big(amount).mul(new Big("10").pow(decimals!)).toFixed();
   }
 
   async function onSubmit(values, call) {

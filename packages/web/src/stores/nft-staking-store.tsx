@@ -7,6 +7,7 @@ import {
 import { Token, Transaction } from "@near/ts";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { utils } from "near-api-js";
+import Big from "big.js";
 
 export const useNftStaking = create<{
   loading: boolean;
@@ -133,7 +134,10 @@ export const useNftStaking = create<{
       import.meta.env.VITE_NFT_STAKING_CONTRACT
     );
 
-    if (!stakingStorage || stakingStorage?.available < "0.10") {
+    if (
+      !stakingStorage ||
+      new Big(stakingStorage?.available).lte("100000000000000000000000")
+    ) {
       transactions.push(
         getTransaction(
           account,
