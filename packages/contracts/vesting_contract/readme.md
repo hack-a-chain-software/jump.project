@@ -94,7 +94,7 @@ Investors will tipically only withdraw tokens from their investments as they bec
 
         }"
     ```shell
-    near call <baseTokenAddress> "new" '{"receiver_id": "<vestingContractAddress>", "amount": "<amount_to_distribute_in_schema>", "memo": "<memo>", "msg": "{msg_object}" }' --accountId <ownerAccountId> --depositYocto 1
+    near call <baseTokenAddress> "new" '{"receiver_id": "<vestingContractAddress>", "amount": "<amount_to_distribute_in_schema>", "memo": "<memo>", "msg": "{ category: "<category>", initial_release: "<initial_release>", cliff_release: "<cliff_release>", final_release: "<final_release>", initial_timestamp: "<initial_timestamp>", cliff_delta: "<cliff_delta>", final_delta: "<final_delta>", curve_type: "Linear", discrete_period: "<discrete_period>" }" }' --accountId <ownerAccountId> --depositYocto 1
     ```
 
     If you wish to see details for a specific schema created:
