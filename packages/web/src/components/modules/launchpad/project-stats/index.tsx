@@ -1,3 +1,5 @@
+/* eslint-disable react/no-children-prop */
+/* eslint-disable react/jsx-key */
 import Big from "big.js";
 import { useMemo } from "react";
 import { format } from "date-fns";
@@ -165,7 +167,7 @@ export function ProjectStats({
               />
             </div>
           </div>
-          <div className="mb-[8px]">
+          {/*  <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
                 DEX Launch date
@@ -178,7 +180,7 @@ export function ProjectStats({
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>,
       <div className="flex flex-col ml-[36px] w-full">
@@ -211,19 +213,36 @@ export function ProjectStats({
             </div>
 
             <div>
-              <span
-                children={formatNumber(
-                  project_total_amount_sale_project_tokens,
-                  project_token_info?.decimals
+              {/*
+								TODO: The Calculation shouldn't be done here, just temporary fix
+
+								*/}
+              {token_allocation_size &&
+                project_total_amount_sale_project_tokens && (
+                  <span
+                    children={
+                      parseFloat(
+                        formatNumber(
+                          project_total_amount_sale_project_tokens,
+                          project_token_info?.decimals
+                        ).replace(/,/g, "")
+                      ) /
+                      parseFloat(
+                        formatNumber(
+                          token_allocation_size,
+                          project_token_info?.decimals
+                        ).replace(/,/g, "")
+                      )
+                    }
+                    className="text-[16px] font-[800] tracking-[-0.04em]"
+                  />
                 )}
-                className="text-[16px] font-[800] tracking-[-0.04em]"
-              />
             </div>
           </div>
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Allocation size
+                Token size per allocation
               </span>
             </div>
 
@@ -250,16 +269,29 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Token price
+                Price per token
               </span>
             </div>
 
             <div>
+              {/*
+								TODO: The Calculation shouldn't be done here, just temporary fix
+								*/}
               <span
-                children={`${formatNumber(
-                  token_allocation_price,
-                  price_token_info?.decimals
-                )} ${price_token_info?.symbol}`}
+                children={`${
+                  parseFloat(
+                    formatNumber(
+                      token_allocation_price,
+                      price_token_info?.decimals
+                    ).replace(/,/g, "")
+                  ) /
+                  parseFloat(
+                    formatNumber(
+                      token_allocation_size,
+                      project_token_info?.decimals
+                    ).replace(/,/g, "")
+                  )
+                } ${price_token_info?.symbol}`}
                 className="text-[16px] font-[800] tracking-[-0.04em]"
               />
             </div>
@@ -308,7 +340,7 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Vesting initial release
+                Initial Allocation release
               </span>
             </div>
 
@@ -325,7 +357,7 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Vesting cliff release
+                Vesting Release
               </span>
             </div>
 
@@ -341,7 +373,7 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Vesting final release
+                Final Allocation Release
               </span>
             </div>
 
@@ -361,7 +393,7 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Vesting cliff launchpad project date
+                Vesting Start Date
               </span>
             </div>
 
@@ -375,7 +407,7 @@ export function ProjectStats({
           <div className="mb-[8px]">
             <div>
               <span className="text-[14px] font-[600] tracking-[-0.04em]">
-                Vesting cliff end date
+                Vesting End Date
               </span>
             </div>
 
