@@ -119,10 +119,7 @@ export const ProjectInvestments = ({
             <span
               children={
                 accountId
-                  ? formatNumber(
-                      allocationsAvailable.toNumber(),
-                      project_token_info?.decimals
-                    )
+                  ? allocationsAvailable.toNumber()
                   : CONNECT_WALLET_MESSAGE
               }
               className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
