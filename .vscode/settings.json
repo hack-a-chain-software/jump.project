@@ -1,0 +1,55 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "dev-jdx.cpvy55ndfvji.us-east-1.rds.amazonaws.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "Jump Dev",
+      "group": "Jump DEX",
+      "username": "postgres",
+      "database": "jdx_dev_db",
+      "password": "JDX-hcswdev15"
+    },
+    {
+      "previewLimit": 50,
+      "server": "postgres-jump-testnet.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "postgres-jump-testnet",
+      "database": "jump_testnet",
+      "username": "postgres",
+      "password": "JDX-secret_password-1683413286"
+    },
+    {
+      "previewLimit": 50,
+      "server": "staging-db.c8fvx3d5adgx.us-east-1.rds.amazonaws.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "staging-jump",
+      "database": "jump_testnet",
+      "username": "postgres",
+      "password": "JDX-secret_password-1683413286"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "local",
+      "database": "test",
+      "username": "postgres",
+      "password": "secretpassword",
+      "connectString": "postgresql://postgres:1234@localhost:5438/postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "local2",
+      "connectString": "postgresql://postgres:1234@localhost:5437/postgres"
+    }
+  ]
+}

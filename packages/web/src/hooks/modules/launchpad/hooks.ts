@@ -142,39 +142,3 @@ export async function useXJumpMetadata(selector: WalletSelector) {
   const metadata = await viewFunction(selector, X_JUMP_TOKEN, "ft_metadata");
   return metadata;
 }
-
-export async function useCollectionStakedNfts(
-  selector: WalletSelector,
-  collection: string
-): Promise<number> {
-  try {
-    let allStaked = [];
-    let from_index = 0;
-    while (true) {
-      const staked = await viewFunction(
-        selector,
-        import.meta.env.VITE_NFT_STAKING_CONTRACT,
-        "view_staked",
-        {
-          collection: {
-            type: "NFTContract",
-            account_id: selector,
-          },
-          from_index,
-          limit: 50,
-        }
-      );
-      from_index += 50;
-      allStaked.concat(staked);
-      if (staked.length < 50) {
-        break;
-      }
-    }
-
-    return allStaked.length;
-  } catch (e) {
-    console.warn(e);
-
-    return 1;
-  }
-}

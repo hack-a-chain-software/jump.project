@@ -229,30 +229,16 @@ export const ProjectCard = ({
           <div className="flex space-x-[29px] items-center mb-[16px]">
             <div className="w-[99px]">
               <span className="font-[700] text-[14px] tracking-[-0.04em]">
-                Token Price:
+                Token price:
               </span>
             </div>
 
             <div>
               <span className="text-white font-[700] text-[15.6259px] tracking-[-0.04em]">
-                {/*
-								TODO: The Calculation shouldn't be done here, just temporary fix
-
-								*/}
-                {`${
-                  parseFloat(
-                    formatNumber(
-                      token_allocation_price,
-                      metadataPriceToken?.decimals
-                    ).replace(/,/g, "")
-                  ) /
-                  parseFloat(
-                    formatNumber(
-                      token_allocation_size,
-                      project_token_info?.decimals
-                    ).replace(/,/g, "")
-                  )
-                } ${metadataPriceToken?.symbol}`}
+                {`${formatNumber(
+                  token_allocation_price,
+                  metadataPriceToken?.decimals
+                )} ${metadataPriceToken?.symbol}`}
               </span>
             </div>
           </div>

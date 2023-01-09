@@ -62,7 +62,6 @@ function NFTCard(props: NFTCardProps) {
         icon={reward?.icon}
         balance={balance ? balance[reward?.account_id] : "0"}
         decimals={reward?.decimals}
-        stakedQuantity={1}
         hideText={true}
       />
     ));

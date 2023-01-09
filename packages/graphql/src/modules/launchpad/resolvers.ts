@@ -39,6 +39,8 @@ export default {
     async project_allocations_sold({ listing_id }: LaunchpadListing) {
       const { allocations_sold } = await findProjectInfo(listing_id);
 
+      console.log("projectallocationssold", allocations_sold);
+
       return allocations_sold;
     },
     async project_total_amount_sale_project_tokens({

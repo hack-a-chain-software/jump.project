@@ -7,7 +7,6 @@ type RewardProps = {
   icon: string;
   balance: string;
   decimals: number;
-  stakedQuantity: number;
   badge?: string;
   hideText?: boolean;
 };
@@ -17,16 +16,14 @@ function Reward({
   icon,
   balance,
   decimals,
-  stakedQuantity,
   badge,
   hideText,
 }: RewardProps) {
   function formattedBalance(balance: string, decimals: number) {
     const decimalsBig = new Big(10).pow(decimals ?? 0);
     const balanceBig = new Big(balance ?? 0);
-    const stakedBig = new Big(stakedQuantity === 0 ? 1 : stakedQuantity);
 
-    return balanceBig.div(decimalsBig).div(stakedBig).toFixed(2);
+    return balanceBig.div(decimalsBig).toFixed(2);
   }
 
   function renderImage() {
@@ -75,15 +72,11 @@ function Reward({
     );
   }
 
-  if (name === "string") {
-    return <></>;
-  } else {
-    return (
-      <div className="rounded-lg bg-white-600 p-4 min-w-[192px] h-[82px] space-y-3">
-        {badge ? renderBadge() : renderContent()}
-      </div>
-    );
-  }
+  return (
+    <div className="rounded-lg bg-white-600 p-4 min-w-[192px] h-[82px] space-y-3">
+      {badge ? renderBadge() : renderContent()}
+    </div>
+  );
 }
 
 export default Reward;

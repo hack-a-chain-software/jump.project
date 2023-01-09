@@ -101,6 +101,7 @@ function StakingComponent(props: StakingComponentProps) {
         setSelectedData(chartObj.month);
         break;
       case 3:
+        console.log(chartObj.year);
         setSelectedData(chartObj.year);
         break;
       default:

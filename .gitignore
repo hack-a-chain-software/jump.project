@@ -29,4 +29,3 @@ yarn-error.log*
 **/target
 .eslintcache
 .vercel
-.vscode

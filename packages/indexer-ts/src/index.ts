@@ -47,7 +47,7 @@ function closureHandleStreamerMessage(sequelize: Sequelize) {
   // get highest block in DB
   const lastProcessedTransaction = (await ProcessedEvent.findOne({
     attributes: [
-      [sequelize.fn("max", sequelize.col("block_height")), "block_height"],
+      [sequelize.fn("min", sequelize.col("block_height")), "block_height"],
     ],
     raw: true,
   }))!;

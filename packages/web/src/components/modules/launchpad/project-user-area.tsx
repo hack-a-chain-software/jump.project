@@ -1,4 +1,3 @@
-/* eslint-disable react/no-children-prop */
 import Big from "big.js";
 import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
@@ -33,7 +32,6 @@ export function ProjectUserArea({
     price_token,
     project_token,
     price_token_info,
-    project_token_info,
     token_allocation_price,
     open_sale_1_timestamp,
     final_sale_2_timestamp,
@@ -204,10 +202,7 @@ export function ProjectUserArea({
 
         <div>
           <span
-            children={`Your allocation balance: ${formatNumber(
-              allocationsAvailable.toNumber(),
-              project_token_info?.decimals
-            )}`}
+            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
         </div>
@@ -256,7 +251,6 @@ export function ProjectUserArea({
                 For:{" "}
                 {formatNumber(
                   ticketsAmount,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
                   new Big(price_token_info?.decimals! || "0")
                 )}{" "}
                 {price_token_info?.symbol}
