@@ -106,6 +106,9 @@ export function ProjectInfo({
             <button
               disabled={!!!website}
               className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
+              onClick={() => {
+                window.open(website!, "_blank");
+              }}
             >
               <span className="font-[500] text-[14px] tracking-[-0.04em]">
                 Website
@@ -119,6 +122,9 @@ export function ProjectInfo({
             <button
               disabled={!!!whitepaper}
               className="border border-[rgba(252,252,252,0.2)] py-[10px] px-[16px] rounded-[10px] flex items-center space-x-[4px] disabled:cursor-not-allowed hover:opacity-[0.8]"
+              onClick={() => {
+                window.open(whitepaper!, "_blank");
+              }}
             >
               <span className="font-[500] text-[14px] tracking-[-0.04em]">
                 Whitepaper
