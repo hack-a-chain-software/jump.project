@@ -219,7 +219,7 @@ export function ProjectUserArea({
                 allocationsAvailable.toNumber()
               );
               console.log("input value:", value);
-              setTickets(value);
+              setTickets(value || 0);
             }}
           />
         </div>
