@@ -53,7 +53,7 @@ export function ProjectUserArea({
 
   const allocationsAvailable = useMemo(() => {
     //TODO: Temp fix
-    return new Big(investorAllowance ?? "1");
+    return new Big(investorAllowance ?? "1000");
   }, [investorAllowance]);
 
   const onJoinProject = useCallback(
@@ -212,7 +212,7 @@ export function ProjectUserArea({
           <NumberInput
             min={0}
             value={tickets}
-            max={50}
+            max={allocationsAvailable.toNumber()}
             onChange={(value) => {
               console.log(
                 "Allocation Balance:",
@@ -224,15 +224,12 @@ export function ProjectUserArea({
           />
         </div>
 
-        <div>
+        {/*   <div>
           <span
-            children={`Your allocation balance: ${formatNumber(
-              allocationsAvailable.toNumber(),
-              project_token_info?.decimals
-            )}`}
+            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full flex justify-between items-center mb-[16px]">
