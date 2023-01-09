@@ -225,7 +225,7 @@ export const useVestingStore = create<{
       import.meta.env.VITE_BASE_TOKEN
     );
 
-    if (!storage || storage.total < "0.10") {
+    if (!storage) {
       transactions.push(
         getTransaction(
           accountId,

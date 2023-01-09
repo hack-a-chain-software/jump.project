@@ -5,6 +5,9 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
 import Reward from "@/components/Reward";
 import Image from "@/components/Image";
+import { useCollectionStakedNfts } from "@/hooks/modules/launchpad";
+import { useState, useEffect } from "react";
+import { useWalletSelector } from "@/context/wallet-selector";
 
 type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
   name?: string | undefined;
@@ -13,9 +16,26 @@ type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
   rewards?: StakingToken[];
   logoless?: boolean;
   wallet?: string;
+  collection?: string | undefined;
 };
 
 export function NFTStakingCard(props: NFTStakingCardProps) {
+  const { accountId, selector } = useWalletSelector();
+  const [nftQuantity, setNftQuantity] = useState<any>(1);
+
+  useEffect(() => {
+    (async () => {
+      if (props.collection) {
+        const quantity = await useCollectionStakedNfts(
+          selector,
+          props.collection!
+        );
+
+        setNftQuantity(quantity);
+      }
+    })();
+  }, []);
+
   const renderLink = () => {
     if (props.link)
       return (
@@ -71,6 +91,7 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
         icon={icon}
         balance={perMonth}
         decimals={decimals}
+        stakedQuantity={nftQuantity}
         badge={props.wallet}
         hideText={props.logoless}
       />
