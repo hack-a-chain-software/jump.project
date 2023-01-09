@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable react/no-children-prop */
 import Big from "big.js";
 import { useMemo, useCallback } from "react";
 import { isBefore } from "date-fns";
@@ -31,6 +33,7 @@ export function ProjectUserArea({
     listing_id,
     price_token,
     project_token,
+    project_token_info,
     price_token_info,
     token_allocation_price,
     open_sale_1_timestamp,
@@ -49,11 +52,12 @@ export function ProjectUserArea({
   const [tickets, setTickets] = useState(0);
 
   const allocationsAvailable = useMemo(() => {
-    return new Big(investorAllowance ?? "0");
+    //TODO: Temp fix
+    return new Big(investorAllowance ?? "1");
   }, [investorAllowance]);
 
   const onJoinProject = useCallback(
-    (amount: number) => {
+    async (amount: number) => {
       if (typeof listing_id && price_token) {
         buyTickets(
           new Big(amount).mul(new Big(token_allocation_price || 0)).toString(),
@@ -66,6 +70,19 @@ export function ProjectUserArea({
     },
     [1, accountId, project_token, token_allocation_price]
   );
+
+  /*  async function TempFixJoinProject(amount: number) {
+    console.log("HERE");
+    if (typeof listing_id && price_token) {
+      await buyTickets(
+        new Big(amount).mul(new Big(token_allocation_price || 0)).toString(),
+        price_token,
+        listing_id,
+        accountId!,
+        selector
+      );
+    }
+  } */
 
   const ticketsAmount = useMemo(() => {
     return new Big(token_allocation_price! ?? 0).mul(
@@ -195,14 +212,24 @@ export function ProjectUserArea({
           <NumberInput
             min={0}
             value={tickets}
-            max={allocationsAvailable.toNumber()}
-            onChange={(value) => setTickets(value || 0)}
+            max={50}
+            onChange={(value) => {
+              console.log(
+                "Allocation Balance:",
+                allocationsAvailable.toNumber()
+              );
+              console.log("input value:", value);
+              setTickets(value);
+            }}
           />
         </div>
 
         <div>
           <span
-            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
+            children={`Your allocation balance: ${formatNumber(
+              allocationsAvailable.toNumber(),
+              project_token_info?.decimals
+            )}`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
         </div>

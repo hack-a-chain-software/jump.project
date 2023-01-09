@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLaunchPadProjectQuery } from "@near/apollo";
 import { useNavigate, useParams } from "react-router";
 import { BackButton } from "@/components/shared/back-button";
