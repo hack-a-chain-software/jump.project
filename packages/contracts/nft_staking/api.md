@@ -104,7 +104,7 @@ The owner is responsible for 5 functions in the contract: (1) adding guardians, 
         msg: String -> { "type": "Deposit", "data": { "type": "ContractTreasury" } }
 
     ```shell
-    near call <tokenContractAddress> "ft_transfer_call" '{"receiver_id": "<nftStakingAddress>", "amount": "<amount>", "msg": "{ \"type\": \"Deposit\", \"data\": { \"type\": \"Deposit\", \"data\": { \"type\": \"ContractTreasury\" } } }" }' --accountId <ownerAccountId> --depositYocto 1
+    near call <tokenContractAddress> "ft_transfer_call" '{"receiver_id": "<nftStakingAddress>", "amount": "<amount>", "msg": "{ \"type\": \"Deposit\", \"data\": { \"type\": \"ContractTreasury\" } }" }' --accountId <ownerAccountId> --depositYocto 1
     ```
 
 7. transfer
@@ -224,7 +224,7 @@ There are 3 actions that must be performed by collection owners: (1) depositing 
         msg: String -> {"type": "CollectionTreasury", "collection": {"type": "NFTContract", "account_id": "<NFTContractAccountId>"} }
 
     ```shell
-    near call <rewardTokenAddress> "ft_transfer_call" '{"receiver_id": "<contractAccount>", "amount": "<quantityToDeposit>", "msg": "{  \"type\": \"Deposit\", \"data\": { \"type\": \"CollectionTreasury\", \"collection\": {\"type\": \"NFTContract\", \"account_id\": \"<NFTContractAccountId>\"} } }" }' --accountId <collectionOwnerAccountId> --depositYocto 1
+    near call <rewardTokenAddress> "ft_transfer_call" '{"receiver_id": "<contractAccount>", "amount": "<quantityToDeposit>", "msg": "{ \"type\": \"CollectionTreasury\", \"collection\": {\"type\": \"NFTContract\", \"account_id\": \"<NFTContractAccountId>\"} }" }' --accountId <collectionOwnerAccountId> --depositYocto 1
     ```
 
 2. transfer

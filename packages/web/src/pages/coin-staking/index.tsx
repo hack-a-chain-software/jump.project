@@ -47,8 +47,10 @@ function Staking() {
   const { data: XTokenRatio } = useQuery(XJumpProjectDocument, {
     variables: queryVariables,
   });
+  console.log();
 
   useEffect(() => {
+    console.log(XTokenRatio);
     function createChartObj() {
       const monthValues: any = [];
       const monthDates: any = [];
@@ -128,6 +130,8 @@ function Staking() {
           },
         });
       }
+
+      console.log(chartObj, "yay");
     }
 
     createChartObj();
@@ -284,7 +288,6 @@ function Staking() {
   }
 
   function calcAmountRaw(amount: string, decimals: number | undefined) {
-    return new Big(amount).mul(new Big("10").pow(decimals!)).toFixed();
     return new Big(amount).mul(new Big("10").pow(decimals!)).toFixed(0);
   }
 
