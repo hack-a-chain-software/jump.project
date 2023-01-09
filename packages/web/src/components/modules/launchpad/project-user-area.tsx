@@ -53,7 +53,7 @@ export function ProjectUserArea({
 
   const allocationsAvailable = useMemo(() => {
     //TODO: Temp fix
-    return new Big(investorAllowance ?? "1000");
+    return new Big(/* investorAllowance ??  */ "100000000000000000");
   }, [investorAllowance]);
 
   const onJoinProject = useCallback(
