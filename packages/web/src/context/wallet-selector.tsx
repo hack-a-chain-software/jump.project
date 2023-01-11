@@ -11,6 +11,7 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+/* import { setupSender } from "@near-wallet-selector/sender"; */
 import { tokenMetadata } from "@/interfaces";
 import { viewFunction } from "@/tools";
 
@@ -63,7 +64,7 @@ export const WalletSelectorContextProvider: React.FC<
     const _selector = await setupWalletSelector({
       network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
       debug: true,
-      modules: [setupNearWallet(), setupMeteorWallet()],
+      modules: [setupNearWallet(), setupMeteorWallet() /* setupSender() */],
     });
 
     const state = _selector.store.getState();

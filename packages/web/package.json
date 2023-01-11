@@ -18,6 +18,7 @@
     "@near-wallet-selector/core": "^7.0.3",
     "@near-wallet-selector/meteor-wallet": "^7.0.3",
     "@near-wallet-selector/near-wallet": "^7.0.3",
+    "@near-wallet-selector/sender": "^7.4.0",
     "@near/apollo": "*",
     "@near/ts": "*",
     "@rollup/plugin-inject": "^4.0.4",
