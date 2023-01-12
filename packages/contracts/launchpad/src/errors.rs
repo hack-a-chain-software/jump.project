@@ -27,7 +27,7 @@ pub const ERR_112: &str =
 pub const ERR_113: &str = "ERR_113: Listing can only be funded once";
 pub const ERR_114: &str = "ERR_114: Cannot fund listing after sale start time";
 pub const ERR_115: &str = "ERR_115: Intended project_owner did not authorize listing creation";
-
+pub const ERR_116: &str = "ERR_116: Error checking allocation sold, division by zero";
 /// Investor errors
 pub const ERR_201: &str = "ERR_201: Storage deposit insufficient for this transaction";
 pub const ERR_202: &str = "ERR_202: Storage deposited was less than minimum deposit";

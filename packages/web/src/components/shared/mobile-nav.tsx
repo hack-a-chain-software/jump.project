@@ -7,6 +7,7 @@ import {
   ModalContent,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { Wallet } from "./wallet";
 import { CloseIcon } from "@/assets/svg";
 import { useTheme } from "@/hooks/theme";
 import { useNavigate } from "react-router";

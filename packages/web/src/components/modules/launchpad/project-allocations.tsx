@@ -1,3 +1,4 @@
+/* eslint-disable react/no-children-prop */
 import Big from "big.js";
 import { isBefore, format } from "date-fns";
 import { getUTCDate } from "@near/ts";

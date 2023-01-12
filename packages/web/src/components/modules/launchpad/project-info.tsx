@@ -78,26 +78,23 @@ export function ProjectInfo({
 
         <div>
           <div className="mb-[-4px]">
-            <span
-              className="text-white text-[24px] font-[800] tracking-[-0.04em]"
-              children={project_token_info?.name}
-            />
+            <span className="text-white text-[24px] font-[800] tracking-[-0.04em]">
+              {project_token_info?.name}
+            </span>
           </div>
 
           <div>
-            <span
-              className="text-[20px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]"
-              children={project_token_info?.symbol}
-            />
+            <span className="text-[20px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]">
+              {project_token_info?.symbol}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="mb-[24px] pl-[54px] max-w-[622px]">
-        <span
-          children={description_project}
-          className="text-white text-[14px] font-[500]"
-        />
+        <span className="text-white text-[14px] font-[500]">
+          {description_project}
+        </span>
       </div>
 
       <div className="flex justify-between pl-[54px]">

@@ -53,17 +53,17 @@ export function Header() {
         />
         <div className="flex gap-x-4 items-center">
           <JumpIcon />
-          <JumpTextIcon />
+          <div className="hidden sm:block">
+            <JumpTextIcon />
+          </div>
         </div>
 
         <div className="flex gap-x-6 items-center">
           {/* GetTestnet Tokens Button */}
           {testnetTokensButton}
-
           {/* Wallet Button/Menu */}
-          <Wallet />
 
-          {/* Dark/Light Switch Button */}
+          {/*  Dark/Light Switch Button */}
           <Button
             white
             className="h-10 aspect-square p-0 hidden"
@@ -73,12 +73,11 @@ export function Header() {
             {isStyleSchemeDark && <SunIcon className="h-3" />}
           </Button>
 
-          {/* Mobile Hamburger Button */}
           <Button white onClick={() => setIsOpen(true)} className="lg:hidden">
             <Bars3Icon className="h-3.5" />
           </Button>
-
           <MobileNav isOpen={isOpen} onClose={() => setIsOpen(!isOpen)} />
+          <Wallet />
         </div>
       </header>
     </div>

@@ -10,8 +10,16 @@ import Big from "big.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import toast from "react-hot-toast";
 
-const shortenAddress = (address: string, chars = 8): string =>
-  `${address.slice(0, chars)}...${address.slice(-chars)}`;
+const shortenAddress = (address: string, chars = 8): string => {
+  if (!address) {
+    return "";
+  }
+  if (address.length <= chars * 2) {
+    return address;
+  }
+
+  return `${address.slice(0, chars)}...${address.slice(-chars)}`;
+};
 
 export const Wallet = () => {
   const { token, xToken, accountId, toggleModal, signOut } =
@@ -54,20 +62,20 @@ export const Wallet = () => {
       <Button
         white
         onClick={() => toggleModal()}
-        className="hidden md:flex text-3.5 font-semibold leading-4 tracking-tight text-purple gap-x-1"
+        className="font-semibold leading-4 tracking-tight text-purple gap-x-1"
       >
         <WalletIcon className="h-5" />
-        Connect Wallet
+        Connect
       </Button>
     );
   }
 
   return (
-    <Menu as="div" className="relative text-left hidden md:inline-block">
+    <Menu as="div" className="relative text-left inline-block">
       <Menu.Button as="div">
         <Button
           white
-          className="hidden md:flex text-3.5 font-semibold leading-4 tracking-tight text-purple gap-x-1"
+          className="text-3.5 font-semibold leading-4 tracking-tight text-purple gap-x-1"
         >
           <span children={shortenAddress(accountId)} />
 
@@ -88,7 +96,8 @@ export const Wallet = () => {
           as="div"
           className="
             absolute 
-            right-0 
+						right-0
+						max-w-[354px]
             mt-2 w-[354px] 
             origin-top-right
             rounded-[16px]

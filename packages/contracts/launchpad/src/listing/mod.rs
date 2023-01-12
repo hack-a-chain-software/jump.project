@@ -393,7 +393,16 @@ impl Listing {
         project_promise
       }
       ListingStatus::Funded => {
-        if env::block_timestamp() > self.final_sale_2_timestamp {
+        //Check All Allocations Sold and allow to withdraw funds
+        let all_allocation_sold = self.allocations_sold as u128
+          == (self
+            .total_amount_sale_project_tokens
+            .checked_div(self.token_allocation_size)
+            .unwrap_or_else(|| {
+              env::panic_str(ERR_116);
+            }));
+
+        if env::block_timestamp() > self.final_sale_2_timestamp || all_allocation_sold {
           self.status = ListingStatus::SaleFinalized;
           self.withdraw_project_funds()
         } else {
@@ -493,9 +502,7 @@ impl Listing {
       ((self.token_allocation_size * self.fraction_cliff_release) / FRACTION_BASE) * allocations;
     let final_release = self.token_allocation_size * allocations - initial_release - cliff_release;
     let mut total_release = initial_release;
-    if timestamp >= self.cliff_timestamp
-      && timestamp < self.end_cliff_timestamp
-    {
+    if timestamp >= self.cliff_timestamp && timestamp < self.end_cliff_timestamp {
       total_release += (cliff_release * (timestamp - self.cliff_timestamp) as u128)
         / (self.end_cliff_timestamp - self.cliff_timestamp) as u128
     } else if timestamp >= self.end_cliff_timestamp {
