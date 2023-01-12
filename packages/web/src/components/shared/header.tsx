@@ -53,7 +53,9 @@ export function Header() {
         />
         <div className="flex gap-x-4 items-center">
           <JumpIcon />
-          <JumpTextIcon />
+          <div className="sm:flex hidden">
+            <JumpTextIcon />
+          </div>
         </div>
 
         <div className="flex gap-x-6 items-center">
