@@ -60,9 +60,6 @@ export function Header() {
           {/* GetTestnet Tokens Button */}
           {testnetTokensButton}
 
-          {/* Wallet Button/Menu */}
-          <Wallet />
-
           {/* Dark/Light Switch Button */}
           <Button
             white
@@ -79,6 +76,8 @@ export function Header() {
           </Button>
 
           <MobileNav isOpen={isOpen} onClose={() => setIsOpen(!isOpen)} />
+          {/* Wallet Button/Menu */}
+          <Wallet />
         </div>
       </header>
     </div>
