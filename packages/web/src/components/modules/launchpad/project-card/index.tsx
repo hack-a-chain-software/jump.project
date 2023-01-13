@@ -19,10 +19,10 @@ const closedArray = [
   "liquidity_pool_finalized",
 ];
 
-const formatConfig = {
+/* const formatConfig = {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
-};
+}; */
 
 export const ProjectCard = ({
   status,
@@ -86,12 +86,16 @@ export const ProjectCard = ({
     );
   }, [project_total_amount_sale_project_tokens, token_allocation_size]);
 
-  const formatNumber = (value, decimals, config: any = formatConfig) => {
+  const formatNumber = (value, decimals, config?) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
-    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+    const formattedBig = new Big(value || 0).div(decimalsBig).toFixed(12);
 
-    return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 12,
+      ...config,
+    }).format(Number(formattedBig));
   };
 
   const allocationsSold = useMemo(() => {
@@ -118,9 +122,31 @@ export const ProjectCard = ({
     return `${formatNumber(
       project_total_amount_sale_project_tokens,
       project_token_info?.decimals,
-      { notation: "compact", compactDisplay: "long" }
+      {
+        notation: "compact",
+        compactDisplay: "long",
+      }
     )} ${project_token_info?.symbol}`;
   }, [project_total_amount_sale_project_tokens, project_token_info]);
+
+  const tokenPrice = useMemo(() => {
+    const parsed_token_allocation_price = parseFloat(
+      formatNumber(
+        token_allocation_price,
+        metadataPriceToken?.decimals
+      ).replace(/,/g, "")
+    );
+    const parsed_token_allocation_size = parseFloat(
+      formatNumber(token_allocation_size, project_token_info?.decimals).replace(
+        /,/g,
+        ""
+      )
+    );
+
+    const price = parsed_token_allocation_price / parsed_token_allocation_size;
+
+    return price;
+  }, [token_allocation_price, token_allocation_size, metadataPriceToken]);
 
   return (
     <div
@@ -239,20 +265,7 @@ export const ProjectCard = ({
 								TODO: The Calculation shouldn't be done here, just temporary fix
 
 								*/}
-                {`${
-                  parseFloat(
-                    formatNumber(
-                      token_allocation_price,
-                      metadataPriceToken?.decimals
-                    ).replace(/,/g, "")
-                  ) /
-                  parseFloat(
-                    formatNumber(
-                      token_allocation_size,
-                      project_token_info?.decimals
-                    ).replace(/,/g, "")
-                  )
-                } ${metadataPriceToken?.symbol}`}
+                {tokenPrice} ${metadataPriceToken?.symbol}
               </span>
             </div>
           </div>

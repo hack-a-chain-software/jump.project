@@ -30,13 +30,38 @@ export function ProjectStats({
   const formatNumber = (value, decimals) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
-    const formattedBig = new Big(value || 0).div(decimalsBig).toFixed(2);
+    const formattedBig = new Big(value || 0).div(decimalsBig).toFixed(12);
 
     return new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 12,
     }).format(Number(formattedBig));
   };
+
+  const allocationAvailable = useMemo(() => {
+    if (
+      !project_total_amount_sale_project_tokens ||
+      !project_token_info ||
+      !token_allocation_size
+    ) {
+      return 0;
+    }
+    const parsedSaleAmount = formatNumber(
+      project_total_amount_sale_project_tokens,
+      project_token_info?.decimals
+    ).replace(/,/g, "");
+
+    const parsedAllocationSize = formatNumber(
+      token_allocation_size,
+      project_token_info?.decimals
+    ).replace(/,/g, "");
+
+    return new Big(parsedSaleAmount).div(parsedAllocationSize).toFixed(0);
+  }, [
+    project_total_amount_sale_project_tokens,
+    project_token_info,
+    token_allocation_size,
+  ]);
 
   const totalAmount = useMemo(() => {
     return new Big(project_total_amount_sale_project_tokens || 0).div(
@@ -220,20 +245,7 @@ export function ProjectStats({
               {token_allocation_size &&
                 project_total_amount_sale_project_tokens && (
                   <span
-                    children={
-                      parseFloat(
-                        formatNumber(
-                          project_total_amount_sale_project_tokens,
-                          project_token_info?.decimals
-                        ).replace(/,/g, "")
-                      ) /
-                      parseFloat(
-                        formatNumber(
-                          token_allocation_size,
-                          project_token_info?.decimals
-                        ).replace(/,/g, "")
-                      )
-                    }
+                    children={allocationAvailable}
                     className="text-[16px] font-[800] tracking-[-0.04em]"
                   />
                 )}
