@@ -33,9 +33,10 @@ export function ProjectUserArea({
     listing_id,
     price_token,
     project_token,
-    project_token_info,
+
     price_token_info,
     token_allocation_price,
+    token_allocation_size,
     open_sale_1_timestamp,
     final_sale_2_timestamp,
   },
@@ -48,13 +49,7 @@ export function ProjectUserArea({
 }) {
   const { accountId, selector } = useWalletSelector();
   const { buyTickets } = useLaunchpadStore();
-
   const [tickets, setTickets] = useState(0);
-
-  const allocationsAvailable = useMemo(() => {
-    //TODO: Temp fix
-    return new Big(/* investorAllowance ??  */ "100000000000000000");
-  }, [investorAllowance]);
 
   const onJoinProject = useCallback(
     async (amount: number) => {
@@ -71,18 +66,7 @@ export function ProjectUserArea({
     [1, accountId, project_token, token_allocation_price]
   );
 
-  /*  async function TempFixJoinProject(amount: number) {
-    console.log("HERE");
-    if (typeof listing_id && price_token) {
-      await buyTickets(
-        new Big(amount).mul(new Big(token_allocation_price || 0)).toString(),
-        price_token,
-        listing_id,
-        accountId!,
-        selector
-      );
-    }
-  } */
+  const isPublic = useMemo(() => {}, [projectStatus]);
 
   const ticketsAmount = useMemo(() => {
     return new Big(token_allocation_price! ?? 0).mul(
@@ -117,7 +101,7 @@ export function ProjectUserArea({
   const formatNumber = (value, decimals, config: any = formatConfig) => {
     const decimalsBig = new Big(10).pow(Number(decimals) || 1);
 
-    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(2);
+    const formattedBig = new Big(value ?? 0).div(decimalsBig).toFixed(12);
 
     return new Intl.NumberFormat("en-US", config).format(Number(formattedBig));
   };
@@ -131,7 +115,13 @@ export function ProjectUserArea({
   const finalSale = useMemo(() => {
     return getUTCDate(Number(final_sale_2_timestamp));
   }, [final_sale_2_timestamp]);
-
+  //=========================================================
+  const allocationsAvailable = useMemo(() => {
+    const allocations = new Big(investorAllowance ?? 0);
+    const size = new Big(token_allocation_size ?? 0);
+    return allocations.toNumber() / size.toNumber();
+  }, [investorAllowance]);
+  //=========================================================
   const status = useMemo(() => {
     if (projectStatus !== "funded" && closedArray.includes(projectStatus!)) {
       return {
@@ -212,24 +202,21 @@ export function ProjectUserArea({
           <NumberInput
             min={0}
             value={tickets}
-            max={allocationsAvailable.toNumber()}
+            max={allocationsAvailable}
             onChange={(value) => {
-              console.log(
-                "Allocation Balance:",
-                allocationsAvailable.toNumber()
-              );
+              console.log("Allocation Balance:", allocationsAvailable);
               console.log("input value:", value);
               setTickets(value || 0);
             }}
           />
         </div>
 
-        {/*   <div>
+        <div>
           <span
-            children={`Your allocation balance: ${allocationsAvailable.toNumber()}`}
+            children={`Your allocation balance: ${allocationsAvailable}`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
-        </div> */}
+        </div>
       </div>
 
       <div className="bg-[rgba(252,252,252,0.2)] pl-[25px] pr-[19px] py-[18px] rounded-[20px] w-full flex justify-between items-center mb-[16px]">

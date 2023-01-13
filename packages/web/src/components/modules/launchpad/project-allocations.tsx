@@ -186,8 +186,9 @@ export function ProjectAllocations({
             fontSize="24px"
             mb="-20px"
             as="h1"
-            children={formatDate(launchpadProject.open_sale_1_timestamp!)}
-          />
+          >
+            {formatDate(launchpadProject.open_sale_1_timestamp!)}
+          </Text>
         </Flex>
       </If>
 

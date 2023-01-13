@@ -18,11 +18,13 @@ import { twMerge } from "tailwind-merge";
 import { useTokenBalance } from "@/hooks/modules/token";
 import { stepItemsProject } from "./projects.tutorial";
 import PageContainer from "@/components/PageContainer";
+import { viewMethod } from "@/helper/near";
 
 export const Project = () => {
   const { id } = useParams();
   const { accountId } = useWalletSelector();
-
+  const [investorAllowance, setInvestorAllowance] = useState("0");
+  const [loadingAllowance, setLoadingAllowance] = useState(true);
   const navigate = useNavigate();
 
   const {
@@ -35,6 +37,26 @@ export const Project = () => {
     },
     skip: !id,
   });
+  //TODO: This should be in hook
+  useEffect(() => {
+    (async () => {
+      setLoadingAllowance(true);
+      if (!accountId || !id) {
+        setLoadingAllowance(false);
+        return;
+      }
+      const a = await viewMethod(
+        import.meta.env.VITE_JUMP_LAUNCHPAD_CONTRACT,
+        "view_investor_allowance",
+        {
+          account_id: "ewtd.near",
+          listing_id: id,
+        }
+      );
+      setInvestorAllowance(a);
+      setLoadingAllowance(false);
+    })();
+  }, [accountId, id]);
 
   const { data: investorAllocation, loading: loadingAllocation } =
     useViewInvestorAllocation(accountId!, id!);
@@ -42,9 +64,9 @@ export const Project = () => {
   const { data: vestedAllocations, loading: loadingVestedAllocations } =
     useViewVestedAllocations(accountId!, launchpadProject?.listing_id!);
 
-  const { data: investorAllowance, loading: loadingAllowance } =
+  /*   const { data: investorAllowance, loading: loadingAllowance } =
     useViewInvestorAllowance(accountId!, launchpadProject?.listing_id!);
-
+ */
   const { data: priceTokenBalance, loading: loadingPriceTokenBalance } =
     useTokenBalance(launchpadProject?.price_token!, accountId!);
 
