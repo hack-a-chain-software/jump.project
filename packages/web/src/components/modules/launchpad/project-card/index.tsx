@@ -27,6 +27,7 @@ const closedArray = [
 export const ProjectCard = ({
   status,
   listing_id,
+  project_name,
   price_token,
   project_token_info,
   public: publicProject,
@@ -178,7 +179,7 @@ export const ProjectCard = ({
         <div>
           <div className="mb-[-4px]">
             <span className="text-white text-[16px] font-[700] tracking-[-0.04em]">
-              {project_token_info?.symbol}
+              {project_name}
             </span>
           </div>
 

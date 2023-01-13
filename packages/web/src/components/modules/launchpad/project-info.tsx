@@ -21,6 +21,7 @@ export function ProjectInfo({
   website,
   whitepaper,
   project_token_info,
+  project_name,
   description_project,
   open_sale_1_timestamp,
   final_sale_2_timestamp,
@@ -80,14 +81,14 @@ export function ProjectInfo({
           <div className="mb-[-4px]">
             <span
               className="text-white text-[24px] font-[800] tracking-[-0.04em]"
-              children={project_token_info?.name}
+              children={project_name}
             />
           </div>
 
           <div>
             <span
               className="text-[20px] font-[600] text-white opacity-[0.5] leading-[6px] tracking-[-0.04em]"
-              children={project_token_info?.symbol}
+              children={project_token_info?.name}
             />
           </div>
         </div>

@@ -228,12 +228,15 @@ export const Projects = () => {
           "
         >
           {!loadingProjects &&
-            (launchpadProjects ?? []).map((project, index) => (
-              <ProjectCard
-                {...(project as any)}
-                key={"jumpad-projects-project-" + index}
-              />
-            ))}
+            (launchpadProjects ?? []).map((project, index) => {
+              console.log(project?.public);
+              return (
+                <ProjectCard
+                  {...(project as any)}
+                  key={"jumpad-projects-project-" + index}
+                />
+              );
+            })}
         </div>
 
         {!loadingProjects && isEmpty(launchpadProjects) && (

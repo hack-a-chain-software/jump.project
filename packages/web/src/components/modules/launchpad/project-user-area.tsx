@@ -33,7 +33,7 @@ export function ProjectUserArea({
     listing_id,
     price_token,
     project_token,
-
+    public: isPublic,
     price_token_info,
     token_allocation_price,
     token_allocation_size,
@@ -65,8 +65,6 @@ export function ProjectUserArea({
     },
     [1, accountId, project_token, token_allocation_price]
   );
-
-  const isPublic = useMemo(() => {}, [projectStatus]);
 
   const ticketsAmount = useMemo(() => {
     return new Big(token_allocation_price! ?? 0).mul(
@@ -202,9 +200,12 @@ export function ProjectUserArea({
           <NumberInput
             min={0}
             value={tickets}
-            max={allocationsAvailable}
+            max={isPublic ? 1000000000000 : allocationsAvailable}
             onChange={(value) => {
-              console.log("Allocation Balance:", allocationsAvailable);
+              console.log(
+                "Allocation Balance:",
+                isPublic ? 1000000000000 : allocationsAvailable
+              );
               console.log("input value:", value);
               setTickets(value || 0);
             }}
@@ -213,7 +214,9 @@ export function ProjectUserArea({
 
         <div>
           <span
-            children={`Your allocation balance: ${allocationsAvailable}`}
+            children={`Your allocation balance: ${
+              isPublic ? "Public" : allocationsAvailable
+            }`}
             className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
           />
         </div>

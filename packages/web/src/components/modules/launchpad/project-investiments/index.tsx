@@ -108,24 +108,21 @@ export const ProjectInvestments = ({
           </div>
         </div>
 
-        <div>
+        {/*      <div>
           <div>
             <span className="text-[14px] font-[600] tracking-[-0.03em]">
-              Allocation ballance
+              Allocation balance
             </span>
           </div>
 
           <div>
-            <span
-              children={
-                accountId
-                  ? allocationsAvailable.toNumber()
-                  : CONNECT_WALLET_MESSAGE
-              }
-              className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]"
-            />
+            <span className="font-[800] text-[24px] tracking-[-0.03em] text-[#E2E8F0]">
+              {accountId
+                ? allocationsAvailable.toNumber()
+                : CONNECT_WALLET_MESSAGE}
+            </span>
           </div>
-        </div>
+        </div> */}
 
         <div>
           <div>
