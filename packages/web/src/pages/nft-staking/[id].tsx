@@ -23,7 +23,9 @@ function NFTStakingProject() {
   } = useWalletSelector();
   const {
     fetchUserTokens,
+    fetchNftMetadata,
     tokens: unorderedTokens,
+    nftMetadata,
     claimRewards,
     unstake,
     stake,
@@ -58,6 +60,14 @@ function NFTStakingProject() {
       }
     })();
   }, [accountId]);
+
+  useEffect(() => {
+    (async () => {
+      if (collection) {
+        await fetchNftMetadata(collection);
+      }
+    })();
+  }, [collection]);
 
   const [selectingMode, setSelectingMode] = useState<boolean>(false);
   const [selectedUnstakeTokens, setSelectedUnstakeTokens] = useState<Token[]>(
@@ -177,6 +187,7 @@ function NFTStakingProject() {
     tokens,
     claimableTokens,
     accountId,
+    nftMetadata,
     selectedTokens: selectedUnstakeTokens,
     selectedStakableTokens,
     selectingMode,

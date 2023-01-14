@@ -8,10 +8,13 @@ import { Token, Transaction } from "@near/ts";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { utils } from "near-api-js";
 import Big from "big.js";
+import { nftMetadata } from "@/interfaces";
+import { viewMethod } from "@/helper/near";
 
 export const useNftStaking = create<{
   loading: boolean;
   tokens: Token[];
+  nftMetadata: nftMetadata | null;
   fetchUserTokens: (
     connection: WalletSelector,
     account: string,
@@ -44,10 +47,13 @@ export const useNftStaking = create<{
     tokens: Token[],
     collection: string
   ) => Promise<any>;
+
+  fetchNftMetadata: (collection_id: string) => Promise<void>;
 }>((set, get) => ({
   tokens: [],
   loading: false,
-
+  nftMetadata: null,
+  //why we need connection for view method?
   fetchUserTokens: async (connection, account, collection) => {
     set({
       loading: true,
@@ -330,7 +336,7 @@ export const useNftStaking = create<{
 
     executeMultipleTransactions(transactions, wallet);
   },
-
+  //why we need connection for view method?
   getTokenStorage: async (connection, account, token) => {
     try {
       return await viewFunction(connection, token, "storage_balance_of", {
@@ -340,11 +346,21 @@ export const useNftStaking = create<{
       return;
     }
   },
-
+  //why we need connection for view method?
   getMinStorageCost: async (connection, token) => {
     try {
       return await viewFunction(connection, token, "storage_balance_bounds");
     } catch (e) {
+      return;
+    }
+  },
+
+  fetchNftMetadata: async (collection: string) => {
+    try {
+      const _nftMetadata = await viewMethod(collection, "nft_metadata", {});
+      set({ nftMetadata: _nftMetadata });
+    } catch (e) {
+      console.log(e);
       return;
     }
   },
