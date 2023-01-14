@@ -1,4 +1,4 @@
-import { useMemo, ReactNode, useEffect } from "react";
+import { useMemo, ReactNode } from "react";
 import { NFTStakingCard, BackButton, Button, Empty } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { StakingToken, Token } from "@near/ts";
@@ -12,11 +12,12 @@ import Big from "big.js";
 import ConfirmModal from "@/components/ConfirmModal";
 import Modal from "@/components/Modal";
 import PageContainer from "@/components/PageContainer";
-import { useNftMetadata } from "@/hooks/modules/NftStaking";
+import type { nftMetadata } from "@/interfaces";
 
 type NFTStakingProjectProps = {
   id: string;
   tokens: Token[];
+  nftMetadata: nftMetadata | null;
   claimableTokens: Token[];
   accountId: string | null;
   selectingMode: boolean;
@@ -53,6 +54,7 @@ type NFTStakingProjectProps = {
 export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   const {
     tokens,
+    nftMetadata,
     claimableTokens,
     accountId,
     selectingMode,
@@ -80,10 +82,6 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   const stepItems = useMemo(() => {
     return STEPS_ITEMS(tokens).filter((item) => item);
   }, [tokens]);
-
-  const { nftMetadata, loading: NftMetadataLoading } = useNftMetadata(
-    collection.id
-  );
 
   function renderSelectToStakeModalFooter() {
     const length = selectedStakableTokens.length;
