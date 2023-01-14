@@ -395,7 +395,8 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           ...reward,
           perMonth: tokens
             .reduce(
-              (sum: Big, token) => sum.add(token.balance[reward?.account_id]),
+              (sum: Big, token) =>
+                sum.add(token.balance[reward?.account_id] || "0"),
               Big("0")
             )
             .toString(),
