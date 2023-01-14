@@ -1,4 +1,4 @@
-import { useMemo, ReactNode } from "react";
+import { useMemo, ReactNode, useEffect } from "react";
 import { NFTStakingCard, BackButton, Button, Empty } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { StakingToken, Token } from "@near/ts";
@@ -12,6 +12,7 @@ import Big from "big.js";
 import ConfirmModal from "@/components/ConfirmModal";
 import Modal from "@/components/Modal";
 import PageContainer from "@/components/PageContainer";
+import { useNftMetadata } from "@/hooks/modules/NftStaking";
 
 type NFTStakingProjectProps = {
   id: string;
@@ -80,6 +81,10 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
     return STEPS_ITEMS(tokens).filter((item) => item);
   }, [tokens]);
 
+  const { nftMetadata, loading: NftMetadataLoading } = useNftMetadata(
+    collection.id
+  );
+
   function renderSelectToStakeModalFooter() {
     const length = selectedStakableTokens.length;
 
@@ -132,23 +137,29 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
               </Button>
             </div>
             <div className="grid gap-4 grid-cols-3">
-              {stakableTokens.map((token, key) => (
-                <Select
-                  key={key}
-                  showCheckbox={true}
-                  selected={selectedStakableTokens.includes(token)}
-                  onChange={() => onSelectStakableChange(token)}
-                  small={true}
-                >
-                  <NFTCard
-                    rewards={collection.rewards}
-                    curfew={collection.curfew}
-                    penalty={collection.penalty}
-                    minified={true}
-                    {...token}
-                  />
-                </Select>
-              ))}
+              {stakableTokens.map((token, key) => {
+                return (
+                  <Select
+                    key={key}
+                    showCheckbox={true}
+                    selected={selectedStakableTokens.includes(token)}
+                    onChange={() => onSelectStakableChange(token)}
+                    small={true}
+                  >
+                    <NFTCard
+                      rewards={collection.rewards}
+                      curfew={collection.curfew}
+                      penalty={collection.penalty}
+                      minified={true}
+                      img={parseImageUrl(
+                        nftMetadata?.base_uri,
+                        token.metadata.media
+                      )}
+                      {...token}
+                    />
+                  </Select>
+                );
+              })}
             </div>
           </>
         ) : (
@@ -195,22 +206,25 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   }
 
   function renderStakedNFTsList(minified: boolean) {
-    return tokens.map((token, index) => (
-      <Select
-        key={index}
-        showCheckbox={selectingMode}
-        selected={selectedTokens.includes(token)}
-        onChange={() => selectingMode && onSelectChange(token)}
-      >
-        <NFTCard
-          {...token}
-          minified={minified}
-          curfew={collection.curfew}
-          penalty={collection.penalty}
-          rewards={collection.rewards}
-        />
-      </Select>
-    ));
+    return tokens.map((token, index) => {
+      return (
+        <Select
+          key={index}
+          showCheckbox={selectingMode}
+          selected={selectedTokens.includes(token)}
+          onChange={() => selectingMode && onSelectChange(token)}
+        >
+          <NFTCard
+            {...token}
+            minified={minified}
+            curfew={collection.curfew}
+            penalty={collection.penalty}
+            rewards={collection.rewards}
+            img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
+          />
+        </Select>
+      );
+    });
   }
 
   function renderStakedNFTsNoStakedNFTs() {
@@ -367,6 +381,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             curfew={collection.curfew}
             penalty={collection.penalty}
             rewards={collection.rewards}
+            img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
           />
         ))}
       </div>
@@ -500,3 +515,10 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
 }
 
 export default NFTStakingProjectComponent;
+function parseImageUrl(baseUrl: string | undefined, imageUrl: string) {
+  if (!baseUrl) return imageUrl;
+
+  if (baseUrl.endsWith("/")) return baseUrl + imageUrl;
+
+  return baseUrl + "/" + imageUrl;
+}

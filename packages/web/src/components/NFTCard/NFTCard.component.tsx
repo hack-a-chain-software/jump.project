@@ -11,6 +11,7 @@ type NFTCardProps = Token & {
   curfew: string;
   penalty: string;
   minified?: boolean;
+  img?: string;
 };
 
 function NFTCard(props: NFTCardProps) {
@@ -22,6 +23,7 @@ function NFTCard(props: NFTCardProps) {
     metadata: { title: name, media: image },
     rewards,
     minified,
+    img,
   } = props;
 
   const [width, setWidth] = useState(0);
@@ -54,7 +56,7 @@ function NFTCard(props: NFTCardProps) {
 
   function renderRewards() {
     const rewardsList = id ? rewards : [{}, {}, {}];
-
+    if (!rewardsList) return null;
     return rewardsList.map((reward, index) => (
       <Reward
         key={index}
@@ -69,10 +71,10 @@ function NFTCard(props: NFTCardProps) {
   }
 
   function renderImage() {
-    const source =
+    /* const source =
       minified && width
         ? `https://images.weserv.nl/?url=${image}&w=${width}&h=${width}`
-        : `https://images.weserv.nl/?url=${image}&w=138&h=138`;
+        : `https://images.weserv.nl/?url=${image}&w=138&h=138`; */
 
     if (!id) return <Skeleton className={`rounded-sm h-[138px] w-[138px]`} />;
 
@@ -85,7 +87,7 @@ function NFTCard(props: NFTCardProps) {
         }`}
       >
         <Image
-          src={source}
+          src={img ? img : "https://picsum.photos/200"}
           alt={name}
           className={
             minified && width > 230
