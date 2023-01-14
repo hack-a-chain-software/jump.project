@@ -23,6 +23,8 @@ export const ProjectInvestments = ({
     listing_id,
     price_token,
     project_token,
+    total_amount_sale_project_tokens,
+    project_allocations_sold,
     token_allocation_size,
   },
 }: {
@@ -77,11 +79,22 @@ export const ProjectInvestments = ({
   }, [investorAllowance]);
 
   const enabledSale = useMemo(() => {
+    const total = formatNumber(
+      total_amount_sale_project_tokens,
+      decimals
+    ).replace(/,/g, "");
+    const size = formatNumber(token_allocation_size, decimals).replace(
+      /,/g,
+      ""
+    );
+    const allocations_available = parseFloat(total) / parseFloat(size);
+
     const now = new Date();
 
     const endAt = new Date(Number(final_sale_2_timestamp!));
-
-    return isBefore(now, endAt);
+    const soldOut =
+      allocations_available >= parseFloat(project_allocations_sold!);
+    return isBefore(now, endAt) && !soldOut;
   }, [final_sale_2_timestamp]);
 
   const retrieveTokens = async () => {
