@@ -497,8 +497,13 @@ impl Listing {
     let final_release = self.token_allocation_size * allocations - initial_release - cliff_release;
     let mut total_release = initial_release;
     if timestamp >= self.cliff_timestamp && timestamp < self.end_cliff_timestamp {
-      total_release += (cliff_release * (timestamp - self.cliff_timestamp) as u128)
-        / (self.end_cliff_timestamp - self.cliff_timestamp) as u128
+     let time_fraction = 100;
+      let time_passed = timestamp - self.cliff_timestamp;
+      let time_total = self.end_cliff_timestamp - self.cliff_timestamp;
+
+      let acc_release = time_passed as u128 * ((cliff_release * time_fraction) / time_total as u128);
+
+      total_release += acc_release / time_fraction as u128;
     } else if timestamp >= self.end_cliff_timestamp {
       total_release += cliff_release + final_release;
     }
