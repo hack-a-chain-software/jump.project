@@ -36,7 +36,9 @@ const questions = [
 
 (async () => {
   //Setup Inquirer
+
   console.clear();
+  await exec("export NODE_ENV=mainnet");
   const { accountId, action } = await inquirer.prompt(questions);
 
   switch (action) {
