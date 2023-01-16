@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { parse } from "date-fns";
 import { exec } from "../helper/exec.js";
 import { viewMethod } from "../helper/near.js";
@@ -16,11 +17,13 @@ export const listingQuestions = [
     name: "project_owner",
     message: "Enter Project Owner Account Id:",
     validate: async (value: string) => {
-      let isError = false;
-      await exec(`near state ${value}`).catch((err) => {
-        isError = true;
+      let is_error = false;
+      await exec(`near state ${value}`, {
+        silent: true,
+      }).catch((_err) => {
+        is_error = true;
       });
-      if (isError) return "Invalid Account Id";
+      if (is_error) return "Invalid Account Id";
       return true;
     },
   },
@@ -31,13 +34,13 @@ export const listingQuestions = [
     message: "Enter Project Token Account Id:",
     required: true,
     validate: async (value: string) => {
-      let isError = false;
+      let is_error = false;
       const TokenMetadata = await viewMethod(value, "ft_metadata", {}).catch(
-        (err) => {
-          isError = true;
+        (_err) => {
+          is_error = true;
         }
       );
-      if (isError) return "Invalid Account Id";
+      if (is_error) return "Invalid Account Id";
       console.log("\nProject token decimals:", TokenMetadata.decimals);
       return true;
     },
@@ -49,13 +52,13 @@ export const listingQuestions = [
     message: "Enter Price Token Account Id",
     required: true,
     validate: async (value: string) => {
-      let isError = false;
+      let is_error = false;
       const TokenMetadata = await viewMethod(value, "ft_metadata", {}).catch(
-        (err) => {
-          isError = true;
+        (_err) => {
+          is_error = true;
         }
       );
-      if (isError) return "Invalid Account Id";
+      if (is_error) return "Invalid Account Id";
       console.log("\nPrice token decimals:", TokenMetadata.decimals);
       return true;
     },
@@ -90,11 +93,13 @@ export const listingQuestions = [
     name: "open_sale_2_timestamp_seconds",
     message: `Enter phrase 2 sale Local Time ${parseDateString}:`,
     required: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validate: (value: string, answers: any) => {
       const date = parse(value, parseDateString, new Date());
       if (date.toString() === "Invalid Date") {
         return "Invalid Date";
       }
+
       if (date.getTime() <= new Date().getTime()) {
         return "Date must be in the future";
       }

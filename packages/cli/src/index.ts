@@ -1,9 +1,13 @@
-import { createListing } from "./launchpad/create_listing.js";
+#! /usr/bin/env node
+import clear from "clear";
+import chalk from "chalk";
+import figlet from "figlet";
 import inquirer from "inquirer";
 import { exec } from "./helper/exec.js";
 import { launchPadEntry } from "./launchpad/index.js";
 import { toolEntry } from "./tool/index.js";
 import { teamVestingEntry } from "./teamVesting/index.js";
+import { nftStakingEntry } from "./nftStaking/index.js";
 
 const questions = [
   {
@@ -12,7 +16,9 @@ const questions = [
     message: "Enter Master Account Id",
     validate: async (value: string) => {
       let isError = false;
-      await exec(`near state ${value}`).catch((err) => {
+      await exec(`near state ${value}`, {
+        silent: true,
+      }).catch((err) => {
         isError = true;
       });
       if (isError) return "Invalid Account Id";
@@ -29,21 +35,27 @@ const questions = [
       "XJump",
       "Team Vesting",
       "Tools",
-      "Exit",
+      chalk.red("Exit"),
     ],
   },
 ];
 
 (async () => {
   //Setup Inquirer
-
-  console.clear();
   await exec("export NODE_ENV=mainnet");
+  clear();
+
+  console.log(
+    chalk.blue(figlet.textSync("NEKO CLI", { horizontalLayout: "full" }))
+  );
   const { accountId, action } = await inquirer.prompt(questions);
 
   switch (action) {
     case "Token Launchpad":
       await launchPadEntry(accountId);
+      break;
+    case "NFT Staking":
+      await nftStakingEntry(accountId);
       break;
     case "Tools":
       await toolEntry(accountId);

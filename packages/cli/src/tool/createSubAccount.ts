@@ -10,7 +10,7 @@ const questions = [
   {
     type: "input",
     name: "accountId",
-    message: "Enter SubAccount Account Id",
+    message: "Enter SubAccount Account Id(eg sub.master.near)",
   },
   {
     type: "input",

@@ -1,0 +1,4 @@
+dist
+contract/**
+node_modules
+.git

@@ -1,6 +1,8 @@
 import inquirer from "inquirer";
 import { createListing } from "./create_listing.js";
-
+import clear from "clear";
+import figlet from "figlet";
+import chalk from "chalk";
 export const LAUNCHPAD_ID = "launchpad.jumpfinance.near";
 
 export async function launchPadEntry(masterId: string) {
@@ -28,7 +30,14 @@ export async function launchPadEntry(masterId: string) {
       ],
     },
   ];
-
+  clear();
+  console.log(
+    chalk.blue(
+      figlet.textSync("Tools", {
+        horizontalLayout: "full",
+      })
+    )
+  );
   const { operation } = await inquirer.prompt(questions);
 
   switch (operation) {

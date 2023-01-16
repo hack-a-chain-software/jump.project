@@ -1,4 +1,7 @@
 import inquirer from "inquirer";
+import chalk from "chalk";
+import figlet from "figlet";
+import clear from "clear";
 import { createSubAccount } from "./createSubAccount.js";
 import { deployContract } from "./deployContract.js";
 import { importAccountToNearWallet } from "./importAccountToNearWallet.js";
@@ -16,7 +19,14 @@ export async function toolEntry(masterId: string) {
       ],
     },
   ];
-
+  clear();
+  console.log(
+    chalk.blue(
+      figlet.textSync("Tools", {
+        horizontalLayout: "full",
+      })
+    )
+  );
   const { operation } = await inquirer.prompt(questions);
 
   switch (operation) {

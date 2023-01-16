@@ -11,6 +11,15 @@ const questions = [
     type: "input",
     name: "accountId",
     message: "Enter Account Id you want to import",
+    validate: async (value: string) => {
+      let fileExists = false;
+      await fs.access(`${credentialsPath}/mainnet/${value}.json`).then(() => {
+        fileExists = true;
+      });
+      if (!fileExists)
+        return "Key File does not exist for this Account Id,please use near login to generate key file";
+      return true;
+    },
   },
 ];
 

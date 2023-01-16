@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import inquirer from "inquirer";
 import { parse } from "date-fns";
 import { listingQuestions } from "./create_listing_questions.js";
@@ -148,13 +149,13 @@ export async function createListing(masterId: string) {
       fee_liquidity_tokens,
     };
 
-    const contractId = LAUNCHPAD_ID;
+    const _contractId = LAUNCHPAD_ID;
 
     const argsString = "'" + JSON.stringify(listing) + "'";
 
     await nearLoginWithLedger(masterId, isLedger);
-    console.log("Simulating Contract Call....");
-    console.log("Generated args:", argsString);
+    console.log(chalk.yellow("Simulating Contract Call...."));
+    console.log(chalk.green("Generated args:", argsString));
 
     console.log("Cleaning up keys");
     await nearDeleteAccessKey(masterId);

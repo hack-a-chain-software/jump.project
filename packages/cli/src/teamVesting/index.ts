@@ -51,7 +51,9 @@ async function initVestingContract(
       default: masterId,
       validate: async (value: string) => {
         let isError = false;
-        await exec(`near state ${value}`).catch((err) => {
+        await exec(`near state ${value}`, {
+          silent: true,
+        }).catch((err) => {
           isError = true;
         });
         if (isError) return "Invalid Account Id";
@@ -83,7 +85,9 @@ async function addVestingMember(masterId: string, vestingContractId: string) {
       message: "Enter Account Id for Vesting Member",
       validate: async (value: string) => {
         let isError = false;
-        await exec(`near state ${value}`).catch((err) => {
+        await exec(`near state ${value}`, {
+          silent: true,
+        }).catch((err) => {
           isError = true;
         });
         if (isError) return "Invalid Account Id";
