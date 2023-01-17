@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use near_sdk::{near_bindgen, AccountId, json_types::U128};
+use near_sdk::{json_types::U128, near_bindgen, AccountId};
 
 use crate::{
   types::{
-    NFTCollection, NonFungibleTokenID, SerializableFungibleTokenBalance, SerializableStakedNFT,
-    SerializableStakingProgram, FungibleTokenBalance,
+    FungibleTokenBalance, NFTCollection, NonFungibleTokenID, SerializableFungibleTokenBalance,
+    SerializableStakedNFT, SerializableStakingProgram,
   },
   Contract, ContractExt,
 };
@@ -44,6 +44,10 @@ impl Contract {
       .collect()
   }
 
+  pub fn view_total_staked_amount_for_collection(&self, collection: NFTCollection) -> U128 {
+    let staking_program = self.staking_programs.get(&collection).unwrap();
+    U128(staking_program.staked_nfts.len() as u128)
+  }
   pub fn view_staked(
     &self,
     collection: NFTCollection,
@@ -97,9 +101,7 @@ impl Contract {
     balance.into()
   }
 
-  pub fn view_contract_treasury_balance(
-    &self
-  ) -> HashMap<AccountId, U128> {
+  pub fn view_contract_treasury_balance(&self) -> HashMap<AccountId, U128> {
     let mut result = HashMap::new();
     for (key, value) in self.contract_treasury.iter() {
       result.insert(key.clone(), U128(*value));
