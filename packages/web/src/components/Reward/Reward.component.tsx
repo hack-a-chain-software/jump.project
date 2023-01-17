@@ -37,8 +37,8 @@ function Reward({
   function renderName() {
     const content = name ? (
       <>
-        <strong className="uppercase">{name}</strong>
-        {hideText ? "" : " per month"}
+        Total <strong className="uppercase">{name}</strong>
+        {hideText ? "" : " in pool"}
       </>
     ) : (
       <Skeleton className="w-16" />
@@ -75,7 +75,7 @@ function Reward({
     );
   }
 
-  if (name === "string") {
+  if (name === "string" || balance === "0") {
     return <></>;
   } else {
     return (
