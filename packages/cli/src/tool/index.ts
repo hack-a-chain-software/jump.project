@@ -37,7 +37,7 @@ export async function toolEntry(masterId: string) {
       await importAccountToNearWallet();
       break;
     case "Deploy Contract":
-      await deployContract();
+      await deployContract(masterId);
       break;
     case "Exit":
   }

@@ -2,11 +2,18 @@ import inquirer from "inquirer";
 import { exec } from "../helper/exec.js";
 import fs from "fs/promises";
 import path from "path";
+import { nearDeleteAccessKey, nearLoginWithLedger } from "../helper/ledger.js";
 //current directory
 const currentDir = path.resolve("./");
-const contractFilesInDir = await fs.readdir(path.join(currentDir, "contract"));
+const contractFilesInDir = await fs.readdir(path.join(currentDir));
 
 const questions = [
+  {
+    type: "confirm",
+    name: "isLedger",
+    message: "Are you using Ledger?",
+    required: true,
+  },
   {
     type: "input",
     name: "accountId",
@@ -29,18 +36,19 @@ const questions = [
   },
 ];
 
-export async function deployContract() {
+export async function deployContract(masterId: string) {
   //Setup Inquirer
   console.clear();
-  const { accountId, contractName } = await inquirer.prompt(questions);
-
+  const { accountId, contractName, isLedger } = await inquirer.prompt(
+    questions
+  );
+  await nearLoginWithLedger(masterId, isLedger);
   console.log("Deploying Contract...");
   const result = await exec(
-    `near deploy ${accountId} --wasmFile ${path.join(
-      currentDir,
-      "contract",
-      contractName
-    )}`
+    `near deploy ${accountId} --wasmFile ${path.join(currentDir, contractName)}`
   ).catch((err) => {});
+  console.log("Cleaning up keys");
+  await nearDeleteAccessKey(masterId);
+
   return result;
 }
