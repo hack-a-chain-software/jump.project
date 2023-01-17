@@ -161,11 +161,16 @@ export const useNftStaking = create<{
     }
 
     tokens.forEach((tokenId) => {
+      let approval_id: number | null = null;
+      //TODO: temporary fix for neartopia
+      if (collection.includes("neartopia")) {
+        approval_id = 0;
+      }
       transactions.push(
         getTransaction(account, collection, "nft_transfer_call", {
           receiver_id: import.meta.env.VITE_NFT_STAKING_CONTRACT,
           token_id: tokenId,
-          approval_id: null,
+          approval_id: approval_id,
           memo: null,
           msg: JSON.stringify({
             type: "Stake",

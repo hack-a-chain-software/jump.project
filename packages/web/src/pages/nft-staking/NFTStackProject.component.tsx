@@ -1,4 +1,4 @@
-import { useMemo, ReactNode, useEffect } from "react";
+import { useMemo, ReactNode, useEffect, useState } from "react";
 import { NFTStakingCard, BackButton, Button, Empty } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { StakingToken, Token } from "@near/ts";
@@ -13,6 +13,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import Modal from "@/components/Modal";
 import PageContainer from "@/components/PageContainer";
 import { useNftMetadata } from "@/hooks/modules/NftStaking";
+import { NftStorageConfirmModal } from "@/components/modules/nft/nft-storage-deposit-confirm-modal";
 
 type NFTStakingProjectProps = {
   id: string;
@@ -84,6 +85,15 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   const { nftMetadata, loading: NftMetadataLoading } = useNftMetadata(
     collection.id
   );
+  const [nftStorageDepositModal, setNftStorageDepositModal] = useState(false);
+
+  function handleStake() {
+    if (!window.localStorage.getItem("shownStorageWarning")) {
+      setNftStorageDepositModal(true);
+    } else {
+      stakeSelectedStakableTokens();
+    }
+  }
 
   function renderSelectToStakeModalFooter() {
     const length = selectedStakableTokens.length;
@@ -103,7 +113,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             {length == 1 ? "" : "s"} selected
           </span>
           <Button
-            onClick={stakeSelectedStakableTokens}
+            onClick={handleStake}
             inline
             className="bg-gradient-to-r from-[#510B72] to-[#740B0B] rounded-md px-6 py-2.5"
           >
@@ -156,6 +166,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
                         token.metadata.media
                       )}
                       {...token}
+                      collection_id={collection.id}
                     />
                   </Select>
                 );
@@ -221,6 +232,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             penalty={collection.penalty}
             rewards={collection.rewards}
             img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
+            collection_id={collection.id}
           />
         </Select>
       );
@@ -382,6 +394,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             penalty={collection.penalty}
             rewards={collection.rewards}
             img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
+            collection_id={collection.id}
           />
         ))}
       </div>
@@ -411,6 +424,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           rewards={rewards}
           wallet={accountId ? undefined : "Connect Wallet"}
           onClick={accountId ? undefined : connectWallet}
+          collection={collection.id}
         />
 
         <div className="rounded-lg bg-white-600 p-6">
@@ -490,6 +504,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           logo={collection.logo}
           name={collection.name}
           rewards={collection.rewards}
+          collection={collection.id}
         />
         <Tutorial items={stepItems as []} />
       </div>
@@ -511,6 +526,11 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           <div className="h-20"></div>
         </Tab.Group>
       </div>
+      <NftStorageConfirmModal
+        isOpen={nftStorageDepositModal}
+        handleClose={() => setNftStorageDepositModal(false)}
+        stakeSelectedStakableTokens={stakeSelectedStakableTokens}
+      />
     </PageContainer>
   );
 }

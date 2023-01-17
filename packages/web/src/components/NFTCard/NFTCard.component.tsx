@@ -5,6 +5,7 @@ import Skeleton from "react-loading-skeleton";
 import { addMilliseconds } from "date-fns";
 import Badge from "@/components/Badge";
 import Image from "@/components/Image";
+import { viewMethod } from "@/helper/near";
 
 type NFTCardProps = Token & {
   rewards: StakingToken[];
@@ -12,6 +13,7 @@ type NFTCardProps = Token & {
   penalty: string;
   minified?: boolean;
   img?: string;
+  collection_id?: string;
 };
 
 function NFTCard(props: NFTCardProps) {

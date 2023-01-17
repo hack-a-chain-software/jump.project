@@ -38,7 +38,7 @@ function Reward({
     const content = name ? (
       <>
         <strong className="uppercase">{name}</strong>
-        {hideText ? "" : " per month"}
+        {hideText ? "" : " / Month per NFT"}
       </>
     ) : (
       <Skeleton className="w-16" />
@@ -75,7 +75,7 @@ function Reward({
     );
   }
 
-  if (name === "string") {
+  if (name === "string" || (name === "JUMP" && balance === "0")) {
     return <></>;
   } else {
     return (
