@@ -85,7 +85,6 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
   const { nftMetadata, loading: NftMetadataLoading } = useNftMetadata(
     collection.id
   );
-
   const [nftStorageDepositModal, setNftStorageDepositModal] = useState(false);
 
   function handleStake() {
@@ -167,6 +166,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
                         token.metadata.media
                       )}
                       {...token}
+                      collection_id={collection.id}
                     />
                   </Select>
                 );
@@ -232,6 +232,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             penalty={collection.penalty}
             rewards={collection.rewards}
             img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
+            collection_id={collection.id}
           />
         </Select>
       );
@@ -393,6 +394,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             penalty={collection.penalty}
             rewards={collection.rewards}
             img={parseImageUrl(nftMetadata?.base_uri, token.metadata.media)}
+            collection_id={collection.id}
           />
         ))}
       </div>
@@ -422,6 +424,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           rewards={rewards}
           wallet={accountId ? undefined : "Connect Wallet"}
           onClick={accountId ? undefined : connectWallet}
+          collection={collection.id}
         />
 
         <div className="rounded-lg bg-white-600 p-6">
@@ -501,6 +504,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           logo={collection.logo}
           name={collection.name}
           rewards={collection.rewards}
+          collection={collection.id}
         />
         <Tutorial items={stepItems as []} />
       </div>
