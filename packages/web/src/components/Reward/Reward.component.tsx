@@ -75,7 +75,7 @@ function Reward({
     );
   }
 
-  if (name === "string" || balance === "0") {
+  if (name === "string" || (name === "JUMP" && balance === "0")) {
     return <></>;
   } else {
     return (
