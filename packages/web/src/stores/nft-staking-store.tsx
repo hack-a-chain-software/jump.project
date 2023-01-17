@@ -162,6 +162,7 @@ export const useNftStaking = create<{
 
     tokens.forEach((tokenId) => {
       let approval_id: number | null = null;
+      //TODO: temporary fix for neartopia
       if (collection.includes("neartopia")) {
         approval_id = 0;
       }

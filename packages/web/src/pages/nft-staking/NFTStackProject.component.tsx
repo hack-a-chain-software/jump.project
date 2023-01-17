@@ -1,4 +1,4 @@
-import { useMemo, ReactNode, useEffect } from "react";
+import { useMemo, ReactNode, useEffect, useState } from "react";
 import { NFTStakingCard, BackButton, Button, Empty } from "@/components";
 import isEmpty from "lodash/isEmpty";
 import { StakingToken, Token } from "@near/ts";
@@ -13,6 +13,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import Modal from "@/components/Modal";
 import PageContainer from "@/components/PageContainer";
 import { useNftMetadata } from "@/hooks/modules/NftStaking";
+import { NftStorageConfirmModal } from "@/components/modules/nft/nft-storage-deposit-confirm-modal";
 
 type NFTStakingProjectProps = {
   id: string;
@@ -85,6 +86,16 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
     collection.id
   );
 
+  const [nftStorageDepositModal, setNftStorageDepositModal] = useState(false);
+
+  function handleStake() {
+    if (!window.localStorage.getItem("shownStorageWarning")) {
+      setNftStorageDepositModal(true);
+    } else {
+      stakeSelectedStakableTokens();
+    }
+  }
+
   function renderSelectToStakeModalFooter() {
     const length = selectedStakableTokens.length;
 
@@ -103,7 +114,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
             {length == 1 ? "" : "s"} selected
           </span>
           <Button
-            onClick={stakeSelectedStakableTokens}
+            onClick={handleStake}
             inline
             className="bg-gradient-to-r from-[#510B72] to-[#740B0B] rounded-md px-6 py-2.5"
           >
@@ -511,6 +522,11 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           <div className="h-20"></div>
         </Tab.Group>
       </div>
+      <NftStorageConfirmModal
+        isOpen={nftStorageDepositModal}
+        handleClose={() => setNftStorageDepositModal(false)}
+        stakeSelectedStakableTokens={stakeSelectedStakableTokens}
+      />
     </PageContainer>
   );
 }
