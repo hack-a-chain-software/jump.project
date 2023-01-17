@@ -8,6 +8,7 @@ import Image from "@/components/Image";
 import { useCollectionStakedNfts } from "@/hooks/modules/launchpad";
 import { useState, useEffect } from "react";
 import { useWalletSelector } from "@/context/wallet-selector";
+import { viewMethod } from "@/helper/near";
 
 type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
   name?: string | undefined;
@@ -24,6 +25,24 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
   const [nftQuantity, setNftQuantity] = useState<any>(1);
 
   useEffect(() => {
+    if (!props.collection) return;
+    viewMethod(
+      import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      "view_total_staked_amount_for_collection",
+      {
+        collection: {
+          type: "NFTContract",
+          account_id: props.collection,
+        },
+      }
+    ).then((res) => {
+      console.log(res, props.collection);
+      if (res == 0) setNftQuantity(1);
+      else setNftQuantity(res);
+    });
+  }, [props.collection]);
+
+  /*  useEffect(() => {
     (async () => {
       if (props.collection) {
         const quantity = await useCollectionStakedNfts(
@@ -34,7 +53,7 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
         setNftQuantity(quantity);
       }
     })();
-  }, []);
+  }, []); */
 
   const renderLink = () => {
     if (props.link)

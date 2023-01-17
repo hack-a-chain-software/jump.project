@@ -37,8 +37,8 @@ function Reward({
   function renderName() {
     const content = name ? (
       <>
-        Total <strong className="uppercase">{name}</strong>
-        {hideText ? "" : " in pool"}
+        <strong className="uppercase">{name}</strong>
+        {hideText ? "" : " / Month per NFT"}
       </>
     ) : (
       <Skeleton className="w-16" />
