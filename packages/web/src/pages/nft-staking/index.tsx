@@ -13,6 +13,10 @@ import { useWalletSelector } from "@/context/wallet-selector";
 import { twMerge } from "tailwind-merge";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import PageContainer from "@/components/PageContainer";
+import { viewMethod } from "@/helper/near";
+import { StakingToken } from "@near/ts";
+import { BN } from "bn.js";
+import Big from "big.js";
 
 const PAGINATE_LIMIT = 30;
 
@@ -22,7 +26,7 @@ export const NFTStaking = () => {
   const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
   const [filterSearch, setSearch] = useState<string | null>(null);
   const { accountId } = useWalletSelector();
-
+  const [rewardsForCollection, setRewardsForCollection] = useState<any>([]);
   const queryVariables: NftStakingProjectsConnectionQueryVariables =
     useMemo(() => {
       return {
@@ -76,6 +80,80 @@ export const NFTStaking = () => {
       ),
     },
   ];
+  async function getRewards(collection_id) {
+    const { farm } = await viewMethod(
+      import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      "view_staking_program",
+      {
+        collection: {
+          type: "NFTContract",
+          account_id: collection_id,
+        },
+      }
+    );
+    return farm;
+  }
+  async function findTokenMetadata(account_id) {
+    const metadata = await viewMethod(account_id, "ft_metadata", {}).catch(
+      (_err) => {
+        return {
+          symbol: "string",
+          decimals: 0,
+          icon: "https://near.org/wp-content/themes/near-19/assets/img/near_logo.svg",
+          name: "string",
+        };
+      }
+    );
+    return metadata;
+  }
+  useEffect(() => {
+    (async () => {
+      await getCollectionReward();
+    })();
+
+    async function getCollectionReward() {
+      if (!nftProjects || nftProjects?.nft_staking_projects?.data.length <= 0)
+        return;
+
+      const collectionIds = nftProjects?.nft_staking_projects?.data.map(
+        (item) => item.collection_id
+      );
+
+      const rewardPromises = collectionIds.map(async (collection_id) => {
+        const rewards = await getRewards(collection_id);
+        return rewards;
+      });
+
+      const rewards = await Promise.all(rewardPromises);
+      const farmPromises = rewards.map(async (farm) => {
+        const millisecondsPerMonth = 2592000000;
+        const interval = farm.round_interval;
+        const distributions = farm.distributions;
+        const stakingRewards: StakingToken[] = [];
+
+        for (const key in distributions) {
+          const metadata = await findTokenMetadata(key);
+          const { reward } = distributions[key];
+          const rewardBN = new BN(new Big(reward).toFixed(0));
+          const intervalBN = new BN(interval);
+          const millisecondsPerMonthBN = new BN(millisecondsPerMonth);
+
+          stakingRewards.push({
+            ...metadata,
+            account_id: key,
+            perMonth: millisecondsPerMonthBN
+              .mul(rewardBN)
+              .div(intervalBN)
+              .toString(),
+          });
+        }
+        return stakingRewards;
+      });
+      const final_result = await Promise.all(farmPromises);
+
+      setRewardsForCollection(final_result);
+    }
+  }, [nftProjects?.nft_staking_projects?.data]);
 
   const renderProjectCard = (staking, index) => {
     return (
@@ -87,10 +165,8 @@ export const NFTStaking = () => {
         }
         logo={staking?.collection_image}
         name={staking?.collection_meta?.name}
-        rewards={staking?.rewards}
-        collection={
-          nftProjects?.nft_staking_projects?.data[index].collection_id
-        }
+        rewards={rewardsForCollection[index]}
+        collection={staking?.collection_id}
       />
     );
   };

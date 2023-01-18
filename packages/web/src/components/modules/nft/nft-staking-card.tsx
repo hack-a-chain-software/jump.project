@@ -23,7 +23,7 @@ type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
 export function NFTStakingCard(props: NFTStakingCardProps) {
   const { accountId, selector } = useWalletSelector();
   const [nftQuantity, setNftQuantity] = useState<any>(1);
-  console.log("Collection ID", props.collection);
+
   useEffect(() => {
     if (!props.collection) return;
     viewMethod(
@@ -40,19 +40,6 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
       else setNftQuantity(res);
     });
   }, [props.collection]);
-
-  /*  useEffect(() => {
-    (async () => {
-      if (props.collection) {
-        const quantity = await useCollectionStakedNfts(
-          selector,
-          props.collection!
-        );
-
-        setNftQuantity(quantity);
-      }
-    })();
-  }, []); */
 
   const renderLink = () => {
     if (props.link)

@@ -795,7 +795,12 @@ export const NftStakingProjectsConnectionDocument = gql`
         collection_modal_image
         collection_owner_id
         token_address
-        rewards {
+      }
+    }
+  }
+`;
+/**
+ *  rewards {
           spec
           name
           symbol
@@ -804,11 +809,7 @@ export const NftStakingProjectsConnectionDocument = gql`
           perMonth
           account_id
         }
-      }
-    }
-  }
-`;
-
+ */
 /**
  * __useNftStakingProjectsConnectionQuery__
  *
