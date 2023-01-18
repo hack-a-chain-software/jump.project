@@ -30,7 +30,10 @@ export async function findTokenMetadata(
     const res = JSON.parse(Buffer.from(rawResult.result).toString());
     return res;
   } catch (e) {
-    if (!JSON.stringify(e).includes("UntypedError"))
+    if (
+      !JSON.stringify(e).includes("UntypedError") &&
+      !JSON.stringify(e).includes("CodeDoesNotExist")
+    )
       throw "Blockchain query error";
 
     return {
