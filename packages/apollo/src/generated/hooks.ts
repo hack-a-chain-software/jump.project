@@ -877,7 +877,11 @@ export const StakingProjectDocument = gql`
       token_address
       min_staking_period
       early_withdraw_penalty
-      rewards {
+    }
+  }
+`;
+
+/** rewards {
         spec
         name
         symbol
@@ -886,11 +890,6 @@ export const StakingProjectDocument = gql`
         perMonth
         account_id
       }
-    }
-  }
-`;
-
-/**
  * __useStakingProjectQuery__
  *
  * To run a query within a React component, call `useStakingProjectQuery` and pass it any options that fit your needs.
