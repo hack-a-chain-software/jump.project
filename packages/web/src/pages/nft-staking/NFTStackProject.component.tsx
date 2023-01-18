@@ -403,6 +403,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
 
   function renderYourRewardsPanel() {
     // Sums all balances of claimable tokens/NFTs per reward
+
     const rewards = collection.rewards
       ? collection.rewards.map((reward) => ({
           ...reward,

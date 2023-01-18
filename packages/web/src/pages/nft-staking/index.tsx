@@ -150,43 +150,11 @@ export const NFTStaking = () => {
         return stakingRewards;
       });
       const final_result = await Promise.all(farmPromises);
-      console.log(final_result);
+
       setRewardsForCollection(final_result);
-      /**
-			 *  async rewards({ collection_id }: NFTStaking) {
-      const { farm } = (await findStakingProgram(collection_id)) || {};
-
-      const millisecondsPerMonth = 2592000000;
-
-      const interval = farm.round_interval;
-      const distributions = farm.distributions;
-
-      const stakingRewards: StakingToken[] = [];
-
-      for (const key in distributions) {
-        const metadata = await findTokenMetadata(key);
-
-        const { reward } = distributions[key];
-
-        const rewardBN = new BN(new Big(reward).toFixed(0));
-        const intervalBN = new BN(interval);
-        const millisecondsPerMonthBN = new BN(millisecondsPerMonth);
-
-        stakingRewards.push({
-          ...metadata,
-          account_id: key,
-          perMonth: millisecondsPerMonthBN
-            .mul(rewardBN)
-            .div(intervalBN)
-            .toString(),
-        });
-      }
-
-      return stakingRewards.sort((a, b) => a.symbol.localeCompare(b.symbol));
-    },
-			 */
     }
   }, [nftProjects?.nft_staking_projects?.data]);
+
   const renderProjectCard = (staking, index) => {
     return (
       <NFTStakingCard
@@ -198,7 +166,7 @@ export const NFTStaking = () => {
         logo={staking?.collection_image}
         name={staking?.collection_meta?.name}
         rewards={rewardsForCollection[index]}
-        collection={nftProjects?.nft_staking_projects?.data?.collection_id}
+        collection={staking?.collection_id}
       />
     );
   };
