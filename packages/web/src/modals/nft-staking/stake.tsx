@@ -43,6 +43,8 @@ export function NFTStakeModal({
     contract: collection,
     variables: {
       account_id: accountId,
+      from_index: "0",
+      limit: 100,
     },
     skip: !accountId,
   });
