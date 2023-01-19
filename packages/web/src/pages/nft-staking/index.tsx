@@ -14,9 +14,6 @@ import { twMerge } from "tailwind-merge";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import PageContainer from "@/components/PageContainer";
 import { viewMethod } from "@/helper/near";
-import { StakingToken } from "@near/ts";
-import { BN } from "bn.js";
-import Big from "big.js";
 
 const PAGINATE_LIMIT = 30;
 
@@ -26,7 +23,7 @@ export const NFTStaking = () => {
   const [filterStaked, setStaked] = useState<StakedEnum | null>(null);
   const [filterSearch, setSearch] = useState<string | null>(null);
   const { accountId } = useWalletSelector();
-  const [rewardsForCollection, setRewardsForCollection] = useState<any>([]);
+
   const queryVariables: NftStakingProjectsConnectionQueryVariables =
     useMemo(() => {
       return {
@@ -80,6 +77,7 @@ export const NFTStaking = () => {
       ),
     },
   ];
+  /*
   async function getRewards(collection_id) {
     const { farm } = await viewMethod(
       import.meta.env.VITE_NFT_STAKING_CONTRACT,
@@ -106,7 +104,7 @@ export const NFTStaking = () => {
     );
     return metadata;
   }
-  useEffect(() => {
+     useEffect(() => {
     (async () => {
       await getCollectionReward();
     })();
@@ -153,7 +151,7 @@ export const NFTStaking = () => {
 
       setRewardsForCollection(final_result);
     }
-  }, [nftProjects?.nft_staking_projects?.data]);
+  }, [nftProjects?.nft_staking_projects?.data]); */
 
   const renderProjectCard = (staking, index) => {
     return (
@@ -165,7 +163,7 @@ export const NFTStaking = () => {
         }
         logo={staking?.collection_image}
         name={staking?.collection_meta?.name}
-        rewards={rewardsForCollection[index]}
+        rewards={staking?.rewards}
         collection={staking?.collection_id}
       />
     );

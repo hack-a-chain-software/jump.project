@@ -795,6 +795,15 @@ export const NftStakingProjectsConnectionDocument = gql`
         collection_modal_image
         collection_owner_id
         token_address
+        rewards {
+          spec
+          name
+          symbol
+          icon
+          decimals
+          perMonth
+          account_id
+        }
       }
     }
   }
@@ -875,6 +884,15 @@ export const StakingProjectDocument = gql`
       collection_image
       collection_modal_image
       token_address
+      rewards {
+        spec
+        name
+        symbol
+        icon
+        decimals
+        perMonth
+        account_id
+      }
       min_staking_period
       early_withdraw_penalty
     }

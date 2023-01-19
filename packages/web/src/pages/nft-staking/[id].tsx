@@ -11,12 +11,12 @@ import { useNearQuery } from "react-near";
 import toast from "react-hot-toast";
 import { XCircleIcon } from "@heroicons/react/24/solid";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
-import { getRewards, parseRawFarmDataToReward } from "@/helper/near";
+/* import { getRewards, parseRawFarmDataToReward } from "@/helper/near"; */
 
 function NFTStakingProject() {
   const { id = "" } = useParams();
   const collection = window.atob(id);
-  const [rewardsForCollection, setRewardsForCollection] = useState<any>([]);
+  // const [rewardsForCollection, setRewardsForCollection] = useState<any>([]);
   const {
     accountId,
     selector,
@@ -61,14 +61,14 @@ function NFTStakingProject() {
   }, [accountId]);
 
   //TODO: rewired check rewards
-  useEffect(() => {
+  /* useEffect(() => {
     if (!collection) return;
     (async () => {
       const reward = await getRewards(collection);
       const result = await parseRawFarmDataToReward([reward]);
       setRewardsForCollection(result[0]);
     })();
-  }, [collection]);
+  }, [collection]); */
 
   const [selectingMode, setSelectingMode] = useState<boolean>(false);
   const [selectedUnstakeTokens, setSelectedUnstakeTokens] = useState<Token[]>(
@@ -198,7 +198,7 @@ function NFTStakingProject() {
       name: staking?.collection_meta.name,
       curfew: staking?.min_staking_period,
       penalty: staking?.early_withdraw_penalty,
-      rewards: rewardsForCollection,
+      rewards: staking?.rewards,
     },
     stakableTokens: stakableTokens ? stakableTokens : [],
     selectToStakeModal,
