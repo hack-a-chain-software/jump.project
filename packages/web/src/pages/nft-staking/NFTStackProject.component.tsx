@@ -426,6 +426,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           wallet={accountId ? undefined : "Connect Wallet"}
           onClick={accountId ? undefined : connectWallet}
           collection={collection.id}
+          shouldDivide={false}
         />
 
         <div className="rounded-lg bg-white-600 p-6">
@@ -506,6 +507,7 @@ export function NFTStakingProjectComponent(props: NFTStakingProjectProps) {
           name={collection.name}
           rewards={collection.rewards}
           collection={collection.id}
+          shouldDivide={true}
         />
         <Tutorial items={stepItems as []} />
       </div>

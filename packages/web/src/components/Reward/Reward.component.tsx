@@ -10,6 +10,7 @@ type RewardProps = {
   stakedQuantity: number;
   badge?: string;
   hideText?: boolean;
+  shouldDivide?: boolean;
 };
 
 function Reward({
@@ -20,13 +21,15 @@ function Reward({
   stakedQuantity,
   badge,
   hideText,
+  shouldDivide,
 }: RewardProps) {
   function formattedBalance(balance: string, decimals: number) {
     const decimalsBig = new Big(10).pow(decimals ?? 0);
     const balanceBig = new Big(balance ?? 0);
     const stakedBig = new Big(stakedQuantity === 0 ? 1 : stakedQuantity);
-
-    return balanceBig.div(decimalsBig).div(stakedBig).toFixed(2);
+    if (shouldDivide)
+      return balanceBig.div(decimalsBig).div(stakedBig).toFixed(2);
+    else return balanceBig.div(decimalsBig).toFixed(2);
   }
 
   function renderImage() {

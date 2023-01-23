@@ -18,6 +18,7 @@ type NFTStakingCardProps = HTMLAttributes<HTMLButtonElement> & {
   logoless?: boolean;
   wallet?: string;
   collection?: string | undefined;
+  shouldDivide?: boolean;
 };
 
 export function NFTStakingCard(props: NFTStakingCardProps) {
@@ -99,6 +100,7 @@ export function NFTStakingCard(props: NFTStakingCardProps) {
         stakedQuantity={nftQuantity}
         badge={props.wallet}
         hideText={props.logoless}
+        shouldDivide={props.shouldDivide}
       />
     );
   };

@@ -165,6 +165,7 @@ export const NFTStaking = () => {
         name={staking?.collection_meta?.name}
         rewards={staking?.rewards}
         collection={staking?.collection_id}
+        shouldDivide={true}
       />
     );
   };
