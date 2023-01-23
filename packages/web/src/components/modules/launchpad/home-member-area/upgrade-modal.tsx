@@ -236,7 +236,7 @@ export default function ({
                 <div className="flex space-x-[11px] items-center mb-[32px]">
                   <div>
                     <span className="font-[700] text-[14px] text-[#000000]">
-                      Your ballance:
+                      Your balance:
                     </span>
                   </div>
 
@@ -265,7 +265,7 @@ export default function ({
                 <div className="flex items-center space-x-[11px] mb-[28px]">
                   <div>
                     <span className="font-[500] text-[14px] text-[#000000]">
-                      Your new ballance:
+                      Your new balance:
                     </span>
                   </div>
 
