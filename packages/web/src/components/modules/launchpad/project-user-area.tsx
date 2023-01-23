@@ -242,7 +242,7 @@ export function ProjectUserArea({
 
           <div>
             <span
-              children={`Your ballance: ${balance} ${price_token_info?.symbol}`}
+              children={`Your balance: ${balance} ${price_token_info?.symbol}`}
               className="text-[14px] font-[600] tracking-[-0.03em] text-[rgba(255,255,255,0.75)]"
             />
           </div>
