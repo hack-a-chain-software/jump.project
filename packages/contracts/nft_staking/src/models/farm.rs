@@ -141,14 +141,14 @@ impl Farm {
     let mut rewards_map = HashMap::new();
 
     for (k, prev_dist) in self.distributions.clone().iter() {
-      let rps = *token_rps.get(k).unwrap();
+      if let Some(rps) = token_rps.get(k) {
+        let (dist, claimed) = prev_dist.claim(*rps);
 
-      let (dist, claimed) = prev_dist.claim(rps);
+        token_rps.insert(k.clone(), dist.rps);
+        self.distributions.insert(k.clone(), dist);
 
-      token_rps.insert(k.clone(), dist.rps);
-      self.distributions.insert(k.clone(), dist);
-
-      rewards_map.insert(k.clone(), claimed);
+        rewards_map.insert(k.clone(), claimed);
+      }
     }
 
     (rewards_map, token_rps)
