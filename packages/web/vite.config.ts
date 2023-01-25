@@ -3,12 +3,18 @@ import { defineConfig } from "vite";
 import Pages from "vite-plugin-pages";
 import react from "@vitejs/plugin-react";
 import reactRefresh from "@vitejs/plugin-react-refresh";
-
+import ViteRadar from "vite-plugin-radar";
 const inject = require("@rollup/plugin-inject");
 
 export default defineConfig({
   plugins: [
     react(),
+    ViteRadar({
+      // Google Analytics tag injection
+      analytics: {
+        id: "G-2MSF5XF8LY",
+      },
+    }),
     reactRefresh(),
     Pages({
       pagesDir: "src/pages",
