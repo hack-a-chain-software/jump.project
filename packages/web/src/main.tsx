@@ -11,10 +11,10 @@ import { WalletSelectorModal } from "@/modals";
 import { buildClient } from "./resolvers";
 import "./index.css";
 import "intro.js/introjs.css";
-
+import { inject } from "@vercel/analytics";
 // TODO: Find a better way to handle this buffer error
 window.Buffer = window.Buffer || Buffer;
-
+inject();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ApolloProvider client={buildClient(import.meta.env.VITE_GRAPHQL_API_URI)}>

@@ -12,6 +12,7 @@ import type { WalletSelector, AccountState } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 /* import { setupSender } from "@near-wallet-selector/sender"; */
+/* import { setupNightlyConnect } from "@near-wallet-selector/nightly-connect"; */
 import { tokenMetadata } from "@/interfaces";
 import { viewFunction } from "@/tools";
 
@@ -64,7 +65,19 @@ export const WalletSelectorContextProvider: React.FC<
     const _selector = await setupWalletSelector({
       network: import.meta.env.VITE_NEAR_NETWORK || "testnet",
       debug: true,
-      modules: [setupNearWallet(), setupMeteorWallet() /* setupSender() */],
+      modules: [
+        /*   setupNightlyConnect({
+          url: "wss://relay.nightly.app/app",
+          appMetadata: {
+            additionalInfo: "",
+            application: "NEAR Wallet Selector",
+            description: "Example dApp used by NEAR Wallet Selector",
+            icon: "https://near.org/wp-content/uploads/2020/09/cropped-favicon-192x192.png",
+          },
+        }), */
+        setupNearWallet(),
+        setupMeteorWallet() /* setupSender() */,
+      ],
     });
 
     const state = _selector.store.getState();
