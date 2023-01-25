@@ -12756,6 +12756,11 @@ vite-plugin-pages@^0.26.0:
     picocolors "^1.0.0"
     yaml "^2.1.1"
 
+vite-plugin-radar@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.npmjs.org/vite-plugin-radar/-/vite-plugin-radar-0.7.0.tgz#87bacd584a019142d95773e1194825159ac3f78f"
+  integrity sha512-lTpCJ56GDVzNq41SU+6AZExUFP/yZauwpfEqyatw/ZayYYM7bEFq4KWN3+/Hjwxfe5nCIjIpE594XE1jtjjz2A==
+
 vite@^2.9.7:
   version "2.9.12"
   resolved "https://registry.yarnpkg.com/vite/-/vite-2.9.12.tgz#b1d636b0a8ac636afe9d83e3792d4895509a941b"
