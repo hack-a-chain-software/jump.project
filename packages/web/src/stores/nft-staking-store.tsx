@@ -8,6 +8,7 @@ import { Token, Transaction } from "@near/ts";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { utils } from "near-api-js";
 import Big from "big.js";
+import { viewMethod } from "@/helper/near";
 
 export const useNftStaking = create<{
   loading: boolean;
@@ -265,6 +266,37 @@ export const useNftStaking = create<{
 
     const transactions: any = [];
 
+    console.log("Claiming", tokens.length, "rewards");
+    const remainStorage: {
+      total: string;
+      available: string;
+    } | null = await viewMethod(
+      import.meta.env.VITE_NFT_STAKING_CONTRACT,
+      "storage_balance_of",
+      {
+        account_id: account,
+      }
+    );
+    console.log(remainStorage?.available);
+    //TODO: Temporary fix for claim deposit
+    if (
+      remainStorage != null &&
+      new Big(remainStorage?.available).lte("50000000000000000000000")
+    ) {
+      transactions.push(
+        getTransaction(
+          account,
+          import.meta.env.VITE_NFT_STAKING_CONTRACT,
+          "storage_deposit",
+          {
+            account_id: account,
+            registration_only: false,
+          },
+          "0.0023"
+        )
+      );
+    }
+
     tokens.forEach(({ token_id }) => {
       transactions.push(
         getTransaction(
@@ -303,6 +335,7 @@ export const useNftStaking = create<{
     for (const key of balances) {
       const storage = await get().getTokenStorage(connection, account, key);
       const storageMin = await get().getMinStorageCost(connection, key);
+      console.log(storageMin);
       const nearStorageCost = utils.format.formatNearAmount(storageMin?.min);
 
       if (!storage) {
